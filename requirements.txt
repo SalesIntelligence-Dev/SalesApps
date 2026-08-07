@@ -1,27 +1,18 @@
-# Aurora Web App – Python Dependencies
-
-# Aurora Foundation Model
-aurora-model==0.2.0
-
-# PyTorch CPU (kein CUDA auf Azure Basic/Standard-Tier)
-# Für GPU: torch>=2.4.0 --index-url https://download.pytorch.org/whl/cu121
-torch>=2.4.0
-torchvision>=0.19.0
-
-# Aurora-Abhängigkeiten (Versionen aus aurora_v4.ipynb, pinned für Stabilität)
-transformers>=4.50.0
-einops>=0.8.0
-huggingface-hub>=0.22.0
+# SalesIntelligence Web App – Render Dependencies
+# Aurora läuft auf RunPod – keine lokalen ML-Pakete nötig
 
 # Web Framework
 flask>=3.0.0
 gunicorn>=22.0.0
 
+# RunPod API Client
+requests>=2.31.0
+
 # Daten
 numpy>=1.26.0
 pandas>=2.0.0
-openpyxl>=3.1.0    # Excel-Upload + -Download
-xlrd>=2.0.1        # Ältere .xls Dateien
+openpyxl>=3.1.0
+xlrd>=2.0.1
 
 # Utilities
 tqdm
