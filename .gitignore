@@ -1,0 +1,45 @@
+# Modell-Checkpoint (805 MB – nicht in Git!)
+aurora_checkpoint.pt
+*.pt
+*.pth
+*.bin
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+*.ipynb
+.ipynb_checkpoints/
+
+# Daten (generierte Datensätze)
+datasets/*.csv
+datasets/*.xlsx
+
+# Umgebungsvariablen (API-Keys nie in Git!)
+.env
+*.env
+.env.local
+
+# Cache
+.cache/
+*.cache
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Azure (wird nicht mehr gebraucht)
+azure/
+
+# Logs
+*.log

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KI-Prognose</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<!-- ══════════════════ HEADER ══════════════════ -->
+<header>
+    <div class="header-inner">
+        <div class="logo">
+            <span class="logo-icon">🌌</span>
+            <div>
+                <div class="logo-title">KI-Prognose</div>
+                <div class="logo-sub">Zeitreihen-KI · Probabilistische Prognose</div>
+            </div>
+        </div>
+        <div id="model-status" class="model-badge loading">Modell wird geprüft …</div>
+    </div>
+</header>
+
+<!-- ══════════════════ MAIN ══════════════════ -->
+<main>
+<div class="layout">
+
+<!-- ─── LEFT PANEL: Konfiguration ─── -->
+<aside class="config-panel">
+    <form id="forecast-form" enctype="multipart/form-data">
+
+    <!-- Datensatz -->
+    <section class="card">
+        <h2 class="card-title">1 · Datensatz</h2>
+
+        <div class="tab-row">
+            <button type="button" class="tab active" data-tab="upload">Datei hochladen</button>
+            <button type="button" class="tab"        data-tab="default">Beispieldaten</button>
+        </div>
+
+        <div id="tab-upload" class="tab-content">
+            <label class="dropzone" id="dropzone">
+                <input type="file" name="file" id="file-input" accept=".csv,.xlsx,.xls,.txt" hidden>
+                <span class="drop-icon">📂</span>
+                <span class="drop-label">CSV / Excel / TXT hier ablegen</span>
+                <span class="drop-sub">oder klicken zum Auswählen</span>
+                <span id="file-name" class="file-chosen"></span>
+            </label>
+        </div>
+
+        <div id="tab-default" class="tab-content hidden">
+            <div id="dataset-list" class="dataset-list">
+                <div class="loading-dots">Lade Beispieldaten …</div>
+            </div>
+            <input type="hidden" name="dataset_id" id="dataset-id-input">
+        </div>
+
+        <!-- Spalten-Konfiguration (erscheint nach Datei-Auswahl) -->
+        <div id="col-config" class="col-config hidden">
+            <div class="form-row">
+                <label>Ziel-Spalte (wird vorhergesagt)</label>
+                <select name="target_col" id="target-col">
+                    <option value="">– automatisch –</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Zeitstempel-Spalte</label>
+                <select name="time_col" id="time-col">
+                    <option value="">– automatisch erkennen –</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- Szenario -->
+    <section class="card">
+        <h2 class="card-title">2 · Geschäftliche Frage</h2>
+
+        <div class="form-row">
+            <label>Was möchten Sie prognostizieren?</label>
+            <input type="text" name="scenario_question" id="scenario-question"
+                   placeholder="z. B. Wie viel Bier brauchen wir nächste Woche?"
+                   value="">
+        </div>
+
+        <div class="form-row">
+            <label>Szenario-Typ</label>
+            <select name="scenario_type" id="scenario-type">
+                <option value="allgemein">Allgemeine Prognose</option>
+                <option value="einkauf">Einkauf & Bestandsplanung</option>
+                <option value="personal">Personalplanung</option>
+                <option value="energie">Energiemanagement</option>
+                <option value="umsatz">Umsatzplanung</option>
+                <option value="produktion">Produktionsplanung</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>
+                KI-Kontext Prompt
+                <span class="tooltip" title="Beschreibt das Modell Ihre Zeitreihe auf Englisch. Das Modell lernt dadurch, welche Muster es aktivieren soll.">ⓘ</span>
+            </label>
+            <textarea name="text_prompt" id="text-prompt" rows="3"
+                placeholder="z. B. Hourly beer sales at a Bavarian restaurant with strong weekend peaks and Oktoberfest seasonality."></textarea>
+        </div>
+
+        <!-- Quick-Prompt-Vorlagen -->
+        <div class="prompt-templates">
+            <span class="template-label">Vorlagen:</span>
+            <button type="button" class="tmpl-btn" data-prompt="Hourly beer sales at a Bavarian restaurant with weekly seasonality and weekend peaks.">🍺 Gastronomie</button>
+            <button type="button" class="tmpl-btn" data-prompt="Hourly electricity consumption of a German supermarket with strong open/closed hours pattern and seasonal variation.">⚡ Energie</button>
+            <button type="button" class="tmpl-btn" data-prompt="Daily e-commerce revenue with weekly seasonality, strong Q4 peak and year-over-year growth trend.">🛒 E-Commerce</button>
+            <button type="button" class="tmpl-btn" data-prompt="Daily retail sales with weekly pattern and seasonal peaks.">📈 Handel</button>
+        </div>
+    </section>
+
+    <!-- Prognose-Einstellungen -->
+    <section class="card">
+        <h2 class="card-title">3 · Prognose-Einstellungen</h2>
+
+        <div class="form-row">
+            <label>Datenfrequenz</label>
+            <select name="freq" id="freq">
+                <option value="hourly" selected>Stündlich (h)</option>
+                <option value="daily">Täglich (D)</option>
+                <option value="weekly">Wöchentlich (W)</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label>Prognose-Horizont</label>
+            <div class="horizon-grid">
+                <label class="horizon-opt">
+                    <input type="radio" name="horizon" value="1w" checked> 1 Woche
+                </label>
+                <label class="horizon-opt">
+                    <input type="radio" name="horizon" value="2w"> 2 Wochen
+                </label>
+                <label class="horizon-opt active">
+                    <input type="radio" name="horizon" value="4w"> 4 Wochen
+                </label>
+                <label class="horizon-opt">
+                    <input type="radio" name="horizon" value="3m"> 3 Monate
+                </label>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Anzahl Szenarien: <span id="samples-val">50</span></label>
+            <input type="range" name="num_samples" id="num-samples"
+                   min="10" max="100" step="10" value="50">
+            <div class="range-hint">
+                <span>10 (schnell)</span><span>100 (genau)</span>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Sicherheitspuffer: <span id="buffer-val">15%</span></label>
+            <input type="range" name="safety_buffer" id="safety-buffer"
+                   min="0" max="0.5" step="0.05" value="0.15">
+            <div class="range-hint">
+                <span>0%</span><span>50%</span>
+            </div>
+        </div>
+    </section>
+
+    <button type="submit" id="run-btn" class="run-btn">
+        <span class="run-icon">🚀</span> Prognose starten
+    </button>
+
+    </form>
+</aside>
+
+<!-- ─── RIGHT PANEL: Ergebnisse ─── -->
+<section class="results-panel">
+
+    <!-- Leerzustand -->
+    <div id="empty-state" class="empty-state">
+        <div class="empty-icon">🌌</div>
+        <div class="empty-title">Bereit für Ihre Prognose</div>
+        <div class="empty-sub">
+            Laden Sie einen Datensatz hoch oder wählen Sie ein Beispiel,<br>
+            geben Sie Ihre Frage ein und starten Sie die Prognose.
+        </div>
+        <div class="empty-steps">
+            <div class="step"><span>1</span> Datensatz wählen</div>
+            <div class="step"><span>2</span> Frage formulieren</div>
+            <div class="step"><span>3</span> Prognose starten</div>
+        </div>
+    </div>
+
+    <!-- Lade-Zustand -->
+    <div id="loading-state" class="loading-state hidden">
+        <div class="aurora-spinner">
+            <div class="spinner-ring"></div>
+            <div class="spinner-core">🌌</div>
+        </div>
+        <div class="loading-title">Prognose läuft …</div>
+        <div id="loading-progress" class="loading-sub">Initialisierung …</div>
+        <div class="loading-hint">
+            Das Modell läuft auf CPU – bitte 1–5 Minuten Geduld
+        </div>
+    </div>
+
+    <!-- Ergebnis-Zustand -->
+    <div id="result-state" class="result-state hidden">
+
+        <!-- Tabs -->
+        <div class="result-tabs">
+            <button class="rtab active" data-rtab="report">📋 Bericht</button>
+            <button class="rtab" data-rtab="chart">📈 Prognose-Chart</button>
+            <button class="rtab" data-rtab="daily">📅 Tages-Übersicht</button>
+        </div>
+
+        <div id="rtab-report" class="rtab-content">
+            <div id="report-html"></div>
+            <div class="dl-row">
+                <button id="dl-btn" class="dl-btn">⬇ Excel herunterladen</button>
+            </div>
+        </div>
+
+        <div id="rtab-chart" class="rtab-content hidden">
+            <div id="forecast-chart" style="width:100%; height:480px;"></div>
+        </div>
+
+        <div id="rtab-daily" class="rtab-content hidden">
+            <div id="daily-chart" style="width:100%; height:420px;"></div>
+        </div>
+
+    </div>
+
+    <!-- Fehler-Zustand -->
+    <div id="error-state" class="error-state hidden">
+        <div class="error-icon">⚠️</div>
+        <div class="error-title">Fehler bei der Prognose</div>
+        <div id="error-msg" class="error-msg"></div>
+        <button class="retry-btn" onclick="resetUI()">Erneut versuchen</button>
+    </div>
+
+</section>
+</div>
+</main>
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer>
+    <span>KI-gestützte Zeitreihenprognose · Probabilistisches Modell</span>
+    <span>Powered by Azure Web Apps</span>
+</footer>
+
+<script src="/static/js/main.js"></script>
+</body>
+</html>
