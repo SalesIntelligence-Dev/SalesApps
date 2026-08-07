@@ -1,0 +1,16 @@
+# RunPod Worker – Aurora Dependencies
+runpod>=1.6.0
+
+# Aurora Foundation Model
+aurora-model==0.2.0
+
+# PyTorch mit CUDA (passend zum Basis-Image)
+# wird über das Docker-Basis-Image bereitgestellt
+
+# Aurora-Abhängigkeiten
+transformers>=4.50.0
+einops>=0.8.0
+huggingface-hub>=0.22.0
+
+# Numerik
+numpy>=1.26.0
