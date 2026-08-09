@@ -136,7 +136,7 @@ def _run_forecast_job(job_id: str, df: pd.DataFrame, params: dict):
         )
 
         with _jobs_lock:
-            _jobs[job_id]["progress"] = "Inference läuft … (kann 1–5 Min dauern)"
+            _jobs[job_id]["progress"] = "Inference läuft … (kann 5–10 Min dauern)"
 
         result = aurora.forecast(
             aurora_input = aurora_input,
