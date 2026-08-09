@@ -4,6 +4,8 @@
 // ── State ────────────────────────────────────────────────────────────────
 let currentJobId    = null;
 let pollInterval    = null;
+let progressTimer   = null;
+let jobStartTime    = null;
 let activeTab       = 'upload';
 let selectedDataset = null;
 let currentChart1   = null;
@@ -233,6 +235,7 @@ async function onSubmit(e) {
   setUIState('loading');
   runBtn.disabled = true;
   clearInterval(pollInterval);
+  startProgressTimer();
 
   try {
     const r = await fetch('/api/forecast', { method: 'POST', body: fd });
@@ -245,6 +248,35 @@ async function onSubmit(e) {
   }
 }
 
+// ── Fortschrittsbalken ───────────────────────────────────────────────────
+function startProgressTimer() {
+  jobStartTime = Date.now();
+  clearInterval(progressTimer);
+  setProgress(0);
+  // Zeitplan: 0-60s → 0-25%, 60-180s → 25-55%, 180-360s → 55-80%, 360-600s → 80-92%
+  progressTimer = setInterval(() => {
+    const elapsed = (Date.now() - jobStartTime) / 1000;
+    let pct;
+    if      (elapsed < 60)  pct = (elapsed / 60)  * 25;
+    else if (elapsed < 180) pct = 25 + ((elapsed - 60)  / 120) * 30;
+    else if (elapsed < 360) pct = 55 + ((elapsed - 180) / 180) * 25;
+    else                    pct = Math.min(92, 80 + ((elapsed - 360) / 240) * 12);
+    setProgress(Math.round(pct));
+  }, 1000);
+}
+
+function setProgress(pct) {
+  const bar   = document.getElementById('progress-bar');
+  const label = document.getElementById('progress-label');
+  if (bar)   bar.style.width = pct + '%';
+  if (label) label.textContent = pct + ' %';
+}
+
+function stopProgressTimer(success) {
+  clearInterval(progressTimer);
+  setProgress(success ? 100 : 0);
+}
+
 // ── Polling ───────────────────────────────────────────────────────────────
 async function pollJob(jobId) {
   try {
@@ -255,9 +287,11 @@ async function pollJob(jobId) {
 
     if (d.status === 'done') {
       clearInterval(pollInterval);
+      stopProgressTimer(true);
       showResults(d);
     } else if (d.status === 'error') {
       clearInterval(pollInterval);
+      stopProgressTimer(false);
       showError(d.error || 'Inference fehlgeschlagen');
     }
   } catch (err) {

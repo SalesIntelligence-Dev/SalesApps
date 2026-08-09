@@ -200,8 +200,17 @@
         </div>
         <div class="loading-title">Inference läuft …</div>
         <div id="loading-progress" class="loading-sub">Initialisierung …</div>
-        <div class="loading-hint">
-            Die Inference läuft auf GPU – bitte 1–5 Minuten Geduld
+
+        <!-- Fortschrittsbalken -->
+        <div class="progress-bar-wrap">
+            <div id="progress-bar" class="progress-bar-fill"></div>
+        </div>
+        <div id="progress-label" class="progress-label">0 %</div>
+
+        <div class="loading-hint-white">
+            Dies ist ein Testserver, weshalb Ressourcen nicht dauerhaft aktiv sind.
+            Der GPU-Server wird bei Bedarf gestartet – dies kann <strong>5 bis 10 Minuten</strong> dauern.
+            Wir bitten Sie um Verständnis, dass im Testbetrieb keine permanente GPU-Bereitschaft vorgesehen ist.
         </div>
     </div>
 

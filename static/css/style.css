@@ -266,6 +266,25 @@ main { flex: 1; max-width: 1600px; margin: 0 auto; padding: 24px; width: 100%; }
 .loading-title { font-size: 18px; font-weight: 600; }
 .loading-sub   { color: var(--sub); }
 .loading-hint  { font-size: 12px; color: var(--muted); margin-top: 8px; }
+.loading-hint-white {
+  font-size: 13px; color: var(--fg);
+  margin-top: 16px; max-width: 420px;
+  line-height: 1.6; text-align: center;
+}
+.progress-bar-wrap {
+  width: 100%; max-width: 360px;
+  height: 8px; background: rgba(255,255,255,0.1);
+  border-radius: 99px; overflow: hidden; margin-top: 4px;
+}
+.progress-bar-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--pink));
+  border-radius: 99px;
+  transition: width 1.5s ease;
+}
+.progress-label {
+  font-size: 12px; color: var(--sub); margin-top: 4px;
+}
 
 /* ── RESULT TABS ─────────────────────────────────────── */
 .result-state { display: flex; flex-direction: column; flex: 1; }
