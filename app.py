@@ -184,8 +184,38 @@ def _run_forecast_job(job_id: str, df: pd.DataFrame, params: dict):
 # ── Routes ────────────────────────────────────────────────────────────────
 
 @app.route("/")
+def home():
+    return render_template("home.html")
+
+
+@app.route("/forecasting")
 def index():
     return render_template("index.html")
+
+
+@app.route("/margenoptimierung")
+def margenoptimierung():
+    return render_template("coming_soon.html", app_name="Margenoptimierung", icon="📊")
+
+
+@app.route("/cross-selling")
+def cross_selling():
+    return render_template("coming_soon.html", app_name="Graph Cross-Selling", icon="🔗")
+
+
+@app.route("/konfiguration")
+def konfiguration():
+    return render_template("coming_soon.html", app_name="Graph Produktkonfiguration", icon="⚙️")
+
+
+@app.route("/retrieval")
+def retrieval():
+    return render_template("coming_soon.html", app_name="Ähnliche Firmen finden", icon="🔍")
+
+
+@app.route("/lead-scoring")
+def lead_scoring():
+    return render_template("coming_soon.html", app_name="Lead Scoring", icon="🎯")
 
 
 @app.route("/api/health")

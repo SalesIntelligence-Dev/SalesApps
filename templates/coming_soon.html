@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }} – SalesApps</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=3">
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <div class="logo">
+            <span class="logo-icon">⚡</span>
+            <div>
+                <div class="logo-title">SalesApps</div>
+                <div class="logo-sub">KI-gestützte Vertriebsoptimierung · PerceptIQ</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="back-nav">
+    <a href="/" class="back-link">← Zurück zur Übersicht</a>
+    <span class="breadcrumb">/ <span>{{ app_name }}</span></span>
+</div>
+
+<main style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:80px 24px; text-align:center; gap:16px;">
+    <div style="font-size:56px;">{{ icon }}</div>
+    <h1 style="font-size:24px; font-weight:700;">{{ app_name }}</h1>
+    <p style="color:var(--sub); max-width:400px; line-height:1.7;">
+        Dieses Modul ist in Entwicklung und wird in Kürze verfügbar sein.
+    </p>
+    <span class="status-badge status-demo" style="margin-top:8px;">Demo in Vorbereitung</span>
+    <a href="/" style="margin-top:24px; color:var(--accent2); text-decoration:none; font-size:14px;">
+        ← Zurück zur Übersicht
+    </a>
+</main>
+
+<footer class="home-footer">SalesApps · PerceptIQ</footer>
+</body>
+</html>
