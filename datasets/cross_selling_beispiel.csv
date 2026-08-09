@@ -1,0 +1,148 @@
+transaktions_id,datum,kunde_id,kunde_name,produkt_id,produkt_name,kategorie,menge,einzelpreis,umsatz
+TX-0128,2023-01-15,K07,Groß Automation,P05,Steuerungsmodul SM-Pro,Zubehör,1,1220,1220
+TX-0121,2023-01-19,K07,Groß Automation,P06,Präzisionssensor PS-200,Zubehör,3,459,1377
+TX-0122,2023-01-19,K07,Groß Automation,P04,Förderpumpe FP-350,Maschinen,2,2626,5252
+TX-0102,2023-01-20,K06,Klein Systems,P11,Inbetriebnahme & Setup,Service,3,841,2523
+TX-0054,2023-01-28,K03,Schmidt & Co.,P09,Wartungsvertrag Basic,Service,3,764,2292
+TX-0072,2023-01-29,K04,Braun Industrie,P05,Steuerungsmodul SM-Pro,Zubehör,2,1202,2404
+TX-0059,2023-01-30,K04,Braun Industrie,P12,Anwenderschulung,Service,1,702,702
+TX-0146,2023-02-12,K08,Ritter Technik,P02,Kompressor KA-500,Maschinen,2,2452,4904
+TX-0116,2023-02-14,K07,Groß Automation,P05,Steuerungsmodul SM-Pro,Zubehör,2,1380,2760
+TX-0008,2023-02-17,K01,Müller GmbH,P01,Hydraulikpumpe HX-200,Maschinen,2,2696,5392
+TX-0007,2023-03-05,K01,Müller GmbH,P11,Inbetriebnahme & Setup,Service,4,712,2848
+TX-0042,2023-03-05,K03,Schmidt & Co.,P08,Schlauchpaket SP-Set,Zubehör,2,188,376
+TX-0089,2023-03-06,K05,Fischer Tech,P02,Kompressor KA-500,Maschinen,4,2133,8532
+TX-0023,2023-03-12,K02,Weber AG,P10,Wartungsvertrag Premium,Service,1,1238,1238
+TX-0034,2023-03-26,K02,Weber AG,P05,Steuerungsmodul SM-Pro,Zubehör,2,977,1954
+TX-0071,2023-03-28,K04,Braun Industrie,P12,Anwenderschulung,Service,2,543,1086
+TX-0141,2023-03-28,K08,Ritter Technik,P05,Steuerungsmodul SM-Pro,Zubehör,2,1236,2472
+TX-0110,2023-04-02,K06,Klein Systems,P11,Inbetriebnahme & Setup,Service,3,714,2142
+TX-0005,2023-04-03,K01,Müller GmbH,P01,Hydraulikpumpe HX-200,Maschinen,4,2460,9840
+TX-0138,2023-04-04,K08,Ritter Technik,P02,Kompressor KA-500,Maschinen,3,1891,5673
+TX-0002,2023-04-07,K01,Müller GmbH,P11,Inbetriebnahme & Setup,Service,3,849,2547
+TX-0051,2023-04-15,K03,Schmidt & Co.,P01,Hydraulikpumpe HX-200,Maschinen,3,3158,9474
+TX-0063,2023-04-15,K04,Braun Industrie,P05,Steuerungsmodul SM-Pro,Zubehör,2,1140,2280
+TX-0041,2023-04-17,K03,Schmidt & Co.,P08,Schlauchpaket SP-Set,Zubehör,4,261,1044
+TX-0147,2023-04-18,K08,Ritter Technik,P09,Wartungsvertrag Basic,Service,4,715,2860
+TX-0086,2023-04-19,K05,Fischer Tech,P12,Anwenderschulung,Service,1,563,563
+TX-0105,2023-04-26,K06,Klein Systems,P01,Hydraulikpumpe HX-200,Maschinen,2,2507,5014
+TX-0049,2023-04-29,K03,Schmidt & Co.,P01,Hydraulikpumpe HX-200,Maschinen,4,2877,11508
+TX-0019,2023-05-01,K01,Müller GmbH,P01,Hydraulikpumpe HX-200,Maschinen,4,2568,10272
+TX-0067,2023-05-03,K04,Braun Industrie,P12,Anwenderschulung,Service,4,700,2800
+TX-0006,2023-05-07,K01,Müller GmbH,P11,Inbetriebnahme & Setup,Service,2,861,1722
+TX-0029,2023-05-13,K02,Weber AG,P06,Präzisionssensor PS-200,Zubehör,2,551,1102
+TX-0097,2023-05-21,K06,Klein Systems,P11,Inbetriebnahme & Setup,Service,4,756,3024
+TX-0009,2023-05-28,K01,Müller GmbH,P09,Wartungsvertrag Basic,Service,1,746,746
+TX-0037,2023-05-30,K03,Schmidt & Co.,P01,Hydraulikpumpe HX-200,Maschinen,4,2947,11788
+TX-0020,2023-06-05,K01,Müller GmbH,P05,Steuerungsmodul SM-Pro,Zubehör,4,1115,4460
+TX-0132,2023-06-11,K08,Ritter Technik,P05,Steuerungsmodul SM-Pro,Zubehör,3,1128,3384
+TX-0099,2023-06-15,K06,Klein Systems,P05,Steuerungsmodul SM-Pro,Zubehör,4,1163,4652
+TX-0117,2023-06-15,K07,Groß Automation,P04,Förderpumpe FP-350,Maschinen,3,2151,6453
+TX-0129,2023-06-17,K08,Ritter Technik,P11,Inbetriebnahme & Setup,Service,1,721,721
+TX-0084,2023-06-26,K05,Fischer Tech,P06,Präzisionssensor PS-200,Zubehör,2,571,1142
+TX-0016,2023-07-04,K01,Müller GmbH,P01,Hydraulikpumpe HX-200,Maschinen,2,2483,4966
+TX-0036,2023-07-06,K03,Schmidt & Co.,P09,Wartungsvertrag Basic,Service,3,672,2016
+TX-0083,2023-07-07,K05,Fischer Tech,P12,Anwenderschulung,Service,1,698,698
+TX-0057,2023-07-19,K03,Schmidt & Co.,P09,Wartungsvertrag Basic,Service,2,702,1404
+TX-0068,2023-07-24,K04,Braun Industrie,P12,Anwenderschulung,Service,4,727,2908
+TX-0118,2023-07-26,K07,Groß Automation,P05,Steuerungsmodul SM-Pro,Zubehör,3,1221,3663
+TX-0053,2023-07-30,K03,Schmidt & Co.,P01,Hydraulikpumpe HX-200,Maschinen,3,2550,7650
+TX-0077,2023-08-05,K05,Fischer Tech,P06,Präzisionssensor PS-200,Zubehör,1,514,514
+TX-0095,2023-08-06,K06,Klein Systems,P01,Hydraulikpumpe HX-200,Maschinen,3,2525,7575
+TX-0113,2023-08-16,K07,Groß Automation,P12,Anwenderschulung,Service,1,567,567
+TX-0056,2023-08-17,K03,Schmidt & Co.,P07,Druckregler DR-80,Zubehör,3,377,1131
+TX-0126,2023-08-24,K07,Groß Automation,P05,Steuerungsmodul SM-Pro,Zubehör,3,1001,3003
+TX-0134,2023-09-08,K08,Ritter Technik,P09,Wartungsvertrag Basic,Service,1,679,679
+TX-0123,2023-09-09,K07,Groß Automation,P10,Wartungsvertrag Premium,Service,4,1154,4616
+TX-0079,2023-09-23,K05,Fischer Tech,P07,Druckregler DR-80,Zubehör,4,353,1412
+TX-0055,2023-09-25,K03,Schmidt & Co.,P01,Hydraulikpumpe HX-200,Maschinen,3,2571,7713
+TX-0133,2023-09-27,K08,Ritter Technik,P02,Kompressor KA-500,Maschinen,3,2136,6408
+TX-0106,2023-09-29,K06,Klein Systems,P01,Hydraulikpumpe HX-200,Maschinen,3,2440,7320
+TX-0107,2023-10-04,K06,Klein Systems,P05,Steuerungsmodul SM-Pro,Zubehör,2,1319,2638
+TX-0090,2023-10-11,K05,Fischer Tech,P06,Präzisionssensor PS-200,Zubehör,4,580,2320
+TX-0087,2023-10-11,K05,Fischer Tech,P06,Präzisionssensor PS-200,Zubehör,1,647,647
+TX-0078,2023-10-27,K05,Fischer Tech,P06,Präzisionssensor PS-200,Zubehör,2,645,1290
+TX-0131,2023-10-28,K08,Ritter Technik,P05,Steuerungsmodul SM-Pro,Zubehör,1,1135,1135
+TX-0140,2023-11-03,K08,Ritter Technik,P02,Kompressor KA-500,Maschinen,3,2444,7332
+TX-0017,2023-11-04,K01,Müller GmbH,P11,Inbetriebnahme & Setup,Service,4,924,3696
+TX-0101,2023-11-23,K06,Klein Systems,P11,Inbetriebnahme & Setup,Service,1,884,884
+TX-0142,2023-11-30,K08,Ritter Technik,P11,Inbetriebnahme & Setup,Service,4,738,2952
+TX-0064,2023-12-12,K04,Braun Industrie,P05,Steuerungsmodul SM-Pro,Zubehör,2,1147,2294
+TX-0100,2023-12-14,K06,Klein Systems,P12,Anwenderschulung,Service,4,550,2200
+TX-0066,2023-12-19,K04,Braun Industrie,P12,Anwenderschulung,Service,1,713,713
+TX-0048,2023-12-22,K03,Schmidt & Co.,P07,Druckregler DR-80,Zubehör,3,441,1323
+TX-0062,2023-12-24,K04,Braun Industrie,P12,Anwenderschulung,Service,3,520,1560
+TX-0080,2023-12-29,K05,Fischer Tech,P02,Kompressor KA-500,Maschinen,4,2478,9912
+TX-0027,2023-12-30,K02,Weber AG,P10,Wartungsvertrag Premium,Service,2,1412,2824
+TX-0135,2024-01-01,K08,Ritter Technik,P05,Steuerungsmodul SM-Pro,Zubehör,2,900,1800
+TX-0033,2024-01-03,K02,Weber AG,P10,Wartungsvertrag Premium,Service,4,1218,4872
+TX-0046,2024-01-08,K03,Schmidt & Co.,P01,Hydraulikpumpe HX-200,Maschinen,1,2472,2472
+TX-0136,2024-01-26,K08,Ritter Technik,P09,Wartungsvertrag Basic,Service,1,721,721
+TX-0093,2024-02-06,K06,Klein Systems,P01,Hydraulikpumpe HX-200,Maschinen,4,2723,10892
+TX-0040,2024-02-06,K03,Schmidt & Co.,P09,Wartungsvertrag Basic,Service,4,702,2808
+TX-0001,2024-02-09,K01,Müller GmbH,P01,Hydraulikpumpe HX-200,Maschinen,1,2474,2474
+TX-0070,2024-02-10,K04,Braun Industrie,P12,Anwenderschulung,Service,4,602,2408
+TX-0098,2024-02-12,K06,Klein Systems,P01,Hydraulikpumpe HX-200,Maschinen,4,2566,10264
+TX-0139,2024-02-14,K08,Ritter Technik,P05,Steuerungsmodul SM-Pro,Zubehör,1,1101,1101
+TX-0031,2024-02-16,K02,Weber AG,P10,Wartungsvertrag Premium,Service,3,1170,3510
+TX-0127,2024-02-19,K07,Groß Automation,P05,Steuerungsmodul SM-Pro,Zubehör,3,927,2781
+TX-0115,2024-03-03,K07,Groß Automation,P12,Anwenderschulung,Service,3,659,1977
+TX-0111,2024-03-11,K06,Klein Systems,P05,Steuerungsmodul SM-Pro,Zubehör,1,1037,1037
+TX-0014,2024-03-13,K01,Müller GmbH,P11,Inbetriebnahme & Setup,Service,3,819,2457
+TX-0069,2024-03-20,K04,Braun Industrie,P05,Steuerungsmodul SM-Pro,Zubehör,3,944,2832
+TX-0004,2024-03-20,K01,Müller GmbH,P01,Hydraulikpumpe HX-200,Maschinen,4,2471,9884
+TX-0103,2024-03-27,K06,Klein Systems,P12,Anwenderschulung,Service,1,598,598
+TX-0043,2024-03-27,K03,Schmidt & Co.,P01,Hydraulikpumpe HX-200,Maschinen,2,2512,5024
+TX-0092,2024-04-03,K06,Klein Systems,P05,Steuerungsmodul SM-Pro,Zubehör,2,1113,2226
+TX-0018,2024-04-04,K01,Müller GmbH,P05,Steuerungsmodul SM-Pro,Zubehör,3,1211,3633
+TX-0015,2024-04-09,K01,Müller GmbH,P11,Inbetriebnahme & Setup,Service,3,776,2328
+TX-0114,2024-04-09,K07,Groß Automation,P04,Förderpumpe FP-350,Maschinen,1,2447,2447
+TX-0060,2024-04-28,K04,Braun Industrie,P06,Präzisionssensor PS-200,Zubehör,3,499,1497
+TX-0074,2024-04-30,K04,Braun Industrie,P11,Inbetriebnahme & Setup,Service,3,739,2217
+TX-0052,2024-05-05,K03,Schmidt & Co.,P07,Druckregler DR-80,Zubehör,2,452,904
+TX-0050,2024-05-10,K03,Schmidt & Co.,P08,Schlauchpaket SP-Set,Zubehör,3,190,570
+TX-0028,2024-05-20,K02,Weber AG,P02,Kompressor KA-500,Maschinen,1,2023,2023
+TX-0030,2024-05-23,K02,Weber AG,P10,Wartungsvertrag Premium,Service,1,1185,1185
+TX-0120,2024-05-27,K07,Groß Automation,P10,Wartungsvertrag Premium,Service,2,1238,2476
+TX-0081,2024-05-28,K05,Fischer Tech,P12,Anwenderschulung,Service,2,636,1272
+TX-0137,2024-05-29,K08,Ritter Technik,P09,Wartungsvertrag Basic,Service,2,663,1326
+TX-0144,2024-06-01,K08,Ritter Technik,P11,Inbetriebnahme & Setup,Service,2,932,1864
+TX-0130,2024-06-02,K08,Ritter Technik,P11,Inbetriebnahme & Setup,Service,3,853,2559
+TX-0125,2024-06-02,K07,Groß Automation,P10,Wartungsvertrag Premium,Service,3,1452,4356
+TX-0003,2024-06-03,K01,Müller GmbH,P01,Hydraulikpumpe HX-200,Maschinen,2,2438,4876
+TX-0088,2024-06-03,K05,Fischer Tech,P02,Kompressor KA-500,Maschinen,4,2375,9500
+TX-0104,2024-06-13,K06,Klein Systems,P11,Inbetriebnahme & Setup,Service,3,831,2493
+TX-0058,2024-06-14,K04,Braun Industrie,P05,Steuerungsmodul SM-Pro,Zubehör,4,1082,4328
+TX-0091,2024-06-19,K06,Klein Systems,P05,Steuerungsmodul SM-Pro,Zubehör,3,1372,4116
+TX-0082,2024-06-20,K05,Fischer Tech,P06,Präzisionssensor PS-200,Zubehör,1,673,673
+TX-0076,2024-06-23,K05,Fischer Tech,P02,Kompressor KA-500,Maschinen,2,2244,4488
+TX-0119,2024-06-27,K07,Groß Automation,P06,Präzisionssensor PS-200,Zubehör,2,524,1048
+TX-0109,2024-07-03,K06,Klein Systems,P05,Steuerungsmodul SM-Pro,Zubehör,4,1258,5032
+TX-0012,2024-07-14,K01,Müller GmbH,P01,Hydraulikpumpe HX-200,Maschinen,1,2977,2977
+TX-0075,2024-07-15,K04,Braun Industrie,P11,Inbetriebnahme & Setup,Service,2,705,1410
+TX-0032,2024-07-17,K02,Weber AG,P10,Wartungsvertrag Premium,Service,3,1461,4383
+TX-0085,2024-07-23,K05,Fischer Tech,P02,Kompressor KA-500,Maschinen,1,2133,2133
+TX-0021,2024-07-25,K02,Weber AG,P02,Kompressor KA-500,Maschinen,3,2148,6444
+TX-0010,2024-07-27,K01,Müller GmbH,P05,Steuerungsmodul SM-Pro,Zubehör,2,952,1904
+TX-0045,2024-08-03,K03,Schmidt & Co.,P01,Hydraulikpumpe HX-200,Maschinen,2,2949,5898
+TX-0011,2024-08-07,K01,Müller GmbH,P11,Inbetriebnahme & Setup,Service,2,795,1590
+TX-0145,2024-08-21,K08,Ritter Technik,P02,Kompressor KA-500,Maschinen,2,1887,3774
+TX-0022,2024-08-31,K02,Weber AG,P06,Präzisionssensor PS-200,Zubehör,4,598,2392
+TX-0044,2024-09-07,K03,Schmidt & Co.,P07,Druckregler DR-80,Zubehör,1,346,346
+TX-0061,2024-09-11,K04,Braun Industrie,P12,Anwenderschulung,Service,3,614,1842
+TX-0038,2024-09-16,K03,Schmidt & Co.,P07,Druckregler DR-80,Zubehör,3,352,1056
+TX-0065,2024-09-16,K04,Braun Industrie,P11,Inbetriebnahme & Setup,Service,1,822,822
+TX-0047,2024-09-20,K03,Schmidt & Co.,P01,Hydraulikpumpe HX-200,Maschinen,4,2552,10208
+TX-0039,2024-09-24,K03,Schmidt & Co.,P09,Wartungsvertrag Basic,Service,1,716,716
+TX-0013,2024-09-25,K01,Müller GmbH,P01,Hydraulikpumpe HX-200,Maschinen,2,2908,5816
+TX-0143,2024-09-25,K08,Ritter Technik,P09,Wartungsvertrag Basic,Service,2,611,1222
+TX-0112,2024-10-11,K06,Klein Systems,P01,Hydraulikpumpe HX-200,Maschinen,1,2666,2666
+TX-0096,2024-10-20,K06,Klein Systems,P05,Steuerungsmodul SM-Pro,Zubehör,3,973,2919
+TX-0025,2024-10-24,K02,Weber AG,P06,Präzisionssensor PS-200,Zubehör,4,522,2088
+TX-0073,2024-11-02,K04,Braun Industrie,P10,Wartungsvertrag Premium,Service,2,1413,2826
+TX-0124,2024-11-03,K07,Groß Automation,P10,Wartungsvertrag Premium,Service,4,1379,5516
+TX-0035,2024-11-05,K02,Weber AG,P05,Steuerungsmodul SM-Pro,Zubehör,2,906,1812
+TX-0024,2024-11-11,K02,Weber AG,P10,Wartungsvertrag Premium,Service,1,1131,1131
+TX-0026,2024-11-15,K02,Weber AG,P10,Wartungsvertrag Premium,Service,3,1111,3333
+TX-0094,2024-11-18,K06,Klein Systems,P01,Hydraulikpumpe HX-200,Maschinen,2,2838,5676
+TX-0108,2024-11-23,K06,Klein Systems,P12,Anwenderschulung,Service,3,603,1809

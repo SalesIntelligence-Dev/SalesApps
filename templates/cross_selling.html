@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Cross-Selling – SalesApps</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=4">
+    <style>
+        .cs-layout { display:flex; gap:22px; max-width:1280px; margin:0 auto; padding:0 24px 48px; }
+        .cs-sidebar { width:280px; flex-shrink:0; display:flex; flex-direction:column; gap:16px; }
+        .cs-main    { flex:1; min-width:0; display:flex; flex-direction:column; gap:20px; }
+
+        /* KPI */
+        .kpi-grid  { display:grid; grid-template-columns:repeat(4,1fr); gap:13px; }
+        @media(max-width:900px){ .kpi-grid{ grid-template-columns:repeat(2,1fr); } }
+        .kpi-tile  { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; }
+        .kpi-val   { font-size:26px; font-weight:700; line-height:1.2; }
+        .kpi-label { font-size:11px; color:var(--sub); font-weight:600; text-transform:uppercase; letter-spacing:.06em; margin-top:3px; }
+        .kpi-sub   { font-size:11px; color:var(--sub); margin-top:2px; }
+
+        /* Section */
+        .section-card { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+        .section-head { padding:13px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+        .section-head h2 { font-size:14px; font-weight:600; margin:0; }
+        .section-body { padding:18px; }
+
+        /* Network graph */
+        #cs-network { width:100%; height:420px; }
+
+        /* Zwei-Spalten-Layout für Käufe + Empfehlungen */
+        .cs-split { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+        @media(max-width:800px){ .cs-split{ grid-template-columns:1fr; } }
+
+        /* Tabellen */
+        .cs-table { width:100%; border-collapse:collapse; font-size:12px; }
+        .cs-table th { background:var(--hover); color:var(--sub); padding:8px 10px; text-align:left; font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:.04em; border-bottom:1px solid var(--border); white-space:nowrap; }
+        .cs-table td { padding:9px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+        .cs-table tr:last-child td { border-bottom:none; }
+        .cs-table tr:hover td { background:var(--hover); }
+
+        /* Badges */
+        .badge { border-radius:6px; padding:2px 8px; font-size:10px; font-weight:700; white-space:nowrap; }
+        .badge-blue   { background:#60a5fa1a; color:#60a5fa; }
+        .badge-green  { background:#34d3991a; color:#34d399; }
+        .badge-orange { background:#f59e0b1a; color:#f59e0b; }
+        .badge-purple { background:#a78bfa1a; color:#a78bfa; }
+
+        /* Empfehlungskarten */
+        .empf-card { background:var(--hover); border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:10px; }
+        .empf-card + .empf-card { margin-top:10px; }
+        .empf-rank  { font-size:20px; font-weight:800; color:var(--accent2); line-height:1; }
+        .empf-name  { font-size:14px; font-weight:700; }
+        .empf-score { font-size:11px; color:var(--sub); }
+        .empf-why   { font-size:12px; color:var(--sub); line-height:1.6; }
+        .empf-why strong { color:var(--text); font-weight:600; }
+
+        /* Lift-Balken */
+        .lift-bar-bg   { flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden; min-width:40px; }
+        .lift-bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#60a5fa,#34d399); }
+
+        /* Sidebar */
+        .upload-zone { border:2px dashed var(--border); border-radius:10px; padding:16px; text-align:center; cursor:pointer; display:block; transition:border-color .2s,background .2s; }
+        .upload-zone:hover { border-color:var(--accent2); background:var(--hover); }
+        .upload-zone input { display:none; }
+        .run-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:11px; margin-top:8px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; border-radius:10px; color:#fff; font-size:14px; font-weight:600; cursor:pointer; transition:opacity .2s,transform .1s; }
+        .run-btn:hover { opacity:.9; transform:translateY(-1px); }
+        .run-btn:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+        .example-btn { width:100%; padding:10px; margin-top:4px; background:var(--hover); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:13px; cursor:pointer; transition:background .2s; }
+        .example-btn:hover { background:var(--card); }
+
+        /* Kunden-Dropdown */
+        .kunde-select { width:100%; padding:9px 11px; background:var(--hover); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; font-family:inherit; cursor:pointer; }
+        .kunde-select:focus { outline:none; border-color:var(--accent2); }
+
+        /* Community-Tags */
+        .comm-tag { display:inline-block; background:var(--hover); border:1px solid var(--border); border-radius:20px; padding:3px 10px; font-size:11px; margin:3px; }
+
+        /* Leerzustand */
+        .cs-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 24px; text-align:center; gap:12px; }
+        .cs-empty-icon  { font-size:52px; }
+        .cs-empty-title { font-size:18px; font-weight:700; }
+        .cs-empty-sub   { max-width:400px; line-height:1.7; font-size:14px; color:var(--sub); }
+
+        /* Info-Row in Sidebar */
+        .info-row { display:flex; justify-content:space-between; align-items:center; font-size:12px; padding:5px 0; }
+        .info-row + .info-row { border-top:1px solid var(--border); }
+
+        /* Score-Balken in Tabelle */
+        .score-wrap { display:flex; align-items:center; gap:6px; }
+    </style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════════════════════════ -->
+<header>
+    <div class="header-inner">
+        <div class="logo">
+            <span class="logo-icon">🔗</span>
+            <div>
+                <div class="logo-title">Graph Cross-Selling</div>
+                <div class="logo-sub">Produkt-Empfehlungen · NetworkX Co-Purchase-Graph · SalesApps</div>
+            </div>
+        </div>
+        <span class="status-badge status-aktiv">Aktiv</span>
+    </div>
+</header>
+
+<div class="back-nav">
+    <a href="/" class="back-link">← Zurück zur Übersicht</a>
+    <span class="breadcrumb">/ <span>Graph Cross-Selling</span></span>
+</div>
+
+<main style="padding:24px 0;">
+<div class="cs-layout">
+
+<!-- ─── SIDEBAR ──────────────────────────────────────────────────────────── -->
+<aside class="cs-sidebar">
+
+    <div class="section-card">
+        <div class="section-head"><span>📂</span><h2>Datensatz</h2></div>
+        <div class="section-body" style="display:flex;flex-direction:column;gap:10px;">
+            <form id="upload-form" method="POST" enctype="multipart/form-data" action="/cross-selling">
+                <label class="upload-zone">
+                    <input type="file" name="file" id="file-input" accept=".csv,.xlsx,.xls">
+                    <div style="font-size:24px;">📄</div>
+                    <div style="font-size:12px;color:var(--sub);margin-top:5px;" id="upload-label">CSV / Excel hochladen</div>
+                </label>
+                <button type="submit" class="run-btn" id="run-btn" {% if not result %}disabled{% endif %}>
+                    <span>🔍</span> Analysieren
+                </button>
+            </form>
+            <div style="text-align:center;color:var(--sub);font-size:11px;">oder</div>
+            <form method="POST" action="/cross-selling">
+                <input type="hidden" name="use_example" value="1">
+                <button type="submit" class="example-btn">🔗 Beispieldaten laden</button>
+            </form>
+        </div>
+    </div>
+
+    {% if result %}
+    <!-- Kundenauswahl -->
+    <div class="section-card">
+        <div class="section-head"><span>👤</span><h2>Kunde auswählen</h2></div>
+        <div class="section-body" style="padding:12px 14px;">
+            <form method="POST" action="/cross-selling" id="kunde-form">
+                <input type="hidden" name="kunde_id" id="kunde-id-val"
+                       value="{{ result.selected_kunde.id if result.selected_kunde else '' }}">
+                <select class="kunde-select" id="kunde-select" onchange="selectKunde(this.value)">
+                    <option value="">— Alle Kunden —</option>
+                    {% for k in result.kunden %}
+                    <option value="{{ k.id }}"
+                        {% if result.selected_kunde and result.selected_kunde.id == k.id %}selected{% endif %}>
+                        {{ k.name }} ({{ k.n_produkte }} Produkte)
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistiken -->
+    <div class="section-card">
+        <div class="section-head"><span>ℹ️</span><h2>Analyse-Info</h2></div>
+        <div class="section-body" style="padding:12px 14px; display:flex; flex-direction:column;">
+            <div class="info-row"><span style="color:var(--sub);">Transaktionen</span><strong>{{ result.kpi.n_tx }}</strong></div>
+            <div class="info-row"><span style="color:var(--sub);">Kunden</span><strong>{{ result.kpi.n_kunden }}</strong></div>
+            <div class="info-row"><span style="color:var(--sub);">Produkte</span><strong>{{ result.kpi.n_produkte }}</strong></div>
+            <div class="info-row"><span style="color:var(--sub);">Empfehlungen</span><strong style="color:#34d399;">{{ result.kpi.n_empfehlungen }}</strong></div>
+            <div class="info-row"><span style="color:var(--sub);">Gesamtumsatz</span><strong>{{ "{:,.0f}".format(result.kpi.umsatz).replace(",", ".") }} €</strong></div>
+        </div>
+    </div>
+
+    <!-- Produktfamilien -->
+    {% if result.communities %}
+    <div class="section-card">
+        <div class="section-head"><span>🧩</span><h2>Produkt-Cluster</h2></div>
+        <div class="section-body" style="padding:12px 14px; font-size:12px;">
+            {% for comm in result.communities %}
+            <div style="margin-bottom:10px;">
+                <div style="color:var(--sub); font-size:10px; text-transform:uppercase; letter-spacing:.05em; margin-bottom:5px;">
+                    Cluster {{ loop.index }}
+                </div>
+                {% for p in comm %}
+                <span class="comm-tag">{{ p }}</span>
+                {% endfor %}
+            </div>
+            {% endfor %}
+            <div style="font-size:11px; color:var(--sub); margin-top:8px; line-height:1.5;">
+                Produkte im selben Cluster werden häufig gemeinsam gekauft. Basis: Greedy Modularity Community Detection.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <!-- Methodik -->
+    <div class="section-card">
+        <div class="section-head"><span>🧠</span><h2>Algorithmus</h2></div>
+        <div class="section-body" style="padding:12px 14px; font-size:11px; color:var(--sub); line-height:1.7;">
+            <strong style="color:var(--text);">Bipartiter Graph</strong><br>
+            Kunden ↔ Produkte als NetworkX-Graph.<br><br>
+            <strong style="color:var(--text);">Lift-Score</strong><br>
+            Lift = P(A∩B) / (P(A)·P(B)). Werte &gt; 1 zeigen signifikante Kaufkorrelation.<br><br>
+            <strong style="color:var(--text);">Item-based Collab. Filtering</strong><br>
+            Empfehle Produkte, die ähnliche Kunden kauften — mit namentlicher Begründung.<br><br>
+            <strong style="color:var(--text);">Next Step: GNN</strong><br>
+            Graph Neural Networks (z.B. GraphSAGE) für &gt; 10.000 Transaktionen.
+        </div>
+    </div>
+
+</aside>
+
+<!-- ─── MAIN ──────────────────────────────────────────────────────────────── -->
+<div class="cs-main">
+
+{% if not result %}
+<!-- LEERZUSTAND -->
+<div class="section-card">
+    <div class="cs-empty">
+        <div class="cs-empty-icon">🔗</div>
+        <div class="cs-empty-title">Graph Cross-Selling</div>
+        <div class="cs-empty-sub">
+            Laden Sie Transaktionsdaten (Kunde + Produkt pro Zeile) oder starten Sie mit den Beispieldaten.
+            Der Algorithmus baut einen Produkt-Graphen und berechnet personalisierte
+            Empfehlungen mit Lift-Score und namentlicher Begründung.
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;font-size:12px;color:var(--sub);margin-top:4px;">
+            <span>🔗 Produkt-Netzwerk</span>
+            <span>📊 Lift-Score</span>
+            <span>👤 je Kunde</span>
+            <span>⚡ &lt; 1 Sek.</span>
+        </div>
+        <form method="POST" action="/cross-selling" style="margin-top:18px;">
+            <input type="hidden" name="use_example" value="1">
+            <button type="submit" class="run-btn" style="min-width:230px;">
+                <span>🔗</span> Beispieldaten analysieren
+            </button>
+        </form>
+    </div>
+</div>
+
+{% else %}
+
+<!-- ── KPI ───────────────────────────────────────────────────────────────── -->
+<div class="kpi-grid">
+    <div class="kpi-tile">
+        <div class="kpi-val" style="color:#60a5fa;">{{ result.kpi.n_kunden }}</div>
+        <div class="kpi-label">Kunden</div>
+        <div class="kpi-sub">im Datensatz</div>
+    </div>
+    <div class="kpi-tile">
+        <div class="kpi-val" style="color:#34d399;">{{ result.kpi.n_produkte }}</div>
+        <div class="kpi-label">Produkte</div>
+        <div class="kpi-sub">{{ result.communities|length }} Cluster</div>
+    </div>
+    <div class="kpi-tile">
+        <div class="kpi-val" style="color:#f59e0b;">{{ result.top_paare[0].lift if result.top_paare else '–' }}</div>
+        <div class="kpi-label">Max. Lift-Score</div>
+        <div class="kpi-sub">
+            {% if result.top_paare %}
+            {{ result.top_paare[0].name_a[:12] }} ↔ {{ result.top_paare[0].name_b[:12] }}
+            {% endif %}
+        </div>
+    </div>
+    <div class="kpi-tile">
+        <div class="kpi-val" style="color:#a78bfa;">{{ result.kpi.n_empfehlungen }}</div>
+        <div class="kpi-label">Empfehlungen</div>
+        <div class="kpi-sub">Top-3 je Kunde</div>
+    </div>
+</div>
+
+<!-- ── Produkt-Netzwerk ──────────────────────────────────────────────────── -->
+<div class="section-card">
+    <div class="section-head">
+        <span>🕸️</span>
+        <h2>Produkt-Co-Purchase-Graph</h2>
+        <span style="font-size:11px;color:var(--sub);">
+            Knoten = Produkte · Kanten = gemeinsame Käufer · Dicke = Häufigkeit
+            {% if result.selected_kunde %}
+            · <span style="color:#fff;">● markiert = {{ result.selected_kunde.name }}</span>
+            {% endif %}
+        </span>
+    </div>
+    <div class="section-body" style="padding:8px 12px 12px;">
+        <div id="cs-network"></div>
+    </div>
+</div>
+
+<!-- ── Kundenspezifisch: Käufe + Empfehlungen ────────────────────────────── -->
+{% if result.selected_kunde %}
+<div style="background:linear-gradient(135deg,#60a5fa0d,#34d3990d); border:1px solid #60a5fa33; border-radius:12px; padding:16px 18px;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+        <span style="font-size:20px;">👤</span>
+        <div>
+            <div style="font-size:15px; font-weight:700;">{{ result.selected_kunde.name }}</div>
+            <div style="font-size:12px; color:var(--sub);">
+                {{ result.selected_kunde.n_produkte }} Produkte · {{ "{:,.0f}".format(result.selected_kunde.umsatz).replace(",",".") }} € Umsatz
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="cs-split">
+
+    <!-- Bisherige Käufe -->
+    <div class="section-card">
+        <div class="section-head"><span>🛒</span><h2>Bisherige Käufe</h2></div>
+        <div style="overflow-x:auto;">
+            <table class="cs-table">
+                <thead>
+                    <tr>
+                        <th>Produkt</th>
+                        <th>Kategorie</th>
+                        <th style="text-align:right;">Umsatz (€)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for k in result.selected_kaeufe %}
+                    <tr>
+                        <td><strong>{{ k.produkt_name }}</strong></td>
+                        <td>
+                            {% if k.kategorie == "Maschinen" %}<span class="badge badge-blue">{{ k.kategorie }}</span>
+                            {% elif k.kategorie == "Zubehör" %}<span class="badge badge-green">{{ k.kategorie }}</span>
+                            {% else %}<span class="badge badge-orange">{{ k.kategorie }}</span>{% endif %}
+                        </td>
+                        <td style="text-align:right;">{{ "{:,.0f}".format(k.umsatz).replace(",",".") }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Top-3 Empfehlungen -->
+    <div class="section-card">
+        <div class="section-head"><span>💡</span><h2>Top-3 Empfehlungen</h2></div>
+        <div class="section-body">
+            {% if result.selected_empfehlungen %}
+            {% for e in result.selected_empfehlungen %}
+            <div class="empf-card">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div class="empf-rank">#{{ loop.index }}</div>
+                    <div style="flex:1;">
+                        <div class="empf-name">{{ e.produkt_name }}</div>
+                        <div class="empf-score">
+                            {% if e.kategorie == "Maschinen" %}<span class="badge badge-blue">{{ e.kategorie }}</span>
+                            {% elif e.kategorie == "Zubehör" %}<span class="badge badge-green">{{ e.kategorie }}</span>
+                            {% else %}<span class="badge badge-orange">{{ e.kategorie }}</span>{% endif %}
+                            &nbsp; Score: <strong>{{ e.score }}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="empf-why">
+                    {{ e.begruendung }}
+                    {% if e.evidence %}
+                    <div style="margin-top:5px; display:flex; flex-wrap:wrap; gap:5px;">
+                        {% for ev in e.evidence %}
+                        <span style="background:var(--card); border:1px solid var(--border); border-radius:5px; padding:1px 7px; font-size:10px;">{{ ev }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div style="color:var(--sub); font-size:13px; text-align:center; padding:20px;">
+                Dieser Kunde hat bereits alle verfügbaren Produkte.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endif %}
+
+<!-- ── Stärkste Produktpaare (Lift-Tabelle) ──────────────────────────────── -->
+{% if result.top_paare %}
+<div class="section-card">
+    <div class="section-head">
+        <span>📊</span>
+        <h2>Stärkste Kaufkorrelationen (Lift-Score)</h2>
+        <span style="font-size:11px;color:var(--sub);">Lift &gt; 1 = überzufällig häufig zusammen gekauft</span>
+    </div>
+    <div style="overflow-x:auto;">
+        <table class="cs-table">
+            <thead>
+                <tr>
+                    <th>Produkt A</th>
+                    <th>Produkt B</th>
+                    <th style="text-align:center;">Lift</th>
+                    <th>Stärke</th>
+                    <th style="text-align:center;">gem. Käufer</th>
+                    <th style="text-align:center;">Konfidenz</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% set max_lift = result.top_paare | map(attribute='lift') | max %}
+            {% for p in result.top_paare[:10] %}
+                {% set bar_pct = (p.lift / max_lift * 100)|int if max_lift > 0 else 0 %}
+                <tr>
+                    <td style="font-size:12px;"><strong>{{ p.name_a }}</strong></td>
+                    <td style="font-size:12px;"><strong>{{ p.name_b }}</strong></td>
+                    <td style="text-align:center;">
+                        <span style="font-weight:700; color:{% if p.lift > 2 %}#34d399{% elif p.lift > 1.5 %}#f59e0b{% else %}#60a5fa{% endif %};">
+                            {{ p.lift }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="score-wrap">
+                            <div class="lift-bar-bg">
+                                <div class="lift-bar-fill" style="width:{{ bar_pct }}%;"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="text-align:center;">{{ p.gemeinsame_kunden }}</td>
+                    <td style="text-align:center; color:var(--sub);">{{ p.konfidenz }} %</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- ── Alle Empfehlungen (Übersicht) ─────────────────────────────────────── -->
+{% if result.alle_empfehlungen and not result.selected_kunde %}
+<div class="section-card">
+    <div class="section-head">
+        <span>💡</span>
+        <h2>Alle Empfehlungen — Top-3 je Kunde</h2>
+        <span style="font-size:11px; color:var(--sub);">Wählen Sie links einen Kunden für die Detailansicht</span>
+    </div>
+    <div style="overflow-x:auto;">
+        <table class="cs-table">
+            <thead>
+                <tr>
+                    <th>Kunde</th>
+                    <th>Empfohlenes Produkt</th>
+                    <th>Kategorie</th>
+                    <th style="text-align:center;">Score</th>
+                    <th>Begründung (Evidenz-Kunden)</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% set prev_kunde = namespace(val='') %}
+            {% for e in result.alle_empfehlungen %}
+                <tr {% if e.kunde_id != prev_kunde.val %}style="border-top:2px solid var(--border);"{% endif %}>
+                    <td>
+                        {% if e.kunde_id != prev_kunde.val %}
+                        <strong>{{ e.kunde_name }}</strong>
+                        {% set prev_kunde.val = e.kunde_id %}
+                        {% endif %}
+                    </td>
+                    <td><strong>{{ e.produkt_name }}</strong></td>
+                    <td>
+                        {% if e.kategorie == "Maschinen" %}<span class="badge badge-blue">{{ e.kategorie }}</span>
+                        {% elif e.kategorie == "Zubehör" %}<span class="badge badge-green">{{ e.kategorie }}</span>
+                        {% else %}<span class="badge badge-orange">{{ e.kategorie }}</span>{% endif %}
+                    </td>
+                    <td style="text-align:center; font-weight:700; color:#34d399;">{{ e.score }}</td>
+                    <td style="color:var(--sub);">
+                        {% if e.evidence %}
+                        Weil <strong style="color:var(--text);">{{ e.evidence | join(', ') }}</strong> dieses Produkt auch kauften.
+                        {% else %}
+                        Kaufmuster-Ähnlichkeit
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endif %}{# end if result #}
+</div>{# .cs-main #}
+</div>{# .cs-layout #}
+</main>
+
+<footer class="home-footer">SalesApps · Graph Cross-Selling · NetworkX · PerceptIQ</footer>
+
+<script>
+// File upload label
+const fi = document.getElementById('file-input');
+const ul = document.getElementById('upload-label');
+const rb = document.getElementById('run-btn');
+if (fi) {
+    fi.addEventListener('change', () => {
+        if (fi.files[0]) { ul.textContent = fi.files[0].name; if(rb) rb.disabled = false; }
+    });
+}
+
+// Kundenauswahl via Dropdown → POST
+function selectKunde(val) {
+    document.getElementById('kunde-id-val').value = val;
+    document.getElementById('kunde-form').submit();
+}
+
+{% if result %}
+// ── Plotly Netzwerk ──────────────────────────────────────────────────────────
+(function(){
+    const fig = {{ result.graph_json | safe }};
+    if (fig && fig.data && fig.data.length > 0) {
+        Plotly.newPlot('cs-network', fig.data, fig.layout,
+            { responsive:true, displayModeBar:false });
+    }
+})();
+{% endif %}
+</script>
+</body>
+</html>

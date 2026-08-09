@@ -21,6 +21,7 @@ from aurora_inference import AuroraInference, AuroraConfig
 from report_generator import generate_report
 from chart_generator import make_forecast_chart, make_daily_bar_chart
 from margen_analyse import analyse as margen_analyse
+from cross_selling_graph import analyse as cs_analyse
 
 # ── Logging ──────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -219,9 +220,31 @@ def margenoptimierung():
     return render_template("margen.html", result=result, error=error)
 
 
-@app.route("/cross-selling")
+@app.route("/cross-selling", methods=["GET", "POST"])
 def cross_selling():
-    return render_template("coming_soon.html", app_name="Graph Cross-Selling", icon="🔗")
+    result = None
+    error  = None
+
+    if request.method == "POST":
+        try:
+            selected_kunde = request.form.get("kunde_id") or None
+
+            if request.form.get("use_example") or selected_kunde:
+                csv_path = DATASETS_DIR / "cross_selling_beispiel.csv"
+                df = pd.read_csv(csv_path)
+            elif "file" in request.files and request.files["file"].filename:
+                f = request.files["file"]
+                df = _load_dataframe(f.stream, f.filename)
+            else:
+                error = "Bitte eine Datei hochladen oder die Beispieldaten verwenden."
+                return render_template("cross_selling.html", result=None, error=error)
+
+            result = cs_analyse(df, selected_kunde_id=selected_kunde)
+        except Exception as exc:
+            logger.error("Cross-Selling Fehler: %s", exc)
+            error = str(exc)
+
+    return render_template("cross_selling.html", result=result, error=error)
 
 
 @app.route("/konfiguration")
