@@ -1,0 +1,424 @@
+════════════════════════════════════════════════════════════════════════════════
+  SALESAPPS – IMPLEMENTIERUNGS-PROMPTS
+  Vollständige Prompt-Sequenz für den Aufbau der SalesApps-Plattform
+  Erstellt: 2026-08-09
+════════════════════════════════════════════════════════════════════════════════
+
+ÜBERSICHT DER ARCHITEKTUR
+─────────────────────────
+Ziel: Aus der bestehenden Aurora-Forecasting-App wird eine SalesApps-Plattform
+mit einer Startseite und 6 eigenständigen Mini-Apps.
+
+Route-Struktur nach Umbau:
+  /                     → SalesApps Startseite (6 Kacheln)
+  /forecasting          → Bestehende Aurora-App (unverändert)
+  /margenoptimierung    → App 1: Margenleckage & Rabattanalyse
+  /cross-selling        → App 2: Graph Cross-Selling Empfehlungen
+  /konfiguration        → App 3: Graph Produktkonfiguration
+  /retrieval            → App 4: Entity Resolution (ähnliche Firmen finden)
+  /lead-scoring         → App 5: Lead Scoring & Abschlusswahrscheinlichkeit
+
+Technologie-Stack je App:
+  - Flask Route + HTML Template
+  - CSV Beispieldaten (synthetisch generiert)
+  - Python ML-Algorithmus (sklearn, networkx, oder pandas)
+  - Ergebnisdarstellung als HTML-Tabelle oder Plotly-Chart
+
+════════════════════════════════════════════════════════════════════════════════
+PROMPT 1 – STARTSEITE MIT 6 KACHELN
+════════════════════════════════════════════════════════════════════════════════
+
+Erstelle eine neue Flask-Startseite für eine SalesApps-Plattform.
+
+AUFGABE:
+1. Erstelle templates/home.html als neue Startseite mit 6 Kacheln im Dark-Theme
+   (passend zum bestehenden style.css mit CSS-Variablen --bg, --card, --accent etc.)
+
+2. Jede Kachel enthält:
+   - Icon (Emoji oder SVG)
+   - Titel
+   - Kurzbeschreibung (1-2 Sätze)
+   - "Öffnen" Button der zur jeweiligen Route führt
+
+3. Die 6 Kacheln:
+   KACHEL 1: Margenoptimierung
+     Icon: 📊
+     Titel: Margenleckage & Rabattanalyse
+     Beschreibung: Identifiziert Rabattmuster und Margenlecks nach Kunde,
+                   Produkt und Vertriebsmitarbeiter. Sofortiger ROI sichtbar.
+     Route: /margenoptimierung
+
+   KACHEL 2: Forecasting
+     Icon: 📈
+     Titel: Zeitreihen-Forecasting
+     Beschreibung: KI-gestützte probabilistische Prognose mit Foundation Model.
+                   Zero-Shot auf beliebigen Zeitreihendaten.
+     Route: /forecasting
+
+   KACHEL 3: Cross-Selling
+     Icon: 🔗
+     Titel: Graph Cross-Selling
+     Beschreibung: Empfiehlt Produkte basierend auf Kauf-Graphen. Findet
+                   Muster die klassische Analyse übersieht.
+     Route: /cross-selling
+
+   KACHEL 4: Produktkonfiguration
+     Icon: ⚙️
+     Titel: Graph Produktkonfiguration
+     Beschreibung: Optimiert Angebotskonfigurationen für maximale Marge
+                   auf Basis historischer Angebote und Stücklisten.
+     Route: /konfiguration
+
+   KACHEL 5: Retrieval
+     Icon: 🔍
+     Titel: Ähnliche Firmen finden
+     Beschreibung: Entity Resolution – findet ähnliche Unternehmen im
+                   Kundenstamm. Ideal für Duplikatbereinigung und Prospecting.
+     Route: /retrieval
+
+   KACHEL 6: Lead Scoring
+     Icon: 🎯
+     Titel: Lead Scoring
+     Beschreibung: Berechnet Abschlusswahrscheinlichkeit für Leads und
+                   Angebote. Priorisiert den Vertrieb nach erwartetem Wert.
+     Route: /lead-scoring
+
+4. Passe app.py an: Route "/" zeigt home.html statt index.html
+5. Route "/forecasting" zeigt die bestehende index.html (Aurora-App unverändert)
+6. Alle anderen Routen zeigen vorerst eine "In Entwicklung"-Seite
+
+BESTEHENDE DATEIEN NICHT VERÄNDERN:
+- templates/index.html (Aurora-App)
+- static/css/style.css (nur ergänzen, nicht ersetzen)
+- aurora_inference.py, app.py Forecasting-Logik
+
+
+════════════════════════════════════════════════════════════════════════════════
+PROMPT 2 – APP: MARGENOPTIMIERUNG
+════════════════════════════════════════════════════════════════════════════════
+
+Erstelle eine vollständige Flask-App für Margenleckage & Rabattanalyse.
+
+AUFGABE:
+
+1. datasets/margen_beispiel.csv generieren (synthetisch, 200 Zeilen):
+   Spalten: angebot_id, datum, kunde, produkt, kategorie, listenpreis,
+            verkaufspreis, rabatt_pct, menge, umsatz, deckungsbeitrag,
+            vertriebsmitarbeiter, region
+
+   Realistische Werte:
+   - Listenpreise: 100-5000 EUR
+   - Rabatte: 0-40%
+   - 5 Kunden, 4 Produkte, 3 Vertriebsmitarbeiter, 2 Regionen
+   - Manche Vertriebsmitarbeiter geben systematisch mehr Rabatt
+
+2. Algorithmus (margen_analyse.py):
+   - Rabattmuster je Vertriebsmitarbeiter (Mittelwert, Streuung)
+   - Margin-Erosion je Produkt (Listenpreis vs. Ist-Preis)
+   - Top-Kunden nach Rabattniveau (wer bekommt am meisten Nachlass?)
+   - Margenleck-Score: Identifiziert Angebote unter Mindestmarge (15%)
+   - Keine externen ML-Libs nötig – reine pandas Deskriptivanalytik
+
+3. Route: GET /margenoptimierung → Template mit Upload-Formular
+          POST /margenoptimierung → Analyse ausführen, Ergebnisse anzeigen
+   Nutzer kann eigene CSV hochladen oder Beispieldaten verwenden.
+
+4. Template templates/margen.html:
+   - Dark-Theme passend zur bestehenden App
+   - 4 KPI-Kacheln: Ø-Rabatt, Ø-Marge, Margenleck-Volumen, Ausreißer-Angebote
+   - Tabelle: Top 5 Margenlecks (Angebot, Rabatt, Marge, Empfehlung)
+   - Tabelle: Vertriebsmitarbeiter-Vergleich (wer rabattiert wieviel)
+   - Plotly-Balkendiagramm: Marge je Produkt
+
+5. Keine langen Wartezeiten – Analyse läuft synchron in < 1 Sekunde
+
+
+════════════════════════════════════════════════════════════════════════════════
+PROMPT 3 – APP: GRAPH CROSS-SELLING
+════════════════════════════════════════════════════════════════════════════════
+
+Erstelle eine vollständige Flask-App für Graph-basierte Cross-Selling-Empfehlungen.
+
+AUFGABE:
+
+1. datasets/cross_selling_beispiel.csv generieren (synthetisch, 150 Zeilen):
+   Spalten: transaktions_id, datum, kunde_id, kunde_name, produkt_id,
+            produkt_name, kategorie, umsatz
+
+   Realistische Werte:
+   - 8 Kunden (mit Namen wie "Müller GmbH", "Weber AG" etc.)
+   - 12 Produkte in 3 Kategorien (Maschinen, Zubehör, Service)
+   - Jeder Kunde kauft 3-8 verschiedene Produkte
+   - Produkte die oft zusammen gekauft werden (z.B. Maschine + Wartungsvertrag)
+
+2. Algorithmus (cross_selling_graph.py):
+   - Bipartiten Graphen aufbauen: Kunde-Produkt mit networkx
+   - Co-Occurrence-Matrix: Welche Produkte werden oft zusammen gekauft?
+   - Für jeden Kunden: Welche Produkte kaufen ähnliche Kunden?
+   - Empfehlungs-Score = Co-Occurrence-Häufigkeit × Kaufkraft-Gewichtung
+   - Ergebnis: Top-3-Empfehlungen pro Kunde mit Begründung
+
+3. Route: GET /cross-selling → Kundenauswahl + Beispieldaten
+          POST /cross-selling → Empfehlungen für gewählten Kunden
+
+4. Template templates/cross_selling.html:
+   - Dark-Theme
+   - Dropdown: Kunde auswählen
+   - Linke Seite: Bisherige Käufe des Kunden (Tabelle)
+   - Rechte Seite: Top-3-Empfehlungen mit Score und Begründung
+   - Netzwerk-Visualisierung: Einfache Darstellung des Produkt-Graphen
+     (als SVG oder Plotly Scatter mit Kanten)
+
+5. Erklärbarkeit: Jede Empfehlung zeigt "Weil Kunden X und Y dieses Produkt
+   auch kauften" – Vertrieb muss verstehen warum
+
+
+════════════════════════════════════════════════════════════════════════════════
+PROMPT 4 – APP: GRAPH PRODUKTKONFIGURATION
+════════════════════════════════════════════════════════════════════════════════
+
+Erstelle eine vollständige Flask-App für Graph-basierte Produktkonfiguration
+mit Margen-Optimierung.
+
+AUFGABE:
+
+1. datasets/konfiguration_beispiel.csv generieren (2 Dateien):
+
+   a) stückliste.csv (60 Zeilen):
+      Spalten: komponente_id, komponente_name, kategorie, listenpreis,
+               herstellkosten, kompatibel_mit (comma-separated IDs)
+      Kategorien: Basis (3), Antrieb (4), Steuerung (4), Gehäuse (3),
+                  Zubehör (6)
+
+   b) angebote_historisch.csv (80 Zeilen):
+      Spalten: angebot_id, gewonnen, konfiguration (comma-separated IDs),
+               gesamtpreis, gesamtkosten, deckungsbeitrag_pct, branche, menge
+
+2. Algorithmus (konfiguration_graph.py):
+   - Kompatibilitätsgraph mit networkx aufbauen
+   - Für eine Auswahl an Basis-Komponenten:
+     → Welche Kombinationen sind kompatibel?
+     → Welche Kombination hat historisch die beste Marge?
+     → Welche Kombination wurde am häufigsten gewonnen?
+   - Ranking der Top-5-Konfigurationen nach: Marge × Gewinnwahrscheinlichkeit
+   - Einfache Heuristik, kein GNN (GNN als "Next Step" erwähnen)
+
+3. Route: GET /konfiguration → Basiskomponente auswählen
+          POST /konfiguration → Top-Konfigurationen anzeigen
+
+4. Template templates/konfiguration.html:
+   - Dark-Theme
+   - Schritt 1: Basiskomponente wählen (Dropdown)
+   - Schritt 2: Muss-Anforderungen (Checkboxen: Branche, Menge)
+   - Ergebnis: Top-5-Konfigurationen als Kacheln mit:
+     Komponenten-Liste, Preis, Deckungsbeitrag%, Gewinn-Wahrscheinlichkeit
+   - Grafik: Marge vs. Gewinnwahrscheinlichkeit (Scatter)
+
+
+════════════════════════════════════════════════════════════════════════════════
+PROMPT 5 – APP: RETRIEVAL (ÄHNLICHE FIRMEN FINDEN)
+════════════════════════════════════════════════════════════════════════════════
+
+Erstelle eine vollständige Flask-App für Entity Resolution und
+Ähnlichkeits-Suche im Firmenstamm.
+
+AUFGABE:
+
+1. datasets/firmenstamm_beispiel.csv generieren (120 Zeilen):
+   Spalten: firma_id, firma_name, strasse, plz, ort, land, branche,
+            umsatz_klasse, mitarbeiter, website, erstellt_am
+
+   Bewusste Duplikate/Varianten einbauen:
+   - "Müller GmbH" vs "Mueller GmbH" vs "Müller GmbH & Co. KG"
+   - Gleiches Unternehmen mit alter und neuer Adresse
+   - Tippfehler in Firmennamen (häufig in CRM-Systemen)
+   - 15-20 echte Duplikat-Paare im Datensatz
+
+2. Algorithmus (retrieval_graph.py):
+   - String-Ähnlichkeit: Levenshtein-Distanz auf Firmenname (difflib)
+   - PLZ + Ort Übereinstimmung (harte Bedingung)
+   - Blocking: Nur Firmen mit gleicher PLZ oder erstem Buchstaben vergleichen
+     (spart Rechenzeit bei großen Datensätzen)
+   - Ähnlichkeits-Score = 0.6 × Name-Score + 0.3 × Adress-Score + 0.1 × Branche
+   - Flaggt Paare mit Score > 0.75 als "wahrscheinliches Duplikat"
+   - Freie Textsuche: "Finde alle Firmen ähnlich wie [Eingabe]"
+
+3. Route: GET /retrieval → Suchmaske + Duplikat-Übersicht
+          POST /retrieval → Ähnliche Firmen zu Eingabe anzeigen
+
+4. Template templates/retrieval.html:
+   - Dark-Theme
+   - Suchfeld: Firmenname eingeben
+   - Ergebnis: Tabelle mit ähnlichen Firmen, Score, Match-Grund
+   - Separater Bereich: "Erkannte Duplikate im Stammdaten"
+     (automatisch alle Paare > Schwellenwert)
+   - Ampel-Darstellung: Grün (kein Duplikat), Gelb (prüfen), Rot (Duplikat)
+
+
+════════════════════════════════════════════════════════════════════════════════
+PROMPT 6 – APP: LEAD SCORING
+════════════════════════════════════════════════════════════════════════════════
+
+Erstelle eine vollständige Flask-App für Lead Scoring und
+Abschlusswahrscheinlichkeit.
+
+AUFGABE:
+
+1. datasets/leads_beispiel.csv generieren (150 Zeilen):
+   Spalten: lead_id, firma, branche, mitarbeiter_klasse, jahresumsatz_klasse,
+            kontaktweg, angebotswert, bisherige_kaeufe, tage_seit_erstkontakt,
+            anzahl_gespraeche, produkt_interesse, region, gewonnen (0/1)
+
+   Realistische Muster einbauen:
+   - Große Firmen mit vorherigen Käufen → höhere Gewinnrate
+   - Kurze Zeit zwischen Kontakt und Angebot → besser
+   - Bestimmte Branchen kaufen bestimmte Produkte häufiger
+   - 35% gewonnene Deals (realistisch für B2B)
+
+2. Algorithmus (lead_scoring.py):
+   - Logistische Regression mit sklearn (einfach + erklärbar)
+   - Training auf historischen Daten aus der CSV
+   - Feature Importance zeigen (welche Faktoren zählen am meisten?)
+   - Für neue Leads: Eingabeformular → Abschlusswahrscheinlichkeit
+   - SHAP-ähnliche Erklärung ohne SHAP-Bibliothek:
+     "Ihr Score ist hoch weil: großes Unternehmen (+15%), vorherige Käufe (+22%)"
+
+3. Route: GET /lead-scoring → Formular für neuen Lead + historische Übersicht
+          POST /lead-scoring → Score berechnen und erklären
+
+4. Template templates/lead_scoring.html:
+   - Dark-Theme
+   - Linke Seite: Eingabeformular für neuen Lead
+     (Dropdown-Felder für alle kategorialen Features)
+   - Rechte Seite nach Submit: Score-Anzeige als große Zahl (z.B. "73%")
+     mit Farb-Codierung (grün/gelb/rot)
+   - Erklärung: Top-3-Faktoren die den Score am stärksten beeinflussen
+   - Unten: Tabelle der Top-10-Leads nach Score aus dem historischen Datensatz
+   - Balkendiagramm: Feature Importance des Modells
+
+
+════════════════════════════════════════════════════════════════════════════════
+PROMPT 7 – NAVIGATION & GEMEINSAME KOMPONENTEN
+════════════════════════════════════════════════════════════════════════════════
+
+Erstelle gemeinsame Navigation für alle SalesApps-Seiten.
+
+AUFGABE:
+
+1. Erstelle templates/base.html als gemeinsames Basis-Template mit:
+   - Header mit "SalesApps" Logo/Schriftzug links
+   - Navigation: "← Zurück zur Übersicht" Link (führt zu /)
+   - Breadcrumb: "SalesApps > [App-Name]"
+   - Dark-Theme konsistent mit style.css
+   - Footer: "SalesApps | PerceptIQ"
+
+2. Passe alle App-Templates an um base.html zu erweitern (Jinja2 extends)
+
+3. In style.css ergänzen (nicht überschreiben):
+   - .app-header: Navigationsleiste oben
+   - .breadcrumb: Breadcrumb-Stil
+   - .back-link: Zurück-Button
+   - .home-grid: 6-Kacheln-Grid für Startseite (2x3 auf Desktop, 1x6 auf Mobile)
+   - .home-card: Einzelne Kachel mit Hover-Effekt
+
+4. Startseite home.html:
+   - Großes "SalesApps" als Seitentitel
+   - Untertitel: "KI-gestützte Vertriebsoptimierung"
+   - 2×3 Grid der Kacheln
+   - Jede Kachel: Icon, Titel, Kurzbeschreibung, Status-Badge
+     (Status: "Aktiv" grün / "Demo" gelb / "In Entwicklung" grau)
+
+
+════════════════════════════════════════════════════════════════════════════════
+PROMPT 8 – REQUIREMENTS & DEPLOYMENT
+════════════════════════════════════════════════════════════════════════════════
+
+Aktualisiere requirements.txt und Dockerfile für die erweiterte App.
+
+AUFGABE:
+
+1. requirements.txt ergänzen (zu den bestehenden Paketen hinzufügen):
+   - scikit-learn>=1.4.0      (Lead Scoring, Logistische Regression)
+   - networkx>=3.2.0          (Graph-Algorithmen für Cross-Sell + Konfiguration)
+   - difflib                  (in Python stdlib, kein Install nötig)
+   Nicht hinzufügen: torch, transformers (laufen auf RunPod, nicht lokal)
+
+2. Dockerfile:
+   - datasets/margen_beispiel.csv generieren beim Build
+   - datasets/firmenstamm_beispiel.csv generieren beim Build
+   - datasets/cross_selling_beispiel.csv generieren beim Build
+   - datasets/leads_beispiel.csv generieren beim Build
+   - Sonst keine Änderungen
+
+3. Überprüfe dass alle neuen Routes in app.py eingetragen sind und
+   keine bestehende Forecasting-Logik verändert wurde.
+
+4. Erstelle datasets/generate_all_datasets.py der alle synthetischen
+   Datensätze auf einmal generiert (wird im Dockerfile aufgerufen).
+
+5. Test-Checkliste:
+   □ GET / zeigt Startseite mit 6 Kacheln
+   □ GET /forecasting zeigt Aurora-App (identisch zu vorher)
+   □ POST /forecasting funktioniert (RunPod-Aufruf)
+   □ GET /margenoptimierung zeigt Formular
+   □ POST /margenoptimierung zeigt Analyse
+   □ GET /cross-selling zeigt Kundenauswahl
+   □ POST /cross-selling zeigt Empfehlungen
+   □ GET /konfiguration zeigt Formular
+   □ POST /konfiguration zeigt Konfigurationen
+   □ GET /retrieval zeigt Suche
+   □ POST /retrieval zeigt Ähnliche Firmen
+   □ GET /lead-scoring zeigt Formular
+   □ POST /lead-scoring zeigt Score
+   □ Alle Seiten haben Zurück-Navigation zu /
+   □ Render Deploy erfolgreich (kein OOM)
+
+
+════════════════════════════════════════════════════════════════════════════════
+REIHENFOLGE DER UMSETZUNG (EMPFOHLEN)
+════════════════════════════════════════════════════════════════════════════════
+
+Schritt 1: Prompt 7 (Navigation + Startseite) → sichtbare Struktur sofort da
+Schritt 2: Prompt 1 (Startseite Kacheln) → alle Kacheln verlinkt
+Schritt 3: Prompt 2 (Margenoptimierung) → einfachste App, guter Start
+Schritt 4: Prompt 6 (Lead Scoring) → auch einfach, sklearn
+Schritt 5: Prompt 5 (Retrieval) → mittlere Komplexität
+Schritt 6: Prompt 3 (Cross-Selling Graph) → Graph-Algorithmen
+Schritt 7: Prompt 4 (Produktkonfiguration) → komplexeste neue App
+Schritt 8: Prompt 8 (Deployment + Requirements) → alles zusammenführen
+
+Jeder Schritt kann unabhängig committed und deployed werden.
+Forecasting läuft die ganze Zeit weiter ohne Unterbrechung.
+
+
+════════════════════════════════════════════════════════════════════════════════
+GESCHÄTZTER AUFWAND
+════════════════════════════════════════════════════════════════════════════════
+
+Prompt 1 (Startseite):          ~30 Min
+Prompt 2 (Margenoptimierung):   ~45 Min
+Prompt 3 (Cross-Selling):       ~60 Min
+Prompt 4 (Konfiguration):       ~60 Min
+Prompt 5 (Retrieval):           ~45 Min
+Prompt 6 (Lead Scoring):        ~45 Min
+Prompt 7 (Navigation):          ~30 Min
+Prompt 8 (Deployment):          ~20 Min
+────────────────────────────────────────
+Gesamt:                         ~6 Stunden
+(zzgl. Review, Tests, kleine Korrekturen: ~8-10 Stunden)
+
+════════════════════════════════════════════════════════════════════════════════
+HINWEIS ZUR AURORA-APP
+════════════════════════════════════════════════════════════════════════════════
+
+Die bestehende Aurora-App bleibt vollständig unverändert:
+- aurora_inference.py     → unverändert
+- runpod/handler.py       → unverändert
+- runpod/Dockerfile.runpod → unverändert
+- RUNPOD_API_KEY           → unverändert in Render
+- RUNPOD_ENDPOINT_ID       → unverändert in Render
+
+Einzige Änderung: Route / wird zu /forecasting umgeleitet.
+Der Aurora RunPod Endpoint läuft weiter ohne jede Anpassung.
+
+════════════════════════════════════════════════════════════════════════════════

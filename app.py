@@ -20,6 +20,7 @@ from flask import (
 from aurora_inference import AuroraInference, AuroraConfig
 from report_generator import generate_report
 from chart_generator import make_forecast_chart, make_daily_bar_chart
+from margen_analyse import analyse as margen_analyse
 
 # ── Logging ──────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -193,9 +194,29 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/margenoptimierung")
+@app.route("/margenoptimierung", methods=["GET", "POST"])
 def margenoptimierung():
-    return render_template("coming_soon.html", app_name="Margenoptimierung", icon="📊")
+    result = None
+    error  = None
+
+    if request.method == "POST":
+        try:
+            if request.form.get("use_example"):
+                csv_path = DATASETS_DIR / "margen_beispiel.csv"
+                df = pd.read_csv(csv_path)
+            elif "file" in request.files and request.files["file"].filename:
+                f = request.files["file"]
+                df = _load_dataframe(f.stream, f.filename)
+            else:
+                error = "Bitte eine Datei hochladen oder die Beispieldaten verwenden."
+                return render_template("margen.html", result=None, error=error)
+
+            result = margen_analyse(df)
+        except Exception as exc:
+            logger.error("Margenanalyse Fehler: %s", exc)
+            error = str(exc)
+
+    return render_template("margen.html", result=result, error=error)
 
 
 @app.route("/cross-selling")

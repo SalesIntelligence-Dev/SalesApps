@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Margenoptimierung – SalesApps</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=4">
+    <style>
+        /* ── Margen-spezifisches Styling ── */
+        .mg-layout { display: flex; gap: 24px; max-width: 1280px; margin: 0 auto; padding: 0 24px 48px; }
+
+        .mg-sidebar { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; }
+
+        .mg-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
+
+        /* KPI Grid */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        @media (max-width: 1000px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+
+        .kpi-tile {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 16px;
+            text-align: center;
+        }
+        .kpi-tile.kpi-warn { border-color: #f59e0b44; background: #f59e0b0a; }
+        .kpi-tile.kpi-bad  { border-color: #ef444444; background: #ef44440a; }
+        .kpi-tile.kpi-good { border-color: #10b98144; background: #10b9810a; }
+
+        .kpi-val  { font-size: 32px; font-weight: 700; line-height: 1.1; margin-bottom: 4px; }
+        .kpi-label{ font-size: 12px; color: var(--sub); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+        .kpi-sub  { font-size: 11px; color: var(--sub); margin-top: 4px; }
+
+        /* Tables */
+        .mg-table-wrap { overflow-x: auto; }
+        .mg-table {
+            width: 100%; border-collapse: collapse; font-size: 13px;
+        }
+        .mg-table th {
+            background: var(--hover); color: var(--sub);
+            padding: 10px 12px; text-align: left;
+            font-weight: 600; font-size: 11px; text-transform: uppercase;
+            letter-spacing: 0.04em; border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        .mg-table td {
+            padding: 10px 12px; border-bottom: 1px solid var(--border);
+            color: var(--text); vertical-align: middle;
+        }
+        .mg-table tr:last-child td { border-bottom: none; }
+        .mg-table tr:hover td { background: var(--hover); }
+
+        .badge-leck { background: #ef44441a; color: #ef4444; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+        .badge-ok   { background: #10b9811a; color: #10b981; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+        .badge-warn { background: #f59e0b1a; color: #f59e0b; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+
+        /* Section headers */
+        .section-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .section-head {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .section-head h2 { font-size: 15px; font-weight: 600; margin: 0; }
+        .section-body { padding: 20px; }
+
+        /* Upload area */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .2s, background .2s;
+        }
+        .upload-zone:hover { border-color: var(--accent2); background: var(--hover); }
+        .upload-zone input { display: none; }
+        .upload-icon { font-size: 28px; }
+        .upload-text { font-size: 13px; color: var(--sub); margin-top: 6px; }
+
+        .run-btn-mg {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; padding: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none; border-radius: 10px;
+            color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: opacity .2s, transform .1s;
+        }
+        .run-btn-mg:hover { opacity: .9; transform: translateY(-1px); }
+        .run-btn-mg:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+        .use-example-btn {
+            width: 100%; padding: 10px;
+            background: var(--hover); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text); font-size: 13px;
+            cursor: pointer; transition: background .2s;
+        }
+        .use-example-btn:hover { background: var(--card); }
+
+        .chart-container { width: 100%; height: 340px; }
+
+        /* Empfehlung Chip */
+        .rec-chip {
+            background: var(--hover); border-radius: 6px;
+            padding: 3px 8px; font-size: 11px; color: var(--sub);
+        }
+
+        /* Alert Banner */
+        .alert-banner {
+            background: #f59e0b14; border: 1px solid #f59e0b44;
+            border-radius: 10px; padding: 14px 18px;
+            display: flex; align-items: flex-start; gap: 10px; font-size: 13px;
+        }
+        .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+        /* Leerzustand */
+        .mg-empty {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 80px 24px;
+            text-align: center; gap: 12px; color: var(--sub);
+        }
+        .mg-empty-icon { font-size: 56px; }
+        .mg-empty-title { font-size: 18px; font-weight: 600; color: var(--text); }
+        .mg-empty-sub { max-width: 380px; line-height: 1.7; font-size: 14px; }
+
+        /* Mitarbeiter-Balken */
+        .bar-inline {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .bar-bg {
+            flex: 1; height: 8px; background: var(--hover);
+            border-radius: 4px; overflow: hidden; min-width: 60px;
+        }
+        .bar-fill { height: 100%; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════════════════════════ -->
+<header>
+    <div class="header-inner">
+        <div class="logo">
+            <span class="logo-icon">📊</span>
+            <div>
+                <div class="logo-title">Margenoptimierung</div>
+                <div class="logo-sub">Margenleckage & Rabattanalyse · SalesApps</div>
+            </div>
+        </div>
+        <span class="status-badge status-aktiv">Aktiv</span>
+    </div>
+</header>
+
+<!-- ══ BACK NAV ════════════════════════════════════════════════════════════ -->
+<div class="back-nav">
+    <a href="/" class="back-link">← Zurück zur Übersicht</a>
+    <span class="breadcrumb">/ <span>Margenoptimierung</span></span>
+</div>
+
+<!-- ══ MAIN ════════════════════════════════════════════════════════════════ -->
+<main style="padding: 24px 0;">
+<div class="mg-layout">
+
+    <!-- ─ SIDEBAR ─────────────────────────────────────────────────────── -->
+    <aside class="mg-sidebar">
+
+        <div class="section-card">
+            <div class="section-head">
+                <span>📂</span>
+                <h2>Datensatz</h2>
+            </div>
+            <div class="section-body" style="display:flex; flex-direction:column; gap:12px;">
+                <form id="upload-form" method="POST" enctype="multipart/form-data" action="/margenoptimierung">
+                    <label class="upload-zone" id="upload-zone">
+                        <input type="file" name="file" id="file-input" accept=".csv,.xlsx,.xls">
+                        <div class="upload-icon">📄</div>
+                        <div class="upload-text" id="upload-label">CSV / Excel hochladen</div>
+                    </label>
+                    <div style="margin-top: 10px;">
+                        <button type="submit" class="run-btn-mg" id="run-btn" {% if not result %}disabled{% endif %}>
+                            <span>🔍</span> Analyse starten
+                        </button>
+                    </div>
+                </form>
+
+                <div style="text-align:center; color:var(--sub); font-size:12px;">oder</div>
+
+                <form method="POST" action="/margenoptimierung">
+                    <input type="hidden" name="use_example" value="1">
+                    <button type="submit" class="use-example-btn">
+                        📊 Beispieldaten analysieren
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% if result %}
+        <div class="section-card">
+            <div class="section-head"><span>ℹ️</span><h2>Analyse-Info</h2></div>
+            <div class="section-body" style="font-size:13px; display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:var(--sub);">Angebote gesamt</span>
+                    <strong>{{ result.zeilen_gesamt }}</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:var(--sub);">Margenlecks</span>
+                    <strong style="color:#ef4444;">{{ result.kpi.leck_anzahl }}</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:var(--sub);">Mindestmarge</span>
+                    <strong>15,0 %</strong>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </aside>
+
+    <!-- ─ MAIN CONTENT ───────────────────────────────────────────────── -->
+    <div class="mg-main">
+
+        {% if not result %}
+        <!-- Leerzustand -->
+        <div class="section-card">
+            <div class="mg-empty">
+                <div class="mg-empty-icon">📊</div>
+                <div class="mg-empty-title">Rabatt- und Margenanalyse</div>
+                <div class="mg-empty-sub">
+                    Laden Sie Ihre Angebotsdaten hoch oder starten Sie mit den Beispieldaten.
+                    Die Analyse findet sofort Margenlecks, Rabattmuster und Optimierungspotenzial.
+                </div>
+                <div style="display:flex; gap:16px; margin-top:8px; flex-wrap:wrap; justify-content:center; font-size:13px; color:var(--sub);">
+                    <span>📄 CSV / Excel</span>
+                    <span>⚡ Ergebnis in &lt;1 Sekunde</span>
+                    <span>🔒 Daten bleiben lokal</span>
+                </div>
+                <form method="POST" action="/margenoptimierung" style="margin-top:16px;">
+                    <input type="hidden" name="use_example" value="1">
+                    <button type="submit" class="run-btn-mg" style="min-width:220px;">
+                        <span>🔍</span> Beispieldaten analysieren
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% else %}
+
+        <!-- ── KPI-Kacheln ─────────────────────────────────────────────── -->
+        <div class="kpi-grid">
+
+            <div class="kpi-tile {% if result.kpi.avg_rabatt > 20 %}kpi-warn{% elif result.kpi.avg_rabatt > 30 %}kpi-bad{% else %}kpi-good{% endif %}">
+                <div class="kpi-val" style="color: {% if result.kpi.avg_rabatt > 20 %}#f59e0b{% elif result.kpi.avg_rabatt > 30 %}#ef4444{% else %}#10b981{% endif %};">
+                    {{ result.kpi.avg_rabatt }} %
+                </div>
+                <div class="kpi-label">Ø Rabatt</div>
+                <div class="kpi-sub">über alle Angebote</div>
+            </div>
+
+            <div class="kpi-tile {% if result.kpi.avg_marge < 15 %}kpi-bad{% elif result.kpi.avg_marge < 25 %}kpi-warn{% else %}kpi-good{% endif %}">
+                <div class="kpi-val" style="color: {% if result.kpi.avg_marge < 15 %}#ef4444{% elif result.kpi.avg_marge < 25 %}#f59e0b{% else %}#10b981{% endif %};">
+                    {{ result.kpi.avg_marge }} %
+                </div>
+                <div class="kpi-label">Ø Deckungsbeitrag</div>
+                <div class="kpi-sub">Ziel: ≥ 15 %</div>
+            </div>
+
+            <div class="kpi-tile kpi-bad">
+                <div class="kpi-val" style="color:#ef4444;">
+                    {{ "{:,.0f}".format(result.kpi.leck_volumen).replace(",", ".") }} €
+                </div>
+                <div class="kpi-label">Margenleck-Volumen</div>
+                <div class="kpi-sub">Umsatz unter Mindestmarge</div>
+            </div>
+
+            <div class="kpi-tile {% if result.kpi.ausreisser > 5 %}kpi-warn{% else %}kpi-ok{% endif %}">
+                <div class="kpi-val" style="color:#f59e0b;">{{ result.kpi.ausreisser }}</div>
+                <div class="kpi-label">Rabatt-Ausreißer</div>
+                <div class="kpi-sub">Angebote im Top-10 %-Bereich</div>
+            </div>
+
+        </div>
+
+        <!-- ── Alert Banner ───────────────────────────────────────────── -->
+        {% if result.kpi.leck_anzahl > 0 %}
+        <div class="alert-banner">
+            <span class="alert-icon">⚠️</span>
+            <div>
+                <strong>{{ result.kpi.leck_anzahl }} Angebote</strong> liegen unter der Mindestmarge von 15 %.
+                Das entspricht einem Risikoumsatz von
+                <strong>{{ "{:,.0f}".format(result.kpi.leck_volumen).replace(",", ".") }} €</strong>.
+                Priorität: Rabattstrategie mit dem Vertrieb abstimmen.
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ── Marge je Produkt (Plotly) ──────────────────────────────── -->
+        {% if result.produkt_margen %}
+        <div class="section-card">
+            <div class="section-head">
+                <span>📈</span>
+                <h2>Marge je Produkt</h2>
+            </div>
+            <div class="section-body">
+                <div id="produkt-chart" class="chart-container"></div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ── Top-5 Margenlecks ──────────────────────────────────────── -->
+        {% if result.top_lecks %}
+        <div class="section-card">
+            <div class="section-head">
+                <span>🚨</span>
+                <h2>Top-Margenlecks</h2>
+            </div>
+            <div class="section-body" style="padding:0;">
+                <div class="mg-table-wrap">
+                    <table class="mg-table">
+                        <thead>
+                            <tr>
+                                <th>Angebot</th>
+                                <th>Kunde</th>
+                                <th>Produkt</th>
+                                <th>Rabatt</th>
+                                <th>Marge</th>
+                                <th>Umsatz (€)</th>
+                                <th>Empfehlung</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for row in result.top_lecks %}
+                            <tr>
+                                <td><code style="font-size:12px;">{{ row.angebot }}</code></td>
+                                <td>{{ row.kunde }}</td>
+                                <td>{{ row.produkt }}</td>
+                                <td>
+                                    <span class="badge-leck">{{ row.rabatt }} %</span>
+                                </td>
+                                <td>
+                                    <span class="badge-leck">{{ row.marge }} %</span>
+                                </td>
+                                <td style="text-align:right;">{{ "{:,.0f}".format(row.umsatz).replace(",", ".") }}</td>
+                                <td><span class="rec-chip">{{ row.empfehlung }}</span></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ── Vertriebsmitarbeiter-Vergleich ────────────────────────── -->
+        {% if result.mitarbeiter_vergleich %}
+        <div class="section-card">
+            <div class="section-head">
+                <span>👥</span>
+                <h2>Vertriebsmitarbeiter-Vergleich</h2>
+            </div>
+            <div class="section-body" style="padding:0;">
+                <div class="mg-table-wrap">
+                    <table class="mg-table">
+                        <thead>
+                            <tr>
+                                <th>Mitarbeiter</th>
+                                <th>Ø Rabatt</th>
+                                <th>Rabatt-Intensität</th>
+                                <th>Ø Marge</th>
+                                <th>Leck-Quote</th>
+                                <th>Angebote</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% set max_rabatt = result.mitarbeiter_vergleich | map(attribute='avg_rabatt') | max %}
+                        {% for m in result.mitarbeiter_vergleich %}
+                            {% set pct = (m.avg_rabatt / max_rabatt * 100) | int if max_rabatt > 0 else 0 %}
+                            <tr>
+                                <td><strong>{{ m.vertriebsmitarbeiter }}</strong></td>
+                                <td>
+                                    {% if m.avg_rabatt > 20 %}
+                                        <span class="badge-leck">{{ m.avg_rabatt }} %</span>
+                                    {% elif m.avg_rabatt > 12 %}
+                                        <span class="badge-warn">{{ m.avg_rabatt }} %</span>
+                                    {% else %}
+                                        <span class="badge-ok">{{ m.avg_rabatt }} %</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="bar-inline">
+                                        <div class="bar-bg">
+                                            <div class="bar-fill"
+                                                 style="width:{{ pct }}%;
+                                                        background: {% if pct > 75 %}#ef4444{% elif pct > 50 %}#f59e0b{% else %}#10b981{% endif %};">
+                                            </div>
+                                        </div>
+                                        <span style="font-size:11px; color:var(--sub); min-width:28px;">{{ pct }}%</span>
+                                    </div>
+                                </td>
+                                <td>{{ m.avg_marge }} %</td>
+                                <td>
+                                    {% if m.leck_quote > 20 %}
+                                        <span class="badge-leck">{{ m.leck_quote }} %</span>
+                                    {% else %}
+                                        <span class="badge-ok">{{ m.leck_quote }} %</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align:center;">{{ m.anzahl }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ── Kunden-Rabattranking ────────────────────────────────────── -->
+        {% if result.kunden_rabatte %}
+        <div class="section-card">
+            <div class="section-head">
+                <span>🏢</span>
+                <h2>Kunden nach Rabattniveau</h2>
+            </div>
+            <div class="section-body" style="padding:0;">
+                <div class="mg-table-wrap">
+                    <table class="mg-table">
+                        <thead>
+                            <tr>
+                                <th>Kunde</th>
+                                <th>Ø Rabatt</th>
+                                <th>Ø Marge</th>
+                                <th>Umsatz (€)</th>
+                                <th>Angebote</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for k in result.kunden_rabatte %}
+                            <tr>
+                                <td><strong>{{ k.kunde }}</strong></td>
+                                <td>
+                                    {% if k.avg_rabatt > 20 %}
+                                        <span class="badge-leck">{{ k.avg_rabatt }} %</span>
+                                    {% elif k.avg_rabatt > 12 %}
+                                        <span class="badge-warn">{{ k.avg_rabatt }} %</span>
+                                    {% else %}
+                                        <span class="badge-ok">{{ k.avg_rabatt }} %</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ k.avg_marge }} %</td>
+                                <td style="text-align:right;">{{ "{:,.0f}".format(k.umsatz).replace(",", ".") }}</td>
+                                <td style="text-align:center;">{{ k.anzahl }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% endif %}{# end if result #}
+
+    </div>{# .mg-main #}
+
+</div>{# .mg-layout #}
+</main>
+
+<!-- ══ FOOTER ══════════════════════════════════════════════════════════════ -->
+<footer class="home-footer">SalesApps · Margenoptimierung · PerceptIQ</footer>
+
+<!-- ══ SCRIPTS ═════════════════════════════════════════════════════════════ -->
+<script>
+// File-upload Label
+const fileInput = document.getElementById('file-input');
+const uploadLabel = document.getElementById('upload-label');
+const runBtn = document.getElementById('run-btn');
+
+if (fileInput) {
+    fileInput.addEventListener('change', () => {
+        const name = fileInput.files[0]?.name;
+        if (name) {
+            uploadLabel.textContent = name;
+            if (runBtn) runBtn.disabled = false;
+        }
+    });
+}
+
+{% if result and result.produkt_margen %}
+// ── Plotly: Marge je Produkt ─────────────────────────────────────────────
+(function () {
+    const data = {{ result.produkt_margen | tojson }};
+    const labels  = data.map(d => d.produkt);
+    const margen  = data.map(d => d.avg_marge);
+    const rabatte = data.map(d => d.avg_rabatt);
+
+    const colors = margen.map(m =>
+        m < 15 ? '#ef4444' : m < 25 ? '#f59e0b' : '#10b981'
+    );
+
+    const traces = [
+        {
+            name: 'Ø Deckungsbeitrag %',
+            x: labels, y: margen,
+            type: 'bar',
+            marker: { color: colors, opacity: 0.85 },
+            text: margen.map(v => v.toFixed(1) + ' %'),
+            textposition: 'outside',
+        },
+        {
+            name: 'Ø Rabatt %',
+            x: labels, y: rabatte,
+            type: 'bar',
+            marker: { color: '#60a5fa', opacity: 0.6 },
+            text: rabatte.map(v => v.toFixed(1) + ' %'),
+            textposition: 'outside',
+        },
+    ];
+
+    const layout = {
+        barmode: 'group',
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        margin: { t: 20, b: 60, l: 40, r: 20 },
+        font: { family: 'Inter, sans-serif', size: 12, color: '#94a3b8' },
+        xaxis: { gridcolor: '#1e293b', tickfont: { size: 12 } },
+        yaxis: { gridcolor: '#1e293b', ticksuffix: ' %', rangemode: 'tozero' },
+        legend: { orientation: 'h', y: -0.15 },
+        shapes: [{
+            type: 'line', x0: -0.5, x1: labels.length - 0.5, y0: 15, y1: 15,
+            line: { color: '#ef4444', width: 1.5, dash: 'dash' },
+        }],
+        annotations: [{
+            x: labels.length - 0.5, y: 15, xanchor: 'right',
+            text: ' Mindestmarge 15 %', showarrow: false,
+            font: { color: '#ef4444', size: 11 },
+        }],
+    };
+
+    Plotly.newPlot('produkt-chart', traces, layout, {
+        responsive: true, displayModeBar: false,
+    });
+})();
+{% endif %}
+</script>
+</body>
+</html>

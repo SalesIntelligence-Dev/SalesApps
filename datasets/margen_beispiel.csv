@@ -1,0 +1,201 @@
+angebot_id,datum,kunde,produkt,kategorie,listenpreis,verkaufspreis,rabatt_pct,menge,umsatz,deckungsbeitrag_pct,vertriebsmitarbeiter,region
+ANG-0001,2023-08-17,Müller GmbH,Hydraulikpumpe,Maschinen,2800,2422.0,13.5,8,19376.0,32.9,Hoffmann,Süd
+ANG-0002,2023-01-31,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2413.6,13.8,2,4827.2,32.7,Hoffmann,Süd
+ANG-0003,2023-07-23,Müller GmbH,Steuerungsmodul,Elektronik,1200,1003.2,16.4,18,18057.6,37.8,Meyer,Nord
+ANG-0004,2023-06-13,Braun Industrie,Steuerungsmodul,Elektronik,1200,1195.2,0.4,1,1195.2,47.8,Schulz,Süd
+ANG-0005,2023-12-11,Braun Industrie,Wartungsvertrag,Service,900,792.9,11.9,7,5550.3,18.3,Schulz,Nord
+ANG-0006,2024-04-15,Schmidt & Co.,Wartungsvertrag,Service,900,765.9,14.9,2,1531.8,15.4,Hoffmann,Süd
+ANG-0007,2023-10-28,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2483.6,11.3,18,44704.8,34.6,Schulz,Nord
+ANG-0008,2024-11-08,Schmidt & Co.,Steuerungsmodul,Elektronik,1200,1129.2,5.9,2,2258.4,44.7,Hoffmann,Nord
+ANG-0009,2024-01-25,Weber AG,Wartungsvertrag,Service,900,748.8,16.8,4,2995.2,13.5,Meyer,Nord
+ANG-0010,2024-11-17,Schmidt & Co.,Steuerungsmodul,Elektronik,1200,1020.0,15.0,7,7140.0,38.8,Schulz,Süd
+ANG-0011,2023-09-08,Schmidt & Co.,Hydraulikpumpe,Maschinen,2800,2394.0,14.5,18,43092.0,32.2,Hoffmann,Nord
+ANG-0012,2023-08-23,Fischer Tech,Steuerungsmodul,Elektronik,1200,1005.6,16.2,2,2011.2,37.9,Hoffmann,Süd
+ANG-0013,2023-08-05,Müller GmbH,Wartungsvertrag,Service,900,778.5,13.5,3,2335.5,16.8,Schulz,Süd
+ANG-0014,2024-10-20,Schmidt & Co.,Steuerungsmodul,Elektronik,1200,1096.8,8.6,13,14258.4,43.1,Hoffmann,Süd
+ANG-0015,2024-07-28,Braun Industrie,Steuerungsmodul,Elektronik,1200,1200,0,8,9600,48.0,Schulz,Nord
+ANG-0016,2024-06-05,Braun Industrie,Präzisionssensor,Elektronik,480,451.2,6.0,5,2256.0,41.5,Schulz,Nord
+ANG-0017,2024-10-04,Braun Industrie,Hydraulikpumpe,Maschinen,2800,2184.0,22.0,5,10920.0,25.6,Meyer,Nord
+ANG-0018,2024-04-24,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2396.8,14.4,20,47936.0,32.2,Schulz,Süd
+ANG-0019,2024-11-29,Fischer Tech,Wartungsvertrag,Service,900,736.2,18.2,4,2944.8,12.0,Hoffmann,Nord
+ANG-0020,2024-04-09,Schmidt & Co.,Hydraulikpumpe,Maschinen,2800,2730.0,2.5,6,16380.0,40.5,Schulz,Süd
+ANG-0021,2023-04-19,Müller GmbH,Wartungsvertrag,Service,900,765.9,14.9,17,13020.3,15.4,Hoffmann,Nord
+ANG-0022,2024-07-06,Fischer Tech,Steuerungsmodul,Elektronik,1200,1021.2,14.9,6,6127.2,38.9,Meyer,Süd
+ANG-0023,2023-01-20,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2363.2,15.6,16,37811.2,31.3,Hoffmann,Süd
+ANG-0024,2023-03-22,Schmidt & Co.,Steuerungsmodul,Elektronik,1200,946.8,21.1,19,17989.2,34.1,Meyer,Nord
+ANG-0025,2024-11-06,Müller GmbH,Präzisionssensor,Elektronik,480,423.36,11.8,5,2116.8,37.6,Meyer,Nord
+ANG-0026,2024-02-13,Schmidt & Co.,Präzisionssensor,Elektronik,480,388.8,19.0,10,3888.0,32.1,Meyer,Nord
+ANG-0027,2023-09-11,Schmidt & Co.,Präzisionssensor,Elektronik,480,419.04,12.7,4,1676.16,37.0,Hoffmann,Süd
+ANG-0028,2023-03-14,Fischer Tech,Steuerungsmodul,Elektronik,1200,1002.0,16.5,1,1002.0,37.7,Hoffmann,Nord
+ANG-0029,2023-03-14,Müller GmbH,Steuerungsmodul,Elektronik,1200,1032.0,14.0,11,11352.0,39.5,Meyer,Nord
+ANG-0030,2024-08-13,Braun Industrie,Steuerungsmodul,Elektronik,1200,1060.8,11.6,19,20155.2,41.2,Hoffmann,Nord
+ANG-0031,2023-04-07,Braun Industrie,Steuerungsmodul,Elektronik,1200,1051.2,12.4,7,7358.4,40.6,Schulz,Süd
+ANG-0032,2023-03-04,Braun Industrie,Präzisionssensor,Elektronik,480,427.2,11.0,4,1708.8,38.2,Schulz,Nord
+ANG-0033,2023-07-14,Braun Industrie,Wartungsvertrag,Service,900,762.3,15.3,7,5336.1,15.0,Meyer,Nord
+ANG-0034,2024-03-29,Weber AG,Wartungsvertrag,Service,900,833.4,7.4,3,2500.2,22.2,Schulz,Nord
+ANG-0035,2023-08-31,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2214.8,20.9,3,6644.4,26.7,Meyer,Nord
+ANG-0036,2023-01-03,Weber AG,Präzisionssensor,Elektronik,480,369.6,23.0,13,4804.8,28.6,Meyer,Nord
+ANG-0037,2024-12-14,Braun Industrie,Wartungsvertrag,Service,900,685.8,23.8,14,9601.2,5.5,Schulz,Süd
+ANG-0038,2023-08-11,Fischer Tech,Präzisionssensor,Elektronik,480,414.24,13.7,10,4142.4,36.3,Meyer,Nord
+ANG-0039,2023-02-21,Müller GmbH,Hydraulikpumpe,Maschinen,2800,2606.8,6.9,2,5213.6,37.7,Hoffmann,Süd
+ANG-0040,2023-03-12,Fischer Tech,Steuerungsmodul,Elektronik,1200,1020.0,15.0,6,6120.0,38.8,Meyer,Nord
+ANG-0041,2023-05-03,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2293.2,18.1,13,29811.6,29.2,Hoffmann,Nord
+ANG-0042,2024-11-04,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2528.4,9.7,14,35397.6,35.8,Hoffmann,Nord
+ANG-0043,2023-09-02,Fischer Tech,Wartungsvertrag,Service,900,830.7,7.7,11,9137.7,22.0,Schulz,Nord
+ANG-0044,2024-04-14,Schmidt & Co.,Präzisionssensor,Elektronik,480,429.12,10.6,1,429.12,38.5,Schulz,Nord
+ANG-0045,2023-09-29,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2209.2,21.1,17,37556.4,26.5,Meyer,Nord
+ANG-0046,2024-03-24,Müller GmbH,Steuerungsmodul,Elektronik,1200,1063.2,11.4,6,6379.2,41.3,Schulz,Süd
+ANG-0047,2023-11-03,Fischer Tech,Wartungsvertrag,Service,900,773.1,14.1,18,13915.8,16.2,Hoffmann,Nord
+ANG-0048,2023-06-09,Weber AG,Wartungsvertrag,Service,900,747.0,17.0,18,13446.0,13.3,Meyer,Nord
+ANG-0049,2023-07-28,Schmidt & Co.,Wartungsvertrag,Service,900,825.3,8.3,11,9078.3,21.5,Hoffmann,Nord
+ANG-0050,2024-10-11,Fischer Tech,Präzisionssensor,Elektronik,480,480,0,3,1440,45.0,Schulz,Nord
+ANG-0051,2023-05-14,Braun Industrie,Wartungsvertrag,Service,900,760.5,15.5,11,8365.5,14.8,Meyer,Nord
+ANG-0052,2023-03-19,Braun Industrie,Präzisionssensor,Elektronik,480,436.8,9.0,4,1747.2,39.6,Hoffmann,Nord
+ANG-0053,2023-05-11,Weber AG,Hydraulikpumpe,Maschinen,2800,2447.2,12.6,14,34260.8,33.6,Schulz,Nord
+ANG-0054,2023-12-29,Müller GmbH,Wartungsvertrag,Service,900,727.2,19.2,4,2908.8,10.9,Meyer,Nord
+ANG-0055,2023-06-16,Fischer Tech,Präzisionssensor,Elektronik,480,379.2,21.0,8,3033.6,30.4,Hoffmann,Nord
+ANG-0056,2024-11-16,Braun Industrie,Hydraulikpumpe,Maschinen,2800,2335.2,16.6,14,32692.8,30.5,Meyer,Süd
+ANG-0057,2023-02-09,Weber AG,Wartungsvertrag,Service,900,718.2,20.2,13,9336.6,9.8,Meyer,Nord
+ANG-0058,2023-01-25,Braun Industrie,Wartungsvertrag,Service,900,853.2,5.2,8,6825.6,24.1,Schulz,Nord
+ANG-0059,2023-10-13,Weber AG,Präzisionssensor,Elektronik,480,458.4,4.5,3,1375.2,42.4,Schulz,Süd
+ANG-0060,2023-07-02,Fischer Tech,Wartungsvertrag,Service,900,694.8,22.8,9,6253.2,6.7,Meyer,Nord
+ANG-0061,2024-03-20,Fischer Tech,Wartungsvertrag,Service,900,783.0,13.0,20,15660.0,17.2,Meyer,Nord
+ANG-0062,2023-02-15,Braun Industrie,Hydraulikpumpe,Maschinen,2800,2374.4,15.2,9,21369.6,31.6,Schulz,Nord
+ANG-0063,2024-03-17,Braun Industrie,Hydraulikpumpe,Maschinen,2800,2276.4,18.7,12,27316.8,28.7,Hoffmann,Nord
+ANG-0064,2024-06-03,Schmidt & Co.,Wartungsvertrag,Service,900,764.1,15.1,10,7641.0,15.2,Hoffmann,Nord
+ANG-0065,2024-07-21,Schmidt & Co.,Präzisionssensor,Elektronik,480,424.32,11.6,10,4243.2,37.8,Schulz,Süd
+ANG-0066,2024-07-15,Braun Industrie,Steuerungsmodul,Elektronik,1200,1011.6,15.7,13,13150.8,38.3,Hoffmann,Süd
+ANG-0067,2024-08-16,Müller GmbH,Wartungsvertrag,Service,900,859.5,4.5,14,12033.0,24.6,Schulz,Nord
+ANG-0068,2024-04-29,Braun Industrie,Präzisionssensor,Elektronik,480,435.36,9.3,17,7401.12,39.4,Hoffmann,Nord
+ANG-0069,2023-08-29,Weber AG,Hydraulikpumpe,Maschinen,2800,2623.6,6.3,3,7870.8,38.1,Schulz,Süd
+ANG-0070,2024-05-01,Weber AG,Steuerungsmodul,Elektronik,1200,1022.4,14.8,8,8179.2,39.0,Meyer,Nord
+ANG-0071,2023-07-19,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2604.0,7.0,19,49476.0,37.6,Schulz,Süd
+ANG-0072,2024-03-11,Braun Industrie,Steuerungsmodul,Elektronik,1200,1041.6,13.2,4,4166.4,40.1,Meyer,Nord
+ANG-0073,2024-07-24,Weber AG,Steuerungsmodul,Elektronik,1200,1056.0,12.0,2,2112.0,40.9,Hoffmann,Süd
+ANG-0074,2024-09-19,Braun Industrie,Steuerungsmodul,Elektronik,1200,987.6,17.7,15,14814.0,36.8,Schulz,Süd
+ANG-0075,2024-05-01,Fischer Tech,Präzisionssensor,Elektronik,480,460.32,4.1,6,2761.92,42.6,Hoffmann,Süd
+ANG-0076,2024-03-26,Schmidt & Co.,Präzisionssensor,Elektronik,480,409.92,14.6,9,3689.28,35.6,Hoffmann,Nord
+ANG-0077,2023-11-24,Müller GmbH,Wartungsvertrag,Service,900,723.6,19.6,11,7959.6,10.4,Meyer,Süd
+ANG-0078,2023-03-07,Weber AG,Steuerungsmodul,Elektronik,1200,1119.6,6.7,7,7837.2,44.3,Schulz,Nord
+ANG-0079,2023-03-05,Braun Industrie,Präzisionssensor,Elektronik,480,434.88,9.4,14,6088.32,39.3,Schulz,Süd
+ANG-0080,2023-01-07,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2324.0,17.0,16,37184.0,30.1,Hoffmann,Süd
+ANG-0081,2024-07-13,Schmidt & Co.,Wartungsvertrag,Service,900,798.3,11.3,18,14369.4,18.8,Schulz,Süd
+ANG-0082,2023-01-30,Braun Industrie,Steuerungsmodul,Elektronik,1200,1200,0,16,19200,48.0,Schulz,Süd
+ANG-0083,2024-04-23,Braun Industrie,Wartungsvertrag,Service,900,681.3,24.3,6,4087.8,4.9,Hoffmann,Süd
+ANG-0084,2024-10-20,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2766.4,1.2,3,8299.2,41.3,Schulz,Nord
+ANG-0085,2023-09-24,Braun Industrie,Steuerungsmodul,Elektronik,1200,1134.0,5.5,2,2268.0,45.0,Schulz,Nord
+ANG-0086,2023-09-16,Schmidt & Co.,Wartungsvertrag,Service,900,806.4,10.4,14,11289.6,19.6,Schulz,Süd
+ANG-0087,2023-08-18,Müller GmbH,Präzisionssensor,Elektronik,480,418.08,12.9,12,5016.96,36.9,Meyer,Nord
+ANG-0088,2024-09-28,Müller GmbH,Hydraulikpumpe,Maschinen,2800,2494.8,10.9,1,2494.8,34.9,Meyer,Nord
+ANG-0089,2024-07-31,Weber AG,Steuerungsmodul,Elektronik,1200,920.4,23.3,4,3681.6,32.2,Meyer,Süd
+ANG-0090,2023-11-15,Schmidt & Co.,Wartungsvertrag,Service,900,754.2,16.2,6,4525.2,14.1,Meyer,Nord
+ANG-0091,2023-07-23,Müller GmbH,Hydraulikpumpe,Maschinen,2800,2385.6,14.8,13,31012.8,31.9,Schulz,Süd
+ANG-0092,2023-05-04,Weber AG,Hydraulikpumpe,Maschinen,2800,2366.0,15.5,20,47320.0,31.4,Hoffmann,Süd
+ANG-0093,2023-03-12,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2704.8,3.4,12,32457.6,40.0,Schulz,Süd
+ANG-0094,2024-10-12,Braun Industrie,Präzisionssensor,Elektronik,480,394.56,17.8,12,4734.72,33.1,Meyer,Süd
+ANG-0095,2024-10-28,Braun Industrie,Steuerungsmodul,Elektronik,1200,1117.2,6.9,17,18992.4,44.1,Schulz,Nord
+ANG-0096,2023-10-02,Fischer Tech,Präzisionssensor,Elektronik,480,398.4,17.0,19,7569.6,33.7,Schulz,Süd
+ANG-0097,2023-09-07,Schmidt & Co.,Steuerungsmodul,Elektronik,1200,984.0,18.0,15,14760.0,36.6,Meyer,Süd
+ANG-0098,2023-07-06,Braun Industrie,Wartungsvertrag,Service,900,796.5,11.5,11,8761.5,18.6,Meyer,Süd
+ANG-0099,2023-10-14,Braun Industrie,Steuerungsmodul,Elektronik,1200,1035.6,13.7,11,11391.6,39.7,Schulz,Süd
+ANG-0100,2023-09-05,Schmidt & Co.,Hydraulikpumpe,Maschinen,2800,2612.4,6.7,3,7837.2,37.8,Hoffmann,Nord
+ANG-0101,2024-10-23,Braun Industrie,Präzisionssensor,Elektronik,480,428.64,10.7,16,6858.24,38.4,Hoffmann,Nord
+ANG-0102,2024-12-09,Müller GmbH,Hydraulikpumpe,Maschinen,2800,2724.4,2.7,13,35417.2,40.4,Schulz,Nord
+ANG-0103,2024-07-20,Weber AG,Wartungsvertrag,Service,900,838.8,6.8,16,13420.8,22.7,Hoffmann,Süd
+ANG-0104,2023-11-10,Fischer Tech,Wartungsvertrag,Service,900,837.0,7.0,9,7533.0,22.6,Schulz,Süd
+ANG-0105,2023-05-03,Schmidt & Co.,Steuerungsmodul,Elektronik,1200,990.0,17.5,11,10890.0,37.0,Meyer,Nord
+ANG-0106,2024-08-26,Weber AG,Steuerungsmodul,Elektronik,1200,1131.6,5.7,9,10184.4,44.9,Meyer,Süd
+ANG-0107,2023-08-21,Fischer Tech,Wartungsvertrag,Service,900,762.3,15.3,10,7623.0,15.0,Meyer,Nord
+ANG-0108,2024-07-20,Fischer Tech,Steuerungsmodul,Elektronik,1200,1064.4,11.3,2,2128.8,41.4,Schulz,Nord
+ANG-0109,2023-01-13,Schmidt & Co.,Steuerungsmodul,Elektronik,1200,1116.0,7.0,4,4464.0,44.1,Hoffmann,Süd
+ANG-0110,2024-05-04,Braun Industrie,Wartungsvertrag,Service,900,760.5,15.5,9,6844.5,14.8,Meyer,Nord
+ANG-0111,2024-08-13,Müller GmbH,Hydraulikpumpe,Maschinen,2800,2606.8,6.9,3,7820.4,37.7,Schulz,Süd
+ANG-0112,2024-07-25,Weber AG,Wartungsvertrag,Service,900,748.8,16.8,4,2995.2,13.5,Meyer,Nord
+ANG-0113,2024-03-29,Braun Industrie,Steuerungsmodul,Elektronik,1200,1080.0,10.0,15,16200.0,42.2,Hoffmann,Süd
+ANG-0114,2023-04-12,Braun Industrie,Wartungsvertrag,Service,900,734.4,18.4,20,14688.0,11.8,Hoffmann,Nord
+ANG-0115,2023-09-03,Weber AG,Steuerungsmodul,Elektronik,1200,1093.2,8.9,6,6559.2,42.9,Schulz,Nord
+ANG-0116,2023-02-03,Müller GmbH,Präzisionssensor,Elektronik,480,432.96,9.8,10,4329.6,39.0,Schulz,Süd
+ANG-0117,2023-03-14,Weber AG,Wartungsvertrag,Service,900,831.6,7.6,15,12474.0,22.1,Hoffmann,Süd
+ANG-0118,2023-08-19,Fischer Tech,Steuerungsmodul,Elektronik,1200,1200,0,18,21600,48.0,Schulz,Nord
+ANG-0119,2023-06-19,Weber AG,Wartungsvertrag,Service,900,721.8,19.8,2,1443.6,10.2,Meyer,Nord
+ANG-0120,2024-12-06,Fischer Tech,Wartungsvertrag,Service,900,886.5,1.5,15,13297.5,26.9,Schulz,Nord
+ANG-0121,2023-03-24,Schmidt & Co.,Präzisionssensor,Elektronik,480,480,0,15,7200,45.0,Schulz,Süd
+ANG-0122,2024-11-21,Schmidt & Co.,Wartungsvertrag,Service,900,792.9,11.9,8,6343.2,18.3,Meyer,Nord
+ANG-0123,2023-02-11,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2455.6,12.3,19,46656.4,33.9,Hoffmann,Süd
+ANG-0124,2024-03-22,Fischer Tech,Präzisionssensor,Elektronik,480,456.48,4.9,19,8673.12,42.2,Schulz,Nord
+ANG-0125,2023-12-08,Braun Industrie,Hydraulikpumpe,Maschinen,2800,2604.0,7.0,14,36456.0,37.6,Schulz,Süd
+ANG-0126,2024-11-09,Weber AG,Wartungsvertrag,Service,900,809.1,10.1,10,8091.0,19.9,Schulz,Süd
+ANG-0127,2023-09-16,Braun Industrie,Hydraulikpumpe,Maschinen,2800,2741.2,2.1,11,30153.2,40.8,Schulz,Nord
+ANG-0128,2023-02-25,Braun Industrie,Hydraulikpumpe,Maschinen,2800,2130.8,23.9,14,29831.2,23.8,Hoffmann,Süd
+ANG-0129,2023-02-22,Weber AG,Wartungsvertrag,Service,900,775.8,13.8,15,11637.0,16.5,Hoffmann,Süd
+ANG-0130,2023-01-30,Schmidt & Co.,Präzisionssensor,Elektronik,480,393.6,18.0,4,1574.4,32.9,Hoffmann,Süd
+ANG-0131,2024-07-18,Fischer Tech,Steuerungsmodul,Elektronik,1200,994.8,17.1,10,9948.0,37.3,Hoffmann,Nord
+ANG-0132,2024-05-25,Weber AG,Hydraulikpumpe,Maschinen,2800,2564.8,8.4,5,12824.0,36.7,Schulz,Nord
+ANG-0133,2023-09-07,Schmidt & Co.,Wartungsvertrag,Service,900,852.3,5.3,16,13636.8,24.0,Schulz,Süd
+ANG-0134,2023-12-15,Weber AG,Steuerungsmodul,Elektronik,1200,975.6,18.7,14,13658.4,36.0,Meyer,Süd
+ANG-0135,2024-08-24,Fischer Tech,Wartungsvertrag,Service,900,795.6,11.6,10,7956.0,18.6,Meyer,Süd
+ANG-0136,2023-12-07,Weber AG,Präzisionssensor,Elektronik,480,439.2,8.5,12,5270.4,39.9,Hoffmann,Süd
+ANG-0137,2024-12-15,Fischer Tech,Präzisionssensor,Elektronik,480,440.16,8.3,7,3081.12,40.0,Schulz,Süd
+ANG-0138,2024-01-31,Braun Industrie,Hydraulikpumpe,Maschinen,2800,2438.8,12.9,13,31704.4,33.4,Schulz,Süd
+ANG-0139,2024-08-27,Weber AG,Präzisionssensor,Elektronik,480,398.88,16.9,17,6780.96,33.8,Meyer,Nord
+ANG-0140,2023-05-28,Braun Industrie,Hydraulikpumpe,Maschinen,2800,2408.0,14.0,1,2408.0,32.6,Hoffmann,Süd
+ANG-0141,2023-12-13,Braun Industrie,Steuerungsmodul,Elektronik,1200,1027.2,14.4,9,9244.8,39.3,Meyer,Süd
+ANG-0142,2024-10-03,Müller GmbH,Wartungsvertrag,Service,900,823.5,8.5,11,9058.5,21.3,Hoffmann,Süd
+ANG-0143,2024-10-08,Braun Industrie,Hydraulikpumpe,Maschinen,2800,2508.8,10.4,8,20070.4,35.3,Hoffmann,Nord
+ANG-0144,2024-03-30,Weber AG,Hydraulikpumpe,Maschinen,2800,2682.4,4.2,4,10729.6,39.5,Schulz,Nord
+ANG-0145,2023-02-27,Weber AG,Wartungsvertrag,Service,900,749.7,16.7,11,8246.7,13.6,Meyer,Nord
+ANG-0146,2024-11-29,Weber AG,Steuerungsmodul,Elektronik,1200,999.6,16.7,19,18992.4,37.6,Hoffmann,Süd
+ANG-0147,2024-01-27,Weber AG,Steuerungsmodul,Elektronik,1200,1016.4,15.3,20,20328.0,38.6,Meyer,Nord
+ANG-0148,2024-04-15,Fischer Tech,Steuerungsmodul,Elektronik,1200,1014.0,15.5,9,9126.0,38.5,Meyer,Süd
+ANG-0149,2023-06-11,Schmidt & Co.,Hydraulikpumpe,Maschinen,2800,2273.6,18.8,18,40924.8,28.6,Schulz,Süd
+ANG-0150,2024-04-12,Fischer Tech,Wartungsvertrag,Service,900,743.4,17.4,9,6690.6,12.8,Hoffmann,Süd
+ANG-0151,2023-08-31,Schmidt & Co.,Steuerungsmodul,Elektronik,1200,1146.0,4.5,4,4584.0,45.5,Schulz,Süd
+ANG-0152,2023-01-09,Schmidt & Co.,Wartungsvertrag,Service,900,709.2,21.2,9,6382.8,8.6,Meyer,Süd
+ANG-0153,2023-08-24,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2564.8,8.4,10,25648.0,36.7,Hoffmann,Süd
+ANG-0154,2024-10-04,Weber AG,Wartungsvertrag,Service,900,818.1,9.1,4,3272.4,20.8,Hoffmann,Nord
+ANG-0155,2024-01-09,Müller GmbH,Wartungsvertrag,Service,900,829.8,7.8,19,15766.2,21.9,Schulz,Nord
+ANG-0156,2023-07-25,Schmidt & Co.,Wartungsvertrag,Service,900,811.8,9.8,6,4870.8,20.2,Hoffmann,Süd
+ANG-0157,2023-09-21,Weber AG,Wartungsvertrag,Service,900,699.3,22.3,6,4195.8,7.3,Hoffmann,Süd
+ANG-0158,2023-05-25,Schmidt & Co.,Wartungsvertrag,Service,900,793.8,11.8,3,2381.4,18.4,Meyer,Süd
+ANG-0159,2024-02-09,Weber AG,Präzisionssensor,Elektronik,480,392.64,18.2,3,1177.92,32.8,Hoffmann,Süd
+ANG-0160,2024-01-26,Braun Industrie,Wartungsvertrag,Service,900,787.5,12.5,19,14962.5,17.7,Hoffmann,Süd
+ANG-0161,2023-01-26,Schmidt & Co.,Hydraulikpumpe,Maschinen,2800,2710.4,3.2,16,43366.4,40.1,Hoffmann,Nord
+ANG-0162,2024-12-18,Schmidt & Co.,Steuerungsmodul,Elektronik,1200,1154.4,3.8,15,17316.0,45.9,Hoffmann,Nord
+ANG-0163,2023-02-08,Schmidt & Co.,Präzisionssensor,Elektronik,480,403.2,16.0,2,806.4,34.5,Meyer,Nord
+ANG-0164,2024-04-09,Müller GmbH,Steuerungsmodul,Elektronik,1200,990.0,17.5,13,12870.0,37.0,Hoffmann,Nord
+ANG-0165,2024-11-01,Schmidt & Co.,Präzisionssensor,Elektronik,480,399.84,16.7,14,5597.76,34.0,Hoffmann,Nord
+ANG-0166,2024-03-30,Braun Industrie,Wartungsvertrag,Service,900,707.4,21.4,7,4951.8,8.4,Meyer,Süd
+ANG-0167,2024-07-11,Braun Industrie,Steuerungsmodul,Elektronik,1200,1033.2,13.9,12,12398.4,39.6,Schulz,Nord
+ANG-0168,2024-04-10,Müller GmbH,Präzisionssensor,Elektronik,480,461.76,3.8,4,1847.04,42.8,Schulz,Nord
+ANG-0169,2023-12-08,Müller GmbH,Steuerungsmodul,Elektronik,1200,1054.8,12.1,2,2109.6,40.8,Hoffmann,Nord
+ANG-0170,2023-08-10,Fischer Tech,Steuerungsmodul,Elektronik,1200,952.8,20.6,19,18103.2,34.5,Meyer,Nord
+ANG-0171,2023-05-29,Weber AG,Wartungsvertrag,Service,900,682.2,24.2,9,6139.8,5.0,Meyer,Nord
+ANG-0172,2023-01-16,Weber AG,Hydraulikpumpe,Maschinen,2800,2478.0,11.5,5,12390.0,34.5,Hoffmann,Nord
+ANG-0173,2023-06-28,Schmidt & Co.,Steuerungsmodul,Elektronik,1200,1059.6,11.7,1,1059.6,41.1,Hoffmann,Süd
+ANG-0174,2024-04-04,Braun Industrie,Hydraulikpumpe,Maschinen,2800,2391.2,14.6,16,38259.2,32.1,Hoffmann,Nord
+ANG-0175,2023-02-14,Schmidt & Co.,Hydraulikpumpe,Maschinen,2800,2620.8,6.4,20,52416.0,38.0,Schulz,Nord
+ANG-0176,2024-05-05,Fischer Tech,Wartungsvertrag,Service,900,900,0,2,1800,28.0,Schulz,Nord
+ANG-0177,2024-12-30,Braun Industrie,Präzisionssensor,Elektronik,480,414.72,13.6,16,6635.52,36.3,Hoffmann,Nord
+ANG-0178,2023-05-10,Müller GmbH,Wartungsvertrag,Service,900,801.0,11.0,3,2403.0,19.1,Hoffmann,Nord
+ANG-0179,2024-06-01,Schmidt & Co.,Wartungsvertrag,Service,900,844.2,6.2,15,12663.0,23.2,Schulz,Süd
+ANG-0180,2024-02-28,Müller GmbH,Steuerungsmodul,Elektronik,1200,1120.8,6.6,8,8966.4,44.3,Schulz,Süd
+ANG-0181,2023-11-17,Schmidt & Co.,Präzisionssensor,Elektronik,480,473.28,1.4,4,1893.12,44.2,Schulz,Süd
+ANG-0182,2023-04-04,Schmidt & Co.,Steuerungsmodul,Elektronik,1200,1016.4,15.3,3,3049.2,38.6,Hoffmann,Süd
+ANG-0183,2023-05-14,Müller GmbH,Hydraulikpumpe,Maschinen,2800,2749.6,1.8,12,32995.2,40.9,Schulz,Nord
+ANG-0184,2023-12-29,Fischer Tech,Wartungsvertrag,Service,900,812.7,9.7,14,11377.8,20.3,Hoffmann,Nord
+ANG-0185,2023-04-17,Braun Industrie,Hydraulikpumpe,Maschinen,2800,2662.8,4.9,12,31953.6,39.0,Schulz,Süd
+ANG-0186,2024-01-12,Braun Industrie,Steuerungsmodul,Elektronik,1200,1003.2,16.4,18,18057.6,37.8,Meyer,Süd
+ANG-0187,2024-07-28,Müller GmbH,Wartungsvertrag,Service,900,710.1,21.1,14,9941.4,8.7,Hoffmann,Nord
+ANG-0188,2023-07-04,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2506.0,10.5,1,2506.0,35.2,Hoffmann,Süd
+ANG-0189,2023-07-05,Schmidt & Co.,Wartungsvertrag,Service,900,788.4,12.4,1,788.4,17.8,Schulz,Süd
+ANG-0190,2024-06-27,Braun Industrie,Hydraulikpumpe,Maschinen,2800,2427.6,13.3,3,7282.8,33.1,Meyer,Nord
+ANG-0191,2023-06-11,Weber AG,Präzisionssensor,Elektronik,480,468.0,2.5,11,5148.0,43.6,Schulz,Süd
+ANG-0192,2024-09-24,Fischer Tech,Hydraulikpumpe,Maschinen,2800,2133.6,23.8,6,12801.6,23.9,Meyer,Nord
+ANG-0193,2024-05-12,Müller GmbH,Hydraulikpumpe,Maschinen,2800,2688.0,4.0,14,37632.0,39.6,Schulz,Süd
+ANG-0194,2023-10-18,Weber AG,Hydraulikpumpe,Maschinen,2800,2665.6,4.8,4,10662.4,39.1,Schulz,Süd
+ANG-0195,2023-08-14,Fischer Tech,Präzisionssensor,Elektronik,480,448.32,6.6,2,896.64,41.1,Hoffmann,Süd
+ANG-0196,2023-09-19,Müller GmbH,Steuerungsmodul,Elektronik,1200,1054.8,12.1,5,5274.0,40.8,Schulz,Nord
+ANG-0197,2024-03-16,Schmidt & Co.,Wartungsvertrag,Service,900,718.2,20.2,16,11491.2,9.8,Meyer,Nord
+ANG-0198,2024-03-22,Weber AG,Wartungsvertrag,Service,900,698.4,22.4,2,1396.8,7.2,Meyer,Süd
+ANG-0199,2024-03-15,Müller GmbH,Präzisionssensor,Elektronik,480,427.2,11.0,19,8116.8,38.2,Meyer,Süd
+ANG-0200,2023-11-29,Braun Industrie,Wartungsvertrag,Service,900,769.5,14.5,1,769.5,15.8,Meyer,Süd
