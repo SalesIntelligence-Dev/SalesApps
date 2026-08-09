@@ -171,7 +171,7 @@ def generate_report(
                 </div>
             </div>
             <p class="purchase-note">
-                Die Empfehlung deckt das 90%-Quantil aller {result.num_samples} Aurora-Szenarien
+                Die Empfehlung deckt das 90%-Quantil aller {result.num_samples} KI-Szenarien
                 zuzüglich {safety_buffer*100:.0f}% Sicherheitspuffer ab.
             </p>
         </div>"""
@@ -225,7 +225,7 @@ def generate_report(
     <div class="narrative">
         <h3>Zusammenfassung</h3>
         <p>
-            Aurora prognostiziert basierend auf <strong>{result.num_samples} Szenarien</strong>
+            Das Modell prognostiziert basierend auf <strong>{result.num_samples} Szenarien</strong>
             einen Gesamtbedarf von <strong>{total_mean:,.1f} {unit_long}</strong>
             über {horizon_text}.
             Das 90%-Quantil liegt bei <strong>{total_q90:,.1f} {unit_long}</strong>
@@ -250,7 +250,7 @@ def generate_report(
             </div>
             <h2 class="report-title">{scenario_q}</h2>
             <p class="report-subtitle">
-                Aurora ICLR 2026 | Probabilistische Zeitreihenvorhersage |
+                KI-gestützte Zeitreihenvorhersage |
                 Horizont: {horizon_text} | {result.num_samples} Szenarien
             </p>
         </div>
@@ -262,7 +262,7 @@ def generate_report(
 
         <div class="report-footer">
             <p>
-                <strong>Modell:</strong> Aurora Foundation Model (ICLR 2026) |
+                <strong>Modell:</strong> KI Foundation Model |
                 <strong>Ziel-Variable:</strong> {result.target_column} |
                 <strong>Lookback:</strong> 528 Zeitschritte |
                 <strong>Quantile:</strong> Q10 / Q90

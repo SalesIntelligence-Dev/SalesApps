@@ -253,14 +253,14 @@ function startProgressTimer() {
   jobStartTime = Date.now();
   clearInterval(progressTimer);
   setProgress(0);
-  // Zeitplan: 0-60s → 0-25%, 60-180s → 25-55%, 180-360s → 55-80%, 360-600s → 80-92%
+  // Zeitplan: 0-20s → 0-30%, 20-60s → 30-70%, 60-90s → 70-88%, 90s+ → 88-95%
   progressTimer = setInterval(() => {
     const elapsed = (Date.now() - jobStartTime) / 1000;
     let pct;
-    if      (elapsed < 60)  pct = (elapsed / 60)  * 25;
-    else if (elapsed < 180) pct = 25 + ((elapsed - 60)  / 120) * 30;
-    else if (elapsed < 360) pct = 55 + ((elapsed - 180) / 180) * 25;
-    else                    pct = Math.min(92, 80 + ((elapsed - 360) / 240) * 12);
+    if      (elapsed < 20)  pct = (elapsed / 20)  * 30;
+    else if (elapsed < 60)  pct = 30 + ((elapsed - 20)  / 40) * 40;
+    else if (elapsed < 90)  pct = 70 + ((elapsed - 60)  / 30) * 18;
+    else                    pct = Math.min(95, 88 + ((elapsed - 90) / 60) * 7);
     setProgress(Math.round(pct));
   }, 1000);
 }

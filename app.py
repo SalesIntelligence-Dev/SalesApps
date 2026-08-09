@@ -136,7 +136,7 @@ def _run_forecast_job(job_id: str, df: pd.DataFrame, params: dict):
         )
 
         with _jobs_lock:
-            _jobs[job_id]["progress"] = "Inference läuft … (kann 5–10 Min dauern)"
+            _jobs[job_id]["progress"] = "Inference läuft … (kann 1–2 Min dauern)"
 
         result = aurora.forecast(
             aurora_input = aurora_input,
@@ -339,14 +339,14 @@ def download_forecast(job_id: str):
     df_out = pd.DataFrame(daily)
     buf = io.BytesIO()
     with pd.ExcelWriter(buf, engine="openpyxl") as writer:
-        df_out.to_excel(writer, sheet_name="Aurora Prognose", index=False)
+        df_out.to_excel(writer, sheet_name="Prognose", index=False)
     buf.seek(0)
 
     return send_file(
         buf,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         as_attachment=True,
-        download_name=f"aurora_prognose_{job_id}.xlsx",
+        download_name=f"prognose_{job_id}.xlsx",
     )
 
 
