@@ -190,12 +190,16 @@ def index():
 
 @app.route("/api/health")
 def health():
+    import os
+    api_key    = os.environ.get("RUNPOD_API_KEY", "")
+    endpoint   = os.environ.get("RUNPOD_ENDPOINT_ID", "")
     return jsonify({
-        "status":       "ok",
-        "model_loaded": _aurora.ready,
-        "device":       _aurora.device,
-        "model_path":   _aurora.config.model_path,
-        "checkpoint":   Path(_aurora.config.model_path).exists(),
+        "status":              "ok",
+        "runpod_ready":        _aurora.ready,
+        "runpod_api_key_set":  bool(api_key),
+        "runpod_endpoint_set": bool(endpoint),
+        "runpod_endpoint_id":  endpoint or "nicht gesetzt",
+        "device":              _aurora.device,
     })
 
 
