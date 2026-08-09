@@ -44,10 +44,10 @@ async function checkModelStatus() {
   try {
     const r = await fetch('/api/health');
     const d = await r.json();
-    modelBadge.className = 'model-badge ' + (d.model_loaded ? 'ready' : 'loading');
-    modelBadge.textContent = d.model_loaded
-      ? `Modell bereit · ${d.device.toUpperCase()}`
-      : `Modell wird geladen · ${d.device.toUpperCase()}`;
+    modelBadge.className = 'model-badge ' + (d.runpod_ready ? 'ready' : 'loading');
+    modelBadge.textContent = d.runpod_ready
+      ? `RunPod bereit · GPU`
+      : `RunPod wird konfiguriert …`;
   } catch {
     modelBadge.className = 'model-badge error';
     modelBadge.textContent = 'Verbindung fehlgeschlagen';
