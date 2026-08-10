@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Churn &amp; Retention Intelligence – SalesApps</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=4">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        .ch-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; }
+        .kpi-row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+
+        .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+        .panel-title { font-size: 14px; font-weight: 600; color: var(--text); }
+        .panel-sub { font-size: 12px; color: var(--sub); margin-top: 2px; }
+
+        #ch-scatter { height: 360px; }
+
+        /* Segment-Badges */
+        .seg { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+        .seg.Kritisch   { background: rgba(248,113,113,0.13); color: #f87171; border: 1px solid rgba(248,113,113,0.28); }
+        .seg.Gefährdet  { background: rgba(251,146,60,0.13);  color: #fb923c; border: 1px solid rgba(251,146,60,0.28); }
+        .seg.Beobachten { background: rgba(251,191,36,0.13);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.28); }
+        .seg.Stabil     { background: rgba(52,211,153,0.13);  color: #34d399; border: 1px solid rgba(52,211,153,0.28); }
+
+        /* Kundenkarte */
+        .cust { background: var(--card); border: 1px solid var(--border); border-radius: 11px; padding: 16px 18px; margin-bottom: 12px; }
+        .cust.Kritisch   { border-left: 3px solid #f87171; }
+        .cust.Gefährdet  { border-left: 3px solid #fb923c; }
+        .cust.Beobachten { border-left: 3px solid #fbbf24; }
+        .cust.Stabil     { border-left: 3px solid #34d399; }
+
+        .cust-top { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+        .cust-head { flex: 1; min-width: 180px; }
+        .cust-name { font-size: 15px; font-weight: 700; color: var(--text); }
+        .cust-meta { font-size: 11px; color: var(--sub); margin-top: 3px; }
+
+        /* Risiko-Gauge */
+        .gauge { text-align: right; white-space: nowrap; }
+        .gauge-val { font-size: 26px; font-weight: 800; line-height: 1; }
+        .gauge-lbl { font-size: 9px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px; }
+        .gauge-eur { font-size: 12px; font-weight: 600; color: #fbbf24; margin-top: 5px; }
+
+        /* Risiko-Balken */
+        .riskbar { height: 6px; border-radius: 3px; background: var(--border); overflow: hidden; margin-bottom: 12px; }
+        .riskbar-fill { height: 100%; border-radius: 3px; }
+
+        /* Signalzeilen */
+        .sig { display: flex; gap: 10px; align-items: center; padding: 6px 0; }
+        .sig-icon { font-size: 13px; flex-shrink: 0; }
+        .sig-lbl { font-size: 12px; color: var(--text); min-width: 158px; }
+        .sig-track { flex: 1; height: 5px; border-radius: 3px; background: var(--border); overflow: hidden; min-width: 50px; }
+        .sig-fill { height: 100%; border-radius: 3px; }
+        .sig-wert { font-size: 12px; font-weight: 600; color: var(--sub); min-width: 62px; text-align: right; white-space: nowrap; }
+
+        .sig-detail { font-size: 11px; color: var(--sub); line-height: 1.55; padding: 2px 0 6px 23px; }
+
+        /* Ursache-Box */
+        .cause { background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.2); border-radius: 8px; padding: 10px 13px; margin: 12px 0; }
+        .cause-lbl { font-size: 10px; font-weight: 700; color: #f87171; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+        .cause-txt { font-size: 12px; color: var(--text); line-height: 1.55; }
+
+        /* Maßnahme */
+        .rec { background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.22); border-radius: 9px; padding: 12px 14px; margin-top: 10px; }
+        .rec-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 5px; flex-wrap: wrap; }
+        .rec-title { font-size: 13px; font-weight: 700; color: #6ee7b7; }
+        .rec-frist { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 9px; white-space: nowrap; background: rgba(248,113,113,0.15); color: #f87171; }
+        .rec-detail { font-size: 12px; color: var(--sub); line-height: 1.6; }
+
+        /* Kennzahlenleiste */
+        .cust-stats { display: flex; gap: 16px; flex-wrap: wrap; padding-top: 10px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .cust-stat { font-size: 11px; color: var(--sub); }
+        .cust-stat b { color: var(--text); font-weight: 600; }
+
+        /* Tabelle */
+        .tbl-wrap { overflow-x: auto; }
+        .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .tbl th { padding: 9px 12px; text-align: left; font-size: 11px; color: var(--sub); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .tbl td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .tbl tr:hover td { background: rgba(255,255,255,0.03); }
+        .tbl .num { text-align: right; white-space: nowrap; }
+
+        /* Ursachenverteilung */
+        .ub { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+        .ub-lbl { font-size: 12px; color: var(--sub); min-width: 168px; }
+        .ub-track { flex: 1; height: 7px; border-radius: 4px; background: var(--border); overflow: hidden; }
+        .ub-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg,#f87171,#fb923c); }
+        .ub-num { font-size: 12px; color: var(--text); font-weight: 600; min-width: 92px; text-align: right; white-space: nowrap; }
+
+        .ch-sidebar { display: flex; flex-direction: column; gap: 16px; }
+        .sidebar-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+        .sidebar-card h4 { font-size: 12px; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+        .note { background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.2); border-radius: 8px; padding: 12px 14px; font-size: 12px; color: var(--sub); line-height: 1.6; }
+        .note strong { color: #60a5fa; }
+
+        select { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 9px 13px; font-family: inherit; font-size: 13px; }
+        select:focus { outline: none; border-color: var(--accent); }
+
+        @media (max-width: 900px) {
+            .ch-layout { grid-template-columns: 1fr; }
+            .kpi-row-4 { grid-template-columns: repeat(2, 1fr); }
+            .sig-lbl { min-width: 110px; }
+            .ub-lbl { min-width: 120px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <div class="logo">
+            <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;">
+                <span class="logo-icon">🛡️</span>
+                <div>
+                    <div class="logo-title">Churn &amp; Retention Intelligence</div>
+                    <div class="logo-sub">Welche Kunden drohen wir zu verlieren – und warum?</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="app-main">
+<div class="ch-layout">
+
+<div>
+    <!-- Steuerung -->
+    <div class="panel">
+        <form method="POST">
+            <div style="font-size:13px;color:var(--sub);margin-bottom:14px;">
+                Die inverse Seite der Growth Engine: derselbe Kundengraph, die umgekehrte Frage.
+                Elf Signaldimensionen ergeben ein Abwanderungsrisiko je Kunde – mit benannter
+                Hauptursache und konkreter Gegenmaßnahme.
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <button type="submit" name="use_example" value="1" class="btn-primary">Beispieldaten laden</button>
+                {% if result and result.kunden %}
+                <select name="kunde_id" onchange="this.form.submit()">
+                    <option value="">— Kunde für Tiefenanalyse wählen —</option>
+                    {% for k in result.kunden %}
+                    <option value="{{ k.id }}"
+                        {% if result.selected_kunde and result.selected_kunde.id == k.id %}selected{% endif %}>
+                        {{ k.name }} · {{ k.churn_risk|int }} % Risiko
+                    </option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    {% if error %}
+    <div style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:12px 16px;color:#f87171;margin-bottom:20px;">{{ error }}</div>
+    {% endif %}
+
+    {% if result %}
+
+    <!-- KPIs -->
+    <div class="kpi-row-4">
+        <div class="kpi-card">
+            <div class="kpi-value kpi-bad">{{ '{:,.0f}'.format(result.kpi.umsatzrisiko).replace(',', '.') }} €</div>
+            <div class="kpi-label">Umsatz unter Risiko</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ result.kpi.risiko_pct }}%</div>
+            <div class="kpi-label">des Bestandsumsatzes</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value kpi-bad">{{ result.kpi.n_kritisch }}</div>
+            <div class="kpi-label">Kritische Kunden</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ result.kpi.avg_risk|int }}%</div>
+            <div class="kpi-label">Ø Churn-Risiko</div>
+        </div>
+    </div>
+
+    <!-- Kernaussage -->
+    <div class="panel" style="border-color:rgba(248,113,113,0.25);background:rgba(248,113,113,0.04);">
+        <div style="font-size:13px;color:var(--text);line-height:1.7;">
+            <strong style="color:#f87171;">Retention-Priorität:</strong>
+            {{ result.kpi.n_kritisch }} von {{ result.kpi.n_kunden }} Kunden stehen auf Kritisch und
+            binden allein
+            <strong style="color:#f87171;">{{ '{:,.0f}'.format(result.kpi.risiko_kritisch).replace(',', '.') }} €</strong>
+            des gefährdeten Umsatzes. Bestandskunden zurückzugewinnen ist deutlich günstiger als
+            Neukundenakquise – diese Liste sagt, wo der Aufwand zuerst hingehört.
+        </div>
+    </div>
+
+    <!-- Scatter -->
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Risiko-Portfolio</div>
+                <div class="panel-sub">
+                    Umsatz × Churn-Risiko · Blasengröße = Umsatz unter Risiko ·
+                    Linien bei 40 % und 65 %
+                </div>
+            </div>
+        </div>
+        <div id="ch-scatter"></div>
+        <div class="note" style="margin-top:12px;">
+            <strong>Lesehilfe:</strong> Große Blasen rechts oben sind die teuersten Fälle –
+            hoher Umsatz bei hohem Risiko. Kunden links oben sind zwar gefährdet, kosten aber
+            weniger; dort lohnt sich eher ein automatisierter Kontakt als ein Executive Review.
+        </div>
+    </div>
+
+    <!-- Kundendetail -->
+    {% if result.selected_kunde %}
+    {% set k = result.selected_kunde %}
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">{{ k.name }}</div>
+                <div class="panel-sub">{{ k.branche }} · {{ k.groesse }} · Betreuer {{ k.rep }}</div>
+            </div>
+            <span class="seg {{ k.segment }}">{{ k.segment }}</span>
+        </div>
+
+        <div class="cust-top">
+            <div class="cust-head">
+                <div style="font-size:12px;color:var(--sub);line-height:1.9;">
+                    <div>Jahresumsatz: <b style="color:var(--text);">{{ '{:,.0f}'.format(k.umsatz).replace(',', '.') }} €</b>
+                        (<span style="color:{% if k.wachstum <= -5 %}#f87171{% elif k.wachstum >= 5 %}#34d399{% else %}var(--sub){% endif %};font-weight:600;">{{ '%+.1f'|format(k.wachstum) }} %</span>)</div>
+                    <div>Letzter Einkauf: <b style="color:var(--text);">vor {{ k.letzter_kauf }} Tagen</b></div>
+                    {% if k.wb_gruppe %}
+                    <div>Wettbewerber gewinnt: <b style="color:#f87171;">{{ k.wb_gruppe }}</b></div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="gauge">
+                <div class="gauge-val" style="color:{% if k.churn_risk >= 65 %}#f87171{% elif k.churn_risk >= 40 %}#fb923c{% elif k.churn_risk >= 25 %}#fbbf24{% else %}#34d399{% endif %};">
+                    {{ k.churn_risk|int }} %
+                </div>
+                <div class="gauge-lbl">Churn-Risiko</div>
+                <div class="gauge-eur">{{ '{:,.0f}'.format(k.umsatzrisiko).replace(',', '.') }} € Risiko</div>
+            </div>
+        </div>
+
+        <div class="riskbar">
+            <div class="riskbar-fill" style="width:{{ k.churn_risk }}%;background:{% if k.churn_risk >= 65 %}#f87171{% elif k.churn_risk >= 40 %}#fb923c{% elif k.churn_risk >= 25 %}#fbbf24{% else %}#34d399{% endif %};"></div>
+        </div>
+
+        <div class="cause">
+            <div class="cause-lbl">Hauptursache · {{ k.hauptursache }}</div>
+            <div class="cause-txt">{{ k.hauptursache_text }}</div>
+        </div>
+
+        <!-- Alle elf Signale -->
+        <div style="font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:0.06em;margin:16px 0 6px;">
+            Signalprofil · alle elf Dimensionen
+        </div>
+        {% for s in k.signale %}
+        <div class="sig">
+            <div class="sig-icon">{{ s.icon }}</div>
+            <div class="sig-lbl">{{ s.label }}</div>
+            <div class="sig-track">
+                <div class="sig-fill" style="width:{{ (s.severity * 100)|round|int }}%;background:{% if s.severity >= 0.66 %}#f87171{% elif s.severity >= 0.33 %}#fb923c{% else %}#34d399{% endif %};"></div>
+            </div>
+            <div class="sig-wert">{{ s.wert }}</div>
+        </div>
+        {% if s.severity >= 0.33 %}
+        <div class="sig-detail">{{ s.text }}</div>
+        {% endif %}
+        {% endfor %}
+
+        <div class="rec">
+            <div class="rec-head">
+                <div class="rec-title">→ {{ k.aktion }}</div>
+                <div class="rec-frist">{{ k.frist }}</div>
+            </div>
+            <div class="rec-detail">{{ k.aktion_detail }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Gefährdete Kunden -->
+    <div class="panel-head" style="margin-bottom:12px;">
+        <div>
+            <div class="panel-title">Gefährdete Kunden</div>
+            <div class="panel-sub">Sortiert nach Umsatz unter Risiko – nicht nach Prozentwert</div>
+        </div>
+    </div>
+
+    {% for k in result.kunden %}
+    {% if k.churn_risk >= 25 %}
+    <div class="cust {{ k.segment }}">
+        <div class="cust-top">
+            <div class="cust-head">
+                <div class="cust-name">{{ k.name }}</div>
+                <div class="cust-meta">
+                    {{ k.branche }} · Betreuer {{ k.rep }} ·
+                    Umsatz {{ '{:,.0f}'.format(k.umsatz).replace(',', '.') }} €
+                    (<span style="color:{% if k.wachstum <= -5 %}#f87171{% elif k.wachstum >= 5 %}#34d399{% else %}var(--sub){% endif %};font-weight:600;">{{ '%+.1f'|format(k.wachstum) }} %</span>)
+                    · letzter Einkauf vor {{ k.letzter_kauf }} Tagen
+                </div>
+            </div>
+            <div class="gauge">
+                <div class="gauge-val" style="color:{% if k.churn_risk >= 65 %}#f87171{% elif k.churn_risk >= 40 %}#fb923c{% else %}#fbbf24{% endif %};">
+                    {{ k.churn_risk|int }} %
+                </div>
+                <div class="gauge-lbl">Churn-Risiko</div>
+                <div class="gauge-eur">{{ '{:,.0f}'.format(k.umsatzrisiko).replace(',', '.') }} € Risiko</div>
+            </div>
+        </div>
+
+        <div class="riskbar">
+            <div class="riskbar-fill" style="width:{{ k.churn_risk }}%;background:{% if k.churn_risk >= 65 %}#f87171{% elif k.churn_risk >= 40 %}#fb923c{% else %}#fbbf24{% endif %};"></div>
+        </div>
+
+        <div class="cause">
+            <div class="cause-lbl">Hauptursache · {{ k.hauptursache }}</div>
+            <div class="cause-txt">{{ k.hauptursache_text }}</div>
+        </div>
+
+        {% for s in k.top_signale %}
+        <div class="sig">
+            <div class="sig-icon">{{ s.icon }}</div>
+            <div class="sig-lbl">{{ s.label }}</div>
+            <div class="sig-track">
+                <div class="sig-fill" style="width:{{ (s.severity * 100)|round|int }}%;background:{% if s.severity >= 0.66 %}#f87171{% elif s.severity >= 0.33 %}#fb923c{% else %}#34d399{% endif %};"></div>
+            </div>
+            <div class="sig-wert">{{ s.wert }}</div>
+        </div>
+        {% endfor %}
+
+        <div class="rec">
+            <div class="rec-head">
+                <div class="rec-title">→ {{ k.aktion }}</div>
+                <div class="rec-frist">{{ k.frist }}</div>
+            </div>
+            <div class="rec-detail">{{ k.aktion_detail }}</div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Ursachenverteilung -->
+    {% if result.ursachen_verteilung %}
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Abwanderungsursachen im Portfolio</div>
+                <div class="panel-sub">Nach gebundenem Umsatzrisiko – wo lohnt eine systematische Gegenmaßnahme?</div>
+            </div>
+        </div>
+        {% set maxu = result.ursachen_verteilung | map(attribute='umsatzrisiko') | max %}
+        {% for u in result.ursachen_verteilung %}
+        <div class="ub">
+            <div class="ub-lbl">{{ u.label }}</div>
+            <div class="ub-track">
+                <div class="ub-fill" style="width:{{ (u.umsatzrisiko / maxu * 100)|round|int }}%;"></div>
+            </div>
+            <div class="ub-num">{{ '{:,.0f}'.format(u.umsatzrisiko).replace(',', '.') }} € · {{ u.anzahl }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Gesamtübersicht -->
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Alle Kunden</div>
+                <div class="panel-sub">{{ result.kpi.n_kunden }} Kunden im Bestand</div>
+            </div>
+        </div>
+        <div class="tbl-wrap">
+            <table class="tbl">
+                <thead>
+                    <tr>
+                        <th>Kunde</th><th>Segment</th>
+                        <th class="num">Umsatz</th><th class="num">Trend</th>
+                        <th class="num">Risiko</th><th class="num">Umsatzrisiko</th>
+                        <th>Hauptursache</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for k in result.kunden %}
+                <tr>
+                    <td>
+                        <div style="font-weight:500;color:var(--text);">{{ k.name }}</div>
+                        <div style="font-size:11px;color:var(--sub);margin-top:2px;">{{ k.branche }} · {{ k.rep }}</div>
+                    </td>
+                    <td><span class="seg {{ k.segment }}">{{ k.segment }}</span></td>
+                    <td class="num" style="color:var(--sub);">{{ '{:,.0f}'.format(k.umsatz).replace(',', '.') }} €</td>
+                    <td class="num" style="color:{% if k.wachstum <= -5 %}#f87171{% elif k.wachstum >= 5 %}#34d399{% else %}var(--sub){% endif %};font-weight:600;">
+                        {{ '%+.1f'|format(k.wachstum) }} %
+                    </td>
+                    <td class="num" style="font-weight:700;color:{% if k.churn_risk >= 65 %}#f87171{% elif k.churn_risk >= 40 %}#fb923c{% elif k.churn_risk >= 25 %}#fbbf24{% else %}#34d399{% endif %};">
+                        {{ k.churn_risk|int }} %
+                    </td>
+                    <td class="num" style="color:#fbbf24;font-weight:600;">{{ '{:,.0f}'.format(k.umsatzrisiko).replace(',', '.') }} €</td>
+                    <td style="color:var(--sub);font-size:12px;">{{ k.hauptursache }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="panel" style="text-align:center;padding:48px;color:var(--sub);">
+        <div style="font-size:40px;margin-bottom:16px;">🛡️</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;">Abwanderungsrisiko berechnen</div>
+        <div style="font-size:13px;">Beispieldaten laden, um gefährdete Kunden<br>und ihre Ursachen zu identifizieren.</div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Sidebar -->
+<div class="ch-sidebar">
+    <div class="sidebar-card">
+        <h4>Elf Signaldimensionen</h4>
+        <div style="font-size:11px;color:var(--sub);line-height:1.9;">
+            <div>📉 Umsatzentwicklung · 18</div>
+            <div>🔄 Bestellfrequenz · 12</div>
+            <div>📅 Letzter Einkauf · 12</div>
+            <div>⚔️ Wettbewerbsdruck · 12</div>
+            <div>📦 Produktportfolio · 10</div>
+            <div>🛠️ Service &amp; Reklamationen · 9</div>
+            <div>👤 Ansprechpartnerwechsel · 8</div>
+            <div>💳 Zahlungsverhalten · 6</div>
+            <div>📄 Angebotsaktivität · 5</div>
+            <div>💶 Preisentwicklung · 5</div>
+            <div>💬 Kommunikationsintensität · 3</div>
+            <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);color:var(--text);font-weight:600;">
+                Summe der Gewichte · 100
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-card">
+        <h4>Risikoschwellen</h4>
+        <div style="display:flex;flex-direction:column;gap:9px;">
+            <div style="display:flex;align-items:flex-start;gap:9px;">
+                <span style="width:9px;height:9px;border-radius:50%;background:#f87171;margin-top:4px;flex-shrink:0;"></span>
+                <div>
+                    <div style="font-size:12px;font-weight:600;color:#f87171;">Kritisch ≥ 65 %</div>
+                    <div style="font-size:11px;color:var(--sub);">Executive-Eskalation innerhalb 48 Stunden.</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:9px;">
+                <span style="width:9px;height:9px;border-radius:50%;background:#fb923c;margin-top:4px;flex-shrink:0;"></span>
+                <div>
+                    <div style="font-size:12px;font-weight:600;color:#fb923c;">Gefährdet 40–64 %</div>
+                    <div style="font-size:11px;color:var(--sub);">Frühindikatoren sichtbar, Umsatz noch stabil – hier ist Retention am günstigsten.</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:9px;">
+                <span style="width:9px;height:9px;border-radius:50%;background:#fbbf24;margin-top:4px;flex-shrink:0;"></span>
+                <div>
+                    <div style="font-size:12px;font-weight:600;color:#fbbf24;">Beobachten 25–39 %</div>
+                    <div style="font-size:11px;color:var(--sub);">Einzelsignale auffällig, Regelkontakt genügt.</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:9px;">
+                <span style="width:9px;height:9px;border-radius:50%;background:#34d399;margin-top:4px;flex-shrink:0;"></span>
+                <div>
+                    <div style="font-size:12px;font-weight:600;color:#34d399;">Stabil &lt; 25 %</div>
+                    <div style="font-size:11px;color:var(--sub);">Kein Handlungsbedarf.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-card">
+        <h4>Churn &amp; Cross-Selling</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.7;">
+            Beide Module laufen auf demselben Kundengraphen und beantworten gespiegelte Fragen:
+            <div style="margin-top:8px;">
+                <a href="/growth" style="color:#34d399;text-decoration:none;font-weight:600;">Growth Engine →</a>
+                <span style="display:block;font-size:11px;">Wo können wir wachsen?</span>
+            </div>
+            <div style="margin-top:6px;">
+                <span style="color:#f87171;font-weight:600;">Churn Intelligence</span>
+                <span style="display:block;font-size:11px;">Wo verlieren wir Umsatz?</span>
+            </div>
+        </div>
+    </div>
+
+    {% if result and result.kpi %}
+    <div class="sidebar-card">
+        <h4>Zusammenfassung</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.9;">
+            <div>Kunden: <span style="color:var(--text);">{{ result.kpi.n_kunden }}</span></div>
+            <div>Bestandsumsatz: <span style="color:var(--text);">{{ '{:,.0f}'.format(result.kpi.gesamt_umsatz).replace(',', '.') }} €</span></div>
+            <div>Umsatzrisiko: <span style="color:#f87171;">{{ '{:,.0f}'.format(result.kpi.umsatzrisiko).replace(',', '.') }} €</span></div>
+            <div>Kritisch: <span style="color:#f87171;">{{ result.kpi.n_kritisch }}</span></div>
+            <div>Gefährdet: <span style="color:#fb923c;">{{ result.kpi.n_gefaehrdet }}</span></div>
+            <div>Stabil: <span style="color:#34d399;">{{ result.kpi.n_stabil }}</span></div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="note">
+        <div style="font-size:11px;font-weight:600;color:#60a5fa;margin-bottom:6px;">Next Step: Survival-Modell</div>
+        Die Gewichte sind hier fachlich gesetzt. Mit historischen Abwanderungsfällen ließe sich
+        ein <strong>Survival-Modell (Cox / Random Survival Forest)</strong> trainieren, das nicht
+        nur „ob“, sondern <strong>„wann“</strong> vorhersagt – und die Gewichte aus tatsächlich
+        verlorenen Kunden lernt statt sie zu setzen.
+    </div>
+</div>
+
+</div>
+</main>
+
+{% if result and result.scatter_json and result.scatter_json != '{}' %}
+<script>
+(function(){
+    var fig = {{ result.scatter_json | safe }};
+    Plotly.newPlot('ch-scatter', fig.data, fig.layout, {responsive:true, displayModeBar:false});
+})();
+</script>
+{% endif %}
+
+<footer class="home-footer">SalesApps · Churn &amp; Retention Intelligence</footer>
+</body>
+</html>

@@ -27,6 +27,7 @@ from retrieval_analyse import analyse as retrieval_analyse
 from growth_engine import analyse as growth_analyse
 from opportunity_graph import analyse as opp_analyse
 from next_action_engine import analyse as nba_analyse
+from churn_engine import analyse as churn_analyse
 
 # ── Logging ──────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -391,6 +392,32 @@ def next_action():
             error = str(exc)
 
     return render_template("next_action.html", result=result, error=error)
+
+
+@app.route("/churn", methods=["GET", "POST"])
+def churn():
+    result = None
+    error  = None
+
+    if request.method == "POST":
+        try:
+            selected_kunde = request.form.get("kunde_id") or None
+
+            if request.form.get("use_example") or selected_kunde:
+                df = pd.read_csv(DATASETS_DIR / "churn_beispiel.csv")
+            elif "file" in request.files and request.files["file"].filename:
+                f  = request.files["file"]
+                df = _load_dataframe(f.stream, f.filename)
+            else:
+                error = "Bitte eine Datei hochladen oder Beispieldaten verwenden."
+                return render_template("churn.html", result=None, error=error)
+
+            result = churn_analyse(df, selected_kunde_id=selected_kunde)
+        except Exception as exc:
+            logger.error("Churn Intelligence Fehler: %s", exc)
+            error = str(exc)
+
+    return render_template("churn.html", result=result, error=error)
 
 
 @app.route("/api/health")

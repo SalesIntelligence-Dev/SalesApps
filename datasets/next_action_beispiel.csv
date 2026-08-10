@@ -1,15 +1,15 @@
 kunde_id,kunde_name,branche,vertriebsmitarbeiter,groesse_klasse,umsatz_ytd,umsatz_vorjahr,portfolio_abdeckung_pct,produktluecken_wert,letzter_kontakt_tage,offene_opps,opp_wert,service_tickets,service_tickets_vorquartal,wettbewerber_aktiv,kontakte_aktiv,kontakte_gesamt,trigger_event
 K01,Müller GmbH,Maschinenbau,Meyer,Groß,126605,114462,50,120846,9,2,670000,5,3,1,4,5,Neue Produktionsstätte angekündigt
 K02,Schneider AG,Automotive,Schulz,Groß,248344,217760,67,82236,11,5,1395000,3,6,0,3,3,Werkserweiterung genehmigt
-K03,Meier GmbH,Chemie,Meyer,Mittel,56886,63195,33,66060,44,3,319000,10,6,1,1,4,
+K03,Meier GmbH,Chemie,Meyer,Mittel,56886,74809,33,66060,44,3,319000,10,6,1,1,4,
 K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,41334,42960,50,71550,35,0,0,4,8,0,5,6,
 K05,Weber Industrie,Maschinenbau,Schulz,Groß,206039,213473,67,53526,10,1,380000,4,7,1,2,4,
 K06,Braun Systems,Pharma,Meyer,Mittel,51049,41539,33,61680,12,2,253000,5,3,0,3,3,Neue Produktlinie in Aufbau
 K07,Fischer Tech,Automotive,Hoffmann,Klein,13230,12814,33,40815,7,0,0,2,3,0,2,3,Finanzierungsrunde abgeschlossen
 K08,Klein Automation,Maschinenbau,Schulz,Klein,19144,18691,33,37590,24,3,259000,6,4,0,7,7,
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,151224,175984,58,102366,52,2,686000,9,7,1,3,5,
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,151224,209356,58,102366,52,2,686000,9,7,1,3,5,
 K10,Ritter Technik,Chemie,Hoffmann,Mittel,81925,87644,50,42480,26,2,318000,3,8,0,1,3,
 K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,217609,192515,67,82236,12,3,1341000,5,6,0,6,6,Übernahme eines Wettbewerbers
-K12,Bauer Industrie,Pharma,Meyer,Mittel,69491,80582,33,55380,62,1,78000,10,5,0,1,3,
+K12,Bauer Industrie,Pharma,Meyer,Mittel,69491,94625,33,55380,62,1,78000,10,5,0,1,3,
 K13,Wagner Systems,Metallindustrie,Hoffmann,Klein,21026,20115,33,40740,33,3,245000,3,3,0,4,4,
 K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,64122,61742,58,47130,21,3,581000,2,4,1,3,4,Zweites Werk in Planung

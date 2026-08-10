@@ -83,7 +83,7 @@ WACHSTUM_FAKTOR = {
     #          2023   2024   2025
     "wachstum":  [0.72, 0.88, 1.00],
     "stabil":    [0.97, 1.00, 0.99],
-    "rueckgang": [1.32, 1.14, 1.00],
+    "rueckgang": [1.55, 1.37, 1.00],   # 2024→2025 ≈ −27 %
 }
 JAHRE = [2023, 2024, 2025]
 
@@ -431,3 +431,122 @@ with open(OUT / "next_action_beispiel.csv", "w", newline="", encoding="utf-8") a
     w.writeheader()
     w.writerows(rows_na)
 print(f"✓ next_action_beispiel.csv   ({len(rows_na)} Zeilen)")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 4) churn_beispiel.csv – Churn & Retention Intelligence
+# ══════════════════════════════════════════════════════════════════════════
+# Churn ist die Kehrseite von Cross-Selling: dieselben Kunden, dieselbe
+# Produktwelt – nur die umgekehrte Frage. Deshalb derselbe Roster.
+
+PRODUKTGRUPPEN = ["Maschinen", "Zubehör", "Service"]
+
+# Produktanzahl im Vorjahr (2024) je Kunde – für Portfolio-Schrumpfung
+produkte_2024 = {}
+for r in rows_growth:
+    if r["jahr"] == 2024:
+        produkte_2024.setdefault(r["kunde_id"], set()).add(r["produkt_id"])
+
+rows_churn = []
+for kid, kname, branche, rep, groesse, wtyp in KUNDEN:
+    u25 = umsatz_2025.get(kid, 0)
+    u24 = umsatz_2024.get(kid, 0)
+    prod_akt = len(PORTFOLIO[kid])
+    prod_vor = len(produkte_2024.get(kid, PORTFOLIO[kid]))
+
+    if wtyp == "rueckgang":
+        # Kunden im Rückgang zeigen das volle Warnbild
+        bestell_akt   = random.randint(6, 12)
+        bestell_vor   = bestell_akt + random.randint(5, 12)
+        letzter_kauf  = random.randint(58, 96)
+        service       = random.randint(11, 19)
+        service_vor   = random.randint(3, 7)
+        reklam        = random.randint(4, 9)
+        reklam_vor    = random.randint(0, 2)
+        ap_wechsel    = random.randint(2, 4)
+        verzug        = random.randint(18, 52)
+        mahnungen     = random.randint(1, 4)
+        preis_anp     = round(random.uniform(4.5, 9.5), 1)
+        angebote_akt  = random.randint(1, 3)
+        angebote_vor  = angebote_akt + random.randint(3, 7)
+        kontakte_akt  = random.randint(3, 8)
+        kontakte_vor  = kontakte_akt + random.randint(6, 14)
+        # Portfolio ist geschrumpft
+        prod_vor      = prod_akt + random.randint(1, 3)
+        wb_gruppe     = random.choice(PRODUKTGRUPPEN)
+    elif wtyp == "stabil":
+        # Stabile Kunden unter Wettbewerbsdruck zeigen Frühindikatoren, ohne
+        # dass der Umsatz schon eingebrochen wäre – das ist der interessante
+        # Graubereich, in dem Retention noch billig ist.
+        unter_druck = kid in WETTBEWERB_AKTIV
+        bestell_akt   = random.randint(9, 14) if unter_druck else random.randint(12, 20)
+        bestell_vor   = bestell_akt + (random.randint(4, 8) if unter_druck else random.randint(-2, 3))
+        letzter_kauf  = random.randint(38, 58) if unter_druck else random.randint(14, 40)
+        service       = random.randint(8, 13)  if unter_druck else random.randint(3, 8)
+        service_vor   = random.randint(3, 6)   if unter_druck else random.randint(3, 8)
+        reklam        = random.randint(2, 5)   if unter_druck else random.randint(0, 3)
+        reklam_vor    = random.randint(0, 2)
+        ap_wechsel    = random.randint(1, 3)   if unter_druck else random.randint(0, 1)
+        verzug        = random.randint(8, 24)  if unter_druck else random.randint(0, 12)
+        mahnungen     = random.randint(0, 2)   if unter_druck else 0
+        preis_anp     = round(random.uniform(4.0, 7.5) if unter_druck
+                              else random.uniform(1.5, 4.0), 1)
+        angebote_akt  = random.randint(2, 4)   if unter_druck else random.randint(3, 7)
+        angebote_vor  = angebote_akt + (random.randint(2, 5) if unter_druck
+                                        else random.randint(-1, 2))
+        kontakte_akt  = random.randint(7, 11)  if unter_druck else random.randint(10, 18)
+        kontakte_vor  = kontakte_akt + (random.randint(4, 9) if unter_druck
+                                        else random.randint(-3, 3))
+        wb_gruppe     = random.choice(PRODUKTGRUPPEN) if unter_druck else ""
+    else:  # wachstum
+        bestell_akt   = random.randint(16, 26)
+        bestell_vor   = bestell_akt - random.randint(2, 7)
+        letzter_kauf  = random.randint(3, 24)
+        service       = random.randint(1, 5)
+        service_vor   = random.randint(2, 6)
+        reklam        = random.randint(0, 1)
+        reklam_vor    = random.randint(0, 2)
+        ap_wechsel    = random.randint(0, 1)
+        verzug        = random.randint(0, 8)
+        mahnungen     = 0
+        preis_anp     = round(random.uniform(1.0, 3.5), 1)
+        angebote_akt  = random.randint(5, 11)
+        angebote_vor  = angebote_akt - random.randint(1, 4)
+        kontakte_akt  = random.randint(14, 24)
+        kontakte_vor  = kontakte_akt - random.randint(2, 6)
+        wb_gruppe     = random.choice(PRODUKTGRUPPEN) if kid in WETTBEWERB_AKTIV else ""
+
+    rows_churn.append({
+        "kunde_id":                  kid,
+        "kunde_name":                kname,
+        "branche":                   branche,
+        "vertriebsmitarbeiter":      rep,
+        "groesse_klasse":            groesse,
+        "umsatz_ytd":                int(u25),
+        "umsatz_vorjahr":            int(u24),
+        "bestellungen_ytd":          bestell_akt,
+        "bestellungen_vorjahr":      bestell_vor,
+        "produkte_aktuell":          prod_akt,
+        "produkte_vorjahr":          prod_vor,
+        "tage_seit_letztem_einkauf": letzter_kauf,
+        "service_faelle":            service,
+        "service_faelle_vorjahr":    service_vor,
+        "reklamationen":             reklam,
+        "reklamationen_vorjahr":     reklam_vor,
+        "ansprechpartner_wechsel":   ap_wechsel,
+        "zahlungsverzug_tage":       verzug,
+        "mahnungen":                 mahnungen,
+        "wettbewerber_aktiv":        1 if kid in WETTBEWERB_AKTIV else 0,
+        "wettbewerber_produktgruppe": wb_gruppe,
+        "preisanpassung_pct":        preis_anp,
+        "angebote_ytd":              angebote_akt,
+        "angebote_vorjahr":          angebote_vor,
+        "kontakte_ytd":              kontakte_akt,
+        "kontakte_vorjahr":          kontakte_vor,
+    })
+
+with open(OUT / "churn_beispiel.csv", "w", newline="", encoding="utf-8") as f:
+    w = csv.DictWriter(f, fieldnames=rows_churn[0].keys())
+    w.writeheader()
+    w.writerows(rows_churn)
+print(f"✓ churn_beispiel.csv         ({len(rows_churn)} Zeilen)")

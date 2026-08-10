@@ -1,0 +1,15 @@
+kunde_id,kunde_name,branche,vertriebsmitarbeiter,groesse_klasse,umsatz_ytd,umsatz_vorjahr,bestellungen_ytd,bestellungen_vorjahr,produkte_aktuell,produkte_vorjahr,tage_seit_letztem_einkauf,service_faelle,service_faelle_vorjahr,reklamationen,reklamationen_vorjahr,ansprechpartner_wechsel,zahlungsverzug_tage,mahnungen,wettbewerber_aktiv,wettbewerber_produktgruppe,preisanpassung_pct,angebote_ytd,angebote_vorjahr,kontakte_ytd,kontakte_vorjahr
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,126605,114462,21,14,6,6,16,2,5,0,1,1,0,0,1,Service,2.6,6,5,23,18
+K02,Schneider AG,Automotive,Schulz,Groß,248344,217760,17,14,8,8,6,2,6,1,1,0,7,0,0,,1.1,6,4,17,11
+K03,Meier GmbH,Chemie,Meyer,Mittel,56886,74809,9,20,4,5,96,16,4,6,0,2,49,3,1,Service,8.4,2,7,3,10
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,41334,42960,17,15,6,6,15,8,8,0,1,0,11,0,0,,2.7,3,5,11,13
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,206039,213473,9,14,8,8,46,9,4,4,0,2,18,2,1,Maschinen,5.3,4,9,11,15
+K06,Braun Systems,Pharma,Meyer,Mittel,51049,41539,21,17,4,4,9,1,5,0,0,0,0,0,0,,1.4,7,6,16,14
+K07,Fischer Tech,Automotive,Hoffmann,Klein,13230,12814,21,18,4,4,3,3,2,0,1,0,4,0,0,,3.1,11,9,18,16
+K08,Klein Automation,Maschinenbau,Schulz,Klein,19144,18691,12,14,4,4,18,4,7,3,2,0,3,0,0,,2.4,4,3,12,10
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,151224,209356,7,15,7,8,91,17,4,7,2,3,49,4,1,Zubehör,4.7,3,6,5,15
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,81925,87644,18,20,6,6,36,5,5,1,1,0,12,0,0,,2.6,5,4,12,13
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,217609,192515,26,21,8,8,12,3,5,1,1,0,4,0,0,,3.1,10,6,15,12
+K12,Bauer Industrie,Pharma,Meyer,Mittel,69491,94625,10,18,4,6,83,11,5,6,0,3,43,3,0,Zubehör,9.2,1,8,6,12
+K13,Wagner Systems,Metallindustrie,Hoffmann,Klein,21026,20115,16,19,4,4,21,4,4,3,2,0,6,0,0,,2.9,6,8,11,8
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,64122,61742,25,19,7,7,15,3,4,1,1,1,0,0,1,Zubehör,3.2,8,6,14,10

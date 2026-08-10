@@ -41,14 +41,14 @@ K02,Schneider AG,Automotive,Schulz,Groß,2025,P07,Druckregler DR-80,Zubehör,26,
 K02,Schneider AG,Automotive,Schulz,Groß,2025,P10,Wartungsvertrag Premium,Service,24,1290,30960
 K02,Schneider AG,Automotive,Schulz,Groß,2025,P11,Inbetriebnahme & Setup,Service,23,783,18009
 K02,Schneider AG,Automotive,Schulz,Groß,2025,P12,Anwenderschulung,Service,28,621,17388
-K03,Meier GmbH,Chemie,Meyer,Mittel,2023,P01,Hydraulikpumpe HX-200,Maschinen,12,2760,33120
-K03,Meier GmbH,Chemie,Meyer,Mittel,2023,P04,Förderpumpe FP-350,Maschinen,15,2331,34965
-K03,Meier GmbH,Chemie,Meyer,Mittel,2023,P07,Druckregler DR-80,Zubehör,7,406,2842
-K03,Meier GmbH,Chemie,Meyer,Mittel,2023,P09,Wartungsvertrag Basic,Service,15,656,9840
-K03,Meier GmbH,Chemie,Meyer,Mittel,2024,P01,Hydraulikpumpe HX-200,Maschinen,10,2527,25270
-K03,Meier GmbH,Chemie,Meyer,Mittel,2024,P04,Förderpumpe FP-350,Maschinen,13,2189,28457
-K03,Meier GmbH,Chemie,Meyer,Mittel,2024,P07,Druckregler DR-80,Zubehör,6,370,2220
-K03,Meier GmbH,Chemie,Meyer,Mittel,2024,P09,Wartungsvertrag Basic,Service,12,604,7248
+K03,Meier GmbH,Chemie,Meyer,Mittel,2023,P01,Hydraulikpumpe HX-200,Maschinen,14,2760,38640
+K03,Meier GmbH,Chemie,Meyer,Mittel,2023,P04,Förderpumpe FP-350,Maschinen,17,2331,39627
+K03,Meier GmbH,Chemie,Meyer,Mittel,2023,P07,Druckregler DR-80,Zubehör,8,406,3248
+K03,Meier GmbH,Chemie,Meyer,Mittel,2023,P09,Wartungsvertrag Basic,Service,18,656,11808
+K03,Meier GmbH,Chemie,Meyer,Mittel,2024,P01,Hydraulikpumpe HX-200,Maschinen,12,2527,30324
+K03,Meier GmbH,Chemie,Meyer,Mittel,2024,P04,Förderpumpe FP-350,Maschinen,15,2189,32835
+K03,Meier GmbH,Chemie,Meyer,Mittel,2024,P07,Druckregler DR-80,Zubehör,7,370,2590
+K03,Meier GmbH,Chemie,Meyer,Mittel,2024,P09,Wartungsvertrag Basic,Service,15,604,9060
 K03,Meier GmbH,Chemie,Meyer,Mittel,2025,P01,Hydraulikpumpe HX-200,Maschinen,8,2668,21344
 K03,Meier GmbH,Chemie,Meyer,Mittel,2025,P04,Förderpumpe FP-350,Maschinen,12,2183,26196
 K03,Meier GmbH,Chemie,Meyer,Mittel,2025,P07,Druckregler DR-80,Zubehör,5,360,1800
@@ -131,20 +131,20 @@ K08,Klein Automation,Maschinenbau,Schulz,Klein,2025,P01,Hydraulikpumpe HX-200,Ma
 K08,Klein Automation,Maschinenbau,Schulz,Klein,2025,P05,Steuerungsmodul SM-Pro,Zubehör,2,1095,2190
 K08,Klein Automation,Maschinenbau,Schulz,Klein,2025,P08,Schlauchpaket SP-Set,Zubehör,4,212,848
 K08,Klein Automation,Maschinenbau,Schulz,Klein,2025,P09,Wartungsvertrag Basic,Service,4,649,2596
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P01,Hydraulikpumpe HX-200,Maschinen,20,2522,50440
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P02,Kompressor KA-500,Maschinen,17,1900,32300
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P04,Förderpumpe FP-350,Maschinen,17,2342,39814
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P07,Druckregler DR-80,Zubehör,34,364,12376
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P08,Schlauchpaket SP-Set,Zubehör,12,220,2640
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P09,Wartungsvertrag Basic,Service,36,664,23904
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P11,Inbetriebnahme & Setup,Service,35,836,29260
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P01,Hydraulikpumpe HX-200,Maschinen,18,2527,45486
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P02,Kompressor KA-500,Maschinen,15,2158,32370
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P04,Förderpumpe FP-350,Maschinen,15,2413,36195
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P07,Druckregler DR-80,Zubehör,28,407,11396
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P08,Schlauchpaket SP-Set,Zubehör,10,234,2340
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P09,Wartungsvertrag Basic,Service,31,699,21669
-K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P11,Inbetriebnahme & Setup,Service,32,829,26528
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P01,Hydraulikpumpe HX-200,Maschinen,24,2522,60528
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P02,Kompressor KA-500,Maschinen,20,1900,38000
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P04,Förderpumpe FP-350,Maschinen,20,2342,46840
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P07,Druckregler DR-80,Zubehör,40,364,14560
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P08,Schlauchpaket SP-Set,Zubehör,14,220,3080
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P09,Wartungsvertrag Basic,Service,43,664,28552
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P11,Inbetriebnahme & Setup,Service,42,836,35112
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P01,Hydraulikpumpe HX-200,Maschinen,21,2527,53067
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P02,Kompressor KA-500,Maschinen,18,2158,38844
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P04,Förderpumpe FP-350,Maschinen,18,2413,43434
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P07,Druckregler DR-80,Zubehör,34,407,13838
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P08,Schlauchpaket SP-Set,Zubehör,12,234,2808
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P09,Wartungsvertrag Basic,Service,37,699,25863
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P11,Inbetriebnahme & Setup,Service,38,829,31502
 K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2025,P01,Hydraulikpumpe HX-200,Maschinen,15,2845,42675
 K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2025,P02,Kompressor KA-500,Maschinen,14,1974,27636
 K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2025,P04,Förderpumpe FP-350,Maschinen,14,2287,32018
@@ -194,14 +194,14 @@ K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2025,P07,Druckregler DR-80,Zubehör
 K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2025,P10,Wartungsvertrag Premium,Service,26,1159,30134
 K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2025,P11,Inbetriebnahme & Setup,Service,9,824,7416
 K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2025,P12,Anwenderschulung,Service,14,613,8582
-K12,Bauer Industrie,Pharma,Meyer,Mittel,2023,P01,Hydraulikpumpe HX-200,Maschinen,11,2741,30151
-K12,Bauer Industrie,Pharma,Meyer,Mittel,2023,P03,Druckluftanlage DA-100,Maschinen,13,3610,46930
-K12,Bauer Industrie,Pharma,Meyer,Mittel,2023,P06,Präzisionssensor PS-200,Zubehör,13,576,7488
-K12,Bauer Industrie,Pharma,Meyer,Mittel,2023,P09,Wartungsvertrag Basic,Service,9,696,6264
-K12,Bauer Industrie,Pharma,Meyer,Mittel,2024,P01,Hydraulikpumpe HX-200,Maschinen,10,2473,24730
-K12,Bauer Industrie,Pharma,Meyer,Mittel,2024,P03,Druckluftanlage DA-100,Maschinen,12,3680,44160
-K12,Bauer Industrie,Pharma,Meyer,Mittel,2024,P06,Präzisionssensor PS-200,Zubehör,12,551,6612
-K12,Bauer Industrie,Pharma,Meyer,Mittel,2024,P09,Wartungsvertrag Basic,Service,8,635,5080
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2023,P01,Hydraulikpumpe HX-200,Maschinen,13,2741,35633
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2023,P03,Druckluftanlage DA-100,Maschinen,16,3610,57760
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2023,P06,Präzisionssensor PS-200,Zubehör,15,576,8640
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2023,P09,Wartungsvertrag Basic,Service,11,696,7656
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2024,P01,Hydraulikpumpe HX-200,Maschinen,12,2473,29676
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2024,P03,Druckluftanlage DA-100,Maschinen,14,3680,51520
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2024,P06,Präzisionssensor PS-200,Zubehör,14,551,7714
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2024,P09,Wartungsvertrag Basic,Service,9,635,5715
 K12,Bauer Industrie,Pharma,Meyer,Mittel,2025,P01,Hydraulikpumpe HX-200,Maschinen,9,2588,23292
 K12,Bauer Industrie,Pharma,Meyer,Mittel,2025,P03,Druckluftanlage DA-100,Maschinen,9,3996,35964
 K12,Bauer Industrie,Pharma,Meyer,Mittel,2025,P06,Präzisionssensor PS-200,Zubehör,10,530,5300
