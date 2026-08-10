@@ -66,7 +66,9 @@ async function loadDatasets() {
       datasetList.innerHTML = '<div class="loading-dots">Keine Beispieldaten gefunden.</div>';
       return;
     }
-    datasets.forEach(ds => {
+    const FORECAST_DATASETS = ['gastro_bier', 'supermarkt_energie', 'ecommerce_umsatz'];
+    const filtered = datasets.filter(ds => FORECAST_DATASETS.includes(ds.id));
+    filtered.forEach(ds => {
       const card = document.createElement('div');
       card.className = 'dataset-card';
       card.dataset.id = ds.id;
