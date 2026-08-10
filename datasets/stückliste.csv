@@ -1,0 +1,61 @@
+komponente_id,komponente_name,kategorie,listenpreis,herstellkosten,kompatibel_mit
+B01,Maschinenrahmen Kompakt MK-100,Basis,4200,2100,"A01,A05,A12,A13"
+B02,Maschinenrahmen Standard MS-200,Basis,5800,2900,"A01,A02,A05,A06,A13"
+B03,Maschinenrahmen Heavy MH-400,Basis,8400,4200,"A02,A03,A06,A07,A08,A09"
+B04,Basismodul Automation BA-150,Basis,6200,3100,"A02,A03,A10,A11,A14"
+B05,Basismodul Prozess BP-250,Basis,7100,3600,"A08,A09,A10"
+B06,Grundgestell Kompakt GK-80,Basis,3900,1950,"A01,A05,A12"
+B07,Plattformmodul Universal PM-300,Basis,9200,4600,"A03,A04,A07,A09,A11,A14"
+B08,Trägerrahmen Mittel TR-180,Basis,5400,2700,"A01,A02,A05,A06"
+B09,Modulrahmen Industrie MI-350,Basis,7800,3900,"A03,A04,A07,A08,A09"
+B10,Grundgestell Schwer GS-500,Basis,10200,5100,"A04,A07,A09,A11,A14"
+A01,"Servomotor 2,5 kW SM-250",Antrieb,2800,1400,"S01,S02,S10"
+A02,Servomotor 5 kW SM-500,Antrieb,3900,1950,"S02,S03,S09"
+A03,"Servomotor 7,5 kW SM-750",Antrieb,5200,2600,"S03,S04,S05"
+A04,Servomotor 11 kW SM-1100,Antrieb,7400,3700,"S04,S05,S11"
+A05,Frequenzumrichter 4 kW FU-400,Antrieb,1800,900,"S01,S02,S10"
+A06,"Frequenzumrichter 7,5 kW FU-750",Antrieb,2400,1200,"S02,S03"
+A07,Frequenzumrichter 15 kW FU-1500,Antrieb,3200,1600,"S03,S04,S05"
+A08,Hydraulikantrieb 200 bar HA-200,Antrieb,4600,2300,"S03,S05,S06"
+A09,Hydraulikantrieb 400 bar HA-400,Antrieb,6800,3400,"S04,S05,S06"
+A10,Direktantrieb 3 kW DA-300,Antrieb,7200,3600,"S05,S06,S07,S11"
+A11,Linearmotor 500 N LM-500,Antrieb,8900,4450,"S06,S07,S08,S11"
+A12,"Schrittmotor 1,5 Nm SK-150",Antrieb,1200,600,"S01,S10"
+A13,"Getriebemotor 3,5 kW GR-350",Antrieb,2200,1100,"S01,S02,S12"
+A14,Torquemotor 8 kW TM-800,Antrieb,9600,4800,"S07,S08,S11"
+S01,SPS Basic SB-100,Steuerung,1400,700,"G01,G08"
+S02,SPS Standard SS-200,Steuerung,2200,1100,"G01,G02,G08"
+S03,SPS Advanced SA-300,Steuerung,3800,1900,"G02,G03,G07"
+S04,SPS Cloud-Connected SC-400,Steuerung,5400,2700,"G02,G03,G07,G10"
+S05,Edge-Controller EC-250,Steuerung,4200,2100,"G03,G04,G10"
+S06,Industrie-PC IPC-500,Steuerung,6800,3400,"G03,G04,G07,G09,G10"
+S07,CNC-Steuerung CNC-300,Steuerung,7200,3600,"G04,G05,G09"
+S08,Robotersteuerung RS-500,Steuerung,8400,4200,"G04,G05,G06"
+S09,Sicherheits-SPS FSP-200,Steuerung,3200,1600,"G02,G03,G06"
+S10,Kompaktsteuerung KS-100,Steuerung,1800,900,"G01,G08"
+S11,Motion-Controller MC-400,Steuerung,5900,2950,"G03,G04,G09,G10"
+S12,HMI-Panel HP-700,Steuerung,4600,2300,"G01,G02,G09"
+G01,Schutzgehäuse IP54 Standard,Gehäuse,800,400,
+G02,Schutzgehäuse IP65 Standard,Gehäuse,1100,550,
+G03,Schutzgehäuse IP67 Premium,Gehäuse,1600,800,
+G04,Edelstahlgehäuse V2A-IP65,Gehäuse,2400,1200,
+G05,Edelstahlgehäuse V4A-IP67,Gehäuse,3200,1600,
+G06,Explosionsschutz Ex-II-2G,Gehäuse,4800,2400,
+G07,Freiluft-Gehäuse IP65 FL-400,Gehäuse,2100,1050,
+G08,Minimalgehäuse IP54 MG-50,Gehäuse,600,300,
+G09,Großgehäuse GR-IP54,Gehäuse,1800,900,
+G10,"Rackgehäuse 19"" RK-400",Gehäuse,2600,1300,
+Z01,"Touch-Display 7"" TD-700",Zubehör,650,325,
+Z02,"Touch-Display 15"" TD-1500",Zubehör,1200,600,
+Z03,Temperatursensor TS-200,Zubehör,280,140,
+Z04,Drucksensor DS-100,Zubehör,320,160,
+Z05,Vibrationssensor VS-300,Zubehör,480,240,
+Z06,Ethernet-Interface 1G ETH-100,Zubehör,380,190,
+Z07,OPC-UA Gateway OG-200,Zubehör,890,445,
+Z08,Kabelsatz Kompakt KK-100,Zubehör,240,120,
+Z09,Kabelsatz Premium KP-300,Zubehör,580,290,
+Z10,Sicherheits-Relais SR-200,Zubehör,420,210,
+Z11,Not-Aus-Set NA-300,Zubehör,360,180,
+Z12,Remote-Access-Modul RA-100,Zubehör,720,360,
+Z13,Energiemessmodul EM-200,Zubehör,390,195,
+Z14,UPS-Modul UP-500,Zubehör,840,420,

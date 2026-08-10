@@ -1,0 +1,121 @@
+firma_id,firma_name,strasse,plz,ort,land,branche,umsatz_klasse,mitarbeiter,website,erstellt_am
+F0048,Weber  GmbH,Parkstraße 64,70173,Stuttgart,DE,Automotive,50–250 Mio,250–999,www.weber.de,2017-12-04
+F0072,Industriewerke Ost GmbH & Co. KG,Technologiepark 5,10115,Berlin,DE,Maschinenbau,10–50 Mio,> 1000,www.industriewerke-ost.de,2018-03-28
+F0038,Hahn GmbH,Gartenweg 108,30159,Hannover,DE,Metallindustrie,1–10 Mio,10–49,www.hahn.de,2017-11-15
+F0112,PharmaRhein GmbH AG,Am Werk 97,70173,Stuttgart,DE,Pharma,1–10 Mio,10–49,www.pharmarhein-gmbh.de,2021-04-09
+F0119,DrugStore Network GmbH,Gewerbepark 68,01067,Dresden,DE,Pharma,< 1 Mio,> 1000,www.drugstore-network.de,2015-11-14
+F0110,WholesaleHub AG GmbH,Rheinstraße 30,45127,Essen,DE,Handel,1–10 Mio,1–9,www.wholesalehub-ag.de,2022-05-17
+F0035,Möller GmbH,Münchener Straße 58,60311,Frankfurt,DE,Handel,10–50 Mio,50–249,www.moeller.de,2022-04-30
+F0013,Klein GmbH & Co. KG,Hauptstraße 92,48143,Münster,DE,IT-Dienstleistung,< 1 Mio,1–9,www.klein.de,2016-06-12
+F0080,Einzelhandel König GmbH,Gewerbepark 111,45127,Essen,DE,Handel,50–250 Mio,250–999,www.einzelhandel-koenig.de,2016-09-01
+F0001,Müller GmbH & Co. KG,Rheinstraße 52,40213,Düsseldorf,DE,Maschinenbau,10–50 Mio,50–249,www.mueller.de,2021-09-21
+F0040,Albrecht AG,Gartenweg 137,90402,Nürnberg,DE,Maschinenbau,1–10 Mio,10–49,www.albrecht.de,2016-06-05
+F0093,Maschinenfabrik Thüringen GmbH & Co. KG,Am Werk 19,48143,Münster,DE,Maschinenbau,< 1 Mio,250–999,www.maschinenfabrik-thueringen.de,2017-09-16
+F0106,NetServices GmbH AG,Rheinstraße 63,90402,Nürnberg,DE,IT-Dienstleistung,< 1 Mio,250–999,www.netservices-gmbh.de,2021-01-13
+F0030,Günther AG,Hauptstraße 150,45127,Essen,DE,Maschinenbau,1–10 Mio,10–49,www.guenther.de,2015-07-15
+F0004,Braun GmbH,Gewerbepark 126,20095,Hamburg,DE,IT-Dienstleistung,1–10 Mio,10–49,www.braun.de,2017-03-28
+F0045,Pfeiffer AG,Hansastraße 76,45127,Essen,DE,Handel,1–10 Mio,10–49,www.pfeiffer.de,2017-03-02
+F0084,Versorgungslogistik GmbH,Gartenweg 24,20095,Hamburg,DE,Logistik,< 1 Mio,250–999,www.versorgungslogistik.de,2019-02-22
+F0061,Hartmann GmbH & Co. KG,Münchener Straße 107,60311,Frankfurt,DE,Maschinenbau,50–250 Mio,250–999,www.hartmann.de,2020-04-01
+F0046,Müllerr GmbH & Co. KG,Rheinstraße 52,40213,Düsseldorf,DE,Maschinenbau,10–50 Mio,50–249,www.mueller.de,2022-06-28
+F0022,Köhler GmbH & Co. KG,Bahnhofstraße 91,10115,Berlin,DE,IT-Dienstleistung,10–50 Mio,50–249,www.koehler.de,2022-10-17
+F0058,Wof GmbH,Hansastraße 42,44135,Dortmund,DE,Chemie,50–250 Mio,250–999,www.wolf.de,2016-11-16
+F0067,FoodPro GmbH,Gartenweg 110,70173,Stuttgart,DE,Lebensmittel,50–250 Mio,250–999,www.foodpro.de,2015-10-24
+F0060,Schwars GmbH & Co. KG,Industriestraße 109,70173,Stuttgart,DE,Pharma,> 250 Mio,> 1000,www.schwarz.de,2017-04-20
+F0071,Handelshaus Bergmann GmbH & Co. KG,Parkstraße 141,50667,Köln,DE,Handel,1–10 Mio,50–249,www.handelshaus-bergmann.de,2016-09-09
+F0043,Winkler GmbH & Co. KG,Parkstraße 98,48143,Münster,DE,Automotive,10–50 Mio,50–249,www.winkler.de,2018-10-11
+F0010,Koch GmbH,Münchener Straße 143,28195,Bremen,DE,Bau,1–10 Mio,10–49,www.koch.de,2015-02-01
+F0015,Schröder GmbH,Am Werk 46,45127,Essen,DE,Handel,1–10 Mio,10–49,www.schroeder.de,2015-06-01
+F0006,Wagner GmbH & Co. KG,Technologiepark 55,50667,Köln,DE,Handel,50–250 Mio,250–999,www.wagner.de,2016-09-15
+F0021,Lange GmbH,Gartenweg 66,50667,Köln,DE,Bau,1–10 Mio,10–49,www.lange.de,2021-02-12
+F0094,HVAC Solutions AG,Berliner Allee 145,44135,Dortmund,DE,Maschinenbau,1–10 Mio,250–999,www.hvac-solutions.de,2018-09-30
+F0032,Haas AG,Rheinstraße 99,70173,Stuttgart,DE,IT-Dienstleistung,1–10 Mio,10–49,www.haas.de,2019-08-24
+F0081,TechGroup International GmbH,Technologiepark 10,40213,Düsseldorf,DE,IT-Dienstleistung,> 250 Mio,250–999,www.techgroup-international.de,2020-08-22
+F0029,Huber GmbH,Technologiepark 19,44135,Dortmund,DE,Lebensmittel,10–50 Mio,50–249,www.huber.de,2020-08-15
+F0052,Wagener GmbH & Co. KG,Technologiepark 55,50667,Köln,DE,Handel,50–250 Mio,250–999,www.wagner.de,2019-06-26
+F0033,Schäfer AG,Am Werk 24,80331,München,DE,Automotive,> 250 Mio,> 1000,www.schaefer.de,2017-01-12
+F0120,AutoMate Systems AG,Industriestraße 5,28195,Bremen,DE,Automotive,10–50 Mio,250–999,www.automate-systems.de,2018-03-02
+F0115,ClearChem GmbH GmbH,Industriestraße 9,60311,Frankfurt,DE,Chemie,10–50 Mio,> 1000,www.clearchem-gmbh.de,2017-06-18
+F0019,Krüger GmbH,Rheinstraße 85,20095,Hamburg,DE,Lebensmittel,10–50 Mio,50–249,www.krueger.de,2016-07-10
+F0113,AutoCare AG GmbH & Co. KG,Münchener Straße 84,80331,München,DE,Automotive,50–250 Mio,50–249,www.autocare-ag.de,2022-12-26
+F0026,Herrmann GmbH,Bahnhofstraße 105,01067,Dresden,DE,Logistik,50–250 Mio,250–999,www.herrmann.de,2016-08-19
+F0109,ElektroTech GmbH GmbH & Co. KG,Münchener Straße 19,44135,Dortmund,DE,Metallindustrie,< 1 Mio,250–999,www.elektrotech-gmbh.de,2022-03-26
+F0103,BioMedical GmbH GmbH,Gartenweg 15,30159,Hannover,DE,Pharma,> 250 Mio,1–9,www.biomedical-gmbh.de,2015-04-22
+F0086,GlobalTrade GmbH AG,Parkstraße 26,50667,Köln,DE,Handel,< 1 Mio,> 1000,www.globaltrade-gmbh.de,2019-11-23
+F0039,Franke GmbH,Am Werk 76,04103,Leipzig,DE,Lebensmittel,10–50 Mio,50–249,www.franke.de,2022-09-05
+F0108,Logistik Center Süd GmbH,Parkstraße 57,48143,Münster,DE,Logistik,10–50 Mio,10–49,www.logistik-center-sued.de,2018-11-08
+F0008,Schulz AG,Industriestraße 136,30159,Hannover,DE,Pharma,10–50 Mio,50–249,www.schulz.de,2022-08-06
+F0050,Braun  GmbH,Gewerbepark 126,20095,Hamburg,DE,IT-Dienstleistung,1–10 Mio,10–49,www.braun.de,2022-12-02
+F0062,Maier GmbH,Hauptstraße 34,90402,Nürnberg,DE,Automotive,50–250 Mio,250–999,www.maier.de,2021-04-14
+F0087,MetalCraft OHG GmbH & Co. KG,Parkstraße 45,10115,Berlin,DE,Metallindustrie,< 1 Mio,1–9,www.metalcraft-ohg.de,2016-07-05
+F0047,Müller GmbH & Co. KG,Rheinstraße 52,40213,Düsseldorf,DE,Maschinenbau,10–50 Mio,50–249,www.mueller.de,2016-12-04
+F0085,Chemcompound AG GmbH & Co. KG,Bahnhofstraße 60,60311,Frankfurt,DE,Chemie,10–50 Mio,250–999,www.chemcompound-ag.de,2021-06-04
+F0095,RealEstate Invest AG,Parkstraße 25,45127,Essen,DE,Bau,1–10 Mio,250–999,www.realestate-invest.de,2022-01-15
+F0034,Vogt GmbH,Berliner Allee 103,20095,Hamburg,DE,Chemie,1–10 Mio,10–49,www.vogt.de,2019-12-24
+F0068,BauKraft GmbH,Berliner Allee 42,80331,München,DE,Bau,1–10 Mio,1–9,www.baukraft.de,2021-10-20
+F0005,Fischer GmbH & Co. KG,Hansastraße 56,60311,Frankfurt,DE,Logistik,10–50 Mio,50–249,www.fischer.de,2019-03-12
+F0107,FreshFood GmbH GmbH,Industriestraße 6,04103,Leipzig,DE,Lebensmittel,1–10 Mio,1–9,www.freshfood-gmbh.de,2015-04-29
+F0041,Ziegler AG,Rheinstraße 75,28195,Bremen,DE,Bau,50–250 Mio,250–999,www.ziegler.de,2019-08-04
+F0083,Energiesysteme GmbH GmbH & Co. KG,Parkstraße 88,80331,München,DE,Energie,1–10 Mio,1–9,www.energiesysteme-gmbh.de,2019-11-16
+F0074,Chemiewerk Elbe GmbH & Co. KG,Parkstraße 45,01067,Dresden,DE,Chemie,10–50 Mio,1–9,www.chemiewerk-elbe.de,2020-11-16
+F0049,Schmitt GmbH,Münchener Straße 99,80331,München,DE,Chemie,1–10 Mio,10–49,www.schmidt.de,2022-05-15
+F0012,Richter GmbH,Gartenweg 133,04103,Leipzig,DE,Automotive,10–50 Mio,50–249,www.richter.de,2017-03-22
+F0065,GreenChem AG,Bahnhofstraße 34,45127,Essen,DE,Chemie,50–250 Mio,10–49,www.greenchem.de,2015-02-16
+F0020,Hartmann GmbH & Co. KG,Parkstraße 15,60311,Frankfurt,DE,Maschinenbau,50–250 Mio,250–999,www.hartmann.de,2022-03-08
+F0088,DigiSolutions KG AG,Hansastraße 64,30159,Hannover,DE,IT-Dienstleistung,10–50 Mio,1–9,www.digisolutions-kg.de,2016-12-07
+F0054,Schultz AG,Industriestraße 136,30159,Hannover,DE,Pharma,10–50 Mio,50–249,www.schulz.de,2020-08-16
+F0023,Maier GmbH & Co. KG,Hauptstraße 34,90402,Nürnberg,DE,Automotive,50–250 Mio,250–999,www.maier.de,2023-01-21
+F0070,MedTech AG,Hauptstraße 97,60311,Frankfurt,DE,Pharma,< 1 Mio,250–999,www.medtech.de,2018-01-13
+F0018,Zimmermann GmbH,Bahnhofstraße 80,80331,München,DE,Metallindustrie,1–10 Mio,10–49,www.zimmermann.de,2021-12-03
+F0024,Meyer GmbH,Gewerbepark 105,04103,Leipzig,DE,Chemie,10–50 Mio,50–249,www.meyer.de,2016-05-24
+F0117,FastDeli GmbH AG,Gewerbepark 63,10115,Berlin,DE,Logistik,10–50 Mio,> 1000,www.fastdeli-gmbh.de,2017-05-20
+F0056,Bauer AG,Parkstraße 93,90402,Nürnberg,DE,Maschinenbau,50–250 Mio,250–999,www.bauer.de,2015-01-06
+F0002,Weber GmbH,Parkstraße 64,70173,Stuttgart,DE,Automotive,50–250 Mio,250–999,www.weber.de,2016-06-29
+F0105,Werkzeugbau Osten GmbH,Rheinstraße 5,28195,Bremen,DE,Maschinenbau,< 1 Mio,> 1000,www.werkzeugbau-osten.de,2019-01-09
+F0101,Bauwerk & Söhne GmbH,Berliner Allee 100,50667,Köln,DE,Bau,10–50 Mio,1–9,www.bauwerk--soehne.de,2016-08-05
+F0028,Peters GmbH,Münchener Straße 31,48143,Münster,DE,Metallindustrie,< 1 Mio,1–9,www.peters.de,2019-01-21
+F0111,IntelliSystems KG AG,Industriestraße 95,40213,Düsseldorf,DE,IT-Dienstleistung,10–50 Mio,250–999,www.intellisystems-kg.de,2020-07-29
+F0016,Neumann GmbH,Hauptstraße 44,40213,Düsseldorf,DE,Logistik,10–50 Mio,50–249,www.neumann.de,2020-04-24
+F0079,Pharmawerk Süd GmbH & Co. KG,Münchener Straße 16,44135,Dortmund,DE,Pharma,1–10 Mio,50–249,www.pharmawerk-sued.de,2017-11-08
+F0118,BioFoods AG AG,Technologiepark 114,30159,Hannover,DE,Lebensmittel,10–50 Mio,> 1000,www.biofoods-ag.de,2020-11-08
+F0075,Stahlbau Weser AG,Hauptstraße 55,28195,Bremen,DE,Metallindustrie,1–10 Mio,10–49,www.stahlbau-weser.de,2017-09-17
+F0099,FlexLog GmbH AG,Hauptstraße 148,20095,Hamburg,DE,Logistik,> 250 Mio,10–49,www.flexlog-gmbh.de,2020-12-12
+F0114,Baustoffe Süd GmbH AG,Industriestraße 70,20095,Hamburg,DE,Bau,10–50 Mio,250–999,www.baustoffe-sued-gmbh.de,2020-12-15
+F0025,Lehmann GmbH,Industriestraße 37,30159,Hannover,DE,Handel,1–10 Mio,10–49,www.lehmann.de,2018-04-27
+F0053,Bekker GmbH & Co. KG,Technologiepark 46,10115,Berlin,DE,Metallindustrie,1–10 Mio,10–49,www.becker.de,2016-04-05
+F0017,Schwarz GmbH & Co. KG,Industriestraße 109,70173,Stuttgart,DE,Pharma,> 250 Mio,> 1000,www.schwarz.de,2022-02-01
+F0082,Bauunternehmen Müller-Bau AG,Gartenweg 19,70173,Stuttgart,DE,Bau,50–250 Mio,> 1000,www.bauunternehmen-mueller-bau.de,2016-11-09
+F0092,Autowerk Leipzig GmbH,Technologiepark 108,04103,Leipzig,DE,Automotive,> 250 Mio,> 1000,www.autowerk-leipzig.de,2019-06-08
+F0073,Logistikcenter Nord GmbH & Co. KG,Rheinstraße 108,30159,Hannover,DE,Logistik,> 250 Mio,1–9,www.logistikcenter-nord.de,2020-09-29
+F0007,Becker GmbH & Co. KG,Technologiepark 46,10115,Berlin,DE,Metallindustrie,1–10 Mio,10–49,www.becker.de,2021-05-11
+F0003,Schmidt GmbH,Münchener Straße 99,80331,München,DE,Chemie,1–10 Mio,10–49,www.schmidt.de,2020-12-14
+F0090,PharmaPlus GmbH GmbH & Co. KG,Technologiepark 130,28195,Bremen,DE,Pharma,50–250 Mio,250–999,www.pharmaplus-gmbh.de,2021-02-03
+F0011,Bauer GmbH & Co. KG,Parkstraße 93,90402,Nürnberg,DE,Maschinenbau,50–250 Mio,250–999,www.bauer.de,2020-12-28
+F0077,Autoteile Express GmbH,Rheinstraße 2,04103,Leipzig,DE,Automotive,> 250 Mio,50–249,www.autoteile-express.de,2021-05-05
+F0044,Simon GmbH,Berliner Allee 2,44135,Dortmund,DE,Chemie,10–50 Mio,50–249,www.simon.de,2022-06-25
+F0063,Technovation AG,Münchener Straße 81,48143,Münster,DE,IT-Dienstleistung,10–50 Mio,1–9,www.technovation.de,2021-08-10
+F0096,DataVault GmbH GmbH,Hauptstraße 112,40213,Düsseldorf,DE,IT-Dienstleistung,10–50 Mio,250–999,www.datavault-gmbh.de,2015-09-12
+F0059,Schroeder GmbH,Am Werk 46,45127,Essen,DE,Handel,1–10 Mio,10–49,www.schroeder.de,2020-09-24
+F0036,Krause AG,Industriestraße 81,50667,Köln,DE,Logistik,50–250 Mio,250–999,www.krause.de,2017-06-14
+F0076,Software Solutions GmbH & Co. KG,Münchener Straße 42,90402,Nürnberg,DE,IT-Dienstleistung,10–50 Mio,10–49,www.software-solutions.de,2021-05-12
+F0009,Hoffmann GmbH,Gartenweg 81,01067,Dresden,DE,Lebensmittel,10–50 Mio,50–249,www.hoffmann.de,2019-07-08
+F0027,König GmbH,Am Werk 82,28195,Bremen,DE,Pharma,10–50 Mio,50–249,www.koenig.de,2020-08-06
+F0100,Foodservice Rhein AG,Parkstraße 94,60311,Frankfurt,DE,Lebensmittel,> 250 Mio,250–999,www.foodservice-rhein.de,2016-04-12
+F0051,Fischer GmbH & Co. KG,Parkstraße 105,60311,Frankfurt,DE,Logistik,10–50 Mio,50–249,www.fischer.de,2018-11-16
+F0037,Jung GmbH,Rheinstraße 76,10115,Berlin,DE,Pharma,10–50 Mio,50–249,www.jung.de,2019-11-30
+F0014,Wolf GmbH,Hansastraße 42,44135,Dortmund,DE,Chemie,50–250 Mio,250–999,www.wolf.de,2019-12-15
+F0069,AutoParts GmbH & Co. KG,Berliner Allee 86,20095,Hamburg,DE,Automotive,< 1 Mio,50–249,www.autoparts.de,2022-06-12
+F0089,Nahrungswerk Nord GmbH & Co. KG,Münchener Straße 43,01067,Dresden,DE,Lebensmittel,> 250 Mio,250–999,www.nahrungswerk-nord.de,2022-04-22
+F0078,MaschBau Rhein GmbH,Parkstraße 34,48143,Münster,DE,Maschinenbau,10–50 Mio,1–9,www.maschbau-rhein.de,2017-01-06
+F0031,Brandt AG,Parkstraße 97,40213,Düsseldorf,DE,Bau,10–50 Mio,50–249,www.brandt.de,2019-06-23
+F0066,FastLog AG,Am Werk 76,40213,Düsseldorf,DE,Logistik,50–250 Mio,10–49,www.fastlog.de,2018-04-03
+F0042,Roth GmbH,Münchener Straße 98,01067,Dresden,DE,IT-Dienstleistung,< 1 Mio,1–9,www.roth.de,2022-08-10
+F0097,Retail Chain SE AG,Parkstraße 13,70173,Stuttgart,DE,Handel,> 250 Mio,10–49,www.retail-chain-se.de,2022-06-08
+F0102,Stahlverarbeitungs AG GmbH & Co. KG,Münchener Straße 136,10115,Berlin,DE,Metallindustrie,> 250 Mio,1–9,www.stahlverarbeitungs-ag.de,2017-12-02
+F0055,Kok GmbH,Münchener Straße 143,28195,Bremen,DE,Bau,1–10 Mio,10–49,www.koch.de,2017-04-09
+F0057,Rihter GmbH,Gartenweg 133,04103,Leipzig,DE,Automotive,10–50 Mio,50–249,www.richter.de,2018-06-25
+F0091,Spedition Franken GmbH,Parkstraße 62,90402,Nürnberg,DE,Logistik,10–50 Mio,1–9,www.spedition-franken.de,2020-11-18
+F0104,AutoSupplement OHG AG,Parkstraße 37,01067,Dresden,DE,Automotive,10–50 Mio,50–249,www.autosupplement-ohg.de,2021-10-27
+F0116,MachPrecision OHG AG,Berliner Allee 27,50667,Köln,DE,Maschinenbau,50–250 Mio,1–9,www.machprecision-ohg.de,2018-01-14
+F0098,ChemPure AG AG,Bahnhofstraße 69,80331,München,DE,Chemie,1–10 Mio,1–9,www.chempure-ag.de,2022-07-14
+F0064,ProMetall GmbH,Gewerbepark 102,44135,Dortmund,DE,Metallindustrie,50–250 Mio,1–9,www.prometall.de,2015-03-25

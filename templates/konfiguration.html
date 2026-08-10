@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Produktkonfiguration – SalesApps</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=3">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        /* ── Konfiguration-spezifisch ── */
+        .kg-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; }
+
+        /* Formular */
+        .kg-form { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group label { display: block; font-size: 12px; color: var(--sub); margin-bottom: 6px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+        .form-group select { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 10px 14px; font-family: inherit; font-size: 14px; cursor: pointer; }
+        .form-group select:focus { outline: none; border-color: var(--accent); }
+
+        /* Top-5 Kacheln */
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+        .config-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: relative; }
+        .config-card.rank-1 { border-color: #fbbf24; }
+        .config-card.rank-2 { border-color: #94a3b8; }
+        .config-card.rank-3 { border-color: #b45309; }
+        .config-card-rank { position: absolute; top: 12px; right: 14px; font-size: 11px; font-weight: 700; color: var(--sub); }
+        .rank-1 .config-card-rank { color: #fbbf24; }
+        .rank-2 .config-card-rank { color: #94a3b8; }
+        .rank-3 .config-card-rank { color: #b45309; }
+        .config-card-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 12px; padding-right: 36px; line-height: 1.4; }
+        .config-stats { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+        .config-stat { text-align: center; }
+        .config-stat-val { font-size: 15px; font-weight: 700; }
+        .config-stat-val.green { color: #34d399; }
+        .config-stat-val.blue  { color: #60a5fa; }
+        .config-stat-val.gold  { color: #fbbf24; }
+        .config-stat-lbl { font-size: 10px; color: var(--sub); margin-top: 2px; }
+        .config-divider { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+        .config-komps { display: flex; flex-direction: column; gap: 5px; }
+        .komp-row { display: flex; align-items: center; gap: 8px; }
+        .komp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .komp-name { font-size: 11px; color: var(--sub); }
+        .komp-kat { font-size: 10px; color: var(--sub); opacity: 0.6; }
+        .komp-preis { font-size: 10px; color: var(--sub); margin-left: auto; white-space: nowrap; }
+
+        /* Score-Badge */
+        .score-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+        .score-badge.gold { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+        .score-badge.silver { background: rgba(148,163,184,0.15); color: #94a3b8; border: 1px solid rgba(148,163,184,0.3); }
+        .score-badge.bronze { background: rgba(180,83,9,0.15); color: #b45309; border: 1px solid rgba(180,83,9,0.3); }
+        .score-badge.default { background: rgba(96,165,250,0.12); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+
+        /* Scatter */
+        .scatter-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        #kg-scatter { height: 340px; }
+
+        /* Sidebar */
+        .kg-sidebar { display: flex; flex-direction: column; gap: 16px; }
+        .sidebar-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+        .sidebar-card h4 { font-size: 12px; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+
+        /* KPI-Row */
+        .kpi-row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+
+        /* Kat-Farben */
+        .dot-Basis     { background: #60a5fa; }
+        .dot-Antrieb   { background: #f59e0b; }
+        .dot-Steuerung { background: #34d399; }
+        .dot-Gehäuse   { background: #a78bfa; }
+        .dot-Zubehör   { background: #f87171; }
+
+        /* Legende */
+        .kat-legend { display: flex; flex-wrap: wrap; gap: 10px; }
+        .kat-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--sub); }
+
+        /* GNN Banner */
+        .gnn-banner { background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.2); border-radius: 8px; padding: 12px 14px; font-size: 12px; color: var(--sub); line-height: 1.6; }
+        .gnn-banner strong { color: #60a5fa; }
+
+        @media (max-width: 900px) {
+            .kg-layout { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .config-grid { grid-template-columns: 1fr; }
+            .kpi-row-4 { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <div class="logo">
+            <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;">
+                <span class="logo-icon">⚙️</span>
+                <div>
+                    <div class="logo-title">Graph Produktkonfiguration</div>
+                    <div class="logo-sub">Margenoptimierte Angebotskonfiguration · SalesApps</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="app-main">
+<div class="kg-layout">
+
+<!-- ══ LINKE SPALTE ══ -->
+<div>
+
+    <!-- Datei-Upload / Formular -->
+    <div class="kg-form">
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-row" style="margin-bottom:16px;">
+                <div class="form-group">
+                    <label>Basiskomponente wählen</label>
+                    <select name="basis_id" {% if not result %}disabled{% endif %}>
+                        <option value="">— Erst Daten laden —</option>
+                        {% if result %}
+                        {% for b in result.basis_komponenten %}
+                        <option value="{{ b.id }}"
+                            {% if result.selected_basis and result.selected_basis.id == b.id %}selected{% endif %}>
+                            {{ b.name }} ({{ '{:,.0f}'.format(b.preis).replace(',', '.') }} €)
+                        </option>
+                        {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Datensatz</label>
+                    <select name="dataset">
+                        <option value="example">Beispieldaten (Maschinenbau)</option>
+                        <option value="upload">Eigene Datei hochladen</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row" style="margin-bottom:16px;">
+                <div class="form-group">
+                    <label>Stückliste (CSV)</label>
+                    <input type="file" name="file_stueck" accept=".csv"
+                           style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--sub);padding:8px 14px;font-family:inherit;font-size:13px;">
+                </div>
+                <div class="form-group">
+                    <label>Historische Angebote (CSV)</label>
+                    <input type="file" name="file_angebote" accept=".csv"
+                           style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--sub);padding:8px 14px;font-family:inherit;font-size:13px;">
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button type="submit" name="use_example" value="1" class="btn-primary">
+                    Beispieldaten laden
+                </button>
+                {% if result and result.basis_komponenten %}
+                <button type="submit" name="analyse" value="1" class="btn-primary" style="background:var(--accent2);">
+                    Konfiguration analysieren →
+                </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    {% if error %}
+    <div style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:12px 16px;color:#f87171;margin-bottom:20px;">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    {% if result %}
+
+    <!-- KPIs -->
+    <div class="kpi-row-4">
+        <div class="kpi-card">
+            <div class="kpi-value">{{ result.kpi.n_komponenten }}</div>
+            <div class="kpi-label">Komponenten</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ result.kpi.n_angebote }}</div>
+            <div class="kpi-label">Hist. Angebote</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value kpi-good">{{ result.kpi.gewinn_rate }}%</div>
+            <div class="kpi-label">Gewinnrate</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value kpi-good">{{ result.kpi.avg_marge }}%</div>
+            <div class="kpi-label">Ø Marge</div>
+        </div>
+    </div>
+
+    {% if result.top_configs %}
+    <!-- Scatter: Marge vs. Gewinnwahrscheinlichkeit -->
+    <div class="scatter-wrap">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div>
+                <div style="font-size:14px;font-weight:600;color:var(--text);">Marge vs. Gewinnwahrscheinlichkeit</div>
+                <div style="font-size:12px;color:var(--sub);">
+                    {{ result.kpi.n_valide_configs }} valide Konfigurationen · Top 5 hervorgehoben
+                </div>
+            </div>
+            <div class="kat-legend">
+                <span style="font-size:11px;color:#fbbf24;">● #1</span>
+                <span style="font-size:11px;color:#94a3b8;">● #2</span>
+                <span style="font-size:11px;color:#b45309;">● #3</span>
+                <span style="font-size:11px;color:#60a5fa;">● #4–5</span>
+                <span style="font-size:11px;color:#334155;">● Andere</span>
+            </div>
+        </div>
+        <div id="kg-scatter"></div>
+    </div>
+
+    <!-- Top-5 Konfigurationen -->
+    <div style="margin-bottom:12px;">
+        <div style="font-size:14px;font-weight:600;color:var(--text);">
+            Top-5 Konfigurationen
+            {% if result.selected_basis %}
+            <span style="font-size:12px;color:var(--sub);font-weight:400;"> · Basis: {{ result.selected_basis.name }}</span>
+            {% endif %}
+        </div>
+        <div style="font-size:12px;color:var(--sub);">Ranking nach Score = Marge% × Gewinnwahrscheinlichkeit</div>
+    </div>
+
+    <div class="config-grid">
+        {% for cfg in result.top_configs %}
+        {% set rank = loop.index %}
+        <div class="config-card rank-{{ rank }}">
+            <div class="config-card-rank">
+                {% if rank == 1 %}🥇 #1
+                {% elif rank == 2 %}🥈 #2
+                {% elif rank == 3 %}🥉 #3
+                {% else %}#{{ rank }}{% endif %}
+            </div>
+            <div class="config-card-label">{{ cfg.label }}</div>
+
+            <div class="config-stats">
+                <div class="config-stat">
+                    <div class="config-stat-val green">{{ cfg.marge_pct }}%</div>
+                    <div class="config-stat-lbl">Marge</div>
+                </div>
+                <div class="config-stat">
+                    <div class="config-stat-val blue">{{ (cfg.win_prob * 100)|int }}%</div>
+                    <div class="config-stat-lbl">Gewinnchance</div>
+                </div>
+                <div class="config-stat">
+                    <div class="config-stat-val gold">{{ cfg.score }}</div>
+                    <div class="config-stat-lbl">Score</div>
+                </div>
+                <div class="config-stat">
+                    <div class="config-stat-val" style="color:var(--text);">
+                        {{ '{:,.0f}'.format(cfg.gesamtpreis).replace(',', '.') }} €
+                    </div>
+                    <div class="config-stat-lbl">Gesamtpreis</div>
+                </div>
+            </div>
+
+            <hr class="config-divider">
+            <div class="config-komps">
+                {% for k in cfg.komponenten %}
+                <div class="komp-row">
+                    <div class="komp-dot dot-{{ k.kat }}"></div>
+                    <span class="komp-kat">{{ k.kat }}</span>
+                    <span class="komp-name">{{ k.name }}</span>
+                    <span class="komp-preis">{{ '{:,.0f}'.format(k.preis).replace(',', '.') }} €</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Kein Basis gewählt -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:40px;text-align:center;color:var(--sub);">
+        <div style="font-size:32px;margin-bottom:12px;">⚙️</div>
+        <div style="font-size:14px;">Bitte eine Basiskomponente auswählen und <strong style="color:var(--text);">„Konfiguration analysieren"</strong> klicken.</div>
+        <div style="font-size:12px;margin-top:8px;">{{ result.kpi.n_komponenten }} Komponenten geladen · {{ result.kpi.n_angebote }} hist. Angebote</div>
+    </div>
+    {% endif %}
+
+    {% endif %}
+</div>
+
+<!-- ══ SIDEBAR ══ -->
+<div class="kg-sidebar">
+
+    <!-- Algorithmus-Erklärung -->
+    <div class="sidebar-card">
+        <h4>Wie es funktioniert</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.7;">
+            <div style="margin-bottom:8px;">
+                <span style="color:#60a5fa;font-weight:600;">1. Kompatibilitätsgraph</span><br>
+                NetworkX verbindet kompatible Komponenten. Edges = erlaubte Kombinationen.
+            </div>
+            <div style="margin-bottom:8px;">
+                <span style="color:#f59e0b;font-weight:600;">2. Pfad-Suche</span><br>
+                Für jede Basis werden alle validen Konfigurationen (Basis → Antrieb → Steuerung → Gehäuse) ermittelt.
+            </div>
+            <div style="margin-bottom:8px;">
+                <span style="color:#34d399;font-weight:600;">3. Margen-Score</span><br>
+                Marge = (Preis − Kosten) / Preis × 100
+            </div>
+            <div>
+                <span style="color:#a78bfa;font-weight:600;">4. Gewinnchance</span><br>
+                Historische Angebote mit ≥ 2 überlappenden Komponenten → empirische Win-Rate.
+            </div>
+        </div>
+    </div>
+
+    <!-- Kategorie-Legende -->
+    <div class="sidebar-card">
+        <h4>Komponenten-Kategorien</h4>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            {% set kat_info = [
+                ("Basis",     "#60a5fa", "Grundrahmen und Module"),
+                ("Antrieb",   "#f59e0b", "Motoren und Antriebe"),
+                ("Steuerung", "#34d399", "SPS und Controller"),
+                ("Gehäuse",   "#a78bfa", "Schutzgehäuse (IP-Klassen)"),
+                ("Zubehör",   "#f87171", "Sensoren und Peripherie"),
+            ] %}
+            {% for kat, farbe, desc in kat_info %}
+            <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:10px;height:10px;border-radius:50%;background:{{ farbe }};flex-shrink:0;"></div>
+                <div>
+                    <div style="font-size:12px;color:var(--text);font-weight:500;">{{ kat }}</div>
+                    <div style="font-size:11px;color:var(--sub);">{{ desc }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- GNN Next Step -->
+    <div class="gnn-banner">
+        <div style="font-size:11px;font-weight:600;color:#60a5fa;margin-bottom:6px;">Next Step: Graph Neural Network</div>
+        <div style="font-size:11px;line-height:1.6;">
+            Diese Heuristik nutzt statische Gewinnwahrscheinlichkeiten aus historischen Daten.
+            Ein <strong>GNN (Graph Attention Network)</strong> würde Kundenkontext, Marktdynamik
+            und Produktlebenszyklen in die Ranking-Vorhersage einbeziehen.
+        </div>
+    </div>
+
+    {% if result and result.selected_basis %}
+    <!-- Konfig-Zusammenfassung -->
+    <div class="sidebar-card">
+        <h4>Analyse-Zusammenfassung</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.8;">
+            <div>Basis: <span style="color:var(--text);">{{ result.selected_basis.name }}</span></div>
+            <div>Valide Configs: <span style="color:var(--text);">{{ result.kpi.n_valide_configs }}</span></div>
+            {% if result.top_configs %}
+            <div>Beste Marge: <span style="color:#34d399;">{{ result.top_configs[0].marge_pct }}%</span></div>
+            <div>Beste Gewinnchance: <span style="color:#60a5fa;">{{ (result.top_configs | sort(attribute='win_prob', reverse=True))[0].win_prob * 100 | int }}%</span></div>
+            <div>Bester Score: <span style="color:#fbbf24;">{{ result.top_configs[0].score }}</span></div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+</div><!-- /.kg-sidebar -->
+
+</div><!-- /.kg-layout -->
+</main>
+
+{% if result and result.scatter_json and result.scatter_json != '{}' %}
+<script>
+(function() {
+    var fig = {{ result.scatter_json | safe }};
+    Plotly.newPlot('kg-scatter', fig.data, fig.layout, {
+        responsive: true, displayModeBar: false
+    });
+})();
+</script>
+{% endif %}
+
+</body>
+</html>

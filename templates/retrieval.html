@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ähnliche Firmen finden – SalesApps</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=3">
+    <style>
+        .rt-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; }
+
+        /* Suchformular */
+        .rt-form { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; margin-bottom: 20px; }
+        .rt-search-row { display: flex; gap: 10px; align-items: flex-end; }
+        .rt-search-row input[type="text"] {
+            flex: 1; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text); padding: 10px 14px;
+            font-family: inherit; font-size: 14px;
+        }
+        .rt-search-row input[type="text"]:focus { outline: none; border-color: var(--accent); }
+
+        /* Ampel */
+        .ampel { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .ampel-rot    { background: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.5); }
+        .ampel-gelb   { background: #fbbf24; box-shadow: 0 0 6px rgba(251,191,36,0.4); }
+        .ampel-grün   { background: #34d399; box-shadow: 0 0 6px rgba(52,211,153,0.4); }
+
+        .ampel-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+        .ampel-badge.rot  { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.25); }
+        .ampel-badge.gelb { background: rgba(251,191,36,0.12);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
+        .ampel-badge.grün { background: rgba(52,211,153,0.12);  color: #34d399; border: 1px solid rgba(52,211,153,0.25); }
+
+        /* Tabellen */
+        .rt-table-wrap { overflow-x: auto; }
+        .rt-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .rt-table th { padding: 9px 12px; text-align: left; font-size: 11px; color: var(--sub); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .rt-table td { padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+        .rt-table tr:hover td { background: rgba(255,255,255,0.03); }
+        .rt-table .firma-name { font-weight: 500; color: var(--text); }
+        .rt-table .firma-sub  { font-size: 11px; color: var(--sub); margin-top: 2px; }
+
+        /* Score-Bar */
+        .score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+        .score-bar { height: 4px; border-radius: 2px; background: var(--border); width: 60px; }
+        .score-bar-fill { height: 100%; border-radius: 2px; }
+        .score-num { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; }
+
+        /* Duplikat-Paar-Karte */
+        .dup-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+        .dup-card.rot  { border-left: 3px solid #f87171; }
+        .dup-card.gelb { border-left: 3px solid #fbbf24; }
+        .dup-pair { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; margin-bottom: 8px; }
+        .dup-firma { }
+        .dup-firma-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+        .dup-firma-sub  { font-size: 11px; color: var(--sub); }
+        .dup-arrow { font-size: 16px; color: var(--sub); text-align: center; }
+        .dup-scores { display: flex; gap: 14px; flex-wrap: wrap; }
+        .dup-score-item { font-size: 11px; color: var(--sub); }
+        .dup-score-item span { color: var(--text); font-weight: 600; }
+        .dup-match-grund { font-size: 11px; color: var(--sub); margin-top: 4px; font-style: italic; }
+
+        /* Section-Headers */
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .section-title { font-size: 14px; font-weight: 600; color: var(--text); }
+        .section-sub   { font-size: 12px; color: var(--sub); }
+
+        /* KPI row */
+        .kpi-row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+
+        /* Sidebar */
+        .rt-sidebar { display: flex; flex-direction: column; gap: 16px; }
+        .sidebar-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+        .sidebar-card h4 { font-size: 12px; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+
+        .info-box { background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.2); border-radius: 8px; padding: 12px 14px; font-size: 12px; color: var(--sub); line-height: 1.6; margin-bottom: 16px; }
+        .info-box strong { color: #60a5fa; }
+
+        @media (max-width: 900px) {
+            .rt-layout { grid-template-columns: 1fr; }
+            .kpi-row-4 { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <div class="logo">
+            <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;">
+                <span class="logo-icon">🔍</span>
+                <div>
+                    <div class="logo-title">Ähnliche Firmen finden</div>
+                    <div class="logo-sub">Entity Resolution · Duplikaterkennung im Kundenstamm</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="app-main">
+<div class="rt-layout">
+
+<!-- ══ LINKE SPALTE ══ -->
+<div>
+
+    <!-- Suchformular -->
+    <div class="rt-form">
+        <form method="POST" enctype="multipart/form-data">
+            <div style="margin-bottom:14px;font-size:13px;color:var(--sub);">
+                Firmennamen eingeben → ähnliche Einträge im Stammdatensatz suchen.
+                Oder Beispieldaten laden um alle Duplikate automatisch zu erkennen.
+            </div>
+            <div class="rt-search-row" style="margin-bottom:12px;">
+                <input type="text" name="suchbegriff"
+                       placeholder="z. B. Müller GmbH, Fischer Tech, Schmidt…"
+                       value="{{ result.suchbegriff if result else '' }}">
+                <button type="submit" name="suchen" value="1" class="btn-primary">Suchen →</button>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <button type="submit" name="use_example" value="1" class="btn-primary" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);">
+                    Beispieldaten laden
+                </button>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--sub);">
+                    <input type="file" name="file" accept=".csv" style="display:none;" onchange="this.closest('form').submit()">
+                    <span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 12px;font-size:12px;">
+                        📁 Eigene CSV hochladen
+                    </span>
+                </label>
+            </div>
+        </form>
+    </div>
+
+    {% if error %}
+    <div style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:12px 16px;color:#f87171;margin-bottom:20px;">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    {% if result %}
+
+    <!-- KPIs -->
+    <div class="kpi-row-4">
+        <div class="kpi-card">
+            <div class="kpi-value">{{ result.kpi.n_firmen }}</div>
+            <div class="kpi-label">Firmen im Stamm</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value kpi-bad">{{ result.kpi.n_duplikate_rot }}</div>
+            <div class="kpi-label">Duplikate (Rot)</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value" style="color:#fbbf24;">{{ result.kpi.n_duplikate_gelb }}</div>
+            <div class="kpi-label">Zu prüfen (Gelb)</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ result.kpi.schwelle }}%</div>
+            <div class="kpi-label">Duplikat-Schwelle</div>
+        </div>
+    </div>
+
+    <!-- Suchergebnisse -->
+    {% if result.suchbegriff %}
+    <div style="margin-bottom:20px;">
+        <div class="section-header">
+            <div>
+                <div class="section-title">Suchergebnisse für „{{ result.suchbegriff }}"</div>
+                <div class="section-sub">{{ result.suchergebnisse | length }} ähnliche Firmen gefunden</div>
+            </div>
+        </div>
+
+        {% if result.suchergebnisse %}
+        <div class="card" style="padding:0;overflow:hidden;">
+            <div class="rt-table-wrap">
+                <table class="rt-table">
+                    <thead>
+                        <tr>
+                            <th>Firma</th>
+                            <th>Ort</th>
+                            <th>Branche</th>
+                            <th>Name-Score</th>
+                            <th>Gesamt</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for f in result.suchergebnisse %}
+                    <tr>
+                        <td>
+                            <div class="firma-name">{{ f.firma_name }}</div>
+                            <div class="firma-sub">{{ f.firma_id }} · {{ f.strasse }}</div>
+                        </td>
+                        <td style="color:var(--sub);font-size:12px;">{{ f.plz }} {{ f.ort }}</td>
+                        <td style="color:var(--sub);font-size:12px;">{{ f.branche }}</td>
+                        <td>
+                            <div class="score-bar-wrap">
+                                <div class="score-bar">
+                                    <div class="score-bar-fill"
+                                         style="width:{{ f.name_score }}%;background:{% if f.name_score >= 75 %}#f87171{% elif f.name_score >= 55 %}#fbbf24{% else %}#60a5fa{% endif %};"></div>
+                                </div>
+                                <span class="score-num">{{ f.name_score }}%</span>
+                            </div>
+                        </td>
+                        <td><span class="score-num">{{ f.score }}%</span></td>
+                        <td>
+                            <span class="ampel-badge {{ f.ampel }}">
+                                <span class="ampel ampel-{{ f.ampel }}"></span>
+                                {% if f.ampel == 'rot' %}Duplikat
+                                {% elif f.ampel == 'gelb' %}Prüfen
+                                {% else %}Eindeutig{% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;text-align:center;color:var(--sub);">
+            Keine ähnlichen Firmen gefunden.
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Erkannte Duplikate -->
+    <div>
+        <div class="section-header">
+            <div>
+                <div class="section-title">Erkannte Duplikate im Stammdatensatz</div>
+                <div class="section-sub">
+                    Automatisch erkannte Paare · Blocking nach PLZ-Präfix und Anfangsbuchstabe
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;">
+                <span class="ampel-badge rot"><span class="ampel ampel-rot"></span> Duplikat ≥ {{ result.kpi.schwelle }}%</span>
+                <span class="ampel-badge gelb"><span class="ampel ampel-gelb"></span> Prüfen 55–74%</span>
+            </div>
+        </div>
+
+        {% if result.duplikate %}
+
+        <!-- Zuerst: Rote (Duplikate) -->
+        {% set rote = result.duplikate | selectattr("ampel", "eq", "rot") | list %}
+        {% set gelbe = result.duplikate | selectattr("ampel", "eq", "gelb") | list %}
+
+        {% if rote %}
+        <div style="font-size:11px;font-weight:600;color:#f87171;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">
+            🔴 Wahrscheinliche Duplikate ({{ rote | length }})
+        </div>
+        {% for d in rote %}
+        <div class="dup-card rot">
+            <div class="dup-pair">
+                <div class="dup-firma">
+                    <div class="dup-firma-name">{{ d.firma_a_name }}</div>
+                    <div class="dup-firma-sub">{{ d.firma_a_id }} · {{ d.firma_a_ort }}</div>
+                </div>
+                <div class="dup-arrow">⟺</div>
+                <div class="dup-firma">
+                    <div class="dup-firma-name">{{ d.firma_b_name }}</div>
+                    <div class="dup-firma-sub">{{ d.firma_b_id }} · {{ d.firma_b_ort }}</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                <span class="ampel-badge rot"><span class="ampel ampel-rot"></span> {{ d.gesamt_score }}%</span>
+                <div class="dup-scores">
+                    <div class="dup-score-item">Name: <span>{{ d.name_score }}%</span></div>
+                    <div class="dup-score-item">Adresse: <span>{{ d.addr_score }}%</span></div>
+                </div>
+                <div class="dup-match-grund">{{ d.match_grund }}</div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if gelbe %}
+        <div style="font-size:11px;font-weight:600;color:#fbbf24;text-transform:uppercase;letter-spacing:0.06em;margin:16px 0 8px;">
+            🟡 Zu prüfen ({{ gelbe | length }})
+        </div>
+        {% for d in gelbe %}
+        <div class="dup-card gelb">
+            <div class="dup-pair">
+                <div class="dup-firma">
+                    <div class="dup-firma-name">{{ d.firma_a_name }}</div>
+                    <div class="dup-firma-sub">{{ d.firma_a_id }} · {{ d.firma_a_ort }}</div>
+                </div>
+                <div class="dup-arrow">⟺</div>
+                <div class="dup-firma">
+                    <div class="dup-firma-name">{{ d.firma_b_name }}</div>
+                    <div class="dup-firma-sub">{{ d.firma_b_id }} · {{ d.firma_b_ort }}</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                <span class="ampel-badge gelb"><span class="ampel ampel-gelb"></span> {{ d.gesamt_score }}%</span>
+                <div class="dup-scores">
+                    <div class="dup-score-item">Name: <span>{{ d.name_score }}%</span></div>
+                    <div class="dup-score-item">Adresse: <span>{{ d.addr_score }}%</span></div>
+                </div>
+                <div class="dup-match-grund">{{ d.match_grund }}</div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% else %}
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;text-align:center;color:var(--sub);">
+            Keine Duplikate erkannt.
+        </div>
+        {% endif %}
+    </div>
+
+    {% else %}
+    <!-- Noch kein Ergebnis -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:48px;text-align:center;color:var(--sub);">
+        <div style="font-size:40px;margin-bottom:16px;">🔍</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;">Firmenstamm analysieren</div>
+        <div style="font-size:13px;">Beispieldaten laden oder eigene CSV hochladen,<br>um Duplikate und ähnliche Firmen zu erkennen.</div>
+    </div>
+    {% endif %}
+
+</div><!-- /.main-col -->
+
+<!-- ══ SIDEBAR ══ -->
+<div class="rt-sidebar">
+
+    <!-- Algorithmus -->
+    <div class="sidebar-card">
+        <h4>Algorithmus</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.7;">
+            <div style="margin-bottom:8px;">
+                <span style="color:#60a5fa;font-weight:600;">1. Blocking</span><br>
+                Nur Firmen mit gleicher PLZ-Vorwahl (2 Ziffern) oder gleichem Anfangsbuchstaben werden verglichen. Spart 95% der Vergleiche.
+            </div>
+            <div style="margin-bottom:8px;">
+                <span style="color:#f59e0b;font-weight:600;">2. Name-Ähnlichkeit</span><br>
+                difflib.SequenceMatcher (Levenshtein-ähnlich). Rechtsformen werden vorher entfernt.
+            </div>
+            <div style="margin-bottom:8px;">
+                <span style="color:#34d399;font-weight:600;">3. Gewichteter Score</span><br>
+                0.6 × Name + 0.3 × Adresse + 0.1 × Branche
+            </div>
+            <div>
+                <span style="color:#a78bfa;font-weight:600;">4. Ampel-Einstufung</span><br>
+                Rot ≥ 75% · Gelb 55–74% · Grün &lt; 55%
+            </div>
+        </div>
+    </div>
+
+    <!-- Ampel-Legende -->
+    <div class="sidebar-card">
+        <h4>Ampel-Bedeutung</h4>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+                <span class="ampel ampel-rot" style="margin-top:3px;"></span>
+                <div>
+                    <div style="font-size:12px;font-weight:600;color:#f87171;">Duplikat ≥ 75%</div>
+                    <div style="font-size:11px;color:var(--sub);">Sehr wahrscheinlich gleiche Firma. Manuell zusammenführen.</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+                <span class="ampel ampel-gelb" style="margin-top:3px;"></span>
+                <div>
+                    <div style="font-size:12px;font-weight:600;color:#fbbf24;">Prüfen 55–74%</div>
+                    <div style="font-size:11px;color:var(--sub);">Möglicherweise verwandt. Manuelle Prüfung empfohlen.</div>
+                </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+                <span class="ampel ampel-grün" style="margin-top:3px;"></span>
+                <div>
+                    <div style="font-size:12px;font-weight:600;color:#34d399;">Eindeutig &lt; 55%</div>
+                    <div style="font-size:11px;color:var(--sub);">Verschiedene Firmen. Kein Handlungsbedarf.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Typische Duplikat-Muster -->
+    <div class="sidebar-card">
+        <h4>Typische Muster</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.7;">
+            <div>• Tippfehler im CRM-Import</div>
+            <div>• Umlaut-Varianten (ü/ue)</div>
+            <div>• Verschiedene Rechtsformen</div>
+            <div>• Alte vs. neue Adresse</div>
+            <div>• Abkürzungen (&amp; Co. → GmbH)</div>
+            <div>• Leerzeichen am Ende</div>
+        </div>
+    </div>
+
+    <!-- Next Step -->
+    <div style="background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.2);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--sub);line-height:1.6;">
+        <div style="font-size:11px;font-weight:600;color:#60a5fa;margin-bottom:6px;">Next Step: ML-Entity-Resolution</div>
+        Dieses Regelmodell deckt syntaktische Varianten ab. Ein trainiertes Modell (z.B. <strong style="color:#60a5fa;">Dedupe.io</strong> oder BERT-basiertes Embedding-Matching) erkennt auch semantische Äquivalenzen wie Branchenkontext und Firmenhistorie.
+    </div>
+
+</div><!-- /.sidebar -->
+
+</div><!-- /.rt-layout -->
+</main>
+
+</body>
+</html>

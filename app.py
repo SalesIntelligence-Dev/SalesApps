@@ -22,6 +22,8 @@ from report_generator import generate_report
 from chart_generator import make_forecast_chart, make_daily_bar_chart
 from margen_analyse import analyse as margen_analyse
 from cross_selling_graph import analyse as cs_analyse
+from konfiguration_graph import analyse as kg_analyse
+from retrieval_analyse import analyse as retrieval_analyse
 
 # ── Logging ──────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -247,14 +249,64 @@ def cross_selling():
     return render_template("cross_selling.html", result=result, error=error)
 
 
-@app.route("/konfiguration")
+@app.route("/konfiguration", methods=["GET", "POST"])
 def konfiguration():
-    return render_template("coming_soon.html", app_name="Graph Produktkonfiguration", icon="⚙️")
+    result = None
+    error  = None
+
+    if request.method == "POST":
+        try:
+            if request.form.get("use_example"):
+                df_sl  = pd.read_csv(DATASETS_DIR / "stückliste.csv")
+                df_ang = pd.read_csv(DATASETS_DIR / "angebote_historisch.csv")
+                selected_basis = None
+            elif request.form.get("analyse"):
+                df_sl  = pd.read_csv(DATASETS_DIR / "stückliste.csv")
+                df_ang = pd.read_csv(DATASETS_DIR / "angebote_historisch.csv")
+                selected_basis = request.form.get("basis_id") or None
+            else:
+                f_sl  = request.files.get("file_stueck")
+                f_ang = request.files.get("file_angebote")
+                if f_sl and f_sl.filename and f_ang and f_ang.filename:
+                    df_sl  = _load_dataframe(f_sl.stream,  f_sl.filename)
+                    df_ang = _load_dataframe(f_ang.stream, f_ang.filename)
+                    selected_basis = None
+                else:
+                    error = "Bitte beide CSV-Dateien hochladen oder Beispieldaten verwenden."
+                    return render_template("konfiguration.html", result=None, error=error)
+
+            result = kg_analyse(df_sl, df_ang, selected_basis_id=selected_basis)
+        except Exception as exc:
+            logger.error("Konfiguration Fehler: %s", exc)
+            error = str(exc)
+
+    return render_template("konfiguration.html", result=result, error=error)
 
 
-@app.route("/retrieval")
+@app.route("/retrieval", methods=["GET", "POST"])
 def retrieval():
-    return render_template("coming_soon.html", app_name="Ähnliche Firmen finden", icon="🔍")
+    result = None
+    error  = None
+
+    if request.method == "POST":
+        try:
+            suchbegriff = request.form.get("suchbegriff", "").strip() or None
+
+            if request.form.get("use_example") or request.form.get("suchen"):
+                df = pd.read_csv(DATASETS_DIR / "firmenstamm_beispiel.csv")
+            elif "file" in request.files and request.files["file"].filename:
+                f  = request.files["file"]
+                df = _load_dataframe(f.stream, f.filename)
+            else:
+                error = "Bitte eine Datei hochladen oder Beispieldaten verwenden."
+                return render_template("retrieval.html", result=None, error=error)
+
+            result = retrieval_analyse(df, suchbegriff=suchbegriff)
+        except Exception as exc:
+            logger.error("Retrieval Fehler: %s", exc)
+            error = str(exc)
+
+    return render_template("retrieval.html", result=result, error=error)
 
 
 @app.route("/lead-scoring")
