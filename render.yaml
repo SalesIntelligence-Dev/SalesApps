@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: salesapps
+    runtime: python
+    region: frankfurt
+    plan: starter
+
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      python datasets/generate_defaults.py
+
+    startCommand: >
+      gunicorn
+      --bind 0.0.0.0:$PORT
+      --workers 1
+      --threads 4
+      --timeout 120
+      --worker-class gthread
+      --access-logfile -
+      --error-logfile -
+      app:app
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      # RunPod Verbindung (in Render Dashboard eintragen, nicht hier!)
+      # - key: RUNPOD_API_KEY
+      #   value: ...
+      # - key: RUNPOD_ENDPOINT_ID
+      #   value: ...
