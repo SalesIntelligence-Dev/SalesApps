@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produkt-Empfehlungen – SalesApps</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=4">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        .rc-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; }
+
+        .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+        .panel-title { font-size: 14px; font-weight: 600; color: var(--text); }
+        .panel-sub { font-size: 12px; color: var(--sub); margin-top: 2px; }
+
+        /* Kundenkontext-Leiste */
+        .whoami { background: linear-gradient(135deg, rgba(167,139,250,0.09), rgba(96,165,250,0.05));
+                  border: 1px solid rgba(167,139,250,0.25); border-radius: 12px;
+                  padding: 18px 22px; margin-bottom: 20px; }
+        .whoami-top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .whoami-avatar { width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
+                         background: linear-gradient(135deg,#a78bfa,#60a5fa);
+                         display: flex; align-items: center; justify-content: center;
+                         font-size: 19px; font-weight: 700; color: #0f172a; }
+        .whoami-name { font-size: 17px; font-weight: 700; color: var(--text); }
+        .whoami-meta { font-size: 12px; color: var(--sub); margin-top: 2px; }
+        .whoami-stats { display: flex; gap: 22px; margin-left: auto; flex-wrap: wrap; }
+        .whoami-stat { text-align: right; }
+        .whoami-stat-val { font-size: 17px; font-weight: 700; color: var(--text); line-height: 1; }
+        .whoami-stat-lbl { font-size: 10px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px; }
+
+        /* Abdeckungsbalken */
+        .cov-wrap { margin-top: 14px; }
+        .cov-track { height: 6px; border-radius: 3px; background: rgba(0,0,0,0.3); overflow: hidden; }
+        .cov-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg,#60a5fa,#a78bfa); }
+        .cov-txt { font-size: 11px; color: var(--sub); margin-top: 6px; }
+
+        /* Produktkarten – Hero */
+        .prod-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+        .prod { background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+                padding: 18px; display: flex; flex-direction: column; gap: 11px; position: relative;
+                transition: border-color .2s, transform .2s; }
+        .prod:hover { border-color: rgba(52,211,153,0.5); transform: translateY(-2px); }
+        .prod.top { border-color: rgba(52,211,153,0.45);
+                    background: linear-gradient(160deg, var(--card), rgba(52,211,153,0.05)); }
+
+        .prod-rank { position: absolute; top: 14px; right: 16px; font-size: 10px; font-weight: 700;
+                     color: var(--sub); letter-spacing: 0.06em; }
+        .prod-icon { font-size: 30px; line-height: 1; }
+        .prod-name { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.35; padding-right: 28px; }
+        .prod-grp { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px;
+                    border-radius: 9px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+        /* Match-Anzeige */
+        .match { display: flex; align-items: center; gap: 10px; }
+        .match-val { font-size: 24px; font-weight: 800; line-height: 1; color: #34d399; }
+        .match-bar { flex: 1; height: 6px; border-radius: 3px; background: var(--border); overflow: hidden; }
+        .match-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg,#34d399,#6ee7b7); }
+        .match-lbl { font-size: 9px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.06em; }
+
+        /* Preis */
+        .prod-preis { display: flex; align-items: baseline; gap: 8px; }
+        .prod-preis-val { font-size: 17px; font-weight: 700; color: var(--text); }
+        .prod-preis-sub { font-size: 11px; color: var(--sub); }
+
+        /* Begründung */
+        .why { background: rgba(0,0,0,0.2); border-radius: 8px; padding: 11px 12px; flex: 1; }
+        .why-lbl { font-size: 9px; font-weight: 700; color: #6ee7b7; text-transform: uppercase;
+                   letter-spacing: 0.06em; margin-bottom: 5px; }
+        .why-txt { font-size: 11px; color: var(--sub); line-height: 1.6; }
+        .chip { display: inline-block; background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.22);
+                color: #93c5fd; border-radius: 8px; padding: 1px 7px; font-size: 10px; margin: 3px 3px 0 0; }
+
+        .fits { font-size: 11px; color: var(--sub); }
+        .fits b { color: #60a5fa; font-weight: 600; }
+
+        /* Modell-Split */
+        .split { display: flex; gap: 8px; }
+        .split-item { flex: 1; background: rgba(0,0,0,0.18); border-radius: 6px; padding: 6px 8px; text-align: center; }
+        .split-val { font-size: 12px; font-weight: 700; }
+        .split-lbl { font-size: 8px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1px; }
+
+        .cta { display: block; text-align: center; background: rgba(52,211,153,0.12);
+               border: 1px solid rgba(52,211,153,0.3); color: #6ee7b7; border-radius: 8px;
+               padding: 9px; font-size: 12px; font-weight: 600; text-decoration: none;
+               transition: background .2s; }
+        .cta:hover { background: rgba(52,211,153,0.2); }
+
+        /* Weitere Empfehlungen */
+        .more { display: flex; align-items: center; gap: 14px; padding: 11px 14px;
+                border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .more-icon { font-size: 18px; flex-shrink: 0; }
+        .more-body { flex: 1; min-width: 0; }
+        .more-name { font-size: 13px; font-weight: 600; color: var(--text); }
+        .more-why { font-size: 11px; color: var(--sub); margin-top: 2px; }
+        .more-match { font-size: 15px; font-weight: 700; color: #34d399; white-space: nowrap; }
+        .more-preis { font-size: 12px; color: var(--sub); white-space: nowrap; min-width: 92px; text-align: right; }
+
+        /* Portfolio-Pills */
+        .pill-row { display: flex; flex-wrap: wrap; gap: 7px; }
+        .pill { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.04);
+                border: 1px solid var(--border); border-radius: 9px; padding: 6px 11px; font-size: 12px; color: var(--sub); }
+        .pill b { color: var(--text); font-weight: 600; }
+
+        #rc-graph { height: 400px; }
+
+        .rc-sidebar { display: flex; flex-direction: column; gap: 16px; }
+        .sidebar-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+        .sidebar-card h4 { font-size: 12px; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+        .note { background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.2); border-radius: 8px; padding: 12px 14px; font-size: 12px; color: var(--sub); line-height: 1.6; }
+        .note strong { color: #60a5fa; }
+
+        select { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 9px 13px; font-family: inherit; font-size: 13px; }
+        select:focus { outline: none; border-color: var(--accent); }
+
+        @media (max-width: 1100px) { .prod-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 900px) {
+            .rc-layout { grid-template-columns: 1fr; }
+            .prod-grid { grid-template-columns: 1fr; }
+            .whoami-stats { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <div class="logo">
+            <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;">
+                <span class="logo-icon">🛒</span>
+                <div>
+                    <div class="logo-title">Produkt-Empfehlungen</div>
+                    <div class="logo-sub">Graph ML · persönlich zusammengestellt</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="app-main">
+<div class="rc-layout">
+
+<div>
+    <!-- Steuerung -->
+    <div class="panel">
+        <form method="POST">
+            <div style="font-size:13px;color:var(--sub);margin-bottom:14px;">
+                Der Kunden-Produkt-Graph berechnet, welche Produkte für Ihr Unternehmen
+                als nächster Schritt sinnvoll sind – jede Empfehlung mit nachvollziehbarer Begründung.
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <button type="submit" name="use_example" value="1" class="btn-primary">Beispieldaten laden</button>
+                {% if result and result.kunden %}
+                <select name="kunde_id" onchange="this.form.submit()">
+                    <option value="">— Als welcher Kunde ansehen? —</option>
+                    {% for k in result.kunden %}
+                    <option value="{{ k.id }}"
+                        {% if result.selected_kunde and result.selected_kunde.id == k.id %}selected{% endif %}>
+                        {{ k.name }} ({{ k.n_produkte }} Produkte)
+                    </option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    {% if error %}
+    <div style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:12px 16px;color:#f87171;margin-bottom:20px;">{{ error }}</div>
+    {% endif %}
+
+    {% if result and result.selected_kunde %}
+    {% set k = result.selected_kunde %}
+
+    <!-- Wer bin ich -->
+    <div class="whoami">
+        <div class="whoami-top">
+            <div class="whoami-avatar">{{ k.name[:2]|upper }}</div>
+            <div>
+                <div class="whoami-name">{{ k.name }}</div>
+                <div class="whoami-meta">{{ k.branche }} · {{ k.groesse }} · Betreuer {{ k.rep }}</div>
+            </div>
+            <div class="whoami-stats">
+                <div class="whoami-stat">
+                    <div class="whoami-stat-val">{{ k.n_produkte }}<span style="font-size:12px;color:var(--sub);">/{{ k.n_gesamt }}</span></div>
+                    <div class="whoami-stat-lbl">Produkte im Einsatz</div>
+                </div>
+                <div class="whoami-stat">
+                    <div class="whoami-stat-val" style="color:#34d399;">
+                        {{ '{:,.0f}'.format(k.potenzial).replace(',', '.') }} €
+                    </div>
+                    <div class="whoami-stat-lbl">Top-3 Empfehlungen p.a.</div>
+                </div>
+            </div>
+        </div>
+        <div class="cov-wrap">
+            <div class="cov-track"><div class="cov-fill" style="width:{{ k.abdeckung }}%;"></div></div>
+            <div class="cov-txt">
+                Sie nutzen {{ k.abdeckung }} % des verfügbaren Sortiments –
+                {{ k.n_gesamt - k.n_produkte }} Produkte kommen für Sie zusätzlich infrage.
+            </div>
+        </div>
+    </div>
+
+    {% if result.empfehlungen %}
+    <!-- Top-Empfehlungen -->
+    <div class="panel-head" style="margin-bottom:12px;">
+        <div>
+            <div class="panel-title">Für Sie empfohlen</div>
+            <div class="panel-sub">
+                Berechnet aus dem Kaufverhalten von {{ result.kpi.n_kunden }} vergleichbaren Unternehmen
+            </div>
+        </div>
+    </div>
+
+    <div class="prod-grid">
+        {% for e in result.empfehlungen[:3] %}
+        <div class="prod top">
+            <div class="prod-rank">TOP {{ e.rang }}</div>
+            <div class="prod-icon">{{ e.icon }}</div>
+            <div>
+                <div class="prod-name">{{ e.produkt_name }}</div>
+                <span class="prod-grp" style="background:{{ e.farbe }}1f;color:{{ e.farbe }};border:1px solid {{ e.farbe }}44;margin-top:7px;">
+                    {{ e.gruppe }}
+                </span>
+            </div>
+
+            <div>
+                <div class="match-lbl">Passgenauigkeit</div>
+                <div class="match" style="margin-top:5px;">
+                    <div class="match-val">{{ e.match|int }}%</div>
+                    <div class="match-bar"><div class="match-fill" style="width:{{ e.match }}%;"></div></div>
+                </div>
+            </div>
+
+            <div class="prod-preis">
+                <span class="prod-preis-val">{{ '{:,.0f}'.format(e.jahreswert).replace(',', '.') }} €</span>
+                <span class="prod-preis-sub">/ Jahr bei {{ e.menge|int }} Stück</span>
+            </div>
+
+            <div class="why">
+                <div class="why-lbl">Warum für Sie?</div>
+                <div class="why-txt">{{ e.erklaerung.text }}</div>
+                {% if e.erklaerung.belege %}
+                <div style="margin-top:6px;">
+                    {% for b in e.erklaerung.belege %}<span class="chip">{{ b.kunde }}</span>{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="split">
+                <div class="split-item">
+                    <div class="split-val" style="color:#a78bfa;">{{ e.score_ppr|int }}</div>
+                    <div class="split-lbl">PageRank</div>
+                </div>
+                <div class="split-item">
+                    <div class="split-val" style="color:#60a5fa;">{{ e.score_svd|int }}</div>
+                    <div class="split-lbl">Latent</div>
+                </div>
+            </div>
+
+            <a href="#" class="cta" onclick="return false;">Angebot anfordern</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Empfehlungsgraph -->
+    {% if result.graph_json and result.graph_json != '{}' %}
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Wie diese Empfehlungen entstehen</div>
+                <div class="panel-sub">
+                    Ihr Knoten, Ihre Produkte, ähnliche Kunden und die daraus abgeleiteten Empfehlungen
+                </div>
+            </div>
+        </div>
+        <div id="rc-graph"></div>
+        <div class="note" style="margin-top:12px;">
+            <strong>Lesehilfe:</strong> Der Random Walk startet bei Ihnen, läuft über Ihre Produkte
+            zu Unternehmen mit ähnlichem Portfolio und von dort weiter zu deren Produkten.
+            Grün markierte Knoten werden Ihnen dadurch vorgeschlagen.
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Weitere Empfehlungen -->
+    {% if result.empfehlungen | length > 3 %}
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Weitere Produkte für Sie</div>
+                <div class="panel-sub">Absteigend nach Passgenauigkeit</div>
+            </div>
+        </div>
+        {% for e in result.empfehlungen[3:] %}
+        <div class="more">
+            <div class="more-icon">{{ e.icon }}</div>
+            <div class="more-body">
+                <div class="more-name">{{ e.produkt_name }}</div>
+                <div class="more-why">
+                    {{ e.gruppe }}
+                    {% if e.passt_zu %} · passt zu Ihrem {{ e.passt_zu }}{% endif %}
+                    · {{ e.erklaerung.n_kunden }} vergleichbare Kunden nutzen es
+                </div>
+            </div>
+            <div class="more-preis">{{ '{:,.0f}'.format(e.jahreswert).replace(',', '.') }} € p.a.</div>
+            <div class="more-match">{{ e.match|int }}%</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="panel" style="text-align:center;padding:40px;color:var(--sub);">
+        Sie nutzen bereits das vollständige Sortiment – aktuell keine weiteren Empfehlungen.
+    </div>
+    {% endif %}
+
+    <!-- Portfolio -->
+    {% if result.portfolio %}
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Ihr aktuelles Portfolio</div>
+                <div class="panel-sub">{{ result.portfolio | length }} Produkte im Einsatz</div>
+            </div>
+        </div>
+        <div class="pill-row">
+            {% for p in result.portfolio %}
+            <span class="pill">
+                <span>{{ p.icon }}</span>
+                <b>{{ p.produkt_name }}</b>
+                <span style="opacity:0.7;">{{ '{:,.0f}'.format(p.umsatz).replace(',', '.') }} €</span>
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% elif result %}
+    <div class="panel" style="text-align:center;padding:48px;color:var(--sub);">
+        <div style="font-size:40px;margin-bottom:16px;">🛒</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;">Kunde auswählen</div>
+        <div style="font-size:13px;">
+            Wählen Sie oben ein Unternehmen aus, um die persönlichen<br>
+            Produktempfehlungen zu berechnen.
+        </div>
+        <div style="font-size:12px;margin-top:14px;">
+            Graph geladen · {{ result.kpi.n_kunden }} Kunden · {{ result.kpi.n_produkte }} Produkte ·
+            {{ result.kpi.n_kanten }} Kaufbeziehungen
+        </div>
+    </div>
+
+    {% else %}
+    <div class="panel" style="text-align:center;padding:48px;color:var(--sub);">
+        <div style="font-size:40px;margin-bottom:16px;">🛒</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;">Produktempfehlungen berechnen</div>
+        <div style="font-size:13px;">Beispieldaten laden, um den Kunden-Produkt-Graphen aufzubauen.</div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Sidebar -->
+<div class="rc-sidebar">
+    <div class="sidebar-card">
+        <h4>Das Modell</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.7;">
+            <div style="margin-bottom:10px;">
+                <span style="color:#a78bfa;font-weight:600;">Personalized PageRank · {{ result.algo.ppr_gewicht if result else 60 }} %</span><br>
+                Random Walk auf dem bipartiten Kunde-Produkt-Graphen, gestartet bei Ihnen.
+                Erfasst auch mehrstufige Zusammenhänge, die eine reine Co-Occurrence-Zählung übersieht.
+            </div>
+            <div style="margin-bottom:10px;">
+                <span style="color:#60a5fa;font-weight:600;">Latente Faktoren · {{ result.algo.svd_gewicht if result else 40 }} %</span><br>
+                Truncated SVD der Interaktionsmatrix (Rang {{ result.algo.svd_rank if result else 4 }}).
+                Findet Muster, die sich nicht über gemeinsame Kunden erklären lassen.
+            </div>
+            <div>
+                <span style="color:#34d399;font-weight:600;">Hybrid</span><br>
+                Beide Signale werden normiert und gewichtet kombiniert. Die Einzelwerte
+                stehen auf jeder Produktkarte.
+            </div>
+        </div>
+    </div>
+
+    {% if result and result.kpi %}
+    <div class="sidebar-card">
+        <h4>Der Graph</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.9;">
+            <div>Kunden: <span style="color:var(--text);">{{ result.kpi.n_kunden }}</span></div>
+            <div>Produkte: <span style="color:var(--text);">{{ result.kpi.n_produkte }}</span></div>
+            <div>Kaufbeziehungen: <span style="color:var(--text);">{{ result.kpi.n_kanten }}</span></div>
+            <div>Matrixdichte: <span style="color:var(--text);">{{ result.kpi.dichte }} %</span></div>
+            <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;">
+                Dämpfungsfaktor α = {{ result.algo.alpha }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="sidebar-card">
+        <h4>Warum zwei Verfahren?</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.7;">
+            PageRank ist stark, wenn genügend gemeinsame Kunden existieren – versagt aber bei
+            Produkten am Rand des Graphen. Die Matrixfaktorisierung erkennt genau dort noch Muster.
+            Auf den Produktkarten sieht man den Unterschied: Manche Empfehlungen kommen fast
+            ausschließlich aus dem einen oder dem anderen Verfahren.
+        </div>
+    </div>
+
+    <div class="note">
+        <div style="font-size:11px;font-weight:600;color:#60a5fa;margin-bottom:6px;">Next Step: LightGCN</div>
+        PageRank und SVD sind untrainierte Verfahren – sie nutzen die Graphstruktur, lernen aber
+        nichts aus tatsächlichen Abschlüssen. Ein <strong>LightGCN- oder GraphSAGE-Modell</strong>
+        würde Kunden- und Produkt-Embeddings direkt auf angenommene gegen abgelehnte Angebote
+        trainieren und dabei Saisonalität sowie Kaufreihenfolge berücksichtigen.
+    </div>
+</div>
+
+</div>
+</main>
+
+{% if result and result.graph_json and result.graph_json != '{}' %}
+<script>
+(function(){
+    var fig = {{ result.graph_json | safe }};
+    Plotly.newPlot('rc-graph', fig.data, fig.layout, {responsive:true, displayModeBar:false});
+})();
+</script>
+{% endif %}
+
+<footer class="home-footer">SalesApps · Produkt-Empfehlungen · Personalized PageRank + SVD</footer>
+</body>
+</html>

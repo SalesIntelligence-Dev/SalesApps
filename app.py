@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from flask import (
     Flask, render_template, request, jsonify,
-    send_file, abort,
+    send_file, abort, redirect, url_for,
 )
 
 from aurora_inference import AuroraInference, AuroraConfig
@@ -24,7 +24,7 @@ from margen_analyse import analyse as margen_analyse
 from cross_selling_graph import analyse as cs_analyse
 from konfiguration_graph import analyse as kg_analyse
 from retrieval_analyse import analyse as retrieval_analyse
-from growth_engine import analyse as growth_analyse
+from recommender_graph import analyse as reco_analyse
 from opportunity_graph import analyse as opp_analyse
 from next_action_engine import analyse as nba_analyse
 from churn_engine import analyse as churn_analyse
@@ -318,8 +318,8 @@ def lead_scoring():
     return render_template("coming_soon.html", app_name="Lead Scoring", icon="🎯")
 
 
-@app.route("/growth", methods=["GET", "POST"])
-def growth():
+@app.route("/recommender", methods=["GET", "POST"])
+def recommender():
     result = None
     error  = None
 
@@ -334,14 +334,20 @@ def growth():
                 df = _load_dataframe(f.stream, f.filename)
             else:
                 error = "Bitte eine Datei hochladen oder Beispieldaten verwenden."
-                return render_template("growth.html", result=None, error=error)
+                return render_template("recommender.html", result=None, error=error)
 
-            result = growth_analyse(df, selected_kunde_id=selected_kunde)
+            result = reco_analyse(df, selected_kunde_id=selected_kunde)
         except Exception as exc:
-            logger.error("Growth Engine Fehler: %s", exc)
+            logger.error("Recommender Fehler: %s", exc)
             error = str(exc)
 
-    return render_template("growth.html", result=result, error=error)
+    return render_template("recommender.html", result=result, error=error)
+
+
+@app.route("/growth")
+def growth_redirect():
+    """Alter Pfad der Growth Engine – zeigt jetzt auf den Produkt-Recommender."""
+    return redirect(url_for("recommender"), code=301)
 
 
 @app.route("/opportunity", methods=["GET", "POST"])
