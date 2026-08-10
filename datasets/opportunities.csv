@@ -1,0 +1,101 @@
+opp_id,kunde_id,kunde_name,branche,vertriebsmitarbeiter,produkt_id,produkt_name,deal_wert,stage,stage_nr,tage_in_stage,tage_seit_erstellung,letzter_kontakt_tage,wettbewerber,rabatt_gefordert_pct,crm_probability,status
+OPP-0001,K01,Müller GmbH,Maschinenbau,Meyer,P03,Druckluftanlage DA-100,420000,Angebot,3,38,96,17,Nordtech AG,12,60,offen
+OPP-0002,K02,Schneider AG,Automotive,Schulz,P10,Wartungsvertrag Premium,210000,Verhandlung,4,11,74,4,—,6,80,offen
+OPP-0003,K03,Meier GmbH,Chemie,Meyer,P01,Hydraulikpumpe HX-200,145000,Bedarfsanalyse,2,62,112,41,Vertec Systems,18,40,offen
+OPP-0004,K05,Weber Industrie,Maschinenbau,Schulz,P03,Druckluftanlage DA-100,380000,Verhandlung,4,24,85,9,Industrial One,22,80,offen
+OPP-0005,K06,Braun Systems,Pharma,Meyer,P11,Inbetriebnahme & Setup,95000,Angebot,3,14,41,6,—,8,60,offen
+OPP-0006,K09,Groß Maschinenbau,Metallindustrie,Meyer,P02,Kompressor KA-500,265000,Angebot,3,71,160,55,Hydrotek GmbH,15,60,offen
+OPP-0007,K11,Hoffmann Werke,Lebensmittel,Schulz,P03,Druckluftanlage DA-100,310000,Abschluss,5,8,47,3,—,9,92,offen
+OPP-0008,K14,Koch Anlagen,Maschinenbau,Schulz,P10,Wartungsvertrag Premium,175000,Angebot,3,19,80,12,Nordtech AG,11,60,offen
+OPP-0009,K13,Wagner Systems,Metallindustrie,Hoffmann,P01,Hydraulikpumpe HX-200,70000,Bedarfsanalyse,2,59,158,29,Nordtech AG,9,40,offen
+OPP-0010,K11,Hoffmann Werke,Lebensmittel,Schulz,P12,Anwenderschulung,518000,Verhandlung,4,66,92,58,—,9,80,offen
+OPP-0011,K03,Meier GmbH,Chemie,Meyer,P11,Inbetriebnahme & Setup,92000,Angebot,3,55,71,32,Industrial One,19,60,offen
+OPP-0012,K13,Wagner Systems,Metallindustrie,Hoffmann,P05,Steuerungsmodul SM-Pro,65000,Qualifizierung,1,74,194,52,Industrial One,19,20,offen
+OPP-0013,K02,Schneider AG,Automotive,Schulz,P09,Wartungsvertrag Basic,338000,Verhandlung,4,78,151,41,Hydrotek GmbH,18,80,offen
+OPP-0014,K03,Meier GmbH,Chemie,Meyer,P05,Steuerungsmodul SM-Pro,82000,Verhandlung,4,36,102,17,Hydrotek GmbH,19,80,offen
+OPP-0015,K01,Müller GmbH,Maschinenbau,Meyer,P08,Schlauchpaket SP-Set,250000,Bedarfsanalyse,2,72,146,52,Nordtech AG,7,40,offen
+OPP-0016,K02,Schneider AG,Automotive,Schulz,P09,Wartungsvertrag Basic,286000,Bedarfsanalyse,2,18,136,28,Nordtech AG,15,40,offen
+OPP-0017,K08,Klein Automation,Maschinenbau,Schulz,P09,Wartungsvertrag Basic,54000,Qualifizierung,1,70,165,4,Hydrotek GmbH,9,20,offen
+OPP-0018,K11,Hoffmann Werke,Lebensmittel,Schulz,P01,Hydraulikpumpe HX-200,513000,Verhandlung,4,74,110,37,Nordtech AG,23,80,offen
+OPP-0019,K10,Ritter Technik,Chemie,Hoffmann,P03,Druckluftanlage DA-100,81000,Bedarfsanalyse,2,30,109,50,—,13,40,offen
+OPP-0020,K13,Wagner Systems,Metallindustrie,Hoffmann,P03,Druckluftanlage DA-100,110000,Abschluss,5,65,168,11,Vertec Systems,24,92,offen
+OPP-0021,K10,Ritter Technik,Chemie,Hoffmann,P06,Präzisionssensor PS-200,237000,Abschluss,5,80,97,43,Nordtech AG,11,92,offen
+OPP-0022,K08,Klein Automation,Maschinenbau,Schulz,P03,Druckluftanlage DA-100,120000,Abschluss,5,19,42,10,Hydrotek GmbH,3,92,offen
+OPP-0023,K02,Schneider AG,Automotive,Schulz,P02,Kompressor KA-500,468000,Bedarfsanalyse,2,13,77,19,Hydrotek GmbH,17,40,offen
+OPP-0024,K12,Bauer Industrie,Pharma,Meyer,P05,Steuerungsmodul SM-Pro,78000,Verhandlung,4,26,143,8,Industrial One,10,80,offen
+OPP-0025,K09,Groß Maschinenbau,Metallindustrie,Meyer,P05,Steuerungsmodul SM-Pro,421000,Qualifizierung,1,43,79,56,Vertec Systems,16,20,offen
+OPP-0026,K14,Koch Anlagen,Maschinenbau,Schulz,P07,Druckregler DR-80,246000,Bedarfsanalyse,2,70,121,53,—,24,40,offen
+OPP-0027,K06,Braun Systems,Pharma,Meyer,P04,Förderpumpe FP-350,158000,Abschluss,5,8,36,17,Industrial One,9,92,offen
+OPP-0028,K08,Klein Automation,Maschinenbau,Schulz,P10,Wartungsvertrag Premium,85000,Angebot,3,58,103,22,Nordtech AG,12,60,offen
+OPP-0029,K14,Koch Anlagen,Maschinenbau,Schulz,P08,Schlauchpaket SP-Set,160000,Angebot,3,16,75,17,Nordtech AG,7,60,offen
+OPP-0030,K02,Schneider AG,Automotive,Schulz,P08,Schlauchpaket SP-Set,93000,Verhandlung,4,49,159,8,Hydrotek GmbH,4,80,offen
+OPP-0031,K13,Wagner Systems,Metallindustrie,Hoffmann,P02,Kompressor KA-500,84000,Abgeschlossen,5,0,384,50,Industrial One,5,92,verloren
+OPP-0032,K02,Schneider AG,Automotive,Schulz,P10,Wartungsvertrag Premium,401000,Abgeschlossen,5,0,356,22,Industrial One,16,92,verloren
+OPP-0033,K05,Weber Industrie,Maschinenbau,Schulz,P04,Förderpumpe FP-350,389000,Abgeschlossen,5,0,189,35,—,8,92,verloren
+OPP-0034,K01,Müller GmbH,Maschinenbau,Meyer,P09,Wartungsvertrag Basic,331000,Abgeschlossen,5,0,193,31,—,12,92,verloren
+OPP-0035,K04,Schmidt AG,Lebensmittel,Hoffmann,P12,Anwenderschulung,215000,Abgeschlossen,5,0,324,30,—,8,92,gewonnen
+OPP-0036,K05,Weber Industrie,Maschinenbau,Schulz,P05,Steuerungsmodul SM-Pro,200000,Abgeschlossen,5,0,367,17,—,3,92,verloren
+OPP-0037,K10,Ritter Technik,Chemie,Hoffmann,P06,Präzisionssensor PS-200,168000,Abgeschlossen,5,0,277,44,Nordtech AG,13,92,verloren
+OPP-0038,K10,Ritter Technik,Chemie,Hoffmann,P08,Schlauchpaket SP-Set,150000,Abgeschlossen,5,0,291,25,Nordtech AG,16,92,verloren
+OPP-0039,K10,Ritter Technik,Chemie,Hoffmann,P06,Präzisionssensor PS-200,142000,Abgeschlossen,5,0,239,2,Industrial One,14,92,gewonnen
+OPP-0040,K13,Wagner Systems,Metallindustrie,Hoffmann,P05,Steuerungsmodul SM-Pro,93000,Abgeschlossen,5,0,368,25,Nordtech AG,16,92,verloren
+OPP-0041,K01,Müller GmbH,Maschinenbau,Meyer,P12,Anwenderschulung,192000,Abgeschlossen,5,0,281,5,—,6,92,verloren
+OPP-0042,K05,Weber Industrie,Maschinenbau,Schulz,P07,Druckregler DR-80,195000,Abgeschlossen,5,0,99,2,Industrial One,9,92,gewonnen
+OPP-0043,K04,Schmidt AG,Lebensmittel,Hoffmann,P03,Druckluftanlage DA-100,39000,Abgeschlossen,5,0,373,41,Industrial One,20,92,verloren
+OPP-0044,K09,Groß Maschinenbau,Metallindustrie,Meyer,P09,Wartungsvertrag Basic,341000,Abgeschlossen,5,0,274,20,Nordtech AG,7,92,gewonnen
+OPP-0045,K04,Schmidt AG,Lebensmittel,Hoffmann,P02,Kompressor KA-500,168000,Abgeschlossen,5,0,258,8,Nordtech AG,5,92,verloren
+OPP-0046,K01,Müller GmbH,Maschinenbau,Meyer,P03,Druckluftanlage DA-100,257000,Abgeschlossen,5,0,206,49,—,3,92,verloren
+OPP-0047,K07,Fischer Tech,Automotive,Hoffmann,P06,Präzisionssensor PS-200,70000,Abgeschlossen,5,0,136,14,Hydrotek GmbH,4,92,verloren
+OPP-0048,K05,Weber Industrie,Maschinenbau,Schulz,P11,Inbetriebnahme & Setup,472000,Abgeschlossen,5,0,84,12,—,22,92,verloren
+OPP-0049,K02,Schneider AG,Automotive,Schulz,P08,Schlauchpaket SP-Set,488000,Abgeschlossen,5,0,135,32,Hydrotek GmbH,17,92,verloren
+OPP-0050,K13,Wagner Systems,Metallindustrie,Hoffmann,P01,Hydraulikpumpe HX-200,43000,Abgeschlossen,5,0,296,10,Nordtech AG,16,92,gewonnen
+OPP-0051,K09,Groß Maschinenbau,Metallindustrie,Meyer,P10,Wartungsvertrag Premium,129000,Abgeschlossen,5,0,112,12,Industrial One,25,92,gewonnen
+OPP-0052,K04,Schmidt AG,Lebensmittel,Hoffmann,P08,Schlauchpaket SP-Set,106000,Abgeschlossen,5,0,65,27,Industrial One,5,92,verloren
+OPP-0053,K06,Braun Systems,Pharma,Meyer,P10,Wartungsvertrag Premium,163000,Abgeschlossen,5,0,191,37,Industrial One,10,92,gewonnen
+OPP-0054,K02,Schneider AG,Automotive,Schulz,P05,Steuerungsmodul SM-Pro,300000,Abgeschlossen,5,0,297,36,Nordtech AG,5,92,verloren
+OPP-0055,K09,Groß Maschinenbau,Metallindustrie,Meyer,P06,Präzisionssensor PS-200,409000,Abgeschlossen,5,0,189,12,Vertec Systems,7,92,gewonnen
+OPP-0056,K11,Hoffmann Werke,Lebensmittel,Schulz,P02,Kompressor KA-500,235000,Abgeschlossen,5,0,156,43,—,18,92,gewonnen
+OPP-0057,K13,Wagner Systems,Metallindustrie,Hoffmann,P03,Druckluftanlage DA-100,108000,Abgeschlossen,5,0,379,6,Hydrotek GmbH,23,92,verloren
+OPP-0058,K05,Weber Industrie,Maschinenbau,Schulz,P09,Wartungsvertrag Basic,85000,Abgeschlossen,5,0,302,24,—,10,92,verloren
+OPP-0059,K11,Hoffmann Werke,Lebensmittel,Schulz,P01,Hydraulikpumpe HX-200,466000,Abgeschlossen,5,0,112,19,Vertec Systems,17,92,verloren
+OPP-0060,K04,Schmidt AG,Lebensmittel,Hoffmann,P05,Steuerungsmodul SM-Pro,53000,Abgeschlossen,5,0,212,6,Hydrotek GmbH,18,92,gewonnen
+OPP-0061,K03,Meier GmbH,Chemie,Meyer,P12,Anwenderschulung,211000,Abgeschlossen,5,0,106,6,Nordtech AG,12,92,verloren
+OPP-0062,K04,Schmidt AG,Lebensmittel,Hoffmann,P11,Inbetriebnahme & Setup,69000,Abgeschlossen,5,0,163,2,—,3,92,verloren
+OPP-0063,K01,Müller GmbH,Maschinenbau,Meyer,P11,Inbetriebnahme & Setup,433000,Abgeschlossen,5,0,270,18,Nordtech AG,18,92,verloren
+OPP-0064,K11,Hoffmann Werke,Lebensmittel,Schulz,P06,Präzisionssensor PS-200,301000,Abgeschlossen,5,0,354,16,—,4,92,gewonnen
+OPP-0065,K12,Bauer Industrie,Pharma,Meyer,P08,Schlauchpaket SP-Set,216000,Abgeschlossen,5,0,393,46,Hydrotek GmbH,16,92,gewonnen
+OPP-0066,K06,Braun Systems,Pharma,Meyer,P06,Präzisionssensor PS-200,69000,Abgeschlossen,5,0,266,37,Industrial One,23,92,verloren
+OPP-0067,K09,Groß Maschinenbau,Metallindustrie,Meyer,P02,Kompressor KA-500,343000,Abgeschlossen,5,0,86,29,Nordtech AG,17,92,verloren
+OPP-0068,K11,Hoffmann Werke,Lebensmittel,Schulz,P10,Wartungsvertrag Premium,80000,Abgeschlossen,5,0,390,44,Vertec Systems,18,92,verloren
+OPP-0069,K14,Koch Anlagen,Maschinenbau,Schulz,P06,Präzisionssensor PS-200,220000,Abgeschlossen,5,0,390,9,Industrial One,10,92,verloren
+OPP-0070,K04,Schmidt AG,Lebensmittel,Hoffmann,P05,Steuerungsmodul SM-Pro,226000,Abgeschlossen,5,0,330,45,Hydrotek GmbH,3,92,gewonnen
+OPP-0071,K08,Klein Automation,Maschinenbau,Schulz,P06,Präzisionssensor PS-200,32000,Abgeschlossen,5,0,151,14,Vertec Systems,25,92,verloren
+OPP-0072,K05,Weber Industrie,Maschinenbau,Schulz,P07,Druckregler DR-80,189000,Abgeschlossen,5,0,263,37,Hydrotek GmbH,16,92,gewonnen
+OPP-0073,K07,Fischer Tech,Automotive,Hoffmann,P06,Präzisionssensor PS-200,102000,Abgeschlossen,5,0,310,36,—,26,92,verloren
+OPP-0074,K05,Weber Industrie,Maschinenbau,Schulz,P06,Präzisionssensor PS-200,493000,Abgeschlossen,5,0,229,48,Vertec Systems,26,92,verloren
+OPP-0075,K09,Groß Maschinenbau,Metallindustrie,Meyer,P02,Kompressor KA-500,439000,Abgeschlossen,5,0,172,13,Industrial One,5,92,verloren
+OPP-0076,K12,Bauer Industrie,Pharma,Meyer,P04,Förderpumpe FP-350,215000,Abgeschlossen,5,0,81,28,—,17,92,verloren
+OPP-0077,K05,Weber Industrie,Maschinenbau,Schulz,P12,Anwenderschulung,453000,Abgeschlossen,5,0,201,46,Industrial One,5,92,verloren
+OPP-0078,K14,Koch Anlagen,Maschinenbau,Schulz,P08,Schlauchpaket SP-Set,96000,Abgeschlossen,5,0,321,50,Nordtech AG,15,92,verloren
+OPP-0079,K07,Fischer Tech,Automotive,Hoffmann,P12,Anwenderschulung,46000,Abgeschlossen,5,0,121,9,Nordtech AG,25,92,verloren
+OPP-0080,K12,Bauer Industrie,Pharma,Meyer,P01,Hydraulikpumpe HX-200,133000,Abgeschlossen,5,0,222,17,Vertec Systems,13,92,verloren
+OPP-0081,K04,Schmidt AG,Lebensmittel,Hoffmann,P05,Steuerungsmodul SM-Pro,151000,Abgeschlossen,5,0,147,2,Industrial One,24,92,gewonnen
+OPP-0082,K10,Ritter Technik,Chemie,Hoffmann,P05,Steuerungsmodul SM-Pro,184000,Abgeschlossen,5,0,98,31,Industrial One,19,92,verloren
+OPP-0083,K13,Wagner Systems,Metallindustrie,Hoffmann,P09,Wartungsvertrag Basic,27000,Abgeschlossen,5,0,107,27,Industrial One,3,92,gewonnen
+OPP-0084,K10,Ritter Technik,Chemie,Hoffmann,P06,Präzisionssensor PS-200,109000,Abgeschlossen,5,0,60,46,—,3,92,verloren
+OPP-0085,K02,Schneider AG,Automotive,Schulz,P01,Hydraulikpumpe HX-200,452000,Abgeschlossen,5,0,69,42,Nordtech AG,13,92,verloren
+OPP-0086,K01,Müller GmbH,Maschinenbau,Meyer,P08,Schlauchpaket SP-Set,85000,Abgeschlossen,5,0,86,39,Nordtech AG,6,92,verloren
+OPP-0087,K04,Schmidt AG,Lebensmittel,Hoffmann,P10,Wartungsvertrag Premium,60000,Abgeschlossen,5,0,76,16,Vertec Systems,4,92,gewonnen
+OPP-0088,K04,Schmidt AG,Lebensmittel,Hoffmann,P01,Hydraulikpumpe HX-200,91000,Abgeschlossen,5,0,109,32,—,17,92,verloren
+OPP-0089,K07,Fischer Tech,Automotive,Hoffmann,P12,Anwenderschulung,54000,Abgeschlossen,5,0,242,8,Nordtech AG,12,92,gewonnen
+OPP-0090,K02,Schneider AG,Automotive,Schulz,P02,Kompressor KA-500,65000,Abgeschlossen,5,0,79,17,Nordtech AG,19,92,gewonnen
+OPP-0091,K01,Müller GmbH,Maschinenbau,Meyer,P05,Steuerungsmodul SM-Pro,65000,Abgeschlossen,5,0,259,2,Vertec Systems,3,92,gewonnen
+OPP-0092,K04,Schmidt AG,Lebensmittel,Hoffmann,P08,Schlauchpaket SP-Set,221000,Abgeschlossen,5,0,239,33,Hydrotek GmbH,6,92,verloren
+OPP-0093,K03,Meier GmbH,Chemie,Meyer,P10,Wartungsvertrag Premium,78000,Abgeschlossen,5,0,81,7,Nordtech AG,7,92,verloren
+OPP-0094,K09,Groß Maschinenbau,Metallindustrie,Meyer,P12,Anwenderschulung,104000,Abgeschlossen,5,0,233,40,Vertec Systems,17,92,verloren
+OPP-0095,K13,Wagner Systems,Metallindustrie,Hoffmann,P08,Schlauchpaket SP-Set,75000,Abgeschlossen,5,0,164,39,Vertec Systems,25,92,verloren
+OPP-0096,K10,Ritter Technik,Chemie,Hoffmann,P09,Wartungsvertrag Basic,42000,Abgeschlossen,5,0,125,14,Vertec Systems,18,92,gewonnen
+OPP-0097,K08,Klein Automation,Maschinenbau,Schulz,P11,Inbetriebnahme & Setup,100000,Abgeschlossen,5,0,121,28,—,6,92,gewonnen
+OPP-0098,K03,Meier GmbH,Chemie,Meyer,P10,Wartungsvertrag Premium,201000,Abgeschlossen,5,0,310,40,—,6,92,verloren
+OPP-0099,K01,Müller GmbH,Maschinenbau,Meyer,P11,Inbetriebnahme & Setup,240000,Abgeschlossen,5,0,220,22,Industrial One,11,92,verloren
+OPP-0100,K01,Müller GmbH,Maschinenbau,Meyer,P07,Druckregler DR-80,237000,Abgeschlossen,5,0,272,23,Vertec Systems,6,92,gewonnen

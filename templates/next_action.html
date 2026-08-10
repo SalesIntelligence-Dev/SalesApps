@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Next Best Action – SalesApps</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=3">
+    <style>
+        .na-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; }
+        .kpi-row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+
+        .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+        .panel-title { font-size: 14px; font-weight: 600; color: var(--text); }
+        .panel-sub { font-size: 12px; color: var(--sub); margin-top: 2px; }
+
+        /* Aktionskarte */
+        .act { background: var(--card); border: 1px solid var(--border); border-radius: 11px; padding: 16px 18px; margin-bottom: 12px; position: relative; }
+        .act.u3 { border-left: 3px solid #f87171; }
+        .act.u2 { border-left: 3px solid #fbbf24; }
+        .act.u1 { border-left: 3px solid #60a5fa; }
+
+        .act-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
+        .act-rank { font-size: 20px; font-weight: 800; color: var(--sub); line-height: 1; min-width: 34px; opacity: 0.55; }
+        .act.u3 .act-rank { color: #f87171; opacity: 0.9; }
+        .act-head { flex: 1; }
+        .act-name { font-size: 15px; font-weight: 700; color: var(--text); }
+        .act-meta { font-size: 11px; color: var(--sub); margin-top: 3px; }
+        .act-right { text-align: right; white-space: nowrap; }
+        .act-score { font-size: 22px; font-weight: 800; line-height: 1; }
+        .act-score-lbl { font-size: 9px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px; }
+
+        /* Signal-Zeilen */
+        .sig { display: flex; gap: 9px; align-items: flex-start; padding: 6px 0; }
+        .sig-icon { font-size: 13px; flex-shrink: 0; line-height: 1.4; }
+        .sig-text { font-size: 12px; color: var(--sub); line-height: 1.55; flex: 1; }
+        .sig-tag { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 8px; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.04em; }
+
+        /* Empfehlung */
+        .rec { background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.22); border-radius: 9px; padding: 12px 14px; margin-top: 12px; }
+        .rec-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 5px; flex-wrap: wrap; }
+        .rec-title { font-size: 13px; font-weight: 700; color: #6ee7b7; }
+        .rec-frist { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 9px; white-space: nowrap; }
+        .rec-frist.u3 { background: rgba(248,113,113,0.15); color: #f87171; }
+        .rec-frist.u2 { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        .rec-frist.u1 { background: rgba(96,165,250,0.15); color: #60a5fa; }
+        .rec-detail { font-size: 12px; color: var(--sub); line-height: 1.6; }
+
+        /* Kennzahlenleiste */
+        .act-stats { display: flex; gap: 16px; flex-wrap: wrap; padding-top: 10px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .act-stat { font-size: 11px; color: var(--sub); }
+        .act-stat b { color: var(--text); font-weight: 600; }
+
+        /* Signalverteilung */
+        .sigbar { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .sigbar-lbl { font-size: 12px; color: var(--sub); min-width: 150px; }
+        .sigbar-track { flex: 1; height: 7px; border-radius: 4px; background: var(--border); overflow: hidden; }
+        .sigbar-fill { height: 100%; border-radius: 4px; }
+        .sigbar-num { font-size: 12px; color: var(--text); font-weight: 600; min-width: 22px; text-align: right; }
+
+        .na-sidebar { display: flex; flex-direction: column; gap: 16px; }
+        .sidebar-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+        .sidebar-card h4 { font-size: 12px; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+        .note { background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.2); border-radius: 8px; padding: 12px 14px; font-size: 12px; color: var(--sub); line-height: 1.6; }
+        .note strong { color: #60a5fa; }
+
+        select { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 9px 13px; font-family: inherit; font-size: 13px; }
+        select:focus { outline: none; border-color: var(--accent); }
+
+        @media (max-width: 900px) {
+            .na-layout { grid-template-columns: 1fr; }
+            .kpi-row-4 { grid-template-columns: repeat(2, 1fr); }
+            .sigbar-lbl { min-width: 110px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <div class="logo">
+            <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;">
+                <span class="logo-icon">🧭</span>
+                <div>
+                    <div class="logo-title">Next Best Action</div>
+                    <div class="logo-sub">Priorisierte Handlungsempfehlungen für den Vertrieb</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="app-main">
+<div class="na-layout">
+
+<div>
+    <!-- Steuerung -->
+    <div class="panel">
+        <form method="POST">
+            <div style="font-size:13px;color:var(--sub);margin-bottom:14px;">
+                Beantwortet die eine Frage, die jeden Morgen zählt:
+                <strong style="color:var(--text);">Was sind heute die wichtigsten Aktionen –
+                und warum genau diese?</strong>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <button type="submit" name="use_example" value="1" class="btn-primary">Beispieldaten laden</button>
+                {% if result and result.reps %}
+                <select name="rep" onchange="this.form.submit()">
+                    <option value="">Alle Vertriebsmitarbeiter</option>
+                    {% for r in result.reps %}
+                    <option value="{{ r }}" {% if result.selected_rep == r %}selected{% endif %}>{{ r }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    {% if error %}
+    <div style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:12px 16px;color:#f87171;margin-bottom:20px;">{{ error }}</div>
+    {% endif %}
+
+    {% if result %}
+
+    <!-- KPIs -->
+    <div class="kpi-row-4">
+        <div class="kpi-card">
+            <div class="kpi-value">{{ result.kpi.n_aktionen }}</div>
+            <div class="kpi-label">Aktionen priorisiert</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value kpi-bad">{{ result.kpi.n_kritisch }}</div>
+            <div class="kpi-label">Sofort handeln (48 h)</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value kpi-good">{{ '{:,.0f}'.format(result.kpi.wert_gesamt).replace(',', '.') }} €</div>
+            <div class="kpi-label">Wert am Risiko / Chance</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ result.kpi.n_signale }}</div>
+            <div class="kpi-label">Erkannte Signale</div>
+        </div>
+    </div>
+
+    <!-- Prioritätenliste -->
+    <div class="panel-head" style="margin-bottom:12px;">
+        <div>
+            <div class="panel-title">
+                Heutige Prioritäten{% if result.selected_rep %} · {{ result.selected_rep }}{% endif %}
+            </div>
+            <div class="panel-sub">
+                Sortiert nach Dringlichkeit und Priority Score ·
+                {{ '{:,.0f}'.format(result.kpi.wert_kritisch).replace(',', '.') }} € davon in der 48-Stunden-Kategorie
+            </div>
+        </div>
+    </div>
+
+    {% for a in result.aktionen %}
+    <div class="act u{{ a.dringlichkeit }}">
+        <div class="act-top">
+            <div class="act-rank">{{ a.rang }}</div>
+            <div class="act-head">
+                <div class="act-name">{{ a.kunde_name }}</div>
+                <div class="act-meta">
+                    {{ a.branche }} · Betreuer {{ a.rep }} ·
+                    Jahresumsatz {{ '{:,.0f}'.format(a.umsatz).replace(',', '.') }} €
+                    (<span style="color:{% if a.wachstum >= 5 %}#34d399{% elif a.wachstum <= -5 %}#f87171{% else %}var(--sub){% endif %};font-weight:600;">{{ '%+.1f'|format(a.wachstum) }} %</span>)
+                </div>
+            </div>
+            <div class="act-right">
+                <div class="act-score" style="color:{% if a.dringlichkeit == 3 %}#f87171{% elif a.dringlichkeit == 2 %}#fbbf24{% else %}#60a5fa{% endif %};">
+                    {{ a.score|int }}
+                </div>
+                <div class="act-score-lbl">Priority</div>
+            </div>
+        </div>
+
+        <!-- Signale -->
+        <div style="font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">
+            Warum dieser Kunde?
+        </div>
+        {% for s in a.signale %}
+        <div class="sig">
+            <div class="sig-icon">{{ s.icon }}</div>
+            <div class="sig-text">{{ s.text }}</div>
+            <span class="sig-tag" style="background:{{ s.farbe }}22;color:{{ s.farbe }};">{{ s.label }}</span>
+        </div>
+        {% endfor %}
+
+        <!-- Empfehlung -->
+        <div class="rec">
+            <div class="rec-head">
+                <div class="rec-title">→ {{ a.aktion }}</div>
+                <div class="rec-frist u{{ a.dringlichkeit }}">{{ a.frist }}</div>
+            </div>
+            <div class="rec-detail">{{ a.aktion_detail }}</div>
+        </div>
+
+        <!-- Kennzahlen -->
+        <div class="act-stats">
+            <div class="act-stat">Wert am Risiko: <b style="color:#fbbf24;">{{ '{:,.0f}'.format(a.wert_am_risiko).replace(',', '.') }} €</b></div>
+            <div class="act-stat">Portfolio: <b>{{ a.abdeckung|int }} %</b></div>
+            <div class="act-stat">Letzter Kontakt: <b>vor {{ a.letzter_kontakt }} Tagen</b></div>
+            {% if a.offene_opps %}
+            <div class="act-stat">Offene Deals: <b>{{ a.offene_opps }}</b> · {{ '{:,.0f}'.format(a.opp_wert).replace(',', '.') }} €</div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+
+    {% if not result.aktionen %}
+    <div class="panel" style="text-align:center;padding:40px;color:var(--sub);">
+        Keine Handlungssignale für diese Auswahl.
+    </div>
+    {% endif %}
+
+    <!-- Signalverteilung -->
+    {% if result.signal_verteilung %}
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Signalverteilung</div>
+                <div class="panel-sub">Welche Handlungsanlässe treten im Portfolio am häufigsten auf?</div>
+            </div>
+        </div>
+        {% set maxn = result.signal_verteilung | map(attribute='anzahl') | max %}
+        {% for s in result.signal_verteilung %}
+        <div class="sigbar">
+            <div class="sigbar-lbl">{{ s.icon }} {{ s.label }}</div>
+            <div class="sigbar-track">
+                <div class="sigbar-fill" style="width:{{ (s.anzahl / maxn * 100)|round|int }}%;background:{{ s.farbe }};"></div>
+            </div>
+            <div class="sigbar-num">{{ s.anzahl }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="panel" style="text-align:center;padding:48px;color:var(--sub);">
+        <div style="font-size:40px;margin-bottom:16px;">🧭</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;">Tagesprioritäten berechnen</div>
+        <div style="font-size:13px;">Beispieldaten laden, um die wichtigsten<br>Vertriebsaktionen zu priorisieren.</div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Sidebar -->
+<div class="na-sidebar">
+    <div class="sidebar-card">
+        <h4>Signalklassen</h4>
+        <div style="font-size:11px;color:var(--sub);line-height:1.9;">
+            <div>📉 <span style="color:#f87171;">Umsatzrückgang</span> · Gewicht 30</div>
+            <div>⚔️ <span style="color:#f87171;">Wettbewerbsdruck</span> · Gewicht 28</div>
+            <div>⏳ <span style="color:#fb923c;">Deal in Gefahr</span> · Gewicht 26</div>
+            <div>🚀 <span style="color:#34d399;">Expansionssignal</span> · Gewicht 24</div>
+            <div>🎯 <span style="color:#60a5fa;">Cross-Sell-Chance</span> · Gewicht 18</div>
+            <div>🛠️ <span style="color:#fbbf24;">Service-Eskalation</span> · Gewicht 16</div>
+            <div>👥 <span style="color:#a78bfa;">Beziehungsrisiko</span> · Gewicht 14</div>
+        </div>
+    </div>
+
+    <div class="sidebar-card">
+        <h4>Wie priorisiert wird</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.7;">
+            <div style="margin-bottom:8px;">
+                <span style="color:#60a5fa;font-weight:600;">1. Signaldetektion</span><br>
+                Jeder Kunde wird gegen sieben Signalklassen geprüft.
+            </div>
+            <div style="margin-bottom:8px;">
+                <span style="color:#f59e0b;font-weight:600;">2. Gewichtung</span><br>
+                Beitrag = Gewicht × Dringlichkeit × Signalstärke.
+            </div>
+            <div style="margin-bottom:8px;">
+                <span style="color:#34d399;font-weight:600;">3. Wert-Normierung</span><br>
+                Der Wert am Risiko geht logarithmisch ein – große Kunden dominieren
+                die Liste nicht automatisch.
+            </div>
+            <div>
+                <span style="color:#a78bfa;font-weight:600;">4. Aktionsableitung</span><br>
+                Das stärkste Signal bestimmt die konkrete Empfehlung und die Frist.
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-card">
+        <h4>Warum nicht nur ein Score?</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.7;">
+            Ein Score wie „Kunde A = 83 Punkte“ sagt einem Verkäufer nicht, was er tun soll.
+            Statische Regelwerke für Lead- und Account-Scoring gelten inzwischen als
+            Commodity. Der Mehrwert entsteht erst, wenn aus dem Signal eine
+            <strong style="color:var(--text);">begründete Handlung mit Frist</strong> wird.
+        </div>
+    </div>
+
+    {% if result and result.kpi %}
+    <div class="sidebar-card">
+        <h4>Zusammenfassung</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.9;">
+            <div>Aktionen: <span style="color:var(--text);">{{ result.kpi.n_aktionen }}</span></div>
+            <div>Sofort (48 h): <span style="color:#f87171;">{{ result.kpi.n_kritisch }}</span></div>
+            <div>Signale gesamt: <span style="color:var(--text);">{{ result.kpi.n_signale }}</span></div>
+            <div>Ø Priority Score: <span style="color:var(--text);">{{ result.kpi.avg_score|int }}</span></div>
+            <div>Wert kritisch: <span style="color:#fbbf24;">{{ '{:,.0f}'.format(result.kpi.wert_kritisch).replace(',', '.') }} €</span></div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="note">
+        <div style="font-size:11px;font-weight:600;color:#60a5fa;margin-bottom:6px;">Next Step: Closed Loop</div>
+        Aktuell sind die Signalgewichte fest kalibriert. Der eigentliche Hebel entsteht,
+        wenn <strong>die Ergebnisse der ausgeführten Aktionen zurück ins Modell fließen</strong> –
+        also welche Empfehlung tatsächlich zu einem Abschluss geführt hat. Damit wird aus der
+        Regel-Engine ein lernendes System (Contextual Bandit / Uplift-Modellierung).
+    </div>
+</div>
+
+</div>
+</main>
+
+<footer class="home-footer">SalesApps · Next Best Action</footer>
+</body>
+</html>

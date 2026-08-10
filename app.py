@@ -24,6 +24,9 @@ from margen_analyse import analyse as margen_analyse
 from cross_selling_graph import analyse as cs_analyse
 from konfiguration_graph import analyse as kg_analyse
 from retrieval_analyse import analyse as retrieval_analyse
+from growth_engine import analyse as growth_analyse
+from opportunity_graph import analyse as opp_analyse
+from next_action_engine import analyse as nba_analyse
 
 # ── Logging ──────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -312,6 +315,82 @@ def retrieval():
 @app.route("/lead-scoring")
 def lead_scoring():
     return render_template("coming_soon.html", app_name="Lead Scoring", icon="🎯")
+
+
+@app.route("/growth", methods=["GET", "POST"])
+def growth():
+    result = None
+    error  = None
+
+    if request.method == "POST":
+        try:
+            selected_kunde = request.form.get("kunde_id") or None
+
+            if request.form.get("use_example") or selected_kunde:
+                df = pd.read_csv(DATASETS_DIR / "growth_beispiel.csv")
+            elif "file" in request.files and request.files["file"].filename:
+                f  = request.files["file"]
+                df = _load_dataframe(f.stream, f.filename)
+            else:
+                error = "Bitte eine Datei hochladen oder Beispieldaten verwenden."
+                return render_template("growth.html", result=None, error=error)
+
+            result = growth_analyse(df, selected_kunde_id=selected_kunde)
+        except Exception as exc:
+            logger.error("Growth Engine Fehler: %s", exc)
+            error = str(exc)
+
+    return render_template("growth.html", result=result, error=error)
+
+
+@app.route("/opportunity", methods=["GET", "POST"])
+def opportunity():
+    result = None
+    error  = None
+
+    if request.method == "POST":
+        try:
+            selected_opp = request.form.get("opp_id") or None
+
+            if request.form.get("use_example") or selected_opp:
+                df_opp = pd.read_csv(DATASETS_DIR / "opportunities.csv")
+                df_kon = pd.read_csv(DATASETS_DIR / "opportunity_kontakte.csv")
+            else:
+                error = "Bitte Beispieldaten verwenden."
+                return render_template("opportunity.html", result=None, error=error)
+
+            result = opp_analyse(df_opp, df_kon, selected_opp_id=selected_opp)
+        except Exception as exc:
+            logger.error("Opportunity Intelligence Fehler: %s", exc)
+            error = str(exc)
+
+    return render_template("opportunity.html", result=result, error=error)
+
+
+@app.route("/next-action", methods=["GET", "POST"])
+def next_action():
+    result = None
+    error  = None
+
+    if request.method == "POST":
+        try:
+            selected_rep = request.form.get("rep") or None
+
+            if request.form.get("use_example") or selected_rep is not None:
+                df = pd.read_csv(DATASETS_DIR / "next_action_beispiel.csv")
+            elif "file" in request.files and request.files["file"].filename:
+                f  = request.files["file"]
+                df = _load_dataframe(f.stream, f.filename)
+            else:
+                error = "Bitte eine Datei hochladen oder Beispieldaten verwenden."
+                return render_template("next_action.html", result=None, error=error)
+
+            result = nba_analyse(df, selected_rep=selected_rep)
+        except Exception as exc:
+            logger.error("Next Best Action Fehler: %s", exc)
+            error = str(exc)
+
+    return render_template("next_action.html", result=result, error=error)
 
 
 @app.route("/api/health")

@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════
-   Aurora Web App – Dark Theme
+   SalesApps – Dark Theme
    ══════════════════════════════════════════════════════ */
 
 :root {
@@ -247,7 +247,7 @@ main { flex: 1; max-width: 1600px; margin: 0 auto; padding: 24px; width: 100%; }
   align-items: center; justify-content: center;
   text-align: center; padding: 60px 40px; gap: 16px;
 }
-.aurora-spinner { position: relative; width: 80px; height: 80px; margin-bottom: 8px; }
+.inference-spinner { position: relative; width: 80px; height: 80px; margin-bottom: 8px; }
 .spinner-ring {
   position: absolute; inset: 0;
   border: 3px solid transparent;

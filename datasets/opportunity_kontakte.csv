@@ -1,0 +1,151 @@
+opp_id,kontakt_name,rolle,involviert,sentiment,wettbewerber_kontakt
+OPP-0001,Christian Ullmann,Geschäftsführung,1,neutral,0
+OPP-0001,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0001,Ralf Vogel,Einkauf,1,neutral,1
+OPP-0001,Petra Reinhardt,Technik,1,positiv,0
+OPP-0001,—,Produktion,0,unbekannt,0
+OPP-0002,—,Geschäftsführung,0,unbekannt,0
+OPP-0002,Sabine Lindner,CFO / Einkaufsleitung,1,positiv,0
+OPP-0002,Ralf Ullmann,Einkauf,1,positiv,0
+OPP-0002,Daniela Vogel,Technik,1,positiv,0
+OPP-0002,Andreas Thiele,Produktion,1,positiv,0
+OPP-0003,—,Geschäftsführung,0,unbekannt,0
+OPP-0003,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0003,Ralf Ullmann,Einkauf,1,neutral,1
+OPP-0003,Ralf Ostermann,Technik,1,positiv,0
+OPP-0003,Petra Lindner,Produktion,1,positiv,0
+OPP-0004,Martin Ullmann,Geschäftsführung,1,neutral,0
+OPP-0004,Sabine Ostermann,CFO / Einkaufsleitung,1,neutral,0
+OPP-0004,Erik Vogel,Einkauf,1,neutral,1
+OPP-0004,Erik Zeller,Technik,1,neutral,0
+OPP-0004,Erik Wendt,Produktion,1,positiv,0
+OPP-0005,—,Geschäftsführung,0,unbekannt,0
+OPP-0005,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0005,Ingo Pfeiffer,Einkauf,1,positiv,0
+OPP-0005,Erik Pfeiffer,Technik,1,positiv,0
+OPP-0005,—,Produktion,0,unbekannt,0
+OPP-0006,Oliver Lindner,Geschäftsführung,1,positiv,0
+OPP-0006,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0006,Franziska Zeller,Einkauf,1,neutral,1
+OPP-0006,Franziska Wendt,Technik,1,positiv,0
+OPP-0006,—,Produktion,0,unbekannt,0
+OPP-0007,Petra Ullmann,Geschäftsführung,1,neutral,0
+OPP-0007,Julia Ostermann,CFO / Einkaufsleitung,1,positiv,0
+OPP-0007,Lena Ullmann,Einkauf,1,neutral,0
+OPP-0007,Oliver Wendt,Technik,1,positiv,0
+OPP-0007,Nadine Lindner,Produktion,1,neutral,0
+OPP-0008,—,Geschäftsführung,0,unbekannt,0
+OPP-0008,Birgit Thiele,CFO / Einkaufsleitung,1,neutral,0
+OPP-0008,Birgit Krämer,Einkauf,1,positiv,0
+OPP-0008,Thomas Zeller,Technik,1,positiv,0
+OPP-0008,Ingo Reinhardt,Produktion,1,neutral,0
+OPP-0009,—,Geschäftsführung,0,unbekannt,0
+OPP-0009,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0009,Lena Lindner,Einkauf,1,neutral,0
+OPP-0009,Nadine Thiele,Technik,1,negativ,0
+OPP-0009,Gerd Pfeiffer,Produktion,1,neutral,0
+OPP-0010,Daniela Lindner,Geschäftsführung,1,neutral,0
+OPP-0010,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0010,Nadine Ostermann,Einkauf,1,neutral,0
+OPP-0010,Andreas Ullmann,Technik,1,negativ,0
+OPP-0010,—,Produktion,0,unbekannt,0
+OPP-0011,—,Geschäftsführung,0,unbekannt,0
+OPP-0011,Erik Ullmann,CFO / Einkaufsleitung,1,positiv,0
+OPP-0011,Lena Thiele,Einkauf,1,neutral,0
+OPP-0011,Ute Wendt,Technik,1,negativ,0
+OPP-0011,Sabine Reinhardt,Produktion,1,positiv,0
+OPP-0012,—,Geschäftsführung,0,unbekannt,0
+OPP-0012,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0012,Thomas Berger,Einkauf,1,positiv,1
+OPP-0012,—,Technik,0,unbekannt,0
+OPP-0012,—,Produktion,0,unbekannt,0
+OPP-0013,Sabine Pfeiffer,Geschäftsführung,1,neutral,0
+OPP-0013,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0013,Birgit Zeller,Einkauf,1,positiv,1
+OPP-0013,Ute Ullmann,Technik,1,positiv,0
+OPP-0013,Klaus Zeller,Produktion,1,positiv,0
+OPP-0014,—,Geschäftsführung,0,unbekannt,0
+OPP-0014,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0014,Oliver Ostermann,Einkauf,1,neutral,1
+OPP-0014,Thomas Thiele,Technik,1,positiv,0
+OPP-0014,Petra Ullmann,Produktion,1,negativ,0
+OPP-0015,—,Geschäftsführung,0,unbekannt,0
+OPP-0015,Lena Vogel,CFO / Einkaufsleitung,1,positiv,0
+OPP-0015,Ralf Krämer,Einkauf,1,neutral,0
+OPP-0015,—,Technik,0,unbekannt,0
+OPP-0015,Gerd Vogel,Produktion,1,neutral,0
+OPP-0016,Lena Krämer,Geschäftsführung,1,neutral,0
+OPP-0016,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0016,Franziska Berger,Einkauf,1,neutral,1
+OPP-0016,Sabine Krämer,Technik,1,neutral,0
+OPP-0016,—,Produktion,0,unbekannt,0
+OPP-0017,—,Geschäftsführung,0,unbekannt,0
+OPP-0017,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0017,Ingo Ostermann,Einkauf,1,positiv,1
+OPP-0017,—,Technik,0,unbekannt,0
+OPP-0017,Julia Vogel,Produktion,1,positiv,0
+OPP-0018,Oliver Krämer,Geschäftsführung,1,negativ,0
+OPP-0018,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0018,Birgit Berger,Einkauf,1,neutral,1
+OPP-0018,Martin Ullmann,Technik,1,negativ,0
+OPP-0018,Oliver Wendt,Produktion,1,positiv,0
+OPP-0019,—,Geschäftsführung,0,unbekannt,0
+OPP-0019,Christian Berger,CFO / Einkaufsleitung,1,negativ,0
+OPP-0019,Christian Zeller,Einkauf,1,neutral,0
+OPP-0019,—,Technik,0,unbekannt,0
+OPP-0019,—,Produktion,0,unbekannt,0
+OPP-0020,—,Geschäftsführung,0,unbekannt,0
+OPP-0020,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0020,Christian Zeller,Einkauf,1,negativ,1
+OPP-0020,Nadine Wendt,Technik,1,negativ,0
+OPP-0020,—,Produktion,0,unbekannt,0
+OPP-0021,—,Geschäftsführung,0,unbekannt,0
+OPP-0021,Julia Zeller,CFO / Einkaufsleitung,1,neutral,0
+OPP-0021,Andreas Reinhardt,Einkauf,1,positiv,1
+OPP-0021,Oliver Vogel,Technik,1,neutral,0
+OPP-0021,Heike Wendt,Produktion,1,positiv,0
+OPP-0022,—,Geschäftsführung,0,unbekannt,0
+OPP-0022,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0022,Ute Pfeiffer,Einkauf,1,negativ,1
+OPP-0022,Martin Wendt,Technik,1,neutral,0
+OPP-0022,Oliver Vogel,Produktion,1,positiv,0
+OPP-0023,—,Geschäftsführung,0,unbekannt,0
+OPP-0023,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0023,Petra Pfeiffer,Einkauf,1,negativ,0
+OPP-0023,Franziska Krämer,Technik,1,neutral,0
+OPP-0023,Gerd Ostermann,Produktion,1,positiv,0
+OPP-0024,—,Geschäftsführung,0,unbekannt,0
+OPP-0024,Sabine Ullmann,CFO / Einkaufsleitung,1,neutral,0
+OPP-0024,Ingo Reinhardt,Einkauf,1,negativ,1
+OPP-0024,Heike Lindner,Technik,1,negativ,0
+OPP-0024,—,Produktion,0,unbekannt,0
+OPP-0025,—,Geschäftsführung,0,unbekannt,0
+OPP-0025,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0025,Birgit Vogel,Einkauf,1,neutral,0
+OPP-0025,Sabine Pfeiffer,Technik,1,neutral,0
+OPP-0025,—,Produktion,0,unbekannt,0
+OPP-0026,—,Geschäftsführung,0,unbekannt,0
+OPP-0026,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0026,Martin Ullmann,Einkauf,1,neutral,0
+OPP-0026,Andreas Sander,Technik,1,neutral,0
+OPP-0026,Martin Vogel,Produktion,1,negativ,0
+OPP-0027,—,Geschäftsführung,0,unbekannt,0
+OPP-0027,Ralf Ostermann,CFO / Einkaufsleitung,1,negativ,0
+OPP-0027,Andreas Ullmann,Einkauf,1,neutral,0
+OPP-0027,Daniela Krämer,Technik,1,positiv,0
+OPP-0027,Martin Krämer,Produktion,1,neutral,0
+OPP-0028,—,Geschäftsführung,0,unbekannt,0
+OPP-0028,—,CFO / Einkaufsleitung,0,unbekannt,0
+OPP-0028,Oliver Wendt,Einkauf,1,neutral,1
+OPP-0028,Daniela Wendt,Technik,1,negativ,0
+OPP-0028,Gerd Ullmann,Produktion,1,positiv,0
+OPP-0029,—,Geschäftsführung,0,unbekannt,0
+OPP-0029,Erik Krämer,CFO / Einkaufsleitung,1,negativ,0
+OPP-0029,Oliver Sander,Einkauf,1,positiv,0
+OPP-0029,—,Technik,0,unbekannt,0
+OPP-0029,—,Produktion,0,unbekannt,0
+OPP-0030,—,Geschäftsführung,0,unbekannt,0
+OPP-0030,Nadine Krämer,CFO / Einkaufsleitung,1,neutral,0
+OPP-0030,Franziska Berger,Einkauf,1,neutral,0
+OPP-0030,Ute Vogel,Technik,1,neutral,0
+OPP-0030,Ingo Sander,Produktion,1,neutral,0

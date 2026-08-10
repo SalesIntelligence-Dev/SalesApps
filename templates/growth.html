@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Growth Engine – SalesApps</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=3">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        .gr-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; }
+        .kpi-row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+
+        .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+        .panel-title { font-size: 14px; font-weight: 600; color: var(--text); }
+        .panel-sub { font-size: 12px; color: var(--sub); margin-top: 2px; }
+
+        #gr-bubble { height: 360px; }
+
+        /* Tabellen */
+        .tbl-wrap { overflow-x: auto; }
+        .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .tbl th { padding: 9px 12px; text-align: left; font-size: 11px; color: var(--sub); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .tbl td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+        .tbl tr:hover td { background: rgba(255,255,255,0.03); }
+        .tbl .nm { font-weight: 500; color: var(--text); }
+        .tbl .sub { font-size: 11px; color: var(--sub); margin-top: 2px; }
+        .tbl .num { text-align: right; white-space: nowrap; }
+
+        /* Segment-Badges */
+        .seg { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+        .seg.Wachstum { background: rgba(52,211,153,0.13); color: #34d399; border: 1px solid rgba(52,211,153,0.28); }
+        .seg.Stabil   { background: rgba(96,165,250,0.13); color: #60a5fa; border: 1px solid rgba(96,165,250,0.28); }
+        .seg.Rückgang { background: rgba(248,113,113,0.13); color: #f87171; border: 1px solid rgba(248,113,113,0.28); }
+
+        /* Abdeckungsbalken */
+        .cov { display: flex; align-items: center; gap: 8px; }
+        .cov-bar { width: 58px; height: 5px; border-radius: 3px; background: var(--border); overflow: hidden; flex-shrink: 0; }
+        .cov-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg,#60a5fa,#a78bfa); }
+        .cov-num { font-size: 12px; color: var(--sub); }
+
+        /* Lücken-Karten */
+        .gap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .gap-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 14px; border-left: 3px solid #34d399; }
+        .gap-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+        .gap-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.35; }
+        .gap-eur { font-size: 15px; font-weight: 700; color: #34d399; white-space: nowrap; }
+        .gap-meta { font-size: 11px; color: var(--sub); line-height: 1.6; }
+        .chip { display: inline-block; background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.22); color: #93c5fd; border-radius: 8px; padding: 1px 7px; font-size: 10px; margin: 2px 3px 0 0; }
+
+        /* Portfolio-Pills */
+        .pill-row { display: flex; flex-wrap: wrap; gap: 6px; }
+        .pill { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 8px; padding: 4px 9px; font-size: 11px; color: var(--sub); }
+        .pill b { color: var(--text); font-weight: 600; }
+
+        /* Trend-Balken */
+        .trend-row { display: flex; align-items: flex-end; gap: 10px; height: 90px; }
+        .trend-bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .trend-fill { width: 100%; border-radius: 4px 4px 0 0; background: linear-gradient(180deg,#60a5fa,#3b82f6); min-height: 4px; }
+        .trend-lbl { font-size: 10px; color: var(--sub); }
+        .trend-val { font-size: 10px; color: var(--text); font-weight: 600; }
+
+        .gr-sidebar { display: flex; flex-direction: column; gap: 16px; }
+        .sidebar-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+        .sidebar-card h4 { font-size: 12px; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+
+        .note { background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.2); border-radius: 8px; padding: 12px 14px; font-size: 12px; color: var(--sub); line-height: 1.6; }
+        .note strong { color: #60a5fa; }
+
+        select, input[type="text"] { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 9px 13px; font-family: inherit; font-size: 13px; }
+        select:focus { outline: none; border-color: var(--accent); }
+
+        @media (max-width: 900px) {
+            .gr-layout { grid-template-columns: 1fr; }
+            .kpi-row-4 { grid-template-columns: repeat(2, 1fr); }
+            .gap-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <div class="logo">
+            <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;">
+                <span class="logo-icon">🌱</span>
+                <div>
+                    <div class="logo-title">Customer Growth Engine</div>
+                    <div class="logo-sub">Produktempfehlungen &amp; Umsatzpotenzial je Kunde</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="app-main">
+<div class="gr-layout">
+
+<div>
+    <!-- Steuerung -->
+    <div class="panel">
+        <form method="POST">
+            <div style="font-size:13px;color:var(--sub);margin-bottom:14px;">
+                Analysiert für jeden Kunden die Portfolio-Abdeckung gegenüber vergleichbaren
+                Kunden und beziffert das freie Umsatzpotenzial in Euro.
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <button type="submit" name="use_example" value="1" class="btn-primary">
+                    Beispieldaten laden
+                </button>
+                {% if result and result.kunden %}
+                <select name="kunde_id" onchange="this.form.submit()">
+                    <option value="">— Kunde für Detailanalyse wählen —</option>
+                    {% for k in result.kunden %}
+                    <option value="{{ k.id }}"
+                        {% if result.selected_kunde and result.selected_kunde.id == k.id %}selected{% endif %}>
+                        {{ k.name }} · {{ '{:,.0f}'.format(k.potenzial_eur).replace(',', '.') }} € Potenzial
+                    </option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    {% if error %}
+    <div style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:12px 16px;color:#f87171;margin-bottom:20px;">{{ error }}</div>
+    {% endif %}
+
+    {% if result %}
+
+    <!-- KPIs -->
+    <div class="kpi-row-4">
+        <div class="kpi-card">
+            <div class="kpi-value kpi-good">{{ '{:,.0f}'.format(result.kpi.gesamt_potenzial).replace(',', '.') }} €</div>
+            <div class="kpi-label">Umsatzpotenzial</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">+{{ result.kpi.potenzial_pct }}%</div>
+            <div class="kpi-label">auf Bestandsumsatz</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ result.kpi.avg_abdeckung|int }}%</div>
+            <div class="kpi-label">Ø Portfolio-Abdeckung</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value kpi-bad">{{ result.kpi.n_rueckgang }}</div>
+            <div class="kpi-label">Kunden im Rückgang</div>
+        </div>
+    </div>
+
+    <!-- Bubble -->
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Wo liegt das Potenzial?</div>
+                <div class="panel-sub">
+                    Umsatz × Portfolio-Abdeckung · Blasengröße = Potenzial ·
+                    Vergleich {{ result.kpi.jahr_vorjahr }} → {{ result.kpi.jahr_aktuell }}
+                </div>
+            </div>
+        </div>
+        <div id="gr-bubble"></div>
+        <div class="note" style="margin-top:12px;">
+            <strong>Lesehilfe:</strong> Große Blasen links unten sind die attraktivsten Ziele –
+            hoher Umsatz bei niedriger Abdeckung bedeutet, dass der Kunde bereits Vertrauen hat,
+            aber nur einen Teil des Sortiments bezieht.
+        </div>
+    </div>
+
+    <!-- Kunden-Ranking -->
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Kunden nach Umsatzpotenzial</div>
+                <div class="panel-sub">{{ result.kpi.n_kunden }} Kunden · sortiert nach realisierbarem Zusatzumsatz</div>
+            </div>
+        </div>
+        <div class="tbl-wrap">
+            <table class="tbl">
+                <thead>
+                    <tr>
+                        <th>Kunde</th>
+                        <th>Segment</th>
+                        <th>Abdeckung</th>
+                        <th class="num">Umsatz</th>
+                        <th class="num">Trend</th>
+                        <th class="num">Potenzial</th>
+                        <th>Nächstes Produkt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for k in result.kunden %}
+                <tr>
+                    <td>
+                        <div class="nm">{{ k.name }}</div>
+                        <div class="sub">{{ k.branche }} · {{ k.rep }}</div>
+                    </td>
+                    <td><span class="seg {{ k.segment }}">{{ k.segment }}</span></td>
+                    <td>
+                        <div class="cov">
+                            <div class="cov-bar"><div class="cov-fill" style="width:{{ k.abdeckung_pct }}%;"></div></div>
+                            <span class="cov-num">{{ k.abdeckung_pct|int }}%</span>
+                        </div>
+                    </td>
+                    <td class="num" style="color:var(--sub);">{{ '{:,.0f}'.format(k.umsatz_aktuell).replace(',', '.') }} €</td>
+                    <td class="num" style="color:{% if k.wachstum_pct >= 5 %}#34d399{% elif k.wachstum_pct <= -5 %}#f87171{% else %}var(--sub){% endif %};font-weight:600;">
+                        {{ '%+.1f'|format(k.wachstum_pct) }}%
+                    </td>
+                    <td class="num" style="color:#34d399;font-weight:700;">
+                        {{ '{:,.0f}'.format(k.potenzial_eur).replace(',', '.') }} €
+                    </td>
+                    <td style="color:var(--sub);font-size:12px;">{{ k.top_luecke }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Kundendetail -->
+    {% if result.selected_kunde %}
+    {% set k = result.selected_kunde %}
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">{{ k.name }}</div>
+                <div class="panel-sub">
+                    {{ k.branche }} · {{ k.groesse }} · Betreuer {{ k.rep }} ·
+                    {{ k.n_produkte }} von {{ (k.n_produkte + k.n_luecken) }}+ Produkten im Einsatz
+                </div>
+            </div>
+            <span class="seg {{ k.segment }}">{{ k.segment }} {{ '%+.1f'|format(k.wachstum_pct) }}%</span>
+        </div>
+
+        <!-- Trend -->
+        {% if result.selected_trend %}
+        <div style="margin-bottom:20px;">
+            <div style="font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">Umsatzentwicklung</div>
+            {% set maxu = result.selected_trend | map(attribute='umsatz') | max %}
+            <div class="trend-row">
+                {% for t in result.selected_trend %}
+                <div class="trend-bar">
+                    <div class="trend-val">{{ '{:,.0f}'.format(t.umsatz).replace(',', '.') }} €</div>
+                    <div class="trend-fill" style="height:{{ (t.umsatz / maxu * 68)|round|int }}px;"></div>
+                    <div class="trend-lbl">{{ t.jahr }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Aktuelles Portfolio -->
+        {% if result.selected_portfolio %}
+        <div style="margin-bottom:20px;">
+            <div style="font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">
+                Aktuelles Portfolio ({{ result.selected_portfolio | length }} Produkte)
+            </div>
+            <div class="pill-row">
+                {% for p in result.selected_portfolio %}
+                <span class="pill"><b>{{ p.produkt_name }}</b> · {{ '{:,.0f}'.format(p.umsatz).replace(',', '.') }} €</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Empfehlungen -->
+        {% if result.selected_luecken %}
+        <div style="font-size:11px;color:#34d399;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">
+            Empfohlene Produkte · {{ '{:,.0f}'.format(k.potenzial_eur).replace(',', '.') }} € Gesamtpotenzial
+        </div>
+        <div class="gap-grid">
+            {% for g in result.selected_luecken %}
+            <div class="gap-card">
+                <div class="gap-top">
+                    <div>
+                        <div class="gap-name">{{ g.produkt_name }}</div>
+                        <div style="font-size:11px;color:var(--sub);margin-top:2px;">{{ g.gruppe }}</div>
+                    </div>
+                    <div class="gap-eur">+{{ '{:,.0f}'.format(g.potenzial).replace(',', '.') }} €</div>
+                </div>
+                <div class="gap-meta">
+                    {{ g.peer_anteil }} % der vergleichbaren Kunden ({{ g.peer_anzahl }}) setzen dieses Produkt bereits ein:
+                    <div style="margin-top:4px;">
+                        {% for n in g.peer_namen %}<span class="chip">{{ n }}</span>{% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="color:var(--sub);font-size:13px;">
+            Portfolio bereits vollständig gegenüber der Vergleichsgruppe – kein Lückenpotenzial erkennbar.
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Produktpotenzial -->
+    {% if result.produkt_potenzial %}
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Potenzial nach Produkt</div>
+                <div class="panel-sub">Aggregiert über alle Kunden – wo lohnt sich eine Kampagne?</div>
+            </div>
+        </div>
+        <div class="tbl-wrap">
+            <table class="tbl">
+                <thead>
+                    <tr><th>Produkt</th><th>Gruppe</th><th class="num">Kunden mit Lücke</th><th class="num">Potenzial</th></tr>
+                </thead>
+                <tbody>
+                {% for p in result.produkt_potenzial[:8] %}
+                <tr>
+                    <td class="nm">{{ p.produkt_name }}</td>
+                    <td style="color:var(--sub);font-size:12px;">{{ p.gruppe }}</td>
+                    <td class="num" style="color:var(--sub);">{{ p.n_kunden }}</td>
+                    <td class="num" style="color:#34d399;font-weight:700;">{{ '{:,.0f}'.format(p.potenzial).replace(',', '.') }} €</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="panel" style="text-align:center;padding:48px;color:var(--sub);">
+        <div style="font-size:40px;margin-bottom:16px;">🌱</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;">Wachstumspotenzial berechnen</div>
+        <div style="font-size:13px;">Beispieldaten laden, um Portfolio-Lücken und<br>Umsatzpotenzial je Kunde zu ermitteln.</div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Sidebar -->
+<div class="gr-sidebar">
+    <div class="sidebar-card">
+        <h4>Wie es funktioniert</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.7;">
+            <div style="margin-bottom:8px;">
+                <span style="color:#60a5fa;font-weight:600;">1. Peer-Group</span><br>
+                Jeder Kunde wird mit Kunden gleicher Branche verglichen.
+            </div>
+            <div style="margin-bottom:8px;">
+                <span style="color:#f59e0b;font-weight:600;">2. Produktlücken</span><br>
+                Produkte, die über 50 % der Vergleichsgruppe kauft, der Kunde aber nicht.
+            </div>
+            <div style="margin-bottom:8px;">
+                <span style="color:#34d399;font-weight:600;">3. Potenzial in €</span><br>
+                Median-Umsatz der Peers, skaliert auf die Kundengröße, mit 45 % Realisierungsquote.
+            </div>
+            <div>
+                <span style="color:#a78bfa;font-weight:600;">4. Segmentierung</span><br>
+                Wachstum / Stabil / Rückgang aus dem Jahresvergleich.
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-card">
+        <h4>Warum konservativ gerechnet?</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.7;">
+            Das theoretische Lückenpotenzial wird bewusst mit einer Realisierungsquote von
+            <strong style="color:var(--text);">45 %</strong> multipliziert. Nicht jede Lücke ist
+            adressierbar – manche Kunden haben Rahmenverträge, technische Restriktionen oder
+            bereits einen anderen Lieferanten. Die Zahl soll im Vertriebsgespräch belastbar sein.
+        </div>
+    </div>
+
+    {% if result and result.kpi %}
+    <div class="sidebar-card">
+        <h4>Zusammenfassung</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.9;">
+            <div>Kunden: <span style="color:var(--text);">{{ result.kpi.n_kunden }}</span></div>
+            <div>Bestandsumsatz: <span style="color:var(--text);">{{ '{:,.0f}'.format(result.kpi.gesamt_umsatz).replace(',', '.') }} €</span></div>
+            <div>Potenzial: <span style="color:#34d399;">{{ '{:,.0f}'.format(result.kpi.gesamt_potenzial).replace(',', '.') }} €</span></div>
+            <div>Im Wachstum: <span style="color:#34d399;">{{ result.kpi.n_wachstum }}</span></div>
+            <div>Im Rückgang: <span style="color:#f87171;">{{ result.kpi.n_rueckgang }}</span></div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="note">
+        <div style="font-size:11px;font-weight:600;color:#60a5fa;margin-bottom:6px;">Next Step: Graph-Embeddings</div>
+        Die Peer-Group ist hier regelbasiert (Branche + Größe). Ein
+        <strong>LightGCN- oder GraphSAGE-Modell</strong> auf dem Kunden-Produkt-Graphen
+        würde Ähnlichkeit aus dem tatsächlichen Kaufverhalten lernen statt aus Stammdaten –
+        und dabei auch Kaufreihenfolge und Saisonalität berücksichtigen.
+    </div>
+</div>
+
+</div>
+</main>
+
+{% if result and result.bubble_json and result.bubble_json != '{}' %}
+<script>
+(function(){
+    var fig = {{ result.bubble_json | safe }};
+    Plotly.newPlot('gr-bubble', fig.data, fig.layout, {responsive:true, displayModeBar:false});
+})();
+</script>
+{% endif %}
+
+<footer class="home-footer">SalesApps · Customer Growth Engine</footer>
+</body>
+</html>

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Opportunity Intelligence – SalesApps</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=3">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        .op-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; }
+        .kpi-row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+
+        .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+        .panel-title { font-size: 14px; font-weight: 600; color: var(--text); }
+        .panel-sub { font-size: 12px; color: var(--sub); margin-top: 2px; }
+
+        /* Deal-Karten */
+        .deal { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 15px 16px; margin-bottom: 11px; }
+        .deal.rot  { border-left: 3px solid #f87171; }
+        .deal.gelb { border-left: 3px solid #fbbf24; }
+        .deal.grün { border-left: 3px solid #34d399; }
+        .deal-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+        .deal-name { font-size: 14px; font-weight: 600; color: var(--text); }
+        .deal-meta { font-size: 11px; color: var(--sub); margin-top: 3px; }
+        .deal-wert { font-size: 17px; font-weight: 700; color: var(--text); white-space: nowrap; }
+        .deal-wert-sub { font-size: 11px; color: var(--sub); text-align: right; margin-top: 2px; }
+
+        /* CRM vs Graph Vergleich */
+        .prob-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .prob-box { background: rgba(0,0,0,0.22); border-radius: 8px; padding: 10px 12px; }
+        .prob-lbl { font-size: 10px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+        .prob-val { font-size: 20px; font-weight: 700; line-height: 1; }
+        .prob-track { height: 4px; border-radius: 2px; background: var(--border); margin-top: 7px; overflow: hidden; }
+        .prob-fill { height: 100%; border-radius: 2px; }
+        .prob-delta { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 8px; margin-top: 6px; }
+        .prob-delta.neg { background: rgba(248,113,113,0.14); color: #f87171; }
+        .prob-delta.pos { background: rgba(52,211,153,0.14); color: #34d399; }
+
+        /* Sekundäre Wahrscheinlichkeiten */
+        .risk-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+        .risk-mini { background: rgba(0,0,0,0.18); border-radius: 7px; padding: 8px 10px; text-align: center; }
+        .risk-mini-val { font-size: 14px; font-weight: 700; }
+        .risk-mini-lbl { font-size: 9px; color: var(--sub); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+        /* Faktoren */
+        .fak { display: flex; gap: 9px; align-items: flex-start; padding: 7px 0; border-top: 1px solid rgba(255,255,255,0.04); }
+        .fak-icon { font-size: 13px; line-height: 1.3; flex-shrink: 0; }
+        .fak-body { flex: 1; }
+        .fak-titel { font-size: 12px; font-weight: 600; color: var(--text); }
+        .fak-text { font-size: 11px; color: var(--sub); line-height: 1.55; margin-top: 2px; }
+        .fak-delta { font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .fak-delta.neg { color: #f87171; }
+        .fak-delta.pos { color: #34d399; }
+
+        /* Next Action */
+        .nba { background: rgba(167,139,250,0.07); border: 1px solid rgba(167,139,250,0.25); border-radius: 8px; padding: 11px 13px; margin-top: 11px; }
+        .nba-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+        .nba-title { font-size: 12px; font-weight: 700; color: #c4b5fd; }
+        .nba-frist { font-size: 10px; font-weight: 700; color: #fbbf24; background: rgba(251,191,36,0.12); border-radius: 8px; padding: 2px 8px; white-space: nowrap; }
+        .nba-detail { font-size: 11px; color: var(--sub); line-height: 1.6; }
+
+        /* Ampel */
+        .amp { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+        .amp.rot  { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.25); }
+        .amp.gelb { background: rgba(251,191,36,0.12);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
+        .amp.grün { background: rgba(52,211,153,0.12);  color: #34d399; border: 1px solid rgba(52,211,153,0.25); }
+
+        /* Buying Center */
+        .bc-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .bc-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+        .bc-rolle { font-size: 12px; color: var(--text); font-weight: 500; min-width: 150px; }
+        .bc-name { font-size: 12px; color: var(--sub); flex: 1; }
+        .bc-tag { font-size: 10px; padding: 2px 7px; border-radius: 8px; white-space: nowrap; }
+
+        #op-graph { height: 380px; }
+
+        .tbl-wrap { overflow-x: auto; }
+        .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .tbl th { padding: 9px 12px; text-align: left; font-size: 11px; color: var(--sub); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .tbl td { padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .tbl .num { text-align: right; white-space: nowrap; }
+
+        .op-sidebar { display: flex; flex-direction: column; gap: 16px; }
+        .sidebar-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+        .sidebar-card h4 { font-size: 12px; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+        .note { background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.2); border-radius: 8px; padding: 12px 14px; font-size: 12px; color: var(--sub); line-height: 1.6; }
+        .note strong { color: #60a5fa; }
+
+        select { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 9px 13px; font-family: inherit; font-size: 13px; }
+        select:focus { outline: none; border-color: var(--accent); }
+
+        @media (max-width: 900px) {
+            .op-layout { grid-template-columns: 1fr; }
+            .kpi-row-4 { grid-template-columns: repeat(2, 1fr); }
+            .prob-compare { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <div class="logo">
+            <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;">
+                <span class="logo-icon">🕸️</span>
+                <div>
+                    <div class="logo-title">Graph Opportunity Intelligence</div>
+                    <div class="logo-sub">Deal-Risiken aus dem Buying-Center-Graphen erkennen</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="app-main">
+<div class="op-layout">
+
+<div>
+    <!-- Steuerung -->
+    <div class="panel">
+        <form method="POST">
+            <div style="font-size:13px;color:var(--sub);margin-bottom:14px;">
+                Ein CRM sieht „Deal, 420.000 €, Stage 3, 60 %“. Der Graph sieht zusätzlich, wer im
+                Buying Center fehlt, wo der Wettbewerb sitzt und wie vergleichbare Deals ausgingen.
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <button type="submit" name="use_example" value="1" class="btn-primary">Beispieldaten laden</button>
+                {% if result and result.deals %}
+                <select name="opp_id" onchange="this.form.submit()">
+                    <option value="">— Deal für Tiefenanalyse wählen —</option>
+                    {% for d in result.deals %}
+                    <option value="{{ d.opp_id }}"
+                        {% if result.selected_deal and result.selected_deal.opp_id == d.opp_id %}selected{% endif %}>
+                        {{ d.kunde_name }} · {{ '{:,.0f}'.format(d.deal_wert).replace(',', '.') }} € · {{ d.graph_prob|int }}%
+                    </option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    {% if error %}
+    <div style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:12px 16px;color:#f87171;margin-bottom:20px;">{{ error }}</div>
+    {% endif %}
+
+    {% if result %}
+
+    <!-- KPIs -->
+    <div class="kpi-row-4">
+        <div class="kpi-card">
+            <div class="kpi-value">{{ '{:,.0f}'.format(result.kpi.pipeline).replace(',', '.') }} €</div>
+            <div class="kpi-label">Pipeline · {{ result.kpi.n_deals }} Deals</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value kpi-good">{{ '{:,.0f}'.format(result.kpi.gewichtet).replace(',', '.') }} €</div>
+            <div class="kpi-label">Gewichtet (Graph)</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value kpi-bad">{{ '{:,.0f}'.format(result.kpi.korrektur).replace(',', '.') }} €</div>
+            <div class="kpi-label">Korrektur ggü. CRM</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value kpi-bad">{{ result.kpi.n_rot }}</div>
+            <div class="kpi-label">Deals mit hohem Risiko</div>
+        </div>
+    </div>
+
+    <!-- Kernaussage -->
+    <div class="panel" style="border-color:rgba(248,113,113,0.25);background:rgba(248,113,113,0.04);">
+        <div style="font-size:13px;color:var(--text);line-height:1.7;">
+            <strong style="color:#f87171;">Forecast-Korrektur:</strong>
+            Das CRM gewichtet die Pipeline mit
+            <strong>{{ '{:,.0f}'.format(result.kpi.crm_gewichtet).replace(',', '.') }} €</strong>.
+            Unter Berücksichtigung der Graph-Signale liegt der belastbare Wert bei
+            <strong style="color:#34d399;">{{ '{:,.0f}'.format(result.kpi.gewichtet).replace(',', '.') }} €</strong> –
+            eine Abweichung von
+            <strong style="color:#f87171;">{{ '{:,.0f}'.format(result.kpi.korrektur).replace(',', '.') }} €</strong>.
+            Zum Vergleich: Die tatsächliche historische Win-Rate über
+            {{ result.kpi.n_historisch }} abgeschlossene Deals liegt bei
+            <strong>{{ result.kpi.winrate_hist }} %</strong>.
+        </div>
+    </div>
+
+    <!-- Deal-Detail -->
+    {% if result.selected_deal %}
+    {% set d = result.selected_deal %}
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">{{ d.kunde_name }} · {{ d.produkt_name }}</div>
+                <div class="panel-sub">
+                    {{ d.opp_id }} · {{ d.branche }} · Stage {{ d.stage_nr }} „{{ d.stage }}“ ·
+                    {{ d.tage_in_stage }} Tage · Betreuer {{ d.rep }}
+                </div>
+            </div>
+            <span class="amp {{ d.ampel }}">{{ d.ampel_text }}</span>
+        </div>
+
+        <div class="prob-compare">
+            <div class="prob-box">
+                <div class="prob-lbl">CRM-Prognose</div>
+                <div class="prob-val" style="color:var(--sub);">{{ d.crm_prob|int }} %</div>
+                <div class="prob-track"><div class="prob-fill" style="width:{{ d.crm_prob }}%;background:#64748b;"></div></div>
+                <div style="font-size:11px;color:var(--sub);margin-top:6px;">
+                    = {{ '{:,.0f}'.format(d.crm_value).replace(',', '.') }} € gewichtet
+                </div>
+            </div>
+            <div class="prob-box">
+                <div class="prob-lbl">Graph-Prognose</div>
+                <div class="prob-val" style="color:{% if d.ampel == 'rot' %}#f87171{% elif d.ampel == 'gelb' %}#fbbf24{% else %}#34d399{% endif %};">
+                    {{ d.graph_prob|int }} %
+                </div>
+                <div class="prob-track">
+                    <div class="prob-fill" style="width:{{ d.graph_prob }}%;background:{% if d.ampel == 'rot' %}#f87171{% elif d.ampel == 'gelb' %}#fbbf24{% else %}#34d399{% endif %};"></div>
+                </div>
+                <span class="prob-delta {% if d.delta < 0 %}neg{% else %}pos{% endif %}">
+                    {{ '%+.0f'|format(d.delta) }} Prozentpunkte
+                </span>
+                <div style="font-size:11px;color:var(--sub);margin-top:4px;">
+                    = {{ '{:,.0f}'.format(d.expected_value).replace(',', '.') }} € gewichtet
+                </div>
+            </div>
+        </div>
+
+        <div class="risk-row">
+            <div class="risk-mini">
+                <div class="risk-mini-val" style="color:#fb923c;">{{ d.p_stall|int }} %</div>
+                <div class="risk-mini-lbl">Stillstand</div>
+            </div>
+            <div class="risk-mini">
+                <div class="risk-mini-val" style="color:#f87171;">{{ d.p_competitor|int }} %</div>
+                <div class="risk-mini-lbl">Wettbewerber</div>
+            </div>
+            <div class="risk-mini">
+                <div class="risk-mini-val" style="color:#fbbf24;">{{ d.p_discount|int }} %</div>
+                <div class="risk-mini-lbl">Rabattdruck</div>
+            </div>
+        </div>
+
+        <!-- Faktoren -->
+        <div style="font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:0.05em;margin:16px 0 4px;">
+            Signale aus dem Graphen
+        </div>
+        {% for f in d.faktoren %}
+        <div class="fak">
+            <div class="fak-icon">{% if f.typ == 'risiko' %}⚠️{% else %}✅{% endif %}</div>
+            <div class="fak-body">
+                <div class="fak-titel">{{ f.titel }}</div>
+                <div class="fak-text">{{ f.text }}</div>
+            </div>
+            <div class="fak-delta {% if f.delta < 0 %}neg{% else %}pos{% endif %}">{{ '%+d'|format(f.delta) }}</div>
+        </div>
+        {% endfor %}
+
+        <!-- Next Action -->
+        <div class="nba">
+            <div class="nba-head">
+                <div class="nba-title">Empfohlene nächste Aktion: {{ d.next_action.aktion }}</div>
+                <div class="nba-frist">{{ d.next_action.frist }}</div>
+            </div>
+            <div class="nba-detail">{{ d.next_action.detail }}</div>
+        </div>
+    </div>
+
+    <!-- Buying Center -->
+    {% if result.selected_kontakte %}
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Buying Center</div>
+                <div class="panel-sub">{{ result.selected_deal.buying_center }} von {{ result.selected_kontakte | length }} Rollen aktiv eingebunden</div>
+            </div>
+        </div>
+        {% for k in result.selected_kontakte %}
+        <div class="bc-row">
+            <div class="bc-dot" style="background:{% if k.involviert %}{% if k.wb_kontakt %}#f87171{% else %}#34d399{% endif %}{% else %}#475569{% endif %};"></div>
+            <div class="bc-rolle">{{ k.rolle }}</div>
+            <div class="bc-name">{% if k.involviert %}{{ k.name }}{% else %}nicht eingebunden{% endif %}</div>
+            {% if k.wb_kontakt %}
+            <span class="bc-tag" style="background:rgba(248,113,113,0.14);color:#f87171;">Wettbewerberkontakt</span>
+            {% endif %}
+            {% if k.involviert %}
+            <span class="bc-tag" style="background:rgba(255,255,255,0.05);color:var(--sub);">{{ k.sentiment }}</span>
+            {% elif k.kritisch %}
+            <span class="bc-tag" style="background:rgba(251,191,36,0.14);color:#fbbf24;">Lücke</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Graph -->
+    {% if result.graph_json and result.graph_json != '{}' %}
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Deal-Graph</div>
+                <div class="panel-sub">
+                    Heterogener Graph: {{ result.kpi.n_knoten }} Knoten, {{ result.kpi.n_kanten }} Kanten gesamt ·
+                    hier das Umfeld des gewählten Deals
+                </div>
+            </div>
+        </div>
+        <div id="op-graph"></div>
+    </div>
+    {% endif %}
+
+    <!-- Ähnliche Deals -->
+    {% if result.selected_aehnliche %}
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Vergleichbare abgeschlossene Deals</div>
+                <div class="panel-sub">Gleiche Branche, ähnlicher Wert – wie ging es damals aus?</div>
+            </div>
+        </div>
+        <div class="tbl-wrap">
+            <table class="tbl">
+                <thead><tr><th>Deal</th><th>Kunde</th><th class="num">Wert</th><th>Wettbewerber</th><th class="num">Rabatt</th><th>Ergebnis</th></tr></thead>
+                <tbody>
+                {% for a in result.selected_aehnliche %}
+                <tr>
+                    <td style="color:var(--sub);font-size:12px;">{{ a.opp_id }}</td>
+                    <td style="color:var(--text);">{{ a.kunde_name }}</td>
+                    <td class="num" style="color:var(--sub);">{{ '{:,.0f}'.format(a.deal_wert).replace(',', '.') }} €</td>
+                    <td style="color:var(--sub);font-size:12px;">{{ a.wettbewerber }}</td>
+                    <td class="num" style="color:var(--sub);">{{ a.rabatt_pct|int }} %</td>
+                    <td>
+                        <span class="amp {% if a.status == 'gewonnen' %}grün{% else %}rot{% endif %}">
+                            {{ a.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <!-- Deal-Liste -->
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <div class="panel-title">Pipeline nach erwartetem Wert</div>
+                <div class="panel-sub">{{ result.kpi.n_deals }} offene Deals · CRM-Prognose gegen Graph-Prognose</div>
+            </div>
+            <div style="display:flex;gap:6px;">
+                <span class="amp rot">{{ result.kpi.n_rot }} kritisch</span>
+                <span class="amp gelb">{{ result.kpi.n_gelb }} beobachten</span>
+                <span class="amp grün">{{ result.kpi.n_gruen }} auf Kurs</span>
+            </div>
+        </div>
+
+        {% for d in result.deals[:12] %}
+        <div class="deal {{ d.ampel }}">
+            <div class="deal-top">
+                <div>
+                    <div class="deal-name">{{ d.kunde_name }} · {{ d.produkt_name }}</div>
+                    <div class="deal-meta">
+                        {{ d.opp_id }} · Stage {{ d.stage_nr }} {{ d.stage }} · {{ d.tage_in_stage }} Tage ·
+                        letzter Kontakt vor {{ d.letzter_kontakt_tage }} Tagen ·
+                        {% if d.wettbewerber != '—' %}Wettbewerb: {{ d.wettbewerber }}{% else %}kein Wettbewerb{% endif %}
+                    </div>
+                </div>
+                <div>
+                    <div class="deal-wert">{{ '{:,.0f}'.format(d.deal_wert).replace(',', '.') }} €</div>
+                    <div class="deal-wert-sub">erwartet {{ '{:,.0f}'.format(d.expected_value).replace(',', '.') }} €</div>
+                </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:11px;color:var(--sub);">CRM</span>
+                    <span style="font-size:14px;font-weight:700;color:var(--sub);">{{ d.crm_prob|int }}%</span>
+                    <span style="color:var(--sub);">→</span>
+                    <span style="font-size:11px;color:var(--sub);">Graph</span>
+                    <span style="font-size:14px;font-weight:700;color:{% if d.ampel == 'rot' %}#f87171{% elif d.ampel == 'gelb' %}#fbbf24{% else %}#34d399{% endif %};">
+                        {{ d.graph_prob|int }}%
+                    </span>
+                    <span class="prob-delta {% if d.delta < 0 %}neg{% else %}pos{% endif %}" style="margin:0;">
+                        {{ '%+.0f'|format(d.delta) }}
+                    </span>
+                </div>
+                <span class="amp {{ d.ampel }}">{{ d.n_risiken }} Risikosignal(e)</span>
+                <span style="font-size:11px;color:var(--sub);">Buying Center: {{ d.buying_center }}/5 Rollen</span>
+            </div>
+
+            <div class="nba">
+                <div class="nba-head">
+                    <div class="nba-title">{{ d.next_action.aktion }}</div>
+                    <div class="nba-frist">{{ d.next_action.frist }}</div>
+                </div>
+                <div class="nba-detail">{{ d.next_action.detail }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="panel" style="text-align:center;padding:48px;color:var(--sub);">
+        <div style="font-size:40px;margin-bottom:16px;">🕸️</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;">Deal-Risiken analysieren</div>
+        <div style="font-size:13px;">Beispieldaten laden, um die Pipeline gegen<br>die Graph-Signale zu prüfen.</div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Sidebar -->
+<div class="op-sidebar">
+    <div class="sidebar-card">
+        <h4>Der heterogene Graph</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.7;">
+            <div style="margin-bottom:8px;">
+                <span style="color:var(--text);font-weight:600;">Knotentypen</span><br>
+                <span style="color:#a78bfa;">●</span> Opportunity
+                <span style="color:#60a5fa;">●</span> Kunde
+                <span style="color:#34d399;">●</span> Kontakt<br>
+                <span style="color:#fbbf24;">●</span> Produkt
+                <span style="color:#f87171;">●</span> Wettbewerber
+                <span style="color:#22d3ee;">●</span> Vertrieb
+            </div>
+            <div>
+                <span style="color:var(--text);font-weight:600;">Kantentypen</span><br>
+                GEHOERT_ZU · INVOLVIERT · BETRIFFT ·<br>KONKURRIERT_UM · BETREUT
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-card">
+        <h4>Warum das CRM zu optimistisch ist</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.7;">
+            CRM-Wahrscheinlichkeiten sind an die Stage gekoppelt: Stage 3 bedeutet immer 60 %.
+            Das ignoriert, <strong style="color:var(--text);">wer</strong> im Buying Center sitzt,
+            <strong style="color:var(--text);">wie lange</strong> der Deal schon steht und
+            <strong style="color:var(--text);">ob der Wettbewerb</strong> einen Draht in den Einkauf hat.
+            Genau diese Beziehungen liefert der Graph.
+        </div>
+    </div>
+
+    <div class="sidebar-card">
+        <h4>Bewertete Signale</h4>
+        <div style="font-size:11px;color:var(--sub);line-height:1.9;">
+            <div>⚠️ Finanzfreigabe fehlt · −14</div>
+            <div>⚠️ Wettbewerber im Buying Center · −16</div>
+            <div>⚠️ Deal steht still · −12</div>
+            <div>⚠️ Kontakt eingeschlafen · −10</div>
+            <div>⚠️ Widerstand im Buying Center · −9</div>
+            <div>⚠️ Hoher Rabattdruck · −8</div>
+            <div>⚠️ Kein GF-Zugang · −7</div>
+            <div>⚠️ Technik nicht eingebunden · −6</div>
+            <div>✅ Finanzfreigabe eingebunden · +8</div>
+            <div>✅ Enger Kundenkontakt · +5</div>
+        </div>
+    </div>
+
+    {% if result and result.benchmark and result.benchmark.winrate_branche %}
+    <div class="sidebar-card">
+        <h4>Win-Rate nach Branche</h4>
+        <div style="font-size:12px;color:var(--sub);line-height:1.9;">
+            {% for br, wr in result.benchmark.winrate_branche.items() %}
+            <div style="display:flex;justify-content:space-between;">
+                <span>{{ br }}</span>
+                <span style="color:{% if wr >= result.kpi.winrate_hist %}#34d399{% else %}#f87171{% endif %};font-weight:600;">{{ wr }} %</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="note">
+        <div style="font-size:11px;font-weight:600;color:#60a5fa;margin-bottom:6px;">Next Step: Heterogeneous GNN</div>
+        Die Faktorgewichte sind hier kalibrierte Heuristiken. Ein
+        <strong>HGT- oder GraphSAGE-Modell</strong> würde Deal-Embeddings direkt aus der
+        Graphstruktur lernen und die Gewichte aus gewonnenen und verlorenen Deals ableiten,
+        statt sie fest zu setzen – inklusive Pfadmustern wie „Wettbewerber → Einkauf → Deal“.
+    </div>
+</div>
+
+</div>
+</main>
+
+{% if result and result.graph_json and result.graph_json != '{}' %}
+<script>
+(function(){
+    var fig = {{ result.graph_json | safe }};
+    Plotly.newPlot('op-graph', fig.data, fig.layout, {responsive:true, displayModeBar:false});
+})();
+</script>
+{% endif %}
+
+<footer class="home-footer">SalesApps · Graph Opportunity Intelligence · NetworkX</footer>
+</body>
+</html>

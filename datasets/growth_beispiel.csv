@@ -1,0 +1,241 @@
+kunde_id,kunde_name,branche,vertriebsmitarbeiter,groesse_klasse,jahr,produkt_id,produkt_name,produktgruppe,menge,einzelpreis,umsatz
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2023,P01,Hydraulikpumpe HX-200,Maschinen,8,2686,21488
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2023,P02,Kompressor KA-500,Maschinen,14,2094,29316
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2023,P05,Steuerungsmodul SM-Pro,Zubehör,20,1132,22640
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2023,P06,Präzisionssensor PS-200,Zubehör,19,571,10849
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2023,P09,Wartungsvertrag Basic,Service,8,602,4816
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2023,P11,Inbetriebnahme & Setup,Service,11,747,8217
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2024,P01,Hydraulikpumpe HX-200,Maschinen,9,2413,21717
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2024,P02,Kompressor KA-500,Maschinen,18,2065,37170
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2024,P05,Steuerungsmodul SM-Pro,Zubehör,23,1062,24426
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2024,P06,Präzisionssensor PS-200,Zubehör,23,591,13593
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2024,P09,Wartungsvertrag Basic,Service,10,644,6440
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2024,P11,Inbetriebnahme & Setup,Service,14,794,11116
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2025,P01,Hydraulikpumpe HX-200,Maschinen,11,2448,26928
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2025,P02,Kompressor KA-500,Maschinen,20,1993,39860
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2025,P05,Steuerungsmodul SM-Pro,Zubehör,25,1108,27700
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2025,P06,Präzisionssensor PS-200,Zubehör,27,527,14229
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2025,P09,Wartungsvertrag Basic,Service,11,643,7073
+K01,Müller GmbH,Maschinenbau,Meyer,Groß,2025,P11,Inbetriebnahme & Setup,Service,15,721,10815
+K02,Schneider AG,Automotive,Schulz,Groß,2023,P02,Kompressor KA-500,Maschinen,18,2040,36720
+K02,Schneider AG,Automotive,Schulz,Groß,2023,P03,Druckluftanlage DA-100,Maschinen,18,3840,69120
+K02,Schneider AG,Automotive,Schulz,Groß,2023,P05,Steuerungsmodul SM-Pro,Zubehör,8,994,7952
+K02,Schneider AG,Automotive,Schulz,Groß,2023,P06,Präzisionssensor PS-200,Zubehör,15,511,7665
+K02,Schneider AG,Automotive,Schulz,Groß,2023,P07,Druckregler DR-80,Zubehör,18,389,7002
+K02,Schneider AG,Automotive,Schulz,Groß,2023,P10,Wartungsvertrag Premium,Service,18,1139,20502
+K02,Schneider AG,Automotive,Schulz,Groß,2023,P11,Inbetriebnahme & Setup,Service,16,772,12352
+K02,Schneider AG,Automotive,Schulz,Groß,2023,P12,Anwenderschulung,Service,19,560,10640
+K02,Schneider AG,Automotive,Schulz,Groß,2024,P02,Kompressor KA-500,Maschinen,24,2113,50712
+K02,Schneider AG,Automotive,Schulz,Groß,2024,P03,Druckluftanlage DA-100,Maschinen,21,3834,80514
+K02,Schneider AG,Automotive,Schulz,Groß,2024,P05,Steuerungsmodul SM-Pro,Zubehör,10,1171,11710
+K02,Schneider AG,Automotive,Schulz,Groß,2024,P06,Präzisionssensor PS-200,Zubehör,19,551,10469
+K02,Schneider AG,Automotive,Schulz,Groß,2024,P07,Druckregler DR-80,Zubehör,24,364,8736
+K02,Schneider AG,Automotive,Schulz,Groß,2024,P10,Wartungsvertrag Premium,Service,22,1222,26884
+K02,Schneider AG,Automotive,Schulz,Groß,2024,P11,Inbetriebnahme & Setup,Service,19,826,15694
+K02,Schneider AG,Automotive,Schulz,Groß,2024,P12,Anwenderschulung,Service,23,567,13041
+K02,Schneider AG,Automotive,Schulz,Groß,2025,P02,Kompressor KA-500,Maschinen,26,1904,49504
+K02,Schneider AG,Automotive,Schulz,Groß,2025,P03,Druckluftanlage DA-100,Maschinen,25,3918,97950
+K02,Schneider AG,Automotive,Schulz,Groß,2025,P05,Steuerungsmodul SM-Pro,Zubehör,11,1085,11935
+K02,Schneider AG,Automotive,Schulz,Groß,2025,P06,Präzisionssensor PS-200,Zubehör,22,584,12848
+K02,Schneider AG,Automotive,Schulz,Groß,2025,P07,Druckregler DR-80,Zubehör,26,375,9750
+K02,Schneider AG,Automotive,Schulz,Groß,2025,P10,Wartungsvertrag Premium,Service,24,1290,30960
+K02,Schneider AG,Automotive,Schulz,Groß,2025,P11,Inbetriebnahme & Setup,Service,23,783,18009
+K02,Schneider AG,Automotive,Schulz,Groß,2025,P12,Anwenderschulung,Service,28,621,17388
+K03,Meier GmbH,Chemie,Meyer,Mittel,2023,P01,Hydraulikpumpe HX-200,Maschinen,12,2760,33120
+K03,Meier GmbH,Chemie,Meyer,Mittel,2023,P04,Förderpumpe FP-350,Maschinen,15,2331,34965
+K03,Meier GmbH,Chemie,Meyer,Mittel,2023,P07,Druckregler DR-80,Zubehör,7,406,2842
+K03,Meier GmbH,Chemie,Meyer,Mittel,2023,P09,Wartungsvertrag Basic,Service,15,656,9840
+K03,Meier GmbH,Chemie,Meyer,Mittel,2024,P01,Hydraulikpumpe HX-200,Maschinen,10,2527,25270
+K03,Meier GmbH,Chemie,Meyer,Mittel,2024,P04,Förderpumpe FP-350,Maschinen,13,2189,28457
+K03,Meier GmbH,Chemie,Meyer,Mittel,2024,P07,Druckregler DR-80,Zubehör,6,370,2220
+K03,Meier GmbH,Chemie,Meyer,Mittel,2024,P09,Wartungsvertrag Basic,Service,12,604,7248
+K03,Meier GmbH,Chemie,Meyer,Mittel,2025,P01,Hydraulikpumpe HX-200,Maschinen,8,2668,21344
+K03,Meier GmbH,Chemie,Meyer,Mittel,2025,P04,Förderpumpe FP-350,Maschinen,12,2183,26196
+K03,Meier GmbH,Chemie,Meyer,Mittel,2025,P07,Druckregler DR-80,Zubehör,5,360,1800
+K03,Meier GmbH,Chemie,Meyer,Mittel,2025,P09,Wartungsvertrag Basic,Service,11,686,7546
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2023,P02,Kompressor KA-500,Maschinen,8,2222,17776
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2023,P05,Steuerungsmodul SM-Pro,Zubehör,9,1076,9684
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2023,P06,Präzisionssensor PS-200,Zubehör,6,554,3324
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2023,P08,Schlauchpaket SP-Set,Zubehör,4,208,832
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2023,P09,Wartungsvertrag Basic,Service,9,620,5580
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2023,P12,Anwenderschulung,Service,10,616,6160
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2024,P02,Kompressor KA-500,Maschinen,8,2071,16568
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2024,P05,Steuerungsmodul SM-Pro,Zubehör,9,1016,9144
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2024,P06,Präzisionssensor PS-200,Zubehör,6,534,3204
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2024,P08,Schlauchpaket SP-Set,Zubehör,4,212,848
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2024,P09,Wartungsvertrag Basic,Service,9,695,6255
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2024,P12,Anwenderschulung,Service,11,631,6941
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2025,P02,Kompressor KA-500,Maschinen,8,1901,15208
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2025,P05,Steuerungsmodul SM-Pro,Zubehör,9,1115,10035
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2025,P06,Präzisionssensor PS-200,Zubehör,6,584,3504
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2025,P08,Schlauchpaket SP-Set,Zubehör,4,215,860
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2025,P09,Wartungsvertrag Basic,Service,9,621,5589
+K04,Schmidt AG,Lebensmittel,Hoffmann,Mittel,2025,P12,Anwenderschulung,Service,11,558,6138
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2023,P01,Hydraulikpumpe HX-200,Maschinen,20,2486,49720
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2023,P02,Kompressor KA-500,Maschinen,24,2220,53280
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2023,P03,Druckluftanlage DA-100,Maschinen,14,4095,57330
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2023,P05,Steuerungsmodul SM-Pro,Zubehör,11,1078,11858
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2023,P06,Präzisionssensor PS-200,Zubehör,26,501,13026
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2023,P07,Druckregler DR-80,Zubehör,22,358,7876
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2023,P10,Wartungsvertrag Premium,Service,9,1304,11736
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2023,P11,Inbetriebnahme & Setup,Service,14,797,11158
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2024,P01,Hydraulikpumpe HX-200,Maschinen,19,2530,48070
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2024,P02,Kompressor KA-500,Maschinen,24,2198,52752
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2024,P03,Druckluftanlage DA-100,Maschinen,15,3649,54735
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2024,P05,Steuerungsmodul SM-Pro,Zubehör,11,1074,11814
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2024,P06,Präzisionssensor PS-200,Zubehör,28,574,16072
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2024,P07,Druckregler DR-80,Zubehör,21,355,7455
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2024,P10,Wartungsvertrag Premium,Service,9,1210,10890
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2024,P11,Inbetriebnahme & Setup,Service,15,779,11685
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2025,P01,Hydraulikpumpe HX-200,Maschinen,19,2450,46550
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2025,P02,Kompressor KA-500,Maschinen,23,1894,43562
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2025,P03,Druckluftanlage DA-100,Maschinen,15,3824,57360
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2025,P05,Steuerungsmodul SM-Pro,Zubehör,11,1089,11979
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2025,P06,Präzisionssensor PS-200,Zubehör,27,577,15579
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2025,P07,Druckregler DR-80,Zubehör,21,346,7266
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2025,P10,Wartungsvertrag Premium,Service,9,1191,10719
+K05,Weber Industrie,Maschinenbau,Schulz,Groß,2025,P11,Inbetriebnahme & Setup,Service,16,814,13024
+K06,Braun Systems,Pharma,Meyer,Mittel,2023,P03,Druckluftanlage DA-100,Maschinen,5,4006,20030
+K06,Braun Systems,Pharma,Meyer,Mittel,2023,P05,Steuerungsmodul SM-Pro,Zubehör,4,1093,4372
+K06,Braun Systems,Pharma,Meyer,Mittel,2023,P06,Präzisionssensor PS-200,Zubehör,6,511,3066
+K06,Braun Systems,Pharma,Meyer,Mittel,2023,P10,Wartungsvertrag Premium,Service,9,1138,10242
+K06,Braun Systems,Pharma,Meyer,Mittel,2024,P03,Druckluftanlage DA-100,Maschinen,6,3596,21576
+K06,Braun Systems,Pharma,Meyer,Mittel,2024,P05,Steuerungsmodul SM-Pro,Zubehör,4,1055,4220
+K06,Braun Systems,Pharma,Meyer,Mittel,2024,P06,Präzisionssensor PS-200,Zubehör,7,559,3913
+K06,Braun Systems,Pharma,Meyer,Mittel,2024,P10,Wartungsvertrag Premium,Service,10,1183,11830
+K06,Braun Systems,Pharma,Meyer,Mittel,2025,P03,Druckluftanlage DA-100,Maschinen,7,3568,24976
+K06,Braun Systems,Pharma,Meyer,Mittel,2025,P05,Steuerungsmodul SM-Pro,Zubehör,5,1019,5095
+K06,Braun Systems,Pharma,Meyer,Mittel,2025,P06,Präzisionssensor PS-200,Zubehör,8,500,4000
+K06,Braun Systems,Pharma,Meyer,Mittel,2025,P10,Wartungsvertrag Premium,Service,13,1306,16978
+K07,Fischer Tech,Automotive,Hoffmann,Klein,2023,P02,Kompressor KA-500,Maschinen,3,1900,5700
+K07,Fischer Tech,Automotive,Hoffmann,Klein,2023,P06,Präzisionssensor PS-200,Zubehör,3,562,1686
+K07,Fischer Tech,Automotive,Hoffmann,Klein,2023,P07,Druckregler DR-80,Zubehör,1,404,404
+K07,Fischer Tech,Automotive,Hoffmann,Klein,2023,P12,Anwenderschulung,Service,1,615,615
+K07,Fischer Tech,Automotive,Hoffmann,Klein,2024,P02,Kompressor KA-500,Maschinen,4,2122,8488
+K07,Fischer Tech,Automotive,Hoffmann,Klein,2024,P06,Präzisionssensor PS-200,Zubehör,4,585,2340
+K07,Fischer Tech,Automotive,Hoffmann,Klein,2024,P07,Druckregler DR-80,Zubehör,2,358,716
+K07,Fischer Tech,Automotive,Hoffmann,Klein,2024,P12,Anwenderschulung,Service,2,635,1270
+K07,Fischer Tech,Automotive,Hoffmann,Klein,2025,P02,Kompressor KA-500,Maschinen,4,2134,8536
+K07,Fischer Tech,Automotive,Hoffmann,Klein,2025,P06,Präzisionssensor PS-200,Zubehör,5,562,2810
+K07,Fischer Tech,Automotive,Hoffmann,Klein,2025,P07,Druckregler DR-80,Zubehör,2,369,738
+K07,Fischer Tech,Automotive,Hoffmann,Klein,2025,P12,Anwenderschulung,Service,2,573,1146
+K08,Klein Automation,Maschinenbau,Schulz,Klein,2023,P01,Hydraulikpumpe HX-200,Maschinen,5,2837,14185
+K08,Klein Automation,Maschinenbau,Schulz,Klein,2023,P05,Steuerungsmodul SM-Pro,Zubehör,2,1012,2024
+K08,Klein Automation,Maschinenbau,Schulz,Klein,2023,P08,Schlauchpaket SP-Set,Zubehör,4,210,840
+K08,Klein Automation,Maschinenbau,Schulz,Klein,2023,P09,Wartungsvertrag Basic,Service,5,663,3315
+K08,Klein Automation,Maschinenbau,Schulz,Klein,2024,P01,Hydraulikpumpe HX-200,Maschinen,5,2659,13295
+K08,Klein Automation,Maschinenbau,Schulz,Klein,2024,P05,Steuerungsmodul SM-Pro,Zubehör,2,1010,2020
+K08,Klein Automation,Maschinenbau,Schulz,Klein,2024,P08,Schlauchpaket SP-Set,Zubehör,4,202,808
+K08,Klein Automation,Maschinenbau,Schulz,Klein,2024,P09,Wartungsvertrag Basic,Service,4,642,2568
+K08,Klein Automation,Maschinenbau,Schulz,Klein,2025,P01,Hydraulikpumpe HX-200,Maschinen,5,2702,13510
+K08,Klein Automation,Maschinenbau,Schulz,Klein,2025,P05,Steuerungsmodul SM-Pro,Zubehör,2,1095,2190
+K08,Klein Automation,Maschinenbau,Schulz,Klein,2025,P08,Schlauchpaket SP-Set,Zubehör,4,212,848
+K08,Klein Automation,Maschinenbau,Schulz,Klein,2025,P09,Wartungsvertrag Basic,Service,4,649,2596
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P01,Hydraulikpumpe HX-200,Maschinen,20,2522,50440
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P02,Kompressor KA-500,Maschinen,17,1900,32300
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P04,Förderpumpe FP-350,Maschinen,17,2342,39814
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P07,Druckregler DR-80,Zubehör,34,364,12376
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P08,Schlauchpaket SP-Set,Zubehör,12,220,2640
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P09,Wartungsvertrag Basic,Service,36,664,23904
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2023,P11,Inbetriebnahme & Setup,Service,35,836,29260
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P01,Hydraulikpumpe HX-200,Maschinen,18,2527,45486
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P02,Kompressor KA-500,Maschinen,15,2158,32370
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P04,Förderpumpe FP-350,Maschinen,15,2413,36195
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P07,Druckregler DR-80,Zubehör,28,407,11396
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P08,Schlauchpaket SP-Set,Zubehör,10,234,2340
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P09,Wartungsvertrag Basic,Service,31,699,21669
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2024,P11,Inbetriebnahme & Setup,Service,32,829,26528
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2025,P01,Hydraulikpumpe HX-200,Maschinen,15,2845,42675
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2025,P02,Kompressor KA-500,Maschinen,14,1974,27636
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2025,P04,Förderpumpe FP-350,Maschinen,14,2287,32018
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2025,P07,Druckregler DR-80,Zubehör,25,367,9175
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2025,P08,Schlauchpaket SP-Set,Zubehör,9,218,1962
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2025,P09,Wartungsvertrag Basic,Service,26,690,17940
+K09,Groß Maschinenbau,Metallindustrie,Meyer,Groß,2025,P11,Inbetriebnahme & Setup,Service,27,734,19818
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2023,P03,Druckluftanlage DA-100,Maschinen,10,4048,40480
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2023,P04,Förderpumpe FP-350,Maschinen,6,2184,13104
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2023,P05,Steuerungsmodul SM-Pro,Zubehör,11,1124,12364
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2023,P06,Präzisionssensor PS-200,Zubehör,4,567,2268
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2023,P09,Wartungsvertrag Basic,Service,9,604,5436
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2023,P10,Wartungsvertrag Premium,Service,11,1295,14245
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2024,P03,Druckluftanlage DA-100,Maschinen,10,3902,39020
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2024,P04,Förderpumpe FP-350,Maschinen,6,2302,13812
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2024,P05,Steuerungsmodul SM-Pro,Zubehör,12,1084,13008
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2024,P06,Präzisionssensor PS-200,Zubehör,4,513,2052
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2024,P09,Wartungsvertrag Basic,Service,9,612,5508
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2024,P10,Wartungsvertrag Premium,Service,12,1187,14244
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2025,P03,Druckluftanlage DA-100,Maschinen,10,3553,35530
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2025,P04,Förderpumpe FP-350,Maschinen,6,2465,14790
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2025,P05,Steuerungsmodul SM-Pro,Zubehör,10,1043,10430
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2025,P06,Präzisionssensor PS-200,Zubehör,4,532,2128
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2025,P09,Wartungsvertrag Basic,Service,9,623,5607
+K10,Ritter Technik,Chemie,Hoffmann,Mittel,2025,P10,Wartungsvertrag Premium,Service,12,1120,13440
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2023,P02,Kompressor KA-500,Maschinen,17,1943,33031
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2023,P03,Druckluftanlage DA-100,Maschinen,15,3603,54045
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2023,P05,Steuerungsmodul SM-Pro,Zubehör,15,1119,16785
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2023,P06,Präzisionssensor PS-200,Zubehör,20,577,11540
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2023,P07,Druckregler DR-80,Zubehör,9,363,3267
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2023,P10,Wartungsvertrag Premium,Service,19,1243,23617
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2023,P11,Inbetriebnahme & Setup,Service,6,724,4344
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2023,P12,Anwenderschulung,Service,9,548,4932
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2024,P02,Kompressor KA-500,Maschinen,22,1918,42196
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2024,P03,Druckluftanlage DA-100,Maschinen,19,3724,70756
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2024,P05,Steuerungsmodul SM-Pro,Zubehör,17,1076,18292
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2024,P06,Präzisionssensor PS-200,Zubehör,23,550,12650
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2024,P07,Druckregler DR-80,Zubehör,11,367,4037
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2024,P10,Wartungsvertrag Premium,Service,24,1309,31416
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2024,P11,Inbetriebnahme & Setup,Service,8,719,5752
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2024,P12,Anwenderschulung,Service,12,618,7416
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2025,P02,Kompressor KA-500,Maschinen,25,1985,49625
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2025,P03,Druckluftanlage DA-100,Maschinen,22,3636,79992
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2025,P05,Steuerungsmodul SM-Pro,Zubehör,20,1092,21840
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2025,P06,Präzisionssensor PS-200,Zubehör,26,582,15132
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2025,P07,Druckregler DR-80,Zubehör,13,376,4888
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2025,P10,Wartungsvertrag Premium,Service,26,1159,30134
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2025,P11,Inbetriebnahme & Setup,Service,9,824,7416
+K11,Hoffmann Werke,Lebensmittel,Schulz,Groß,2025,P12,Anwenderschulung,Service,14,613,8582
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2023,P01,Hydraulikpumpe HX-200,Maschinen,11,2741,30151
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2023,P03,Druckluftanlage DA-100,Maschinen,13,3610,46930
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2023,P06,Präzisionssensor PS-200,Zubehör,13,576,7488
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2023,P09,Wartungsvertrag Basic,Service,9,696,6264
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2024,P01,Hydraulikpumpe HX-200,Maschinen,10,2473,24730
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2024,P03,Druckluftanlage DA-100,Maschinen,12,3680,44160
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2024,P06,Präzisionssensor PS-200,Zubehör,12,551,6612
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2024,P09,Wartungsvertrag Basic,Service,8,635,5080
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2025,P01,Hydraulikpumpe HX-200,Maschinen,9,2588,23292
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2025,P03,Druckluftanlage DA-100,Maschinen,9,3996,35964
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2025,P06,Präzisionssensor PS-200,Zubehör,10,530,5300
+K12,Bauer Industrie,Pharma,Meyer,Mittel,2025,P09,Wartungsvertrag Basic,Service,7,705,4935
+K13,Wagner Systems,Metallindustrie,Hoffmann,Klein,2023,P04,Förderpumpe FP-350,Maschinen,6,2282,13692
+K13,Wagner Systems,Metallindustrie,Hoffmann,Klein,2023,P07,Druckregler DR-80,Zubehör,6,390,2340
+K13,Wagner Systems,Metallindustrie,Hoffmann,Klein,2023,P08,Schlauchpaket SP-Set,Zubehör,3,218,654
+K13,Wagner Systems,Metallindustrie,Hoffmann,Klein,2023,P09,Wartungsvertrag Basic,Service,5,639,3195
+K13,Wagner Systems,Metallindustrie,Hoffmann,Klein,2024,P04,Förderpumpe FP-350,Maschinen,6,2316,13896
+K13,Wagner Systems,Metallindustrie,Hoffmann,Klein,2024,P07,Druckregler DR-80,Zubehör,6,374,2244
+K13,Wagner Systems,Metallindustrie,Hoffmann,Klein,2024,P08,Schlauchpaket SP-Set,Zubehör,4,210,840
+K13,Wagner Systems,Metallindustrie,Hoffmann,Klein,2024,P09,Wartungsvertrag Basic,Service,5,627,3135
+K13,Wagner Systems,Metallindustrie,Hoffmann,Klein,2025,P04,Förderpumpe FP-350,Maschinen,6,2491,14946
+K13,Wagner Systems,Metallindustrie,Hoffmann,Klein,2025,P07,Druckregler DR-80,Zubehör,6,345,2070
+K13,Wagner Systems,Metallindustrie,Hoffmann,Klein,2025,P08,Schlauchpaket SP-Set,Zubehör,3,215,645
+K13,Wagner Systems,Metallindustrie,Hoffmann,Klein,2025,P09,Wartungsvertrag Basic,Service,5,673,3365
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2023,P01,Hydraulikpumpe HX-200,Maschinen,4,2506,10024
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2023,P02,Kompressor KA-500,Maschinen,9,2105,18945
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2023,P05,Steuerungsmodul SM-Pro,Zubehör,5,1046,5230
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2023,P06,Präzisionssensor PS-200,Zubehör,9,565,5085
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2023,P09,Wartungsvertrag Basic,Service,3,665,1995
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2023,P10,Wartungsvertrag Premium,Service,3,1174,3522
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2023,P11,Inbetriebnahme & Setup,Service,4,734,2936
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2024,P01,Hydraulikpumpe HX-200,Maschinen,5,2851,14255
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2024,P02,Kompressor KA-500,Maschinen,11,2212,24332
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2024,P05,Steuerungsmodul SM-Pro,Zubehör,6,1052,6312
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2024,P06,Präzisionssensor PS-200,Zubehör,10,555,5550
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2024,P09,Wartungsvertrag Basic,Service,3,701,2103
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2024,P10,Wartungsvertrag Premium,Service,5,1126,5630
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2024,P11,Inbetriebnahme & Setup,Service,5,712,3560
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2025,P01,Hydraulikpumpe HX-200,Maschinen,5,2522,12610
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2025,P02,Kompressor KA-500,Maschinen,12,1962,23544
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2025,P05,Steuerungsmodul SM-Pro,Zubehör,7,1144,8008
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2025,P06,Präzisionssensor PS-200,Zubehör,12,519,6228
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2025,P09,Wartungsvertrag Basic,Service,4,648,2592
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2025,P10,Wartungsvertrag Premium,Service,5,1268,6340
+K14,Koch Anlagen,Maschinenbau,Schulz,Mittel,2025,P11,Inbetriebnahme & Setup,Service,6,800,4800
