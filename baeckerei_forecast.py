@@ -45,7 +45,7 @@ FEATURE_LABELS = {
     "week_of_year":    "Kalenderwoche",
     "is_feiertag":     "Feiertag NRW",
     "is_schulferien":  "Schulferien NRW",
-    "temperatur":      "Temperatur (°C)",
+    "temperatur":      "Tageshöchsttemp. Dülmen (°C)",
     "is_aktion":       "Aktion / Promotion",
     "filiale_enc":     "Filiale",
     "artikel_enc":     "Artikel",
@@ -126,10 +126,11 @@ def _is_schulferien(d: pd.Timestamp) -> int:
 
 
 def _synthetic_temp(d: pd.Timestamp) -> float:
+    """Tageshöchsttemperatur Dülmen/NRW (°C): Jan ≈ 5°C, Jul ≈ 28°C."""
     doy  = d.timetuple().tm_yday
-    base = 10.0 + 12.0 * np.sin((doy - 80) / 365.0 * 2 * np.pi)
+    base = 16.5 + 12.5 * np.sin((doy - 80) / 365.0 * 2 * np.pi)
     rng  = np.random.default_rng(int(d.timestamp()))
-    return float(base + rng.normal(0, 2.0))
+    return float(base + rng.normal(0, 3.0))
 
 
 # ── Singletons ────────────────────────────────────────────────────────────

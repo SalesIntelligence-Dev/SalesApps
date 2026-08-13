@@ -88,21 +88,21 @@ def _is_schulferien(d: date) -> bool:
 
 
 def _synthetic_temp(d: date) -> float:
-    """Jahresgang NRW-Temperatur (°C), reproduzierbar per Tag."""
+    """Tageshöchsttemperatur Dülmen/NRW (°C): Jan ≈ 5°C, Jul ≈ 28°C."""
     doy  = d.timetuple().tm_yday
-    base = 10.0 + 12.0 * np.sin((doy - 80) / 365.0 * 2 * np.pi)
+    base = 16.5 + 12.5 * np.sin((doy - 80) / 365.0 * 2 * np.pi)
     rng  = np.random.default_rng(d.toordinal())
-    return float(base + rng.normal(0, 2.5))
+    return float(base + rng.normal(0, 3.0))
 
 
 def _temp_mult(temp: float) -> float:
-    """Heiße Sommer → weniger Kauf von Brot/Gebäck; kalte Winter → mehr."""
-    if temp > 28:
-        return max(0.78, 1.0 - (temp - 28) * 0.018)
-    if temp > 22:
-        return 1.0 - (temp - 22) * 0.010
-    if temp < 2:
-        return min(1.12, 1.0 + (2 - temp) * 0.010)
+    """Heiße Tage → weniger Brot/Gebäck; kalte Tage → mehr."""
+    if temp > 30:
+        return max(0.78, 1.0 - (temp - 30) * 0.018)
+    if temp > 24:
+        return 1.0 - (temp - 24) * 0.010
+    if temp < 5:
+        return min(1.12, 1.0 + (5 - temp) * 0.010)
     return 1.0
 
 
