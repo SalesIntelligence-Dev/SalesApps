@@ -28,6 +28,7 @@ from recommender_graph import analyse as reco_analyse
 from opportunity_graph import analyse as opp_analyse
 from next_action_engine import analyse as nba_analyse
 from churn_engine import analyse as churn_analyse
+from baeckerei_forecast import get_meta as bk_meta, run_forecast as bk_forecast
 
 # ── Logging ──────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -586,6 +587,33 @@ def download_forecast(job_id: str):
         as_attachment=True,
         download_name=f"prognose_{job_id}.xlsx",
     )
+
+
+# ── Bäckerei Nachfrageprognose (eigenständige Route) ─────────────────────
+
+@app.route("/forecasting_model")
+def forecasting_model():
+    return render_template("forecasting_model.html")
+
+
+@app.route("/api/forecasting_model/meta")
+def bk_meta_route():
+    return jsonify(bk_meta())
+
+
+@app.route("/api/forecasting_model/run", methods=["POST"])
+def bk_run():
+    data       = request.get_json(force=True)
+    filiale    = data.get("filiale", "Innenstadt")
+    artikel    = data.get("artikel",  "Brötchen")
+    with_aktion = bool(data.get("with_aktion", False))
+
+    try:
+        result = bk_forecast(filiale, artikel, with_aktion)
+        return jsonify(result)
+    except Exception as exc:
+        logger.error("Bäckerei-Forecast Fehler: %s", exc)
+        return jsonify({"error": str(exc)}), 500
 
 
 # ── Datasets generieren beim Start ───────────────────────────────────────
