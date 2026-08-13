@@ -28,7 +28,15 @@ from recommender_graph import analyse as reco_analyse
 from opportunity_graph import analyse as opp_analyse
 from next_action_engine import analyse as nba_analyse
 from churn_engine import analyse as churn_analyse
-from baeckerei_forecast import get_meta as bk_meta, run_forecast as bk_forecast
+from baeckerei_forecast import (
+    get_meta     as bk_meta,
+    run_forecast as bk_forecast,
+    run_overview as bk_overview,
+)
+
+# ── Korrekturen-Store (in-memory) ────────────────────────────────────────
+_bk_corrections: dict = {}
+_bk_corr_lock = threading.Lock()
 
 # ── Logging ──────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -599,6 +607,37 @@ def forecasting_model():
 @app.route("/api/forecasting_model/meta")
 def bk_meta_route():
     return jsonify(bk_meta())
+
+
+@app.route("/api/forecasting_model/overview")
+def bk_overview_route():
+    try:
+        data = bk_overview()
+        with _bk_corr_lock:
+            data["corrections"] = dict(_bk_corrections)
+        return jsonify(data)
+    except Exception as exc:
+        logger.error("Overview Fehler: %s", exc)
+        return jsonify({"error": str(exc)}), 500
+
+
+@app.route("/api/forecasting_model/corrections", methods=["GET"])
+def bk_get_corrections():
+    with _bk_corr_lock:
+        return jsonify(dict(_bk_corrections))
+
+
+@app.route("/api/forecasting_model/corrections", methods=["POST"])
+def bk_set_correction():
+    data = request.get_json(force=True)
+    key  = f"{data['filiale']}|{data['artikel']}|{data['datum_iso']}"
+    with _bk_corr_lock:
+        if data.get("wert") is None:
+            _bk_corrections.pop(key, None)
+        else:
+            _bk_corrections[key] = int(data["wert"])
+        n = len(_bk_corrections)
+    return jsonify({"ok": True, "n_corrections": n})
 
 
 @app.route("/api/forecasting_model/run", methods=["POST"])

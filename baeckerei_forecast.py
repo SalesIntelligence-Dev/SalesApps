@@ -233,6 +233,20 @@ def _get_model():
 
 # ── Public API ────────────────────────────────────────────────────────────
 
+_FLAG_DIFF_THRESH = 0.30   # >30 % Abweichung Modell vs. Naive → auffällig
+_FLAG_CI_THRESH   = 0.45   # CI-Breite >45 % der Prognose     → unsicher
+
+
+def _flag(pred: int, naive: int, lower: int, upper: int) -> str:
+    rel_diff = abs(pred - naive) / naive if naive > 0 else 0
+    ci_width = (upper - lower) / pred    if pred  > 0 else 0
+    if rel_diff > _FLAG_DIFF_THRESH:
+        return "auffaellig"
+    if ci_width > _FLAG_CI_THRESH:
+        return "unsicher"
+    return "ok"
+
+
 def get_meta() -> dict:
     return {"filialen": FILIALEN, "artikel": ARTIKEL}
 
@@ -349,6 +363,8 @@ def run_forecast(
         # Feiertags-Name (leer wenn kein Feiertag)
         feiertag_name = NRW_HOLIDAY_NAMES.get(fc_date, "") if is_feiertag else ""
 
+        day_flag = _flag(pred_int, naive_val, lower, upper)
+
         forecast_rows.append({
             "datum":         fc_date.strftime("%d.%m.%Y"),
             "datum_iso":     fc_date.strftime("%Y-%m-%d"),
@@ -362,6 +378,8 @@ def run_forecast(
             "is_schulferien":bool(is_schulfer),
             "is_aktion":     bool(is_aktion),
             "temperatur":    round(temp, 1),
+            "flag":          day_flag,
+            "rel_diff_pct":  round(abs(pred_int - naive_val) / naive_val * 100, 1) if naive_val > 0 else 0,
         })
 
         new_row = pd.DataFrame([{
@@ -401,4 +419,51 @@ def run_forecast(
             "importance": fi_values,
         },
         "last_date": last_date.strftime("%d.%m.%Y"),
+    }
+
+
+def run_overview(aktion_days: Optional[list] = None) -> dict:
+    """
+    Batch-Prognose für alle Filialen × Artikel (40 Serien).
+    Gibt strukturierte Übersicht mit Flagging für Ausnahme-basierte Prüfung zurück.
+    """
+    if aktion_days is None:
+        aktion_days = [False] * 7
+
+    _get_model()   # Modell einmalig laden / trainieren
+
+    serien = []
+    for filiale in FILIALEN:
+        for artikel in ARTIKEL:
+            fc = run_forecast(filiale, artikel, aktion_days)
+            row_flags = [r["flag"] for r in fc["forecast"]]
+
+            if "auffaellig" in row_flags:
+                row_flag = "auffaellig"
+            elif "unsicher" in row_flags:
+                row_flag = "unsicher"
+            else:
+                row_flag = "ok"
+
+            serien.append({
+                "filiale":      filiale,
+                "artikel":      artikel,
+                "tage":         fc["forecast"],
+                "flag":         row_flag,
+                "n_flagged":    sum(1 for f in row_flags if f != "ok"),
+            })
+
+    fc_dates = [
+        {"datum": t["datum"], "datum_iso": t["datum_iso"], "wochentag": t["wochentag"],
+         "is_feiertag": t["is_feiertag"], "feiertag_name": t.get("feiertag_name", "")}
+        for t in serien[0]["tage"]
+    ] if serien else []
+
+    return {
+        "serien":       serien,
+        "fc_dates":     fc_dates,
+        "n_total":      len(serien),
+        "n_auffaellig": sum(1 for s in serien if s["flag"] == "auffaellig"),
+        "n_unsicher":   sum(1 for s in serien if s["flag"] == "unsicher"),
+        "n_ok":         sum(1 for s in serien if s["flag"] == "ok"),
     }

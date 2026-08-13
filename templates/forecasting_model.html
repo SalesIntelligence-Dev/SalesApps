@@ -11,71 +11,89 @@
 :root{
   --bg:#0a0a18;--bg2:#0f0f28;--bg3:#141430;--card:#12122a;
   --border:#1e1e42;--border2:#2a2a55;--text:#e2e8f0;--sub:#94a3b8;--muted:#4a5568;
-  --accent:#f59e0b;--accent2:#fbbf24;--teal:#34d399;--blue:#7eb8f7;
-  --purple:#a78bfa;--danger:#ef4444;--orange:#fb923c;
-  --radius:10px;--radius-lg:16px;--shadow:0 4px 24px rgba(0,0,0,.5);
+  --accent:#f59e0b;--teal:#34d399;--blue:#7eb8f7;--purple:#a78bfa;
+  --danger:#ef4444;--orange:#fb923c;
+  --radius:10px;--radius-lg:16px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);
      min-height:100vh;display:flex;flex-direction:column;font-size:14px;line-height:1.6}
 
-/* ── HEADER ───────────────────────────────────────── */
+/* ── HEADER ─────────────────────────────────────────────────────── */
 header{background:var(--bg2);border-bottom:1px solid var(--border);
-       position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
+       position:sticky;top:0;z-index:200;backdrop-filter:blur(8px)}
 .header-inner{max-width:1440px;margin:0 auto;padding:0 24px;
-               height:60px;display:flex;align-items:center;gap:12px}
+               height:58px;display:flex;align-items:center;gap:12px}
 .logo-icon{font-size:22px}
-.logo-title{font-size:15px;font-weight:700;color:var(--text)}
+.logo-title{font-size:15px;font-weight:700}
 .logo-sub{font-size:11px;color:var(--sub)}
-.badges{margin-left:auto;display:flex;gap:8px;align-items:center}
+.badges{margin-left:auto;display:flex;gap:8px}
 .badge-pill{border-radius:20px;padding:2px 10px;font-size:11px;font-weight:600}
 .badge-cpu{background:rgba(245,158,11,.15);color:var(--accent);border:1px solid rgba(245,158,11,.3)}
 .badge-lgbm{background:rgba(52,211,153,.12);color:var(--teal);border:1px solid rgba(52,211,153,.25)}
 
-/* ── LAYOUT ────────────────────────────────────────── */
+/* ── TAB NAV ─────────────────────────────────────────────────────── */
+.tab-nav{background:var(--bg2);border-bottom:1px solid var(--border);
+         position:sticky;top:58px;z-index:100}
+.tab-nav-inner{max-width:1440px;margin:0 auto;padding:0 24px;
+               display:flex;gap:4px;align-items:flex-end;height:44px}
+.tab-btn{background:transparent;border:1px solid transparent;
+         border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;
+         color:var(--sub);font-family:inherit;font-size:13px;font-weight:500;
+         padding:8px 18px;cursor:pointer;transition:all .18s;
+         display:flex;align-items:center;gap:7px;white-space:nowrap}
+.tab-btn:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.tab-btn.active{background:var(--bg);border-color:var(--border);
+                color:var(--text);font-weight:700}
+.tab-badge{background:var(--accent);color:#000;border-radius:20px;
+           padding:1px 7px;font-size:10px;font-weight:700;min-width:18px;text-align:center}
+.tab-badge.green{background:var(--teal)}
+
+/* ── LAYOUT ──────────────────────────────────────────────────────── */
 main{flex:1;max-width:1440px;margin:0 auto;width:100%;padding:24px;
      display:grid;grid-template-columns:300px 1fr;gap:24px}
 @media(max-width:960px){main{grid-template-columns:1fr}}
 
-/* ── CONTROLS ──────────────────────────────────────── */
+/* Tab 1 wrapper (display:contents → children join parent grid) */
+#tab-single{display:contents}
+/* Tab 2 wrapper (spans full grid width) */
+#tab-overview{grid-column:1/-1;display:none}
+
+/* ── CONTROLS (Tab 1) ────────────────────────────────────────────── */
 .controls{background:var(--card);border:1px solid var(--border);
           border-radius:var(--radius-lg);padding:20px;
           display:flex;flex-direction:column;gap:14px;align-self:start;
-          position:sticky;top:76px}
-.ctrl-section-title{font-size:11px;font-weight:700;color:var(--sub);
-                    text-transform:uppercase;letter-spacing:.08em}
+          position:sticky;top:110px}
+.ctrl-title{font-size:11px;font-weight:700;color:var(--sub);
+            text-transform:uppercase;letter-spacing:.08em}
 .field{display:flex;flex-direction:column;gap:5px}
 .field label{font-size:12px;font-weight:500;color:var(--sub)}
 select{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);
-       color:var(--text);font-family:inherit;font-size:13px;padding:8px 10px;width:100%;
-       transition:border-color .2s;cursor:pointer}
+       color:var(--text);font-family:inherit;font-size:13px;padding:8px 10px;
+       width:100%;transition:border-color .2s;cursor:pointer}
 select:focus{outline:none;border-color:var(--accent)}
 .divider{height:1px;background:var(--border)}
-
-/* 7-day aktion grid */
-.aktion-label-row{display:flex;justify-content:space-between;
-                  background:var(--bg3);border-radius:var(--radius);
-                  border:1px solid var(--border2);padding:8px 6px 10px;gap:4px}
-.aktion-day-cell{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
-.aktion-day-name{font-size:10px;font-weight:600;color:var(--sub);text-transform:uppercase}
-.aktion-day-date{font-size:9px;color:var(--muted)}
-.aktion-day-cb{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+.aktion-grid{display:flex;justify-content:space-between;
+             background:var(--bg3);border:1px solid var(--border2);
+             border-radius:var(--radius);padding:8px 6px 10px;gap:4px}
+.ak-cell{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.ak-day{font-size:10px;font-weight:600;color:var(--sub);text-transform:uppercase}
+.ak-date{font-size:9px;color:var(--muted)}
+.ak-cb{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
 .aktion-hint{font-size:11px;color:var(--muted);text-align:center}
-
 .btn-run{background:linear-gradient(135deg,var(--accent),#f97316);
          color:#000;font-weight:700;font-size:14px;border:none;
          border-radius:var(--radius);padding:12px;cursor:pointer;width:100%;
-         transition:opacity .2s;letter-spacing:.02em}
+         transition:opacity .2s}
 .btn-run:hover{opacity:.9}
 .btn-run:disabled{opacity:.5;cursor:not-allowed}
-.info-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);
-          padding:12px;font-size:11px;color:var(--sub);line-height:1.7}
+.info-box{background:var(--bg3);border:1px solid var(--border);
+          border-radius:var(--radius);padding:12px;font-size:11px;
+          color:var(--sub);line-height:1.7}
 .info-box strong{color:var(--text);font-size:12px}
 
-/* ── RIGHT PANEL ───────────────────────────────────── */
+/* ── RESULTS (Tab 1) ─────────────────────────────────────────────── */
 .results{display:flex;flex-direction:column;gap:20px}
-
-/* State cards */
 .state-card{background:var(--card);border:1px solid var(--border);
             border-radius:var(--radius-lg);padding:36px;
             display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
@@ -85,14 +103,10 @@ select:focus{outline:none;border-color:var(--accent)}
 .spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);
          border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* Section card */
 .section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
 .section-title{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;
                letter-spacing:.08em;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.section-title .s-label{color:var(--text);font-size:13px}
-
-/* Metric tiles */
+.s-label{color:var(--text);font-size:13px;text-transform:none;letter-spacing:0}
 .metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
 @media(max-width:640px){.metrics-grid{grid-template-columns:1fr 1fr}}
 .metric-tile{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
@@ -100,31 +114,22 @@ select:focus{outline:none;border-color:var(--accent)}
               letter-spacing:.06em;margin-bottom:6px}
 .metric-value{font-size:26px;font-weight:700;line-height:1}
 .metric-sub{font-size:10px;color:var(--muted);margin-top:3px}
-.mv-green{color:var(--teal)} .mv-amber{color:var(--accent)} .mv-blue{color:var(--blue)}
-
-/* Secondary bar */
+.mv-green{color:var(--teal)}.mv-amber{color:var(--accent)}.mv-blue{color:var(--blue)}
 .sec-bar{display:flex;gap:20px;flex-wrap:wrap;padding:10px 12px;
          background:var(--bg3);border-radius:var(--radius);margin-bottom:10px}
 .sec-m{display:flex;flex-direction:column;gap:2px}
 .sec-m-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .sec-m-val{font-size:12px;font-weight:600;color:var(--sub)}
-
-/* Improvement banner */
 .improvement-banner{display:flex;align-items:center;gap:10px;
                     background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);
                     border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--teal)}
 .improvement-banner strong{font-size:16px}
-
-/* Charts */
 .chart-wrap{position:relative;height:260px}
 .chart-wrap-sm{position:relative;height:210px}
-
-/* Forecast table */
 .fc-table-wrap{overflow-x:auto}
 .fc-table{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
-.fc-table th{text-align:left;padding:8px 10px;font-size:10px;font-weight:700;
-             color:var(--sub);text-transform:uppercase;letter-spacing:.06em;
-             border-bottom:1px solid var(--border);white-space:nowrap}
+.fc-table th{text-align:left;padding:8px 10px;font-size:10px;font-weight:700;color:var(--sub);
+             text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap}
 .fc-table td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
 .fc-table tr:last-child td{border-bottom:none}
 .fc-table tr.is-weekend td{background:rgba(124,58,237,.04)}
@@ -136,8 +141,6 @@ select:focus{outline:none;border-color:var(--accent)}
 .col-temp{font-size:11px;color:var(--muted)}
 .col-aktion-cb{text-align:center}
 .col-aktion-cb input[type=checkbox]{width:15px;height:15px;accent-color:var(--orange);cursor:pointer}
-
-/* Badges */
 .badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;
        white-space:nowrap;margin:1px 2px 1px 0}
 .b-ft{background:rgba(245,158,11,.18);color:var(--accent)}
@@ -145,9 +148,102 @@ select:focus{outline:none;border-color:var(--accent)}
 .b-sf{background:rgba(126,184,247,.12);color:var(--blue)}
 .b-ak{background:rgba(251,146,60,.18);color:var(--orange)}
 
-/* Delta indicator (aktion effect) */
-.delta-up{color:var(--teal);font-size:11px;font-weight:600}
-.delta-dn{color:var(--danger);font-size:11px;font-weight:600}
+/* ── TAB 2 OVERVIEW ──────────────────────────────────────────────── */
+.ov-wrap{display:flex;flex-direction:column;gap:18px}
+
+/* Summary tiles */
+.ov-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+@media(max-width:700px){.ov-summary{grid-template-columns:repeat(3,1fr)}}
+.ov-stat{background:var(--card);border:1px solid var(--border);
+         border-radius:var(--radius);padding:14px;text-align:center}
+.ov-stat-val{font-size:28px;font-weight:700;color:var(--text)}
+.ov-stat-lbl{font-size:11px;color:var(--sub);margin-top:3px}
+.ov-stat.s-auf .ov-stat-val{color:var(--accent)}
+.ov-stat.s-uns .ov-stat-val{color:var(--blue)}
+.ov-stat.s-kor .ov-stat-val{color:var(--teal)}
+.ov-stat.s-ok  .ov-stat-val{color:var(--sub)}
+
+/* Exception info banner */
+.exception-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+                  background:rgba(126,184,247,.08);border:1px solid rgba(126,184,247,.2);
+                  border-radius:var(--radius);padding:10px 16px;font-size:12px;color:var(--blue)}
+.exception-banner strong{font-size:13px;color:var(--text)}
+
+/* Controls bar */
+.ov-ctrl-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.ov-filter-btns{display:flex;gap:6px}
+.ov-filter-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);
+               color:var(--sub);font-family:inherit;font-size:12px;font-weight:500;
+               padding:6px 14px;cursor:pointer;transition:all .18s}
+.ov-filter-btn:hover{border-color:var(--accent);color:var(--text)}
+.ov-filter-btn.active{background:rgba(245,158,11,.12);border-color:var(--accent);
+                      color:var(--accent);font-weight:600}
+.ov-action-btns{display:flex;gap:8px}
+.ov-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);
+        color:var(--sub);font-family:inherit;font-size:12px;padding:6px 12px;
+        cursor:pointer;transition:all .18s}
+.ov-btn:hover{border-color:var(--border2);color:var(--text)}
+.ov-btn-primary{border-color:var(--teal);color:var(--teal)}
+
+/* Overview table */
+.ov-table-outer{background:var(--card);border:1px solid var(--border);
+                border-radius:var(--radius-lg);overflow:hidden}
+.ov-table-wrap{overflow-x:auto;max-height:600px;overflow-y:auto}
+.ov-table{width:100%;border-collapse:collapse;font-size:13px}
+.ov-table th{text-align:center;padding:10px 8px;font-size:10px;font-weight:700;color:var(--sub);
+             text-transform:uppercase;letter-spacing:.05em;
+             background:var(--bg2);position:sticky;top:0;z-index:10;
+             border-bottom:2px solid var(--border);white-space:nowrap}
+.ov-table th.col-left{text-align:left;position:sticky;background:var(--bg2);z-index:20}
+.ov-table th:nth-child(1){left:0;min-width:110px}
+.ov-table th:nth-child(2){left:110px;min-width:100px;border-right:1px solid var(--border2)}
+.ov-table td{padding:0;border-bottom:1px solid var(--border);vertical-align:middle}
+.ov-table tr:last-child td{border-bottom:none}
+.ov-table tr:hover .ov-cell-fixed{background:rgba(255,255,255,.02)}
+.ov-cell-fixed{padding:9px 12px;font-size:12px;font-weight:600;color:var(--text);
+               position:sticky;background:var(--card)}
+.ov-cell-fixed:nth-child(1){left:0;min-width:110px}
+.ov-cell-fixed:nth-child(2){left:110px;min-width:100px;border-right:1px solid var(--border2);
+                             color:var(--sub);font-weight:500}
+
+/* Day cells */
+.ov-cell{padding:7px 6px;text-align:center;cursor:pointer;
+         min-width:72px;transition:background .15s;user-select:none}
+.ov-cell:hover{background:rgba(255,255,255,.06)!important}
+.ov-cell.ok{}
+.ov-cell.auffaellig{background:rgba(245,158,11,.14)}
+.ov-cell.unsicher{background:rgba(126,184,247,.08)}
+.ov-cell.corrected{background:rgba(52,211,153,.12)!important}
+.ov-cell .orig{color:var(--muted);font-size:11px;text-decoration:line-through;display:block}
+.ov-cell .corr{color:var(--teal);font-weight:700;font-size:13px;display:block}
+.ov-cell .pred{font-weight:600;font-size:13px}
+.ov-cell .pred.flag-auf{color:var(--accent)}
+.ov-cell .pred.flag-uns{color:var(--blue)}
+.ov-cell .flag-icon{font-size:10px;opacity:.8}
+.ov-cell input[type=number]{width:56px;background:var(--bg);border:1px solid var(--accent);
+                             border-radius:4px;color:var(--text);font-family:inherit;
+                             font-size:13px;padding:3px 6px;text-align:right}
+.ov-cell input[type=number]::-webkit-inner-spin-button{opacity:.5}
+
+/* Status col */
+.ov-status{padding:7px 10px;font-size:11px;font-weight:600;white-space:nowrap}
+.ov-status.s-auf{color:var(--accent)}
+.ov-status.s-uns{color:var(--blue)}
+.ov-status.s-ok{color:var(--muted)}
+.ov-status.s-kor{color:var(--teal)}
+
+/* Feiertag header highlight */
+.th-feiertag{color:var(--accent)!important}
+
+/* Legend */
+.ov-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--sub);
+           background:var(--card);border:1px solid var(--border);
+           border-radius:var(--radius);padding:10px 14px}
+.leg-dot{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.leg-auf{background:rgba(245,158,11,.4)}
+.leg-uns{background:rgba(126,184,247,.3)}
+.leg-kor{background:rgba(52,211,153,.3)}
+.leg-ok{background:var(--border2)}
 </style>
 </head>
 <body>
@@ -158,7 +254,7 @@ select:focus{outline:none;border-color:var(--accent)}
     <span class="logo-icon">🍞</span>
     <div>
       <div class="logo-title">Bäckerei Nachfrageprognose</div>
-      <div class="logo-sub">Prognose-Woche: Aug 2026 · 5 Filialen · 8 Artikel</div>
+      <div class="logo-sub">Aug 2026 · 5 Filialen · 8 Artikel · NRW-Feiertage &amp; Schulferien</div>
     </div>
     <div class="badges">
       <span class="badge-pill badge-lgbm">LightGBM</span>
@@ -167,160 +263,208 @@ select:focus{outline:none;border-color:var(--accent)}
   </div>
 </header>
 
+<!-- ═══════════ TAB NAV ═══════════ -->
+<div class="tab-nav">
+  <div class="tab-nav-inner">
+    <button class="tab-btn active" id="tab-btn-single" onclick="switchTab('single')">
+      📊 Einzel-Prognose
+    </button>
+    <button class="tab-btn" id="tab-btn-overview" onclick="switchTab('overview')">
+      📋 Gesamtübersicht &amp; Korrekturen
+      <span class="tab-badge" id="tab-badge-flag" style="display:none">–</span>
+      <span class="tab-badge green" id="tab-badge-corr" style="display:none">–</span>
+    </button>
+  </div>
+</div>
+
 <!-- ═══════════ MAIN ═══════════ -->
 <main>
 
-  <!-- ── CONTROLS ── -->
-  <aside class="controls">
-    <div class="ctrl-section-title">Auswahl</div>
+  <!-- ╔═══════════════════════════╗
+       ║  TAB 1: EINZEL-PROGNOSE  ║
+       ╚═══════════════════════════╝ -->
+  <div id="tab-single">
 
-    <div class="field">
-      <label for="sel-filiale">Filiale</label>
-      <select id="sel-filiale" onchange="onSelChange()"></select>
-    </div>
-
-    <div class="field">
-      <label for="sel-artikel">Artikel</label>
-      <select id="sel-artikel" onchange="onSelChange()"></select>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="ctrl-section-title">Aktions-Planung – nächste 7 Tage</div>
-
-    <div class="aktion-label-row" id="aktion-grid">
-      <!-- filled dynamically after first forecast -->
-      <div class="aktion-day-cell" id="adc-0"><div class="aktion-day-name" id="adn-0">Tag1</div><div class="aktion-day-date" id="add-0"></div><input class="aktion-day-cb" type="checkbox" id="adc-cb-0" onchange="onAktionChange()"></div>
-      <div class="aktion-day-cell" id="adc-1"><div class="aktion-day-name" id="adn-1">Tag2</div><div class="aktion-day-date" id="add-1"></div><input class="aktion-day-cb" type="checkbox" id="adc-cb-1" onchange="onAktionChange()"></div>
-      <div class="aktion-day-cell" id="adc-2"><div class="aktion-day-name" id="adn-2">Tag3</div><div class="aktion-day-date" id="add-2"></div><input class="aktion-day-cb" type="checkbox" id="adc-cb-2" onchange="onAktionChange()"></div>
-      <div class="aktion-day-cell" id="adc-3"><div class="aktion-day-name" id="adn-3">Tag4</div><div class="aktion-day-date" id="add-3"></div><input class="aktion-day-cb" type="checkbox" id="adc-cb-3" onchange="onAktionChange()"></div>
-      <div class="aktion-day-cell" id="adc-4"><div class="aktion-day-name" id="adn-4">Tag5</div><div class="aktion-day-date" id="add-4"></div><input class="aktion-day-cb" type="checkbox" id="adc-cb-4" onchange="onAktionChange()"></div>
-      <div class="aktion-day-cell" id="adc-5"><div class="aktion-day-name" id="adn-5">Tag6</div><div class="aktion-day-date" id="add-5"></div><input class="aktion-day-cb" type="checkbox" id="adc-cb-5" onchange="onAktionChange()"></div>
-      <div class="aktion-day-cell" id="adc-6"><div class="aktion-day-name" id="adn-6">Tag7</div><div class="aktion-day-date" id="add-6"></div><input class="aktion-day-cb" type="checkbox" id="adc-cb-6" onchange="onAktionChange()"></div>
-    </div>
-    <div class="aktion-hint">Aktionen erhöhen Absatz ~+32 % · Modell reagiert sofort</div>
-
-    <button class="btn-run" id="btn-run" onclick="runForecast()">
-      Prognose berechnen
-    </button>
-
-    <div class="divider"></div>
-
-    <div class="info-box">
-      <strong>Datensatz:</strong> Aug 2024 – Aug 2026<br>
-      <strong>Granularität:</strong> Täglich pro Filiale × Artikel<br>
-      <strong>Features:</strong> Lag 7/14/28/364 d, rollende Mittelwerte, Wochentag, Monat, NRW-Feiertage, Schulferien NRW, Temperatur, Aktion<br>
-      <strong>Backtest:</strong> Rolling-Origin 28 Tage vs. Seasonal Naive
-    </div>
-  </aside>
-
-  <!-- ── RESULTS ── -->
-  <div class="results" id="results-area">
-
-    <div class="state-card" id="state-initial">
-      <div class="state-icon">📊</div>
-      <div class="state-title">Filiale und Artikel wählen</div>
-      <div class="state-sub">
-        Beim ersten Klick wird das LightGBM-Modell auf 2 Jahren Bäckerei-Daten (Aug 2024–Aug 2026)
-        trainiert. Das dauert einmalig ~5 Sekunden, danach ist jede Prognose in &lt;1 s fertig.
+    <!-- Controls -->
+    <aside class="controls">
+      <div class="ctrl-title">Auswahl</div>
+      <div class="field"><label for="sel-filiale">Filiale</label>
+        <select id="sel-filiale"></select></div>
+      <div class="field"><label for="sel-artikel">Artikel</label>
+        <select id="sel-artikel"></select></div>
+      <div class="divider"></div>
+      <div class="ctrl-title">Aktions-Planung – nächste 7 Tage</div>
+      <div class="aktion-grid" id="aktion-grid">
+        <div class="ak-cell"><div class="ak-day" id="adn-0">Tag1</div><div class="ak-date" id="add-0"></div><input class="ak-cb" type="checkbox" id="adc-cb-0" onchange="onAktionChange()"></div>
+        <div class="ak-cell"><div class="ak-day" id="adn-1">Tag2</div><div class="ak-date" id="add-1"></div><input class="ak-cb" type="checkbox" id="adc-cb-1" onchange="onAktionChange()"></div>
+        <div class="ak-cell"><div class="ak-day" id="adn-2">Tag3</div><div class="ak-date" id="add-2"></div><input class="ak-cb" type="checkbox" id="adc-cb-2" onchange="onAktionChange()"></div>
+        <div class="ak-cell"><div class="ak-day" id="adn-3">Tag4</div><div class="ak-date" id="add-3"></div><input class="ak-cb" type="checkbox" id="adc-cb-3" onchange="onAktionChange()"></div>
+        <div class="ak-cell"><div class="ak-day" id="adn-4">Tag5</div><div class="ak-date" id="add-4"></div><input class="ak-cb" type="checkbox" id="adc-cb-4" onchange="onAktionChange()"></div>
+        <div class="ak-cell"><div class="ak-day" id="adn-5">Tag6</div><div class="ak-date" id="add-5"></div><input class="ak-cb" type="checkbox" id="adc-cb-5" onchange="onAktionChange()"></div>
+        <div class="ak-cell"><div class="ak-day" id="adn-6">Tag7</div><div class="ak-date" id="add-6"></div><input class="ak-cb" type="checkbox" id="adc-cb-6" onchange="onAktionChange()"></div>
       </div>
-    </div>
+      <div class="aktion-hint">Modell reagiert innerhalb ~1 Sek.</div>
+      <button class="btn-run" id="btn-run" onclick="runForecast()">Prognose berechnen</button>
+      <div class="divider"></div>
+      <div class="info-box">
+        <strong>Datensatz:</strong> Aug 2024 – Aug 2026<br>
+        <strong>Features:</strong> Lag 7/14/28/364d, rollende Mittelwerte, Wochentag, Monat, NRW-Feiertage, Schulferien, Temperatur, Aktion<br>
+        <strong>Backtest:</strong> Rolling-Origin 28 Tage vs. Seasonal Naive
+      </div>
+    </aside>
 
-    <div class="state-card" id="state-loading" style="display:none">
-      <div class="spinner"></div>
-      <div class="state-title" id="loading-msg">Datensatz wird generiert …</div>
-      <div class="state-sub">Erster Aufruf: Feature-Engineering + LightGBM Training (CPU). Ab dann gecacht.</div>
-    </div>
+    <!-- Results -->
+    <div class="results" id="results-area">
+      <div class="state-card" id="state-initial">
+        <div class="state-icon">📊</div>
+        <div class="state-title">Filiale und Artikel wählen</div>
+        <div class="state-sub">Beim ersten Klick: LightGBM auf 2 Jahren Bäckerei-Daten trainieren (~5–15 s). Danach &lt;1 s pro Abfrage.</div>
+      </div>
+      <div class="state-card" id="state-loading" style="display:none">
+        <div class="spinner"></div>
+        <div class="state-title" id="loading-msg">Modell wird trainiert …</div>
+        <div class="state-sub">Feature-Engineering + LightGBM (CPU). Einmalig beim ersten Aufruf.</div>
+      </div>
+      <div class="state-card" id="state-error" style="display:none">
+        <div class="state-icon">⚠️</div>
+        <div class="state-title">Fehler</div>
+        <div class="state-sub" id="error-msg"></div>
+      </div>
+      <div id="result-content" style="display:none">
 
-    <div class="state-card" id="state-error" style="display:none">
-      <div class="state-icon">⚠️</div>
-      <div class="state-title">Fehler</div>
-      <div class="state-sub" id="error-msg"></div>
-    </div>
-
-    <div id="result-content" style="display:none">
-
-      <!-- Metrics -->
-      <div class="section">
-        <div class="section-title"><span class="s-label" id="result-headline">Prognose</span></div>
-        <div class="metrics-grid">
-          <div class="metric-tile">
-            <div class="metric-label">WAPE Modell</div>
-            <div class="metric-value mv-green" id="m-wape-model">–</div>
-            <div class="metric-sub">Weighted Abs. % Error · Backtest 4W</div>
+        <div class="section">
+          <div class="section-title"><span class="s-label" id="result-headline">Prognose</span></div>
+          <div class="metrics-grid">
+            <div class="metric-tile"><div class="metric-label">WAPE Modell</div>
+              <div class="metric-value mv-green" id="m-wape-model">–</div>
+              <div class="metric-sub">Backtest 4 Wochen</div></div>
+            <div class="metric-tile"><div class="metric-label">WAPE Seasonal Naive</div>
+              <div class="metric-value mv-amber" id="m-wape-naive">–</div>
+              <div class="metric-sub">Benchmark: Vorwoche</div></div>
+            <div class="metric-tile"><div class="metric-label">Verbesserung</div>
+              <div class="metric-value mv-blue" id="m-improvement">–</div>
+              <div class="metric-sub">vs. Naive Baseline</div></div>
           </div>
-          <div class="metric-tile">
-            <div class="metric-label">WAPE Seasonal Naive</div>
-            <div class="metric-value mv-amber" id="m-wape-naive">–</div>
-            <div class="metric-sub">Benchmark: gleicher Tag Vorwoche</div>
+          <div class="sec-bar">
+            <div class="sec-m"><span class="sec-m-lbl">MAE Modell</span><span class="sec-m-val" id="m-mae-model">–</span></div>
+            <div class="sec-m"><span class="sec-m-lbl">MAE Naive</span><span class="sec-m-val" id="m-mae-naive">–</span></div>
+            <div class="sec-m"><span class="sec-m-lbl">Bias</span><span class="sec-m-val" id="m-bias">–</span></div>
+            <div class="sec-m"><span class="sec-m-lbl">Backtest</span><span class="sec-m-val">Rolling Origin, 28 Tage</span></div>
           </div>
-          <div class="metric-tile">
-            <div class="metric-label">Verbesserung vs. Naive</div>
-            <div class="metric-value mv-blue" id="m-improvement">–</div>
-            <div class="metric-sub">Weniger Überproduktion + Ausverkauf</div>
+          <div class="improvement-banner">
+            🎯 LightGBM schlägt Seasonal Naive um <strong id="imp-val">–</strong> — weniger Retoure, mehr verfügbare Ware zur Spitzenzeit.
           </div>
         </div>
-        <div class="sec-bar">
-          <div class="sec-m"><span class="sec-m-lbl">MAE Modell</span><span class="sec-m-val" id="m-mae-model">–</span></div>
-          <div class="sec-m"><span class="sec-m-lbl">MAE Naive</span><span class="sec-m-val" id="m-mae-naive">–</span></div>
-          <div class="sec-m"><span class="sec-m-lbl">Bias</span><span class="sec-m-val" id="m-bias">–</span></div>
-          <div class="sec-m"><span class="sec-m-lbl">Backtest-Fenster</span><span class="sec-m-val">Rolling Origin, 28 Tage</span></div>
+
+        <div class="section">
+          <div class="section-title">📅 <span class="s-label">Verlauf (30 Tage) + 7-Tages-Prognose Aug 2026</span></div>
+          <div class="chart-wrap"><canvas id="chart-forecast"></canvas></div>
         </div>
-        <div class="improvement-banner">
-          🎯 LightGBM schlägt Seasonal Naive um <strong id="imp-val">–</strong> — weniger Retoure, mehr verfügbare Artikel zur Spitzenzeit.
+
+        <div class="section">
+          <div class="section-title">📋 <span class="s-label">Prognosetabelle – nächste 7 Tage (Aug 2026)</span></div>
+          <div class="fc-table-wrap">
+            <table class="fc-table">
+              <thead>
+                <tr>
+                  <th>Datum</th><th>Tag</th><th>LightGBM</th>
+                  <th>Konfidenz (80 %)</th><th>Seasonal Naive</th>
+                  <th>Temperatur</th><th>Merkmale</th><th>Aktion</th>
+                </tr>
+              </thead>
+              <tbody id="fc-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">🔍 <span class="s-label">Feature Importance (Gain) – globales Modell</span></div>
+          <div class="chart-wrap-sm"><canvas id="chart-importance"></canvas></div>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /tab-single -->
+
+  <!-- ╔═══════════════════════════════════════╗
+       ║  TAB 2: GESAMTÜBERSICHT & KORREKTUREN ║
+       ╚═══════════════════════════════════════╝ -->
+  <div id="tab-overview">
+    <div class="ov-wrap">
+
+      <!-- Summary -->
+      <div class="ov-summary">
+        <div class="ov-stat"><div class="ov-stat-val">40</div><div class="ov-stat-lbl">Serien gesamt</div></div>
+        <div class="ov-stat s-auf"><div class="ov-stat-val" id="ov-n-auf">–</div><div class="ov-stat-lbl">⚠ Auffällig</div></div>
+        <div class="ov-stat s-uns"><div class="ov-stat-val" id="ov-n-uns">–</div><div class="ov-stat-lbl">❓ Unsicher</div></div>
+        <div class="ov-stat s-kor"><div class="ov-stat-val" id="ov-n-kor">0</div><div class="ov-stat-lbl">✏ Korrigiert</div></div>
+        <div class="ov-stat s-ok"><div class="ov-stat-val" id="ov-n-ok">–</div><div class="ov-stat-lbl">✓ Freigegeben</div></div>
+      </div>
+
+      <!-- Exception banner -->
+      <div class="exception-banner">
+        <div>
+          <strong>Ausnahme-basierte Prüfung</strong><br>
+          Mitarbeiter prüfen nur <span id="ov-flagged-count">–</span> markierte Prognosen — auffällige Abweichungen oder hohe Unsicherheit.
+          Zelle anklicken → Wert korrigieren → Enter.
+        </div>
+        <div style="font-size:12px;color:var(--sub)" id="ov-timestamp"></div>
+      </div>
+
+      <!-- Controls bar -->
+      <div class="ov-ctrl-bar">
+        <div class="ov-filter-btns">
+          <button class="ov-filter-btn active" id="filter-btn-flagged" onclick="setFilter('flagged')">Nur Markierte &amp; Unsichere</button>
+          <button class="ov-filter-btn" id="filter-btn-all" onclick="setFilter('all')">Alle 40 Serien</button>
+          <button class="ov-filter-btn" id="filter-btn-corrected" onclick="setFilter('corrected')">Nur Korrigierte</button>
+        </div>
+        <div class="ov-action-btns">
+          <button class="ov-btn" onclick="loadOverview(true)">⟳ Neu berechnen</button>
+          <button class="ov-btn ov-btn-primary" onclick="exportCSV()">↓ CSV Export</button>
         </div>
       </div>
 
-      <!-- Forecast chart -->
-      <div class="section">
-        <div class="section-title">📅 <span class="s-label">Verlauf (30 Tage) + 7-Tages-Prognose Aug 2026</span></div>
-        <div class="chart-wrap">
-          <canvas id="chart-forecast"></canvas>
-        </div>
+      <!-- Loading -->
+      <div class="state-card" id="ov-loading" style="display:none">
+        <div class="spinner"></div>
+        <div class="state-title" id="ov-loading-msg">280 Prognosen werden berechnet …</div>
+        <div class="state-sub">5 Filialen × 8 Artikel × 7 Tage — LightGBM (CPU)</div>
       </div>
 
-      <!-- Forecast table -->
-      <div class="section">
-        <div class="section-title">📋 <span class="s-label">Prognosetabelle – nächste 7 Tage (Aug 2026)</span></div>
-        <div class="fc-table-wrap">
-          <table class="fc-table">
-            <thead>
-              <tr>
-                <th>Datum</th>
-                <th>Tag</th>
-                <th>LightGBM</th>
-                <th>Konfidenz (80 %)</th>
-                <th>Seasonal Naive</th>
-                <th>Temperatur</th>
-                <th>Merkmale</th>
-                <th>Aktion</th>
-              </tr>
-            </thead>
-            <tbody id="fc-tbody"></tbody>
+      <!-- Table -->
+      <div class="ov-table-outer" id="ov-table-outer" style="display:none">
+        <div class="ov-table-wrap">
+          <table class="ov-table">
+            <thead id="ov-thead"></thead>
+            <tbody id="ov-tbody"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- Feature importance -->
-      <div class="section">
-        <div class="section-title">🔍 <span class="s-label">Feature Importance (Gain) – globales Modell</span></div>
-        <div class="chart-wrap-sm">
-          <canvas id="chart-importance"></canvas>
-        </div>
+      <!-- Legend -->
+      <div class="ov-legend">
+        <span><span class="leg-dot leg-auf"></span>⚠ Auffällig – Modell weicht &gt;30 % vom Seasonal-Naive-Wert ab</span>
+        <span><span class="leg-dot leg-uns"></span>❓ Unsicher – Konfidenzband &gt;45 % der Prognose</span>
+        <span><span class="leg-dot leg-kor"></span>✏ Manuell korrigiert (Wert überschreibt Modell)</span>
+        <span><span class="leg-dot leg-ok"></span>✓ Freigegeben – keine Aktion erforderlich</span>
+        <span style="color:var(--sub);font-size:10px">Klick auf Zellwert → Eingabe → Enter zum Speichern · ESC zum Abbrechen · Leer = Korrektur aufheben</span>
       </div>
 
-    </div><!-- /result-content -->
-  </div><!-- /results -->
+    </div>
+  </div><!-- /tab-overview -->
+
 </main>
 
 <script>
+// ═══════════════════════════════════════════════════════
+//  TAB 1: EINZEL-PROGNOSE
+// ═══════════════════════════════════════════════════════
 let chartForecast   = null;
 let chartImportance = null;
 let aktionDays      = [false,false,false,false,false,false,false];
 let debounceTimer   = null;
 let isFirstRun      = true;
 
-// ── Bootstrap ─────────────────────────────────────────────────────────
 async function loadMeta() {
   try {
     const res  = await fetch('/api/forecasting_model/meta');
@@ -331,249 +475,351 @@ async function loadMeta() {
     data.artikel.forEach(a  => { const o=document.createElement('option'); o.value=o.text=a; sa.appendChild(o); });
     sf.value = 'Innenstadt';
     sa.value = 'Brötchen';
-  } catch(e) { console.error('Meta load failed', e); }
+  } catch(e) { console.error('Meta', e); }
 }
 
-function onSelChange() { /* re-run optional: only on explicit button press */ }
-
-// ── Aktion day toggles ────────────────────────────────────────────────
 function onAktionChange() {
   aktionDays = Array.from({length:7}, (_,i) => document.getElementById(`adc-cb-${i}`).checked);
   clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => runForecast(true), 400);  // true = silent re-run
+  debounceTimer = setTimeout(() => runForecast(true), 400);
 }
 
-function updateAktionLabels(forecastRows) {
-  forecastRows.forEach((r, i) => {
-    const nameEl = document.getElementById(`adn-${i}`);
-    const dateEl = document.getElementById(`add-${i}`);
-    if (nameEl) nameEl.textContent = r.wochentag;
-    if (dateEl) dateEl.textContent = r.datum.substring(0, 5); // dd.mm.
-    // Highlight Feiertage/Wochenende in aktion grid
-    const cell = document.getElementById(`adc-${i}`);
-    if (cell) {
-      cell.style.opacity = (r.wochentag === 'So') ? '0.6' : '1';
-    }
-  });
-}
-
-// ── Run forecast ──────────────────────────────────────────────────────
-async function runForecast(silent = false) {
+async function runForecast(silent=false) {
   const filiale = document.getElementById('sel-filiale').value;
   const artikel = document.getElementById('sel-artikel').value;
   const btn     = document.getElementById('btn-run');
-
   if (!silent) showState('loading');
   btn.disabled = true;
-
-  // Progressive loading messages
-  let msgIdx = 0;
-  const msgs = [
-    'Datensatz wird vorbereitet …',
-    'Feature-Engineering läuft …',
-    'LightGBM Training (CPU) …',
-    'Prognose wird berechnet …',
-  ];
-  const msgEl = document.getElementById('loading-msg');
-  const msgTimer = isFirstRun ? setInterval(() => {
-    msgIdx = (msgIdx + 1) % msgs.length;
-    if (msgEl) msgEl.textContent = msgs[msgIdx];
-  }, 2000) : null;
-
+  let msgTimer = null;
+  if (isFirstRun) {
+    const msgs = ['Datensatz wird vorbereitet …','Feature-Engineering …','LightGBM Training (CPU) …','Prognose läuft …'];
+    let mi = 0;
+    msgTimer = setInterval(() => { mi=(mi+1)%msgs.length; document.getElementById('loading-msg').textContent=msgs[mi]; }, 2500);
+  }
   try {
     const res = await fetch('/api/forecasting_model/run', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
+      method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({filiale, artikel, aktion_days: aktionDays}),
     });
     if (msgTimer) clearInterval(msgTimer);
-    if (!res.ok) { const e=await res.json(); throw new Error(e.error||'Server-Fehler'); }
+    if (!res.ok) { const e=await res.json(); throw new Error(e.error||'Fehler'); }
     const data = await res.json();
-    if (isFirstRun) { updateAktionLabels(data.forecast); isFirstRun = false; }
+    if (isFirstRun) {
+      data.forecast.forEach((r,i) => {
+        const n=document.getElementById(`adn-${i}`); const d=document.getElementById(`add-${i}`);
+        if(n) n.textContent=r.wochentag; if(d) d.textContent=r.datum.substring(0,5);
+      });
+      isFirstRun = false;
+    }
     renderResults(data);
     showState('result');
   } catch(e) {
     if (msgTimer) clearInterval(msgTimer);
     document.getElementById('error-msg').textContent = e.message;
     showState('error');
-  } finally {
-    btn.disabled = false;
-  }
+  } finally { btn.disabled = false; }
 }
 
 function showState(s) {
-  ['state-initial','state-loading','state-error','result-content'].forEach(id => {
-    document.getElementById(id).style.display = 'none';
-  });
-  if (s === 'initial') document.getElementById('state-initial').style.display  = 'flex';
-  if (s === 'loading') document.getElementById('state-loading').style.display  = 'flex';
-  if (s === 'error')   document.getElementById('state-error').style.display    = 'flex';
-  if (s === 'result')  document.getElementById('result-content').style.display = 'block';
+  ['state-initial','state-loading','state-error','result-content'].forEach(id =>
+    document.getElementById(id).style.display='none');
+  const map={initial:'flex',loading:'flex',error:'flex',result:'block'};
+  document.getElementById(`state-${s}` === 'state-result' ? 'result-content' : `state-${s}`).style.display = map[s]||'none';
+  if(s==='result') document.getElementById('result-content').style.display='block';
 }
 
-// ── Render all ────────────────────────────────────────────────────────
 function renderResults(d) {
-  document.getElementById('result-headline').textContent =
-    `${d.filiale} · ${d.artikel}  (Daten bis ${d.last_date})`;
-
+  document.getElementById('result-headline').textContent = `${d.filiale} · ${d.artikel}  (Daten bis ${d.last_date})`;
   document.getElementById('m-wape-model').textContent  = d.metrics.wape_model  + ' %';
   document.getElementById('m-wape-naive').textContent  = d.metrics.wape_naive  + ' %';
   document.getElementById('m-improvement').textContent = '−' + d.metrics.improvement_pct + ' %';
   document.getElementById('m-mae-model').textContent   = d.metrics.mae_model   + ' Stk';
   document.getElementById('m-mae-naive').textContent   = d.metrics.mae_naive   + ' Stk';
-  const b = d.metrics.bias;
-  document.getElementById('m-bias').textContent        = (b>=0?'+':'')+b+' Stk';
-  document.getElementById('imp-val').textContent       = d.metrics.improvement_pct + ' %';
-
-  renderForecastChart(d);
-  renderTable(d.forecast);
-  renderImportanceChart(d.feature_importance);
+  const b=d.metrics.bias; document.getElementById('m-bias').textContent=(b>=0?'+':'')+b+' Stk';
+  document.getElementById('imp-val').textContent = d.metrics.improvement_pct + ' %';
+  renderForecastChart(d); renderTable(d.forecast); renderImportanceChart(d.feature_importance);
 }
 
-// ── Forecast chart ────────────────────────────────────────────────────
 function renderForecastChart(d) {
   if (chartForecast) chartForecast.destroy();
-
-  const hDates = d.history.dates;
-  const hVals  = d.history.menge;
-  const fcRows = d.forecast;
-  const fcLabels  = fcRows.map(r => r.wochentag + ' ' + r.datum.substring(0,5));
-  const allLabels = [...hDates, ...fcLabels];
-
-  const histData  = [...hVals, ...fcRows.map(() => null)];
-  const joinVal   = hVals[hVals.length - 1];
-
-  // Forecast with leading join point
-  const fcData    = [...hDates.map(() => null), joinVal, ...fcRows.map(r => r.prognose)];
-  const upperData = [...hDates.map(() => null), joinVal, ...fcRows.map(r => r.upper)];
-  const lowerData = [...hDates.map(() => null), joinVal, ...fcRows.map(r => r.lower)];
-  const naiveData = [...hDates.map(() => null), joinVal, ...fcRows.map(r => r.naive)];
-
-  // Aktion markers: null where no aktion, prognose where aktion
-  const aktionData= [...hDates.map(() => null), null, ...fcRows.map(r => r.is_aktion ? r.prognose : null)];
-
-  const allDates = [...hDates, ...fcLabels];
-
-  const ctx = document.getElementById('chart-forecast').getContext('2d');
-  chartForecast = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: allDates,
-      datasets: [
-        {label:'Ist-Absatz (30 Tage)',data:histData,borderColor:'rgba(126,184,247,.85)',
-         backgroundColor:'rgba(126,184,247,.05)',borderWidth:2,pointRadius:2,tension:.3,fill:false,spanGaps:false},
-        {label:'LightGBM Prognose',data:fcData,borderColor:'rgba(245,158,11,.95)',
-         backgroundColor:'rgba(245,158,11,.05)',borderWidth:2.5,pointRadius:4,
-         pointBackgroundColor:'rgba(245,158,11,.9)',tension:.3,fill:false,spanGaps:false},
-        {label:'Konfidenz oben',data:upperData,borderColor:'transparent',
-         backgroundColor:'rgba(245,158,11,.12)',borderWidth:0,pointRadius:0,fill:'+1',spanGaps:false},
-        {label:'Konfidenz unten',data:lowerData,borderColor:'rgba(245,158,11,.3)',
-         backgroundColor:'rgba(245,158,11,.12)',borderWidth:1,borderDash:[4,3],
-         pointRadius:0,fill:false,spanGaps:false},
-        {label:'Seasonal Naive',data:naiveData,borderColor:'rgba(148,163,184,.45)',
-         backgroundColor:'transparent',borderWidth:1.5,borderDash:[6,4],
-         pointRadius:0,fill:false,spanGaps:false},
-        {label:'Aktion-Tag',data:aktionData,borderColor:'transparent',
-         backgroundColor:'rgba(251,146,60,.0)',borderWidth:0,
-         pointRadius:7,pointStyle:'star',pointBackgroundColor:'rgba(251,146,60,.9)',
-         fill:false,showLine:false,spanGaps:false},
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{position:'top',labels:{color:'#94a3b8',font:{size:11},padding:14,
-          filter:item => !item.text.includes('Konfidenz oben')}},
-        tooltip:{backgroundColor:'#0f0f28',borderColor:'#2a2a55',borderWidth:1,
-          titleColor:'#e2e8f0',bodyColor:'#94a3b8',
-          callbacks:{label:ctx => ctx.parsed.y===null?null:` ${ctx.dataset.label}: ${Math.round(ctx.parsed.y)} Stk`}}
-      },
-      scales:{
-        x:{ticks:{color:'#4a5568',font:{size:10},maxTicksLimit:12},
-           grid:{color:'rgba(30,30,66,.8)'}},
-        y:{ticks:{color:'#4a5568',font:{size:11}},grid:{color:'rgba(30,30,66,.8)'},
-           title:{display:true,text:'Menge (Stk)',color:'#4a5568',font:{size:11}}}
-      }
-    }
-  });
+  const hD=d.history.dates, hV=d.history.menge, fcR=d.forecast;
+  const fcL=fcR.map(r=>r.wochentag+' '+r.datum.substring(0,5));
+  const all=[...hD,...fcL], jv=hV[hV.length-1];
+  const hData=[...hV,...fcR.map(()=>null)];
+  const fcData=[...hD.map(()=>null),jv,...fcR.map(r=>r.prognose)];
+  const upData=[...hD.map(()=>null),jv,...fcR.map(r=>r.upper)];
+  const loData=[...hD.map(()=>null),jv,...fcR.map(r=>r.lower)];
+  const nvData=[...hD.map(()=>null),jv,...fcR.map(r=>r.naive)];
+  const akData=[...hD.map(()=>null),null,...fcR.map(r=>r.is_aktion?r.prognose:null)];
+  const ctx=document.getElementById('chart-forecast').getContext('2d');
+  chartForecast=new Chart(ctx,{type:'line',data:{labels:all,datasets:[
+    {label:'Ist-Absatz (30 Tage)',data:hData,borderColor:'rgba(126,184,247,.85)',borderWidth:2,pointRadius:2,tension:.3,fill:false,spanGaps:false},
+    {label:'LightGBM Prognose',data:fcData,borderColor:'rgba(245,158,11,.95)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'rgba(245,158,11,.9)',tension:.3,fill:false,spanGaps:false},
+    {label:'Konfidenz oben',data:upData,borderColor:'transparent',backgroundColor:'rgba(245,158,11,.12)',pointRadius:0,fill:'+1',spanGaps:false},
+    {label:'Konfidenz unten',data:loData,borderColor:'rgba(245,158,11,.3)',borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false,spanGaps:false},
+    {label:'Seasonal Naive',data:nvData,borderColor:'rgba(148,163,184,.45)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,fill:false,spanGaps:false},
+    {label:'Aktion',data:akData,borderColor:'transparent',pointRadius:7,pointStyle:'star',pointBackgroundColor:'rgba(251,146,60,.9)',fill:false,showLine:false,spanGaps:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{position:'top',labels:{color:'#94a3b8',font:{size:11},padding:14,filter:i=>!i.text.includes('oben')}},
+      tooltip:{backgroundColor:'#0f0f28',borderColor:'#2a2a55',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+        callbacks:{label:c=>c.parsed.y===null?null:` ${c.dataset.label}: ${Math.round(c.parsed.y)} Stk`}}},
+    scales:{x:{ticks:{color:'#4a5568',font:{size:10},maxTicksLimit:12},grid:{color:'rgba(30,30,66,.8)'}},
+            y:{ticks:{color:'#4a5568',font:{size:11}},grid:{color:'rgba(30,30,66,.8)'},
+               title:{display:true,text:'Menge (Stk)',color:'#4a5568',font:{size:11}}}}}});
 }
 
-// ── Forecast table ────────────────────────────────────────────────────
 function renderTable(rows) {
-  const tbody = document.getElementById('fc-tbody');
-  tbody.innerHTML = '';
-  rows.forEach((r, i) => {
-    const isWE  = r.wochentag === 'Sa' || r.wochentag === 'So';
-    const isFT  = r.is_feiertag;
-    const isSF  = r.is_schulferien;
-    const isAk  = r.is_aktion;
-
-    const tr = document.createElement('tr');
-    if (isFT) tr.classList.add('is-feiertag');
-    else if (isWE) tr.classList.add('is-weekend');
-    if (isAk) tr.classList.add('has-aktion');
-
-    const badges = [];
-    if (isFT) badges.push(`<span class="badge b-ft">🎌 ${r.feiertag_name || 'Feiertag'}</span>`);
-    else if (isWE) badges.push(`<span class="badge b-we">Wochenende</span>`);
-    if (isSF) badges.push(`<span class="badge b-sf">Schulferien</span>`);
-    if (isAk) badges.push(`<span class="badge b-ak">🏷 Aktion</span>`);
-
-    // Temperature color hint
-    const tempColor = r.temperatur > 25 ? '#fb923c' : r.temperatur < 5 ? '#7eb8f7' : '';
-    const tempStyle = tempColor ? `style="color:${tempColor}"` : '';
-
-    tr.innerHTML = `
-      <td><strong>${r.datum}</strong></td>
-      <td>${r.wochentag}</td>
+  const tbody=document.getElementById('fc-tbody'); tbody.innerHTML='';
+  rows.forEach((r,i)=>{
+    const isWE=r.wochentag==='Sa'||r.wochentag==='So', isFT=r.is_feiertag, isSF=r.is_schulferien, isAk=r.is_aktion;
+    const tr=document.createElement('tr');
+    if(isFT) tr.classList.add('is-feiertag'); else if(isWE) tr.classList.add('is-weekend');
+    if(isAk) tr.classList.add('has-aktion');
+    const badges=[];
+    if(isFT) badges.push(`<span class="badge b-ft">🎌 ${r.feiertag_name||'Feiertag'}</span>`);
+    else if(isWE) badges.push(`<span class="badge b-we">Wochenende</span>`);
+    if(isSF) badges.push(`<span class="badge b-sf">Schulferien</span>`);
+    if(isAk) badges.push(`<span class="badge b-ak">🏷 Aktion</span>`);
+    const tC=r.temperatur>25?'#fb923c':r.temperatur<5?'#7eb8f7':'';
+    tr.innerHTML=`<td><strong>${r.datum}</strong></td><td>${r.wochentag}</td>
       <td class="col-prognose">${r.prognose}&thinsp;Stk</td>
       <td class="col-conf">${r.lower}–${r.upper}</td>
       <td class="col-naive">${r.naive}&thinsp;Stk</td>
-      <td class="col-temp" ${tempStyle}>${r.temperatur} °C</td>
+      <td class="col-temp"${tC?` style="color:${tC}"`:''}>${r.temperatur} °C</td>
       <td>${badges.join('')}&nbsp;</td>
-      <td class="col-aktion-cb">
-        <input type="checkbox" id="fc-cb-${i}" ${aktionDays[i]?'checked':''} onchange="onFcTableAktionChange(${i}, this.checked)">
-      </td>
-    `;
+      <td class="col-aktion-cb"><input type="checkbox" ${aktionDays[i]?'checked':''} onchange="onFcCbChange(${i},this.checked)"></td>`;
     tbody.appendChild(tr);
   });
 }
 
-function onFcTableAktionChange(idx, checked) {
-  aktionDays[idx] = checked;
-  // Sync to controls grid
-  const ctrl = document.getElementById(`adc-cb-${idx}`);
-  if (ctrl) ctrl.checked = checked;
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => runForecast(true), 400);
+function onFcCbChange(i,v) {
+  aktionDays[i]=v;
+  const c=document.getElementById(`adc-cb-${i}`); if(c) c.checked=v;
+  clearTimeout(debounceTimer); debounceTimer=setTimeout(()=>runForecast(true),400);
 }
 
-// ── Feature importance chart ──────────────────────────────────────────
 function renderImportanceChart(fi) {
-  if (chartImportance) chartImportance.destroy();
-  const vals = fi.importance.map(v => Math.round(v*1000)/10);
-  const colors = fi.features.map((_,i) => {
-    const t = i / Math.max(fi.features.length-1, 1);
-    const r = Math.round(167+(52-167)*t), g = Math.round(139+(211-139)*t), b2 = Math.round(250+(153-250)*t);
-    return `rgba(${r},${g},${b2},.75)`;
+  if(chartImportance) chartImportance.destroy();
+  const vals=fi.importance.map(v=>Math.round(v*1000)/10);
+  const colors=fi.features.map((_,i)=>{const t=i/Math.max(fi.features.length-1,1);return `rgba(${Math.round(167+(52-167)*t)},${Math.round(139+(211-139)*t)},${Math.round(250+(153-250)*t)},.75)`;});
+  const ctx=document.getElementById('chart-importance').getContext('2d');
+  chartImportance=new Chart(ctx,{type:'bar',data:{labels:fi.features,datasets:[{label:'Importance (%)',data:vals,backgroundColor:colors,borderRadius:4}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#0f0f28',borderColor:'#2a2a55',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',callbacks:{label:c=>` ${c.parsed.x.toFixed(1)} %`}}},
+      scales:{x:{ticks:{color:'#4a5568',font:{size:11},callback:v=>v+' %'},grid:{color:'rgba(30,30,66,.8)'}},y:{ticks:{color:'#94a3b8',font:{size:11}},grid:{display:false}}}}});
+}
+
+// ═══════════════════════════════════════════════════════
+//  TAB 2: GESAMTÜBERSICHT & KORREKTUREN
+// ═══════════════════════════════════════════════════════
+let ovData        = null;
+let corrections   = {};   // key: "filiale|artikel|datum_iso" → corrected int
+let currentFilter = 'flagged';
+let nCorrections  = 0;
+
+async function loadOverview(force=false) {
+  if (ovData && !force) { renderOverview(); return; }
+  document.getElementById('ov-loading').style.display    = 'flex';
+  document.getElementById('ov-table-outer').style.display = 'none';
+  document.getElementById('ov-loading-msg').textContent = force
+    ? 'Alle 280 Prognosen werden neu berechnet …'
+    : 'Alle 280 Prognosen werden berechnet … (~10 s beim ersten Aufruf)';
+
+  try {
+    const [ovRes, corrRes] = await Promise.all([
+      fetch('/api/forecasting_model/overview'),
+      fetch('/api/forecasting_model/corrections'),
+    ]);
+    ovData      = await ovRes.json();
+    corrections = await corrRes.json();
+    nCorrections = Object.keys(corrections).length;
+    renderOverview();
+    const ts = new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('ov-timestamp').textContent = `Letzte Berechnung: ${ts} Uhr`;
+  } catch(e) {
+    alert('Fehler beim Laden der Gesamtübersicht: ' + e.message);
+  } finally {
+    document.getElementById('ov-loading').style.display     = 'none';
+    document.getElementById('ov-table-outer').style.display = 'block';
+  }
+}
+
+function renderOverview() {
+  if (!ovData) return;
+  const d = ovData;
+
+  // Summary
+  document.getElementById('ov-n-auf').textContent = d.n_auffaellig;
+  document.getElementById('ov-n-uns').textContent = d.n_unsicher;
+  document.getElementById('ov-n-ok').textContent  = d.n_ok;
+  document.getElementById('ov-n-kor').textContent = nCorrections;
+
+  const nFlagged = d.n_auffaellig + d.n_unsicher;
+  document.getElementById('ov-flagged-count').textContent = `${nFlagged} von 40`;
+
+  // Tab badges
+  const bFlag = document.getElementById('tab-badge-flag');
+  const bCorr = document.getElementById('tab-badge-corr');
+  if (nFlagged > 0) { bFlag.textContent = nFlagged; bFlag.style.display='inline'; } else bFlag.style.display='none';
+  if (nCorrections > 0) { bCorr.textContent = nCorrections; bCorr.style.display='inline'; } else bCorr.style.display='none';
+
+  // Table header
+  const thead = document.getElementById('ov-thead');
+  thead.innerHTML = '';
+  const hr = document.createElement('tr');
+  hr.innerHTML = '<th class="col-left" style="left:0;min-width:110px">Filiale</th>'
+               + '<th class="col-left" style="left:110px;min-width:100px;border-right:1px solid var(--border2)">Artikel</th>';
+  d.fc_dates.forEach(fc => {
+    const ft = fc.is_feiertag ? ' class="th-feiertag"' : '';
+    hr.innerHTML += `<th${ft} title="${fc.is_feiertag?fc.feiertag_name:''}">${fc.wochentag}<br><span style="font-weight:400;font-size:9px">${fc.datum}</span></th>`;
   });
-  const ctx = document.getElementById('chart-importance').getContext('2d');
-  chartImportance = new Chart(ctx, {
-    type:'bar',
-    data:{labels:fi.features,datasets:[{label:'Importance (%)',data:vals,backgroundColor:colors,borderRadius:4,borderWidth:0}]},
-    options:{
-      indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},
-        tooltip:{backgroundColor:'#0f0f28',borderColor:'#2a2a55',borderWidth:1,
-          titleColor:'#e2e8f0',bodyColor:'#94a3b8',
-          callbacks:{label:ctx=>` ${ctx.parsed.x.toFixed(1)} %`}}},
-      scales:{
-        x:{ticks:{color:'#4a5568',font:{size:11},callback:v=>v+' %'},grid:{color:'rgba(30,30,66,.8)'}},
-        y:{ticks:{color:'#94a3b8',font:{size:11}},grid:{display:false}}
+  hr.innerHTML += '<th>Status</th>';
+  thead.appendChild(hr);
+
+  // Table body
+  const tbody = document.getElementById('ov-tbody');
+  tbody.innerHTML = '';
+
+  const filtered = filterSerien(d.serien);
+  if (filtered.length === 0) {
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td colspan="${d.fc_dates.length+3}" style="text-align:center;padding:32px;color:var(--muted)">
+      Keine Einträge für diesen Filter${currentFilter==='corrected'?' – noch keine Korrekturen gespeichert.':currentFilter==='flagged'?' – alle Prognosen im grünen Bereich!':'.'}
+    </td>`;
+    tbody.appendChild(tr); return;
+  }
+
+  filtered.forEach(serie => {
+    const tr = document.createElement('tr');
+    // Fixed cols
+    let html = `<td class="ov-cell-fixed">${serie.filiale}</td>
+                <td class="ov-cell-fixed">${serie.artikel}</td>`;
+
+    // Day cells
+    serie.tage.forEach(tag => {
+      const key = `${serie.filiale}|${serie.artikel}|${tag.datum_iso}`;
+      const corrVal = corrections[key];
+      const hasCorrValue = corrVal !== undefined && corrVal !== null;
+      const cellClass = hasCorrValue ? 'corrected' : tag.flag;
+      const title = tag.flag==='auffaellig'
+        ? `Abweichung: ${tag.rel_diff_pct}% vom Naive-Wert`
+        : tag.flag==='unsicher' ? 'Hohes Konfidenzband – manuelle Prüfung empfohlen' : '';
+
+      let inner = '';
+      if (hasCorrValue) {
+        inner = `<span class="orig">${tag.prognose}</span><span class="corr">${corrVal}</span>`;
+      } else {
+        const flagCls = tag.flag==='auffaellig'?'flag-auf':tag.flag==='unsicher'?'flag-uns':'';
+        const icon    = tag.flag==='auffaellig'?'⚠':tag.flag==='unsicher'?'❓':'';
+        inner = `<span class="pred ${flagCls}">${tag.prognose}${icon?`<span class="flag-icon">${icon}</span>`:''}</span>`;
       }
-    }
+
+      html += `<td class="ov-cell ${cellClass}" title="${title}"
+                   data-filiale="${esc(serie.filiale)}" data-artikel="${esc(serie.artikel)}"
+                   data-datum="${tag.datum_iso}" data-orig="${tag.prognose}"
+                   onclick="startEdit(this)">${inner}</td>`;
+    });
+
+    // Status col
+    const corrCount = serie.tage.filter(t => corrections[`${serie.filiale}|${serie.artikel}|${t.datum_iso}`] !== undefined).length;
+    let statusCls, statusTxt;
+    if (corrCount > 0) { statusCls='s-kor'; statusTxt=`✏ ${corrCount} Kor.`; }
+    else if (serie.flag==='auffaellig') { statusCls='s-auf'; statusTxt='⚠ Auffällig'; }
+    else if (serie.flag==='unsicher')   { statusCls='s-uns'; statusTxt='❓ Unsicher'; }
+    else                                { statusCls='s-ok';  statusTxt='✓ OK'; }
+    html += `<td class="ov-status ${statusCls}">${statusTxt}</td>`;
+
+    tr.innerHTML = html;
+    tbody.appendChild(tr);
   });
+}
+
+function filterSerien(serien) {
+  const corrKeys = new Set(Object.keys(corrections));
+  if (currentFilter === 'flagged')
+    return serien.filter(s => s.flag !== 'ok' ||
+      s.tage.some(t => corrKeys.has(`${s.filiale}|${s.artikel}|${t.datum_iso}`)));
+  if (currentFilter === 'corrected')
+    return serien.filter(s => s.tage.some(t => corrKeys.has(`${s.filiale}|${s.artikel}|${t.datum_iso}`)));
+  return serien;
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  ['flagged','all','corrected'].forEach(id => {
+    document.getElementById(`filter-btn-${id}`).classList.toggle('active', id===f);
+  });
+  if (ovData) renderOverview();
+}
+
+// ── Cell editing ──────────────────────────────────────────────────────
+function startEdit(td) {
+  if (td.querySelector('input')) return;
+  const key  = `${td.dataset.filiale}|${td.dataset.artikel}|${td.dataset.datum}`;
+  const cur  = corrections[key] !== undefined ? corrections[key] : td.dataset.orig;
+  td.innerHTML = `<input type="number" min="0" step="1" value="${cur}"
+                         onblur="saveEdit(this,'${td.dataset.filiale}','${td.dataset.artikel}','${td.dataset.datum}',${td.dataset.orig})"
+                         onkeydown="if(event.key==='Enter'){this.blur()}else if(event.key==='Escape'){cancelEdit(this,${td.dataset.orig})}">`;
+  const inp = td.querySelector('input');
+  inp.focus(); inp.select();
+}
+
+async function saveEdit(inp, filiale, artikel, datumIso, orig) {
+  const td   = inp.closest('td');
+  const raw  = inp.value.trim();
+  const wert = raw === '' ? null : parseInt(raw, 10);
+
+  try {
+    const res = await fetch('/api/forecasting_model/corrections', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({filiale, artikel, datum_iso: datumIso, wert}),
+    });
+    const data = await res.json();
+    nCorrections = data.n_corrections;
+    if (wert === null) { delete corrections[`${filiale}|${artikel}|${datumIso}`]; }
+    else { corrections[`${filiale}|${artikel}|${datumIso}`] = wert; }
+    renderOverview();
+  } catch(e) {
+    cancelEdit(inp, orig);
+  }
+}
+
+function cancelEdit(inp, orig) {
+  const td = inp.closest('td');
+  const key = `${td.dataset.filiale}|${td.dataset.artikel}|${td.dataset.datum}`;
+  const corrVal = corrections[key];
+  if (corrVal !== undefined) {
+    td.innerHTML=`<span class="orig">${orig}</span><span class="corr">${corrVal}</span>`;
+  } else {
+    td.innerHTML=`<span class="pred">${orig}</span>`;
+  }
+}
+
+// ── CSV Export ────────────────────────────────────────────────────────
+function exportCSV() {
+  if (!ovData) return;
+  const rows = [['Filiale','Artikel',...ovData.fc_dates.map(f=>f.datum+' '+f.wochentag),'Status'].join(';')];
+  ovData.serien.forEach(s => {
+    const vals = s.tage.map(t => {
+      const key = `${s.filiale}|${s.artikel}|${t.datum_iso}`;
+      return corrections[key] !== undefined ? `${corrections[key]} (korr.)` : t.prognose;
+    });
+    rows.push([s.filiale, s.artikel, ...vals, s.flag].join(';'));
+  });
+  const blob = new Blob([rows.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='baeckerei_prognose_aug2026.csv'; a.click();
+}
+
+function esc(s) { return s.replace(/"/g,'&quot;'); }
+
+// ── Tab switching ─────────────────────────────────────────────────────
+function switchTab(name) {
+  document.getElementById('tab-single').style.display   = name==='single'   ? 'contents' : 'none';
+  document.getElementById('tab-overview').style.display = name==='overview' ? 'block'    : 'none';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-btn-${name}`).classList.add('active');
+  if (name==='overview') loadOverview();
 }
 
 // ── Init ──────────────────────────────────────────────────────────────
