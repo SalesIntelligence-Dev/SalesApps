@@ -46,7 +46,7 @@ FEATURE_LABELS = {
     "week_of_year":    "Kalenderwoche",
     "is_feiertag":     "Feiertag NRW",
     "is_schulferien":  "Schulferien NRW",
-    "temperatur":      "Tageshöchsttemp. Dülmen (°C)",
+    "temperatur":      "Tageshöchsttemperatur (°C)",
     "is_aktion":       "Aktion / Promotion",
     "filiale_enc":     "Filiale",
     "artikel_enc":     "Artikel",

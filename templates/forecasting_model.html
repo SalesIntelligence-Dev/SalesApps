@@ -368,7 +368,7 @@ select:focus{outline:none;border-color:var(--accent)}
                 <tr>
                   <th>Datum</th><th>Tag</th><th>LightGBM</th>
                   <th>Konfidenz (80 %)</th><th>Seasonal Naive</th>
-                  <th id="th-temp" title="Tageshöchsttemperatur Dülmen (NRW)">Temp. max</th><th>Merkmale</th><th>Aktion</th>
+                  <th id="th-temp" title="Tageshöchsttemperatur NRW">Temp. max</th><th>Merkmale</th><th>Aktion</th>
                 </tr>
               </thead>
               <tbody id="fc-tbody"></tbody>
@@ -541,7 +541,7 @@ function renderResults(d) {
   const th = document.getElementById('th-temp');
   if (th) {
     th.textContent = isLive ? 'Temp. max 🌡' : 'Temp. max';
-    th.title = isLive ? 'Tageshöchsttemperatur Dülmen – Live-Daten: Open-Meteo' : 'Tageshöchsttemperatur Dülmen (synthetisch)';
+    th.title = isLive ? 'Tageshöchsttemperatur NRW – Live-Daten: Open-Meteo' : 'Tageshöchsttemperatur NRW (synthetisch)';
   }
   renderForecastChart(d); renderTable(d.forecast); renderImportanceChart(d.feature_importance);
 }
