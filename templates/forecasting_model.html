@@ -368,7 +368,7 @@ select:focus{outline:none;border-color:var(--accent)}
                 <tr>
                   <th>Datum</th><th>Tag</th><th>LightGBM</th>
                   <th>Konfidenz (80 %)</th><th>Seasonal Naive</th>
-                  <th title="Tageshöchsttemperatur Dülmen (synthetisch)">Temp. max</th><th>Merkmale</th><th>Aktion</th>
+                  <th id="th-temp" title="Tageshöchsttemperatur Dülmen (NRW)">Temp. max</th><th>Merkmale</th><th>Aktion</th>
                 </tr>
               </thead>
               <tbody id="fc-tbody"></tbody>
@@ -537,6 +537,12 @@ function renderResults(d) {
   document.getElementById('imp-val').textContent = d.metrics.improvement_pct + ' %';
   document.getElementById('chart-title').textContent =
     `Verlauf (30 Tage bis ${d.history.last_label}) + Prognose ${d.forecast_start} – ${d.forecast[6]?.datum||''}`;
+  const isLive = d.temp_source === 'open-meteo';
+  const th = document.getElementById('th-temp');
+  if (th) {
+    th.textContent = isLive ? 'Temp. max 🌡' : 'Temp. max';
+    th.title = isLive ? 'Tageshöchsttemperatur Dülmen – Live-Daten: Open-Meteo' : 'Tageshöchsttemperatur Dülmen (synthetisch)';
+  }
   renderForecastChart(d); renderTable(d.forecast); renderImportanceChart(d.feature_importance);
 }
 

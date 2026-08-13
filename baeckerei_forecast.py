@@ -12,6 +12,7 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
+import requests as _requests
 
 DATASETS_DIR = Path(__file__).parent / "datasets"
 BAKERY_CSV   = DATASETS_DIR / "baeckerei_beispiel.csv"
@@ -131,6 +132,58 @@ def _synthetic_temp(d: pd.Timestamp) -> float:
     base = 16.5 + 12.5 * np.sin((doy - 80) / 365.0 * 2 * np.pi)
     rng  = np.random.default_rng(int(d.timestamp()))
     return float(base + rng.normal(0, 3.0))
+
+
+# ── Live-Wetterdaten Dülmen (Open-Meteo, kein API-Key) ───────────────────
+_DULMEN_LAT  =  51.83
+_DULMEN_LON  =   7.28
+_weather_cache: dict[pd.Timestamp, float] = {}
+_weather_ts: Optional[float] = None          # Unix-Zeit des letzten Abrufs
+_weather_lock = threading.Lock()
+_WEATHER_TTL  = 3600                         # Cache: 1 Stunde
+
+
+def _fetch_live_temps(dates: list[pd.Timestamp]) -> dict[pd.Timestamp, float]:
+    """
+    Holt Tageshöchstwerte von Open-Meteo für eine Liste von Datumsangaben.
+    Gibt für jeden Tag entweder den echten Wert oder _synthetic_temp zurück.
+    Ergebnis wird 1 h gecacht.
+    """
+    import time as _time
+    global _weather_cache, _weather_ts
+
+    with _weather_lock:
+        now = _time.time()
+        if _weather_ts is None or now - _weather_ts > _WEATHER_TTL:
+            try:
+                resp = _requests.get(
+                    "https://api.open-meteo.com/v1/forecast",
+                    params={
+                        "latitude":     _DULMEN_LAT,
+                        "longitude":    _DULMEN_LON,
+                        "daily":        "temperature_2m_max",
+                        "timezone":     "Europe/Berlin",
+                        "forecast_days": 16,
+                    },
+                    timeout=5,
+                )
+                if resp.ok:
+                    payload = resp.json()
+                    _weather_cache = {
+                        pd.Timestamp(d): float(t)
+                        for d, t in zip(
+                            payload["daily"]["time"],
+                            payload["daily"]["temperature_2m_max"],
+                        )
+                        if t is not None
+                    }
+                    _weather_ts = now
+            except Exception:
+                pass   # Netzwerkfehler → Fallback auf Synthese
+
+        cache = dict(_weather_cache)
+
+    return {d: cache.get(d, _synthetic_temp(d)) for d in dates}
 
 
 # ── Singletons ────────────────────────────────────────────────────────────
@@ -303,8 +356,13 @@ def run_forecast(
     else:
         wm, wn, imp, mae_m, mae_n, bias = 0.09, 0.15, 40.0, 8.0, 13.0, 0.2
 
+    # ── Live-Temperaturen für Prognose-Woche vorab abrufen ───────────────
+    forecast_dates = [forecast_start + timedelta(days=h) for h in range(7)]
+    live_temps     = _fetch_live_temps(forecast_dates)
+
     # ── Hilfsfunktion: Feature-Vektor für einen Tag ──────────────────────
-    def build_feat(fc_date: pd.Timestamp, working: pd.DataFrame, is_aktion: int) -> tuple:
+    def build_feat(fc_date: pd.Timestamp, working: pd.DataFrame,
+                   is_aktion: int, temp_override: Optional[float] = None) -> tuple:
         def get_lag(days: int) -> float:
             target = fc_date - timedelta(days=days)
             row    = working[working["datum"] == target]
@@ -321,7 +379,7 @@ def run_forecast(
         roll_std_4w  = float(past_28.std())  if len(past_28) > 1 else 5.0
         roll_mean_2w = float(past_14.mean()) if len(past_14) > 0 else roll_mean_4w
 
-        temp        = _synthetic_temp(fc_date)
+        temp        = temp_override if temp_override is not None else _synthetic_temp(fc_date)
         is_feiertag = _is_feiertag(fc_date)
         is_schulfer = _is_schulferien(fc_date)
 
@@ -363,7 +421,9 @@ def run_forecast(
         fc_date   = forecast_start + timedelta(days=h)
         is_aktion = 1 if (h < len(aktion_days) and aktion_days[h]) else 0
 
-        feat, temp, is_feiertag, is_schulfer, roll_std_4w, lag_7 = build_feat(fc_date, working, is_aktion)
+        feat, temp, is_feiertag, is_schulfer, roll_std_4w, lag_7 = build_feat(
+            fc_date, working, is_aktion, temp_override=live_temps.get(fc_date)
+        )
 
         X_fc     = pd.DataFrame([feat])[FEATURE_COLS]
         pred     = max(0.0, float(model.predict(X_fc)[0]))
@@ -442,6 +502,7 @@ def run_forecast(
         },
         "last_date":      last_date.strftime("%d.%m.%Y"),
         "forecast_start": forecast_start.strftime("%d.%m.%Y"),
+        "temp_source":    "open-meteo" if _weather_cache else "synthetic",
     }
 
 
