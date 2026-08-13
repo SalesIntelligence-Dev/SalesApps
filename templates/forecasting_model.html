@@ -396,7 +396,7 @@ select:focus{outline:none;border-color:var(--accent)}
         <div class="ov-stat"><div class="ov-stat-val">40</div><div class="ov-stat-lbl">Serien gesamt</div></div>
         <div class="ov-stat s-auf"><div class="ov-stat-val" id="ov-n-auf">–</div><div class="ov-stat-lbl">⚠ Auffällig</div></div>
         <div class="ov-stat s-kor"><div class="ov-stat-val" id="ov-n-kor">0</div><div class="ov-stat-lbl">✏ Korrigiert</div></div>
-        <div class="ov-stat s-ok"><div class="ov-stat-val" id="ov-n-ok">–</div><div class="ov-stat-lbl">✓ Freigegeben</div></div>
+        <div class="ov-stat s-ok"><div class="ov-stat-val" id="ov-n-ok">–</div><div class="ov-stat-lbl">✓ Vorhersage</div></div>
       </div>
 
       <!-- Exception banner -->
@@ -443,7 +443,7 @@ select:focus{outline:none;border-color:var(--accent)}
       <div class="ov-legend">
         <span><span class="leg-dot leg-auf"></span>⚠ Auffällig – Modell weicht &gt;55 % vom Seasonal-Naive-Wert ab</span>
         <span><span class="leg-dot leg-kor"></span>✏ Manuell korrigiert (Wert überschreibt Modell)</span>
-        <span><span class="leg-dot leg-ok"></span>✓ Freigegeben – keine Aktion erforderlich</span>
+        <span><span class="leg-dot leg-ok"></span>✓ Vorhersage – keine Aktion erforderlich</span>
         <span style="color:var(--sub);font-size:10px">Klick auf Zellwert → Eingabe → Enter zum Speichern · ESC zum Abbrechen · Leer = Korrektur aufheben</span>
       </div>
 
@@ -721,7 +721,7 @@ function renderOverview() {
     let statusCls, statusTxt;
     if (corrCount > 0)                  { statusCls='s-kor'; statusTxt=`✏ ${corrCount} Kor.`; }
     else if (serie.flag==='auffaellig') { statusCls='s-auf'; statusTxt='⚠ Auffällig'; }
-    else                                { statusCls='s-ok';  statusTxt='✓ OK'; }
+    else                                { statusCls='s-ok';  statusTxt='✓ Vorhersage'; }
     html += `<td class="ov-status ${statusCls}">${statusTxt}</td>`;
 
     tr.innerHTML = html;

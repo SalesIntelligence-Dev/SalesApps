@@ -233,7 +233,7 @@ def _get_model():
 
 # ── Public API ────────────────────────────────────────────────────────────
 
-_FLAG_DIFF_THRESH = 0.55   # >55 % Abweichung Modell vs. Naive → auffällig
+_FLAG_DIFF_THRESH = 0.80   # >80 % Abweichung Modell vs. Naive → auffällig
 
 
 def _flag(pred: int, naive: int, lower: int, upper: int) -> str:
