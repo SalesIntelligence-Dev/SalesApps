@@ -356,7 +356,7 @@ select:focus{outline:none;border-color:var(--accent)}
         </div>
 
         <div class="section">
-          <div class="section-title">📅 <span class="s-label">Verlauf (30 Tage) + 7-Tages-Prognose Aug 2026</span></div>
+          <div class="section-title">📅 <span class="s-label" id="chart-title">Verlauf (30 Tage) + 7-Tages-Prognose</span></div>
           <div class="chart-wrap"><canvas id="chart-forecast"></canvas></div>
         </div>
 
@@ -527,7 +527,7 @@ function showState(s) {
 }
 
 function renderResults(d) {
-  document.getElementById('result-headline').textContent = `${d.filiale} · ${d.artikel}  (Daten bis ${d.last_date})`;
+  document.getElementById('result-headline').textContent = `${d.filiale} · ${d.artikel}  (Daten bis ${d.last_date} · Prognose ab ${d.forecast_start})`;
   document.getElementById('m-wape-model').textContent  = d.metrics.wape_model  + ' %';
   document.getElementById('m-wape-naive').textContent  = d.metrics.wape_naive  + ' %';
   document.getElementById('m-improvement').textContent = '−' + d.metrics.improvement_pct + ' %';
@@ -535,6 +535,8 @@ function renderResults(d) {
   document.getElementById('m-mae-naive').textContent   = d.metrics.mae_naive   + ' Stk';
   const b=d.metrics.bias; document.getElementById('m-bias').textContent=(b>=0?'+':'')+b+' Stk';
   document.getElementById('imp-val').textContent = d.metrics.improvement_pct + ' %';
+  document.getElementById('chart-title').textContent =
+    `Verlauf (30 Tage bis ${d.history.last_label}) + Prognose ${d.forecast_start} – ${d.forecast[6]?.datum||''}`;
   renderForecastChart(d); renderTable(d.forecast); renderImportanceChart(d.feature_importance);
 }
 
@@ -542,13 +544,17 @@ function renderForecastChart(d) {
   if (chartForecast) chartForecast.destroy();
   const hD=d.history.dates, hV=d.history.menge, fcR=d.forecast;
   const fcL=fcR.map(r=>r.wochentag+' '+r.datum.substring(0,5));
-  const all=[...hD,...fcL], jv=hV[hV.length-1];
+  const all=[...hD,...fcL];
+  const jv=hV[hV.length-1];
+  // Bridge: put last-history value at the final history label so the forecast
+  // line connects visually — no extra label needed (fixes 1-day shift).
+  const n=hD.length;
   const hData=[...hV,...fcR.map(()=>null)];
-  const fcData=[...hD.map(()=>null),jv,...fcR.map(r=>r.prognose)];
-  const upData=[...hD.map(()=>null),jv,...fcR.map(r=>r.upper)];
-  const loData=[...hD.map(()=>null),jv,...fcR.map(r=>r.lower)];
-  const nvData=[...hD.map(()=>null),jv,...fcR.map(r=>r.naive)];
-  const akData=[...hD.map(()=>null),null,...fcR.map(r=>r.is_aktion?r.prognose:null)];
+  const fcData=[...hD.map((_,i)=>i===n-1?jv:null),...fcR.map(r=>r.prognose)];
+  const upData=[...hD.map(()=>null),...fcR.map(r=>r.upper)];
+  const loData=[...hD.map(()=>null),...fcR.map(r=>r.lower)];
+  const nvData=[...hD.map((_,i)=>i===n-1?jv:null),...fcR.map(r=>r.naive)];
+  const akData=[...hD.map(()=>null),...fcR.map(r=>r.is_aktion?r.prognose:null)];
   const ctx=document.getElementById('chart-forecast').getContext('2d');
   chartForecast=new Chart(ctx,{type:'line',data:{labels:all,datasets:[
     {label:'Ist-Absatz (30 Tage)',data:hData,borderColor:'rgba(126,184,247,.85)',borderWidth:2,pointRadius:2,tension:.3,fill:false,spanGaps:false},

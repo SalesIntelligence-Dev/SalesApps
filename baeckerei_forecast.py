@@ -251,12 +251,14 @@ def get_meta() -> dict:
 def run_forecast(
     filiale:     str,
     artikel:     str,
-    aktion_days: Optional[list] = None,   # [bool×7] – welche Prognose-Tage haben Aktion
+    aktion_days: Optional[list] = None,
 ) -> dict:
     """
     Rekursive 7-Tages-Prognose mit LightGBM.
-    aktion_days: Liste von 7 Booleans, einer pro Prognosetag.
+    Prognose startet immer ab dem heutigen Datum (rollierend).
+    Lücke zwischen letztem Datenpunkt und heute wird still überbrückt.
     """
+    import datetime as _dt
     if aktion_days is None:
         aktion_days = [False] * 7
 
@@ -271,6 +273,10 @@ def run_forecast(
     )
     series["datum"] = pd.to_datetime(series["datum"])
     last_date = series["datum"].max()
+
+    # Prognose-Start = heute (oder last_date+1 wenn Datensatz noch aktuell ist)
+    today          = pd.Timestamp(_dt.date.today())
+    forecast_start = max(today, last_date + timedelta(days=1))
 
     # ── Walk-Forward Metriken: letzte 4 Wochen ───────────────────────────
     test_start = last_date - timedelta(days=27)
@@ -297,13 +303,8 @@ def run_forecast(
     else:
         wm, wn, imp, mae_m, mae_n, bias = 0.09, 0.15, 40.0, 8.0, 13.0, 0.2
 
-    # ── Rekursive 7-Tages-Prognose ───────────────────────────────────────
-    working = series.copy()
-    forecast_rows = []
-
-    for h in range(1, 8):
-        fc_date = last_date + timedelta(days=h)
-
+    # ── Hilfsfunktion: Feature-Vektor für einen Tag ──────────────────────
+    def build_feat(fc_date: pd.Timestamp, working: pd.DataFrame, is_aktion: int) -> tuple:
         def get_lag(days: int) -> float:
             target = fc_date - timedelta(days=days)
             row    = working[working["datum"] == target]
@@ -314,35 +315,55 @@ def run_forecast(
         lag_28  = get_lag(28)
         lag_364 = get_lag(364)
 
-        recent_28    = working[working["datum"] < fc_date]["menge"].values[-28:]
-        recent_14    = working[working["datum"] < fc_date]["menge"].values[-14:]
-        roll_mean_4w = float(recent_28.mean()) if len(recent_28) > 0 else lag_7
-        roll_std_4w  = float(recent_28.std())  if len(recent_28) > 1 else 5.0
-        roll_mean_2w = float(recent_14.mean()) if len(recent_14) > 0 else roll_mean_4w
+        past_28      = working[working["datum"] < fc_date]["menge"].values[-28:]
+        past_14      = working[working["datum"] < fc_date]["menge"].values[-14:]
+        roll_mean_4w = float(past_28.mean()) if len(past_28) > 0 else lag_7
+        roll_std_4w  = float(past_28.std())  if len(past_28) > 1 else 5.0
+        roll_mean_2w = float(past_14.mean()) if len(past_14) > 0 else roll_mean_4w
 
-        temp         = _synthetic_temp(fc_date)
-        is_feiertag  = _is_feiertag(fc_date)
-        is_schulfer  = _is_schulferien(fc_date)
-        is_aktion    = 1 if (h - 1 < len(aktion_days) and aktion_days[h - 1]) else 0
+        temp        = _synthetic_temp(fc_date)
+        is_feiertag = _is_feiertag(fc_date)
+        is_schulfer = _is_schulferien(fc_date)
 
         feat = {
-            "dow":           fc_date.dayofweek,
-            "month":         fc_date.month,
-            "week_of_year":  int(fc_date.isocalendar()[1]),
-            "is_feiertag":   is_feiertag,
-            "is_schulferien":is_schulfer,
-            "temperatur":    temp,
-            "is_aktion":     is_aktion,
-            "lag_7":         lag_7,
-            "lag_14":        lag_14,
-            "lag_28":        lag_28,
-            "lag_364":       lag_364,
+            "dow":             fc_date.dayofweek,
+            "month":           fc_date.month,
+            "week_of_year":    int(fc_date.isocalendar()[1]),
+            "is_feiertag":     is_feiertag,
+            "is_schulferien":  is_schulfer,
+            "temperatur":      temp,
+            "is_aktion":       is_aktion,
+            "lag_7":           lag_7,
+            "lag_14":          lag_14,
+            "lag_28":          lag_28,
+            "lag_364":         lag_364,
             "rolling_mean_4w": roll_mean_4w,
             "rolling_std_4w":  roll_std_4w,
             "rolling_mean_2w": roll_mean_2w,
-            "filiale_enc":   FILIALE_ENC[filiale],
-            "artikel_enc":   ARTIKEL_ENC[artikel],
+            "filiale_enc":     FILIALE_ENC[filiale],
+            "artikel_enc":     ARTIKEL_ENC[artikel],
         }
+        return feat, temp, is_feiertag, is_schulfer, roll_std_4w, lag_7
+
+    # ── Gap-Filling: letzte Datenpunkt → gestern (stille Schritte) ───────
+    working   = series.copy()
+    fill_date = last_date + timedelta(days=1)
+    while fill_date < forecast_start:
+        feat, *_ = build_feat(fill_date, working, 0)
+        pred_fill = max(0.0, float(model.predict(pd.DataFrame([feat])[FEATURE_COLS])[0]))
+        working = pd.concat([working, pd.DataFrame([{
+            "datum": fill_date, "filiale": filiale,
+            "artikel": artikel, "menge": round(pred_fill),
+        }])], ignore_index=True)
+        fill_date += timedelta(days=1)
+
+    # ── Rekursive 7-Tages-Prognose ab heute ─────────────────────────────
+    forecast_rows = []
+    for h in range(7):
+        fc_date   = forecast_start + timedelta(days=h)
+        is_aktion = 1 if (h < len(aktion_days) and aktion_days[h]) else 0
+
+        feat, temp, is_feiertag, is_schulfer, roll_std_4w, lag_7 = build_feat(fc_date, working, is_aktion)
 
         X_fc     = pd.DataFrame([feat])[FEATURE_COLS]
         pred     = max(0.0, float(model.predict(X_fc)[0]))
@@ -352,55 +373,52 @@ def run_forecast(
         lower = max(0, round(pred - 1.5 * sigma))
         upper = round(pred + 1.5 * sigma)
 
-        # Naive: gleicher Wochentag letzte Woche
         naive_date = fc_date - timedelta(days=7)
         naive_row  = working[working["datum"] == naive_date]
         naive_val  = int(naive_row["menge"].values[-1]) if len(naive_row) > 0 else round(lag_7)
 
-        # Feiertags-Name (leer wenn kein Feiertag)
         feiertag_name = NRW_HOLIDAY_NAMES.get(fc_date, "") if is_feiertag else ""
-
-        day_flag = _flag(pred_int, naive_val, lower, upper)
+        day_flag      = _flag(pred_int, naive_val, lower, upper)
 
         forecast_rows.append({
-            "datum":         fc_date.strftime("%d.%m.%Y"),
-            "datum_iso":     fc_date.strftime("%Y-%m-%d"),
-            "wochentag":     DOW_NAMES[fc_date.dayofweek],
-            "prognose":      pred_int,
-            "lower":         lower,
-            "upper":         upper,
-            "naive":         naive_val,
-            "is_feiertag":   bool(is_feiertag),
-            "feiertag_name": feiertag_name,
-            "is_schulferien":bool(is_schulfer),
-            "is_aktion":     bool(is_aktion),
-            "temperatur":    round(temp, 1),
-            "flag":          day_flag,
-            "rel_diff_pct":  round(abs(pred_int - naive_val) / naive_val * 100, 1) if naive_val > 0 else 0,
+            "datum":          fc_date.strftime("%d.%m.%Y"),
+            "datum_iso":      fc_date.strftime("%Y-%m-%d"),
+            "wochentag":      DOW_NAMES[fc_date.dayofweek],
+            "prognose":       pred_int,
+            "lower":          lower,
+            "upper":          upper,
+            "naive":          naive_val,
+            "is_feiertag":    bool(is_feiertag),
+            "feiertag_name":  feiertag_name,
+            "is_schulferien": bool(is_schulfer),
+            "is_aktion":      bool(is_aktion),
+            "temperatur":     round(temp, 1),
+            "flag":           day_flag,
+            "rel_diff_pct":   round(abs(pred_int - naive_val) / naive_val * 100, 1) if naive_val > 0 else 0,
         })
 
-        new_row = pd.DataFrame([{
+        working = pd.concat([working, pd.DataFrame([{
             "datum": fc_date, "filiale": filiale,
             "artikel": artikel, "menge": pred_int,
-        }])
-        working = pd.concat([working, new_row], ignore_index=True)
+        }])], ignore_index=True)
 
     # ── Feature Importance (Gain, normalisiert) ──────────────────────────
-    raw_imp = model.feature_importances_
-    total   = raw_imp.sum() or 1
-    pairs   = sorted(zip(FEATURE_COLS, raw_imp), key=lambda x: x[1], reverse=True)[:10]
+    raw_imp   = model.feature_importances_
+    total     = raw_imp.sum() or 1
+    pairs     = sorted(zip(FEATURE_COLS, raw_imp), key=lambda x: x[1], reverse=True)[:10]
     fi_names  = [FEATURE_LABELS.get(n, n) for n, _ in pairs]
     fi_values = [round(v / total, 4) for _, v in pairs]
 
-    # ── Historische Daten (letzte 30 Tage) ──────────────────────────────
+    # ── Historische Daten (letzte 30 Tage aus CSV) ───────────────────────
     hist_30 = series[series["datum"] >= last_date - timedelta(days=29)].sort_values("datum")
 
     return {
         "filiale":  filiale,
         "artikel":  artikel,
         "history": {
-            "dates": hist_30["datum"].dt.strftime("%d.%m.").tolist(),
-            "menge": [int(x) for x in hist_30["menge"].tolist()],
+            "dates":      hist_30["datum"].dt.strftime("%d.%m.").tolist(),
+            "menge":      [int(x) for x in hist_30["menge"].tolist()],
+            "last_label": hist_30["datum"].max().strftime("%d.%m.%Y"),
         },
         "forecast": forecast_rows,
         "metrics": {
@@ -415,7 +433,8 @@ def run_forecast(
             "features":   fi_names,
             "importance": fi_values,
         },
-        "last_date": last_date.strftime("%d.%m.%Y"),
+        "last_date":      last_date.strftime("%d.%m.%Y"),
+        "forecast_start": forecast_start.strftime("%d.%m.%Y"),
     }
 
 
