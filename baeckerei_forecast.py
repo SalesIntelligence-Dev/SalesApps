@@ -1,13 +1,14 @@
 """
-Bäckerei Nachfrageprognose – LightGBM Engine
-Läuft vollständig lokal auf CPU, kein GPU nötig.
-Erstes Laden trainiert das Modell (~3–5 s), danach gecacht.
+Bäckerei Nachfrageprognose – LightGBM Engine (CPU-only, kein GPU).
+Erstes Laden: Datensatz generieren + Modell trainieren (~5 s).
+Danach gecacht – jede Abfrage < 1 s.
 """
 from __future__ import annotations
 
 import threading
 from datetime import timedelta
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -52,37 +53,68 @@ FEATURE_LABELS = {
 
 DOW_NAMES = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 
-# NRW Feiertage 2023–2025 als pd.Timestamp-Set
-NRW_HOLIDAYS: set[pd.Timestamp] = {
-    pd.Timestamp(d) for d in [
-        "2023-01-01","2023-04-07","2023-04-10","2023-05-01",
-        "2023-05-18","2023-05-29","2023-06-08","2023-10-03",
-        "2023-11-01","2023-12-25","2023-12-26",
-        "2024-01-01","2024-03-29","2024-04-01","2024-05-01",
-        "2024-05-09","2024-05-20","2024-05-30","2024-10-03",
-        "2024-11-01","2024-12-25","2024-12-26",
-        "2025-01-01","2025-04-18","2025-04-21","2025-05-01",
-        "2025-05-29","2025-06-09","2025-06-19","2025-10-03",
-        "2025-11-01","2025-12-25","2025-12-26",
-    ]
+# ── NRW Feiertage 2024–2026 ───────────────────────────────────────────────
+_HOLIDAY_DATA = {
+    # 2024
+    "2024-01-01": "Neujahr",
+    "2024-03-29": "Karfreitag",
+    "2024-04-01": "Ostermontag",
+    "2024-05-01": "Tag der Arbeit",
+    "2024-05-09": "Christi Himmelfahrt",
+    "2024-05-20": "Pfingstmontag",
+    "2024-05-30": "Fronleichnam",
+    "2024-10-03": "Tag der dt. Einheit",
+    "2024-11-01": "Allerheiligen",
+    "2024-12-25": "1. Weihnachtstag",
+    "2024-12-26": "2. Weihnachtstag",
+    # 2025
+    "2025-01-01": "Neujahr",
+    "2025-04-18": "Karfreitag",
+    "2025-04-21": "Ostermontag",
+    "2025-05-01": "Tag der Arbeit",
+    "2025-05-29": "Christi Himmelfahrt",
+    "2025-06-09": "Pfingstmontag",
+    "2025-06-19": "Fronleichnam",
+    "2025-10-03": "Tag der dt. Einheit",
+    "2025-11-01": "Allerheiligen",
+    "2025-12-25": "1. Weihnachtstag",
+    "2025-12-26": "2. Weihnachtstag",
+    # 2026
+    "2026-01-01": "Neujahr",
+    "2026-04-03": "Karfreitag",
+    "2026-04-06": "Ostermontag",
+    "2026-05-01": "Tag der Arbeit",
+    "2026-05-14": "Christi Himmelfahrt",
+    "2026-05-25": "Pfingstmontag",
+    "2026-06-04": "Fronleichnam",
+    "2026-10-03": "Tag der dt. Einheit",
+    "2026-11-01": "Allerheiligen",
+    "2026-12-25": "1. Weihnachtstag",
+    "2026-12-26": "2. Weihnachtstag",
 }
 
+NRW_HOLIDAYS: set[pd.Timestamp]       = {pd.Timestamp(d) for d in _HOLIDAY_DATA}
+NRW_HOLIDAY_NAMES: dict[pd.Timestamp, str] = {pd.Timestamp(k): v for k, v in _HOLIDAY_DATA.items()}
+
+# NRW Schulferien 2024–2026
 SCHOOL_HOLIDAYS = [
-    (pd.Timestamp("2023-01-30"), pd.Timestamp("2023-02-03")),
-    (pd.Timestamp("2023-04-03"), pd.Timestamp("2023-04-15")),
-    (pd.Timestamp("2023-05-30"), pd.Timestamp("2023-06-02")),
-    (pd.Timestamp("2023-06-29"), pd.Timestamp("2023-08-11")),
-    (pd.Timestamp("2023-10-02"), pd.Timestamp("2023-10-14")),
-    (pd.Timestamp("2023-12-27"), pd.Timestamp("2024-01-06")),
-    (pd.Timestamp("2024-02-12"), pd.Timestamp("2024-02-16")),
-    (pd.Timestamp("2024-03-25"), pd.Timestamp("2024-04-06")),
-    (pd.Timestamp("2024-05-21"), pd.Timestamp("2024-05-24")),
     (pd.Timestamp("2024-07-22"), pd.Timestamp("2024-09-03")),
     (pd.Timestamp("2024-10-14"), pd.Timestamp("2024-10-26")),
     (pd.Timestamp("2024-12-23"), pd.Timestamp("2025-01-07")),
     (pd.Timestamp("2025-02-17"), pd.Timestamp("2025-02-21")),
     (pd.Timestamp("2025-04-14"), pd.Timestamp("2025-04-26")),
+    (pd.Timestamp("2025-05-30"), pd.Timestamp("2025-06-06")),
+    (pd.Timestamp("2025-07-07"), pd.Timestamp("2025-08-19")),
+    (pd.Timestamp("2025-10-13"), pd.Timestamp("2025-10-25")),
+    (pd.Timestamp("2025-12-22"), pd.Timestamp("2026-01-07")),
+    (pd.Timestamp("2026-02-16"), pd.Timestamp("2026-02-20")),
+    (pd.Timestamp("2026-04-07"), pd.Timestamp("2026-04-18")),
+    (pd.Timestamp("2026-05-22"), pd.Timestamp("2026-05-29")),
+    (pd.Timestamp("2026-07-06"), pd.Timestamp("2026-08-18")),   # Sommerferien 2026
 ]
+
+# Mindest-Enddatum des Datensatzes – wird geprüft, um Neugenerierung auszulösen
+_REQUIRED_END = pd.Timestamp("2026-07-01")
 
 
 def _is_feiertag(d: pd.Timestamp) -> int:
@@ -100,26 +132,34 @@ def _synthetic_temp(d: pd.Timestamp) -> float:
     return float(base + rng.normal(0, 2.0))
 
 
-# ── Modul-Level Singletons ────────────────────────────────────────────────
-_model      = None
-_df_raw: pd.DataFrame | None = None
-_df_feat: pd.DataFrame | None = None
-_lock       = threading.Lock()
+# ── Singletons ────────────────────────────────────────────────────────────
+_model       = None
+_df_raw:  Optional[pd.DataFrame] = None
+_df_feat: Optional[pd.DataFrame] = None
+_lock = threading.Lock()
 
 
 def _ensure_data() -> pd.DataFrame:
     global _df_raw
     if _df_raw is not None:
         return _df_raw
+
+    # Prüfen ob vorhandener Datensatz aktuell genug ist
+    if BAKERY_CSV.exists():
+        probe = pd.read_csv(BAKERY_CSV, usecols=["datum"], parse_dates=["datum"])
+        if probe["datum"].max() < _REQUIRED_END:
+            BAKERY_CSV.unlink()   # veraltet → neu generieren
+
     if not BAKERY_CSV.exists():
         from datasets.generate_baeckerei import generate
         generate()
+
     _df_raw = pd.read_csv(BAKERY_CSV, parse_dates=["datum"])
     return _df_raw
 
 
 def _featurize(df: pd.DataFrame) -> pd.DataFrame:
-    """Feature-Engineering für das gesamte DataFrame (alle Serien)."""
+    """Feature-Engineering für alle Filialen × Artikel gleichzeitig."""
     df = df.copy().sort_values(["filiale", "artikel", "datum"])
     chunks = []
     for (filiale, artikel), grp in df.groupby(["filiale", "artikel"], sort=False):
@@ -130,6 +170,7 @@ def _featurize(df: pd.DataFrame) -> pd.DataFrame:
         grp["week_of_year"] = grp["datum"].dt.isocalendar().week.astype(int)
         grp["filiale_enc"]  = FILIALE_ENC[filiale]
         grp["artikel_enc"]  = ARTIKEL_ENC[artikel]
+
         # CSV-Spalte is_feiertag_nrw → Feature is_feiertag
         if "is_feiertag_nrw" in grp.columns:
             grp["is_feiertag"] = grp["is_feiertag_nrw"]
@@ -164,20 +205,20 @@ def _train() -> None:
     y = df_feat["menge"]
 
     model = lgb.LGBMRegressor(
-        objective       = "regression",
-        metric          = "mae",
-        n_estimators    = 400,
-        learning_rate   = 0.05,
-        num_leaves      = 63,
-        min_child_samples = 20,
-        feature_fraction= 0.8,
-        bagging_fraction= 0.8,
-        bagging_freq    = 5,
-        verbose         = -1,
-        n_jobs          = -1,
+        objective        = "regression",
+        metric           = "mae",
+        n_estimators     = 500,
+        learning_rate    = 0.04,
+        num_leaves       = 63,
+        min_child_samples= 20,
+        feature_fraction = 0.8,
+        bagging_fraction = 0.8,
+        bagging_freq     = 5,
+        verbose          = -1,
+        n_jobs           = -1,
     )
     model.fit(X, y)
-    _model  = model
+    _model   = model
     _df_feat = df_feat
 
 
@@ -196,11 +237,18 @@ def get_meta() -> dict:
     return {"filialen": FILIALEN, "artikel": ARTIKEL}
 
 
-def run_forecast(filiale: str, artikel: str, with_aktion: bool = False) -> dict:
+def run_forecast(
+    filiale:     str,
+    artikel:     str,
+    aktion_days: Optional[list] = None,   # [bool×7] – welche Prognose-Tage haben Aktion
+) -> dict:
     """
-    Trainiert (beim ersten Aufruf) ein globales LightGBM-Modell und gibt
-    7-Tages-Prognose + Metriken + Feature-Importance zurück.
+    Rekursive 7-Tages-Prognose mit LightGBM.
+    aktion_days: Liste von 7 Booleans, einer pro Prognosetag.
     """
+    if aktion_days is None:
+        aktion_days = [False] * 7
+
     model = _get_model()
     df    = _ensure_data()
 
@@ -213,7 +261,7 @@ def run_forecast(filiale: str, artikel: str, with_aktion: bool = False) -> dict:
     series["datum"] = pd.to_datetime(series["datum"])
     last_date = series["datum"].max()
 
-    # ── Metriken: Walk-Forward auf letzten 4 Wochen ─────────────────────
+    # ── Walk-Forward Metriken: letzte 4 Wochen ───────────────────────────
     test_start = last_date - timedelta(days=27)
     test_rows  = _df_feat[
         (_df_feat.filiale == filiale)
@@ -221,7 +269,7 @@ def run_forecast(filiale: str, artikel: str, with_aktion: bool = False) -> dict:
         & (_df_feat.datum >= test_start)
     ].dropna(subset=FEATURE_COLS)
 
-    if len(test_rows) > 0:
+    if len(test_rows) >= 7:
         y_true  = test_rows["menge"].values
         y_pred  = model.predict(test_rows[FEATURE_COLS])
         y_naive = test_rows["lag_7"].values
@@ -229,9 +277,9 @@ def run_forecast(filiale: str, artikel: str, with_aktion: bool = False) -> dict:
         def wape(a, p):
             return float(np.sum(np.abs(a - p)) / np.sum(a)) if np.sum(a) > 0 else 0.0
 
-        wm = wape(y_true, y_pred)
-        wn = wape(y_true, y_naive)
-        imp = (wn - wm) / wn * 100 if wn > 0 else 0.0
+        wm    = wape(y_true, y_pred)
+        wn    = wape(y_true, y_naive)
+        imp   = (wn - wm) / wn * 100 if wn > 0 else 0.0
         mae_m = float(np.mean(np.abs(y_true - y_pred)))
         mae_n = float(np.mean(np.abs(y_true - y_naive)))
         bias  = float(np.mean(y_pred - y_true))
@@ -255,16 +303,16 @@ def run_forecast(filiale: str, artikel: str, with_aktion: bool = False) -> dict:
         lag_28  = get_lag(28)
         lag_364 = get_lag(364)
 
-        recent_28     = working[working["datum"] < fc_date]["menge"].values[-28:]
-        recent_14     = working[working["datum"] < fc_date]["menge"].values[-14:]
-        roll_mean_4w  = float(recent_28.mean()) if len(recent_28) > 0 else lag_7
-        roll_std_4w   = float(recent_28.std())  if len(recent_28) > 1 else 5.0
-        roll_mean_2w  = float(recent_14.mean()) if len(recent_14) > 0 else roll_mean_4w
+        recent_28    = working[working["datum"] < fc_date]["menge"].values[-28:]
+        recent_14    = working[working["datum"] < fc_date]["menge"].values[-14:]
+        roll_mean_4w = float(recent_28.mean()) if len(recent_28) > 0 else lag_7
+        roll_std_4w  = float(recent_28.std())  if len(recent_28) > 1 else 5.0
+        roll_mean_2w = float(recent_14.mean()) if len(recent_14) > 0 else roll_mean_4w
 
         temp         = _synthetic_temp(fc_date)
         is_feiertag  = _is_feiertag(fc_date)
         is_schulfer  = _is_schulferien(fc_date)
-        is_aktion    = 1 if with_aktion else 0
+        is_aktion    = 1 if (h - 1 < len(aktion_days) and aktion_days[h - 1]) else 0
 
         feat = {
             "dow":           fc_date.dayofweek,
@@ -285,11 +333,10 @@ def run_forecast(filiale: str, artikel: str, with_aktion: bool = False) -> dict:
             "artikel_enc":   ARTIKEL_ENC[artikel],
         }
 
-        X_fc = pd.DataFrame([feat])[FEATURE_COLS]
-        pred = max(0.0, float(model.predict(X_fc)[0]))
+        X_fc     = pd.DataFrame([feat])[FEATURE_COLS]
+        pred     = max(0.0, float(model.predict(X_fc)[0]))
         pred_int = round(pred)
 
-        # Konfidenzband: ±1.5 × lokale Standardabweichung
         sigma = max(roll_std_4w, pred * 0.10)
         lower = max(0, round(pred - 1.5 * sigma))
         upper = round(pred + 1.5 * sigma)
@@ -299,30 +346,36 @@ def run_forecast(filiale: str, artikel: str, with_aktion: bool = False) -> dict:
         naive_row  = working[working["datum"] == naive_date]
         naive_val  = int(naive_row["menge"].values[-1]) if len(naive_row) > 0 else round(lag_7)
 
+        # Feiertags-Name (leer wenn kein Feiertag)
+        feiertag_name = NRW_HOLIDAY_NAMES.get(fc_date, "") if is_feiertag else ""
+
         forecast_rows.append({
-            "datum":       fc_date.strftime("%Y-%m-%d"),
-            "wochentag":   DOW_NAMES[fc_date.dayofweek],
-            "prognose":    pred_int,
-            "lower":       lower,
-            "upper":       upper,
-            "naive":       naive_val,
-            "is_feiertag": bool(is_feiertag),
-            "temperatur":  round(temp, 1),
+            "datum":         fc_date.strftime("%d.%m.%Y"),
+            "datum_iso":     fc_date.strftime("%Y-%m-%d"),
+            "wochentag":     DOW_NAMES[fc_date.dayofweek],
+            "prognose":      pred_int,
+            "lower":         lower,
+            "upper":         upper,
+            "naive":         naive_val,
+            "is_feiertag":   bool(is_feiertag),
+            "feiertag_name": feiertag_name,
+            "is_schulferien":bool(is_schulfer),
+            "is_aktion":     bool(is_aktion),
+            "temperatur":    round(temp, 1),
         })
 
-        # Prognose in Working-Series einspeisen (für nächste Lag-Berechnung)
         new_row = pd.DataFrame([{
             "datum": fc_date, "filiale": filiale,
             "artikel": artikel, "menge": pred_int,
         }])
         working = pd.concat([working, new_row], ignore_index=True)
 
-    # ── Feature Importance ───────────────────────────────────────────────
+    # ── Feature Importance (Gain, normalisiert) ──────────────────────────
     raw_imp = model.feature_importances_
     total   = raw_imp.sum() or 1
     pairs   = sorted(zip(FEATURE_COLS, raw_imp), key=lambda x: x[1], reverse=True)[:10]
-    fi_names   = [FEATURE_LABELS.get(n, n) for n, _ in pairs]
-    fi_values  = [round(v / total, 4) for _, v in pairs]
+    fi_names  = [FEATURE_LABELS.get(n, n) for n, _ in pairs]
+    fi_values = [round(v / total, 4) for _, v in pairs]
 
     # ── Historische Daten (letzte 30 Tage) ──────────────────────────────
     hist_30 = series[series["datum"] >= last_date - timedelta(days=29)].sort_values("datum")
@@ -331,7 +384,7 @@ def run_forecast(filiale: str, artikel: str, with_aktion: bool = False) -> dict:
         "filiale":  filiale,
         "artikel":  artikel,
         "history": {
-            "dates": hist_30["datum"].dt.strftime("%Y-%m-%d").tolist(),
+            "dates": hist_30["datum"].dt.strftime("%d.%m.").tolist(),
             "menge": [int(x) for x in hist_30["menge"].tolist()],
         },
         "forecast": forecast_rows,
@@ -347,5 +400,5 @@ def run_forecast(filiale: str, artikel: str, with_aktion: bool = False) -> dict:
             "features":   fi_names,
             "importance": fi_values,
         },
-        "last_date": last_date.strftime("%Y-%m-%d"),
+        "last_date": last_date.strftime("%d.%m.%Y"),
     }

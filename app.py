@@ -603,13 +603,13 @@ def bk_meta_route():
 
 @app.route("/api/forecasting_model/run", methods=["POST"])
 def bk_run():
-    data       = request.get_json(force=True)
-    filiale    = data.get("filiale", "Innenstadt")
-    artikel    = data.get("artikel",  "Brötchen")
-    with_aktion = bool(data.get("with_aktion", False))
+    data        = request.get_json(force=True)
+    filiale     = data.get("filiale", "Innenstadt")
+    artikel     = data.get("artikel",  "Brötchen")
+    aktion_days = data.get("aktion_days", [False] * 7)   # [bool×7]
 
     try:
-        result = bk_forecast(filiale, artikel, with_aktion)
+        result = bk_forecast(filiale, artikel, aktion_days=aktion_days)
         return jsonify(result)
     except Exception as exc:
         logger.error("Bäckerei-Forecast Fehler: %s", exc)

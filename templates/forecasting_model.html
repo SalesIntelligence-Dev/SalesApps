@@ -3,198 +3,202 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bäckerei Nachfrageprognose · LightGBM</title>
+<title>Bäckerei Nachfrageprognose · LightGBM · Aug 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root {
-  --bg:       #0a0a18;
-  --bg2:      #0f0f28;
-  --bg3:      #141430;
-  --card:     #12122a;
-  --border:   #1e1e42;
-  --border2:  #2a2a55;
-  --text:     #e2e8f0;
-  --sub:      #94a3b8;
-  --muted:    #4a5568;
-  --accent:   #f59e0b;
-  --accent2:  #fbbf24;
-  --teal:     #34d399;
-  --blue:     #7eb8f7;
-  --purple:   #a78bfa;
-  --danger:   #ef4444;
-  --radius:   10px;
-  --radius-lg:16px;
-  --shadow:   0 4px 24px rgba(0,0,0,.5);
+:root{
+  --bg:#0a0a18;--bg2:#0f0f28;--bg3:#141430;--card:#12122a;
+  --border:#1e1e42;--border2:#2a2a55;--text:#e2e8f0;--sub:#94a3b8;--muted:#4a5568;
+  --accent:#f59e0b;--accent2:#fbbf24;--teal:#34d399;--blue:#7eb8f7;
+  --purple:#a78bfa;--danger:#ef4444;--orange:#fb923c;
+  --radius:10px;--radius-lg:16px;--shadow:0 4px 24px rgba(0,0,0,.5);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);
      min-height:100vh;display:flex;flex-direction:column;font-size:14px;line-height:1.6}
 
-/* ── HEADER ─────────────────────────────────────────────────── */
+/* ── HEADER ───────────────────────────────────────── */
 header{background:var(--bg2);border-bottom:1px solid var(--border);
        position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
-.header-inner{max-width:1400px;margin:0 auto;padding:0 24px;
+.header-inner{max-width:1440px;margin:0 auto;padding:0 24px;
                height:60px;display:flex;align-items:center;gap:12px}
 .logo-icon{font-size:22px}
 .logo-title{font-size:15px;font-weight:700;color:var(--text)}
 .logo-sub{font-size:11px;color:var(--sub)}
-.badge-cpu{background:rgba(245,158,11,.15);color:var(--accent);
-           border:1px solid rgba(245,158,11,.3);border-radius:20px;
-           padding:2px 10px;font-size:11px;font-weight:600;margin-left:auto}
+.badges{margin-left:auto;display:flex;gap:8px;align-items:center}
+.badge-pill{border-radius:20px;padding:2px 10px;font-size:11px;font-weight:600}
+.badge-cpu{background:rgba(245,158,11,.15);color:var(--accent);border:1px solid rgba(245,158,11,.3)}
+.badge-lgbm{background:rgba(52,211,153,.12);color:var(--teal);border:1px solid rgba(52,211,153,.25)}
 
-/* ── LAYOUT ─────────────────────────────────────────────────── */
-main{flex:1;max-width:1400px;margin:0 auto;width:100%;padding:24px;
-     display:grid;grid-template-columns:280px 1fr;gap:24px}
-@media(max-width:900px){main{grid-template-columns:1fr}}
+/* ── LAYOUT ────────────────────────────────────────── */
+main{flex:1;max-width:1440px;margin:0 auto;width:100%;padding:24px;
+     display:grid;grid-template-columns:300px 1fr;gap:24px}
+@media(max-width:960px){main{grid-template-columns:1fr}}
 
-/* ── CONTROLS PANEL ──────────────────────────────────────────── */
+/* ── CONTROLS ──────────────────────────────────────── */
 .controls{background:var(--card);border:1px solid var(--border);
           border-radius:var(--radius-lg);padding:20px;
-          display:flex;flex-direction:column;gap:16px;align-self:start;
+          display:flex;flex-direction:column;gap:14px;align-self:start;
           position:sticky;top:76px}
-.controls h2{font-size:13px;font-weight:700;color:var(--sub);
-             text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
-.field{display:flex;flex-direction:column;gap:6px}
+.ctrl-section-title{font-size:11px;font-weight:700;color:var(--sub);
+                    text-transform:uppercase;letter-spacing:.08em}
+.field{display:flex;flex-direction:column;gap:5px}
 .field label{font-size:12px;font-weight:500;color:var(--sub)}
-select,input{background:var(--bg3);border:1px solid var(--border2);
-             border-radius:var(--radius);color:var(--text);font-family:inherit;
-             font-size:13px;padding:8px 12px;width:100%;
-             transition:border-color .2s}
-select:focus,input:focus{outline:none;border-color:var(--accent)}
-.toggle-row{display:flex;align-items:center;gap:10px;
-            background:var(--bg3);border:1px solid var(--border2);
-            border-radius:var(--radius);padding:10px 12px;cursor:pointer}
-.toggle-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
-.toggle-label{font-size:13px;color:var(--text);cursor:pointer;flex:1}
-.toggle-label small{display:block;font-size:11px;color:var(--sub)}
+select{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);
+       color:var(--text);font-family:inherit;font-size:13px;padding:8px 10px;width:100%;
+       transition:border-color .2s;cursor:pointer}
+select:focus{outline:none;border-color:var(--accent)}
+.divider{height:1px;background:var(--border)}
+
+/* 7-day aktion grid */
+.aktion-label-row{display:flex;justify-content:space-between;
+                  background:var(--bg3);border-radius:var(--radius);
+                  border:1px solid var(--border2);padding:8px 6px 10px;gap:4px}
+.aktion-day-cell{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.aktion-day-name{font-size:10px;font-weight:600;color:var(--sub);text-transform:uppercase}
+.aktion-day-date{font-size:9px;color:var(--muted)}
+.aktion-day-cb{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+.aktion-hint{font-size:11px;color:var(--muted);text-align:center}
+
 .btn-run{background:linear-gradient(135deg,var(--accent),#f97316);
-         color:#000;font-weight:700;font-size:14px;
-         border:none;border-radius:var(--radius);padding:12px;
-         cursor:pointer;width:100%;transition:opacity .2s;letter-spacing:.02em}
+         color:#000;font-weight:700;font-size:14px;border:none;
+         border-radius:var(--radius);padding:12px;cursor:pointer;width:100%;
+         transition:opacity .2s;letter-spacing:.02em}
 .btn-run:hover{opacity:.9}
 .btn-run:disabled{opacity:.5;cursor:not-allowed}
-.divider{height:1px;background:var(--border)}
-.info-box{background:var(--bg3);border:1px solid var(--border);
-          border-radius:var(--radius);padding:12px;font-size:12px;color:var(--sub);
-          line-height:1.6}
-.info-box strong{color:var(--text)}
+.info-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);
+          padding:12px;font-size:11px;color:var(--sub);line-height:1.7}
+.info-box strong{color:var(--text);font-size:12px}
 
-/* ── RIGHT PANEL ─────────────────────────────────────────────── */
+/* ── RIGHT PANEL ───────────────────────────────────── */
 .results{display:flex;flex-direction:column;gap:20px}
 
 /* State cards */
 .state-card{background:var(--card);border:1px solid var(--border);
-            border-radius:var(--radius-lg);padding:32px;
-            display:flex;flex-direction:column;align-items:center;
-            gap:12px;text-align:center}
-.state-icon{font-size:40px}
-.state-title{font-size:16px;font-weight:600;color:var(--text)}
-.state-sub{font-size:13px;color:var(--sub);max-width:380px}
-.spinner{width:36px;height:36px;border:3px solid var(--border2);
-         border-top-color:var(--accent);border-radius:50%;
-         animation:spin .8s linear infinite}
+            border-radius:var(--radius-lg);padding:36px;
+            display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.state-icon{font-size:44px}
+.state-title{font-size:16px;font-weight:600}
+.state-sub{font-size:13px;color:var(--sub);max-width:400px}
+.spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);
+         border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* Section card */
-.section{background:var(--card);border:1px solid var(--border);
-         border-radius:var(--radius-lg);padding:20px}
-.section-title{font-size:13px;font-weight:700;color:var(--sub);
-               text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;
-               display:flex;align-items:center;gap:8px}
-.section-title span{color:var(--text)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.section-title{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;
+               letter-spacing:.08em;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title .s-label{color:var(--text);font-size:13px}
 
 /* Metric tiles */
-.metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
-@media(max-width:600px){.metrics-grid{grid-template-columns:1fr 1fr}}
-.metric-tile{background:var(--bg3);border:1px solid var(--border);
-             border-radius:var(--radius);padding:14px}
-.metric-label{font-size:11px;color:var(--sub);font-weight:500;
-              text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-.metric-value{font-size:24px;font-weight:700;color:var(--text);line-height:1}
-.metric-sub{font-size:11px;color:var(--muted);margin-top:4px}
-.metric-good{color:var(--teal)}
-.metric-warn{color:var(--accent)}
-.metric-bad{color:var(--danger)}
+.metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+@media(max-width:640px){.metrics-grid{grid-template-columns:1fr 1fr}}
+.metric-tile{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.metric-label{font-size:10px;color:var(--sub);font-weight:600;text-transform:uppercase;
+              letter-spacing:.06em;margin-bottom:6px}
+.metric-value{font-size:26px;font-weight:700;line-height:1}
+.metric-sub{font-size:10px;color:var(--muted);margin-top:3px}
+.mv-green{color:var(--teal)} .mv-amber{color:var(--accent)} .mv-blue{color:var(--blue)}
 
-/* Secondary metrics bar */
-.sec-metrics{display:flex;gap:20px;flex-wrap:wrap;padding:12px;
-             background:var(--bg3);border-radius:var(--radius)}
-.sec-m{display:flex;flex-direction:column;gap:3px}
-.sec-m-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.sec-m-value{font-size:13px;font-weight:600;color:var(--sub)}
-
-/* Chart wrapper */
-.chart-wrap{position:relative;height:260px}
-.chart-wrap-sm{position:relative;height:220px}
-
-/* Forecast table */
-.fc-table{width:100%;border-collapse:collapse;font-size:13px}
-.fc-table th{text-align:left;padding:8px 10px;font-size:11px;font-weight:600;
-             color:var(--sub);text-transform:uppercase;letter-spacing:.06em;
-             border-bottom:1px solid var(--border)}
-.fc-table td{padding:8px 10px;border-bottom:1px solid var(--border)}
-.fc-table tr:last-child td{border-bottom:none}
-.fc-table tr.weekend td{background:rgba(124,58,237,.04)}
-.fc-table tr.feiertag td{background:rgba(245,158,11,.06)}
-.badge{display:inline-block;padding:2px 7px;border-radius:20px;
-       font-size:10px;font-weight:600}
-.badge-ft{background:rgba(245,158,11,.15);color:var(--accent)}
-.badge-we{background:rgba(167,139,250,.15);color:var(--purple)}
-.col-prognose{font-weight:700;color:var(--text)}
-.col-conf{color:var(--muted);font-size:12px}
-.col-naive{color:var(--sub)}
-.temp-val{font-size:11px;color:var(--muted)}
+/* Secondary bar */
+.sec-bar{display:flex;gap:20px;flex-wrap:wrap;padding:10px 12px;
+         background:var(--bg3);border-radius:var(--radius);margin-bottom:10px}
+.sec-m{display:flex;flex-direction:column;gap:2px}
+.sec-m-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sec-m-val{font-size:12px;font-weight:600;color:var(--sub)}
 
 /* Improvement banner */
 .improvement-banner{display:flex;align-items:center;gap:10px;
                     background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);
-                    border-radius:var(--radius);padding:10px 14px;font-size:12px;
-                    color:var(--teal);margin-top:12px}
-.improvement-banner strong{font-size:15px}
+                    border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--teal)}
+.improvement-banner strong{font-size:16px}
+
+/* Charts */
+.chart-wrap{position:relative;height:260px}
+.chart-wrap-sm{position:relative;height:210px}
+
+/* Forecast table */
+.fc-table-wrap{overflow-x:auto}
+.fc-table{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
+.fc-table th{text-align:left;padding:8px 10px;font-size:10px;font-weight:700;
+             color:var(--sub);text-transform:uppercase;letter-spacing:.06em;
+             border-bottom:1px solid var(--border);white-space:nowrap}
+.fc-table td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.fc-table tr:last-child td{border-bottom:none}
+.fc-table tr.is-weekend td{background:rgba(124,58,237,.04)}
+.fc-table tr.is-feiertag td{background:rgba(245,158,11,.07)}
+.fc-table tr.has-aktion td{background:rgba(251,146,60,.05)}
+.col-prognose{font-weight:700;font-size:14px}
+.col-conf{color:var(--muted);font-size:11px}
+.col-naive{color:var(--sub)}
+.col-temp{font-size:11px;color:var(--muted)}
+.col-aktion-cb{text-align:center}
+.col-aktion-cb input[type=checkbox]{width:15px;height:15px;accent-color:var(--orange);cursor:pointer}
+
+/* Badges */
+.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;
+       white-space:nowrap;margin:1px 2px 1px 0}
+.b-ft{background:rgba(245,158,11,.18);color:var(--accent)}
+.b-we{background:rgba(167,139,250,.15);color:var(--purple)}
+.b-sf{background:rgba(126,184,247,.12);color:var(--blue)}
+.b-ak{background:rgba(251,146,60,.18);color:var(--orange)}
+
+/* Delta indicator (aktion effect) */
+.delta-up{color:var(--teal);font-size:11px;font-weight:600}
+.delta-dn{color:var(--danger);font-size:11px;font-weight:600}
 </style>
 </head>
 <body>
 
-<!-- ══════════ HEADER ══════════ -->
+<!-- ═══════════ HEADER ═══════════ -->
 <header>
   <div class="header-inner">
     <span class="logo-icon">🍞</span>
     <div>
       <div class="logo-title">Bäckerei Nachfrageprognose</div>
-      <div class="logo-sub">LightGBM · Feiertage · Wetter · Aktionen · NRW</div>
+      <div class="logo-sub">Prognose-Woche: Aug 2026 · 5 Filialen · 8 Artikel</div>
     </div>
-    <span class="badge-cpu">⚡ Lokale CPU</span>
+    <div class="badges">
+      <span class="badge-pill badge-lgbm">LightGBM</span>
+      <span class="badge-pill badge-cpu">⚡ CPU</span>
+    </div>
   </div>
 </header>
 
-<!-- ══════════ MAIN ══════════ -->
+<!-- ═══════════ MAIN ═══════════ -->
 <main>
 
   <!-- ── CONTROLS ── -->
   <aside class="controls">
-    <h2>Einstellungen</h2>
+    <div class="ctrl-section-title">Auswahl</div>
 
     <div class="field">
       <label for="sel-filiale">Filiale</label>
-      <select id="sel-filiale"></select>
+      <select id="sel-filiale" onchange="onSelChange()"></select>
     </div>
 
     <div class="field">
       <label for="sel-artikel">Artikel</label>
-      <select id="sel-artikel"></select>
+      <select id="sel-artikel" onchange="onSelChange()"></select>
     </div>
 
     <div class="divider"></div>
 
-    <label class="toggle-row" for="chk-aktion">
-      <input type="checkbox" id="chk-aktion">
-      <div class="toggle-label">
-        Aktion nächste Woche
-        <small>+30 % Mehrabsatz modellieren</small>
-      </div>
-    </label>
+    <div class="ctrl-section-title">Aktions-Planung – nächste 7 Tage</div>
+
+    <div class="aktion-label-row" id="aktion-grid">
+      <!-- filled dynamically after first forecast -->
+      <div class="aktion-day-cell" id="adc-0"><div class="aktion-day-name" id="adn-0">Tag1</div><div class="aktion-day-date" id="add-0"></div><input class="aktion-day-cb" type="checkbox" id="adc-cb-0" onchange="onAktionChange()"></div>
+      <div class="aktion-day-cell" id="adc-1"><div class="aktion-day-name" id="adn-1">Tag2</div><div class="aktion-day-date" id="add-1"></div><input class="aktion-day-cb" type="checkbox" id="adc-cb-1" onchange="onAktionChange()"></div>
+      <div class="aktion-day-cell" id="adc-2"><div class="aktion-day-name" id="adn-2">Tag3</div><div class="aktion-day-date" id="add-2"></div><input class="aktion-day-cb" type="checkbox" id="adc-cb-2" onchange="onAktionChange()"></div>
+      <div class="aktion-day-cell" id="adc-3"><div class="aktion-day-name" id="adn-3">Tag4</div><div class="aktion-day-date" id="add-3"></div><input class="aktion-day-cb" type="checkbox" id="adc-cb-3" onchange="onAktionChange()"></div>
+      <div class="aktion-day-cell" id="adc-4"><div class="aktion-day-name" id="adn-4">Tag5</div><div class="aktion-day-date" id="add-4"></div><input class="aktion-day-cb" type="checkbox" id="adc-cb-4" onchange="onAktionChange()"></div>
+      <div class="aktion-day-cell" id="adc-5"><div class="aktion-day-name" id="adn-5">Tag6</div><div class="aktion-day-date" id="add-5"></div><input class="aktion-day-cb" type="checkbox" id="adc-cb-5" onchange="onAktionChange()"></div>
+      <div class="aktion-day-cell" id="adc-6"><div class="aktion-day-name" id="adn-6">Tag7</div><div class="aktion-day-date" id="add-6"></div><input class="aktion-day-cb" type="checkbox" id="adc-cb-6" onchange="onAktionChange()"></div>
+    </div>
+    <div class="aktion-hint">Aktionen erhöhen Absatz ~+32 % · Modell reagiert sofort</div>
 
     <button class="btn-run" id="btn-run" onclick="runForecast()">
       Prognose berechnen
@@ -203,90 +207,73 @@ select:focus,input:focus{outline:none;border-color:var(--accent)}
     <div class="divider"></div>
 
     <div class="info-box">
-      <strong>Modell:</strong> globales LightGBM über alle 5 Filialen × 8 Artikel.<br><br>
-      <strong>Features:</strong> Wochentag, Monat, Feiertag NRW, Schulferien, Temperatur, Aktionsflag, Lag 7/14/28/364 Tage, rollende Mittelwerte.<br><br>
-      <strong>Metriken:</strong> Rolling-Origin-Backtest (letzte 4 Wochen), Vergleich gegen Seasonal-Naive-Baseline.
+      <strong>Datensatz:</strong> Aug 2024 – Aug 2026<br>
+      <strong>Granularität:</strong> Täglich pro Filiale × Artikel<br>
+      <strong>Features:</strong> Lag 7/14/28/364 d, rollende Mittelwerte, Wochentag, Monat, NRW-Feiertage, Schulferien NRW, Temperatur, Aktion<br>
+      <strong>Backtest:</strong> Rolling-Origin 28 Tage vs. Seasonal Naive
     </div>
   </aside>
 
   <!-- ── RESULTS ── -->
   <div class="results" id="results-area">
 
-    <!-- Initial state -->
     <div class="state-card" id="state-initial">
       <div class="state-icon">📊</div>
       <div class="state-title">Filiale und Artikel wählen</div>
       <div class="state-sub">
-        Das LightGBM-Modell trainiert beim ersten Klick automatisch auf dem
-        synthetischen Bäckerei-Datensatz (2023–2025, 5 Filialen, 8 Artikel).
-        Die Berechnung dauert einmalig ~5 Sekunden.
+        Beim ersten Klick wird das LightGBM-Modell auf 2 Jahren Bäckerei-Daten (Aug 2024–Aug 2026)
+        trainiert. Das dauert einmalig ~5 Sekunden, danach ist jede Prognose in &lt;1 s fertig.
       </div>
     </div>
 
-    <!-- Loading state (hidden) -->
     <div class="state-card" id="state-loading" style="display:none">
       <div class="spinner"></div>
-      <div class="state-title" id="loading-msg">Modell wird trainiert …</div>
-      <div class="state-sub">Beim ersten Aufruf: Feature-Engineering + LightGBM (CPU). Ab dem zweiten Aufruf: &lt;1 Sek.</div>
+      <div class="state-title" id="loading-msg">Datensatz wird generiert …</div>
+      <div class="state-sub">Erster Aufruf: Feature-Engineering + LightGBM Training (CPU). Ab dann gecacht.</div>
     </div>
 
-    <!-- Error state (hidden) -->
     <div class="state-card" id="state-error" style="display:none">
       <div class="state-icon">⚠️</div>
       <div class="state-title">Fehler</div>
       <div class="state-sub" id="error-msg"></div>
     </div>
 
-    <!-- Result content (hidden) -->
     <div id="result-content" style="display:none">
 
-      <!-- Metric tiles -->
+      <!-- Metrics -->
       <div class="section">
-        <div class="section-title">📈 <span id="result-headline">Prognose</span></div>
+        <div class="section-title"><span class="s-label" id="result-headline">Prognose</span></div>
         <div class="metrics-grid">
           <div class="metric-tile">
             <div class="metric-label">WAPE Modell</div>
-            <div class="metric-value metric-good" id="m-wape-model">–</div>
-            <div class="metric-sub">Weighted Abs. % Error</div>
+            <div class="metric-value mv-green" id="m-wape-model">–</div>
+            <div class="metric-sub">Weighted Abs. % Error · Backtest 4W</div>
           </div>
           <div class="metric-tile">
             <div class="metric-label">WAPE Seasonal Naive</div>
-            <div class="metric-value metric-warn" id="m-wape-naive">–</div>
-            <div class="metric-sub">Vergleichsbaseline</div>
+            <div class="metric-value mv-amber" id="m-wape-naive">–</div>
+            <div class="metric-sub">Benchmark: gleicher Tag Vorwoche</div>
           </div>
           <div class="metric-tile">
-            <div class="metric-label">Verbesserung</div>
-            <div class="metric-value metric-teal" id="m-improvement" style="color:var(--teal)">–</div>
-            <div class="metric-sub">vs. Naive Baseline</div>
+            <div class="metric-label">Verbesserung vs. Naive</div>
+            <div class="metric-value mv-blue" id="m-improvement">–</div>
+            <div class="metric-sub">Weniger Überproduktion + Ausverkauf</div>
           </div>
         </div>
-        <div class="sec-metrics">
-          <div class="sec-m">
-            <span class="sec-m-label">MAE Modell</span>
-            <span class="sec-m-value" id="m-mae-model">–</span>
-          </div>
-          <div class="sec-m">
-            <span class="sec-m-label">MAE Naive</span>
-            <span class="sec-m-value" id="m-mae-naive">–</span>
-          </div>
-          <div class="sec-m">
-            <span class="sec-m-label">Bias</span>
-            <span class="sec-m-value" id="m-bias">–</span>
-          </div>
-          <div class="sec-m">
-            <span class="sec-m-label">Backtesting</span>
-            <span class="sec-m-value">Rolling Origin, 28 Tage</span>
-          </div>
+        <div class="sec-bar">
+          <div class="sec-m"><span class="sec-m-lbl">MAE Modell</span><span class="sec-m-val" id="m-mae-model">–</span></div>
+          <div class="sec-m"><span class="sec-m-lbl">MAE Naive</span><span class="sec-m-val" id="m-mae-naive">–</span></div>
+          <div class="sec-m"><span class="sec-m-lbl">Bias</span><span class="sec-m-val" id="m-bias">–</span></div>
+          <div class="sec-m"><span class="sec-m-lbl">Backtest-Fenster</span><span class="sec-m-val">Rolling Origin, 28 Tage</span></div>
         </div>
-        <div class="improvement-banner" id="improvement-banner">
-          🎯 LightGBM schlägt die Naive-Baseline um <strong id="imp-val">–</strong> &nbsp;—
-          das entspricht weniger Überproduktion und weniger Umsatzverlust durch Ausverkauf.
+        <div class="improvement-banner">
+          🎯 LightGBM schlägt Seasonal Naive um <strong id="imp-val">–</strong> — weniger Retoure, mehr verfügbare Artikel zur Spitzenzeit.
         </div>
       </div>
 
       <!-- Forecast chart -->
       <div class="section">
-        <div class="section-title">📅 <span>Verlauf + 7-Tages-Prognose</span></div>
+        <div class="section-title">📅 <span class="s-label">Verlauf (30 Tage) + 7-Tages-Prognose Aug 2026</span></div>
         <div class="chart-wrap">
           <canvas id="chart-forecast"></canvas>
         </div>
@@ -294,26 +281,29 @@ select:focus,input:focus{outline:none;border-color:var(--accent)}
 
       <!-- Forecast table -->
       <div class="section">
-        <div class="section-title">📋 <span>Prognosetabelle – nächste 7 Tage</span></div>
-        <table class="fc-table">
-          <thead>
-            <tr>
-              <th>Datum</th>
-              <th>Tag</th>
-              <th>Prognose</th>
-              <th>Konfidenz (80 %)</th>
-              <th>Naive</th>
-              <th>Temp</th>
-              <th>Hinweis</th>
-            </tr>
-          </thead>
-          <tbody id="fc-tbody"></tbody>
-        </table>
+        <div class="section-title">📋 <span class="s-label">Prognosetabelle – nächste 7 Tage (Aug 2026)</span></div>
+        <div class="fc-table-wrap">
+          <table class="fc-table">
+            <thead>
+              <tr>
+                <th>Datum</th>
+                <th>Tag</th>
+                <th>LightGBM</th>
+                <th>Konfidenz (80 %)</th>
+                <th>Seasonal Naive</th>
+                <th>Temperatur</th>
+                <th>Merkmale</th>
+                <th>Aktion</th>
+              </tr>
+            </thead>
+            <tbody id="fc-tbody"></tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Feature importance -->
       <div class="section">
-        <div class="section-title">🔍 <span>Feature Importance (Gain)</span></div>
+        <div class="section-title">🔍 <span class="s-label">Feature Importance (Gain) – globales Modell</span></div>
         <div class="chart-wrap-sm">
           <canvas id="chart-importance"></canvas>
         </div>
@@ -324,90 +314,115 @@ select:focus,input:focus{outline:none;border-color:var(--accent)}
 </main>
 
 <script>
-// ── Chart instances ───────────────────────────────────────────────────
 let chartForecast   = null;
 let chartImportance = null;
+let aktionDays      = [false,false,false,false,false,false,false];
+let debounceTimer   = null;
+let isFirstRun      = true;
 
-// ── Bootstrap: load meta and pre-select defaults ──────────────────────
+// ── Bootstrap ─────────────────────────────────────────────────────────
 async function loadMeta() {
   try {
     const res  = await fetch('/api/forecasting_model/meta');
     const data = await res.json();
-    const sf   = document.getElementById('sel-filiale');
-    const sa   = document.getElementById('sel-artikel');
+    const sf = document.getElementById('sel-filiale');
+    const sa = document.getElementById('sel-artikel');
     data.filialen.forEach(f => { const o=document.createElement('option'); o.value=o.text=f; sf.appendChild(o); });
-    data.artikel.forEach(a => { const o=document.createElement('option'); o.value=o.text=a; sa.appendChild(o); });
-    // Default: Innenstadt + Brötchen
+    data.artikel.forEach(a  => { const o=document.createElement('option'); o.value=o.text=a; sa.appendChild(o); });
     sf.value = 'Innenstadt';
     sa.value = 'Brötchen';
   } catch(e) { console.error('Meta load failed', e); }
 }
 
-// ── Run forecast ──────────────────────────────────────────────────────
-async function runForecast() {
-  const filiale    = document.getElementById('sel-filiale').value;
-  const artikel    = document.getElementById('sel-artikel').value;
-  const with_aktion = document.getElementById('chk-aktion').checked;
-  const btn        = document.getElementById('btn-run');
+function onSelChange() { /* re-run optional: only on explicit button press */ }
 
-  showState('loading');
+// ── Aktion day toggles ────────────────────────────────────────────────
+function onAktionChange() {
+  aktionDays = Array.from({length:7}, (_,i) => document.getElementById(`adc-cb-${i}`).checked);
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => runForecast(true), 400);  // true = silent re-run
+}
+
+function updateAktionLabels(forecastRows) {
+  forecastRows.forEach((r, i) => {
+    const nameEl = document.getElementById(`adn-${i}`);
+    const dateEl = document.getElementById(`add-${i}`);
+    if (nameEl) nameEl.textContent = r.wochentag;
+    if (dateEl) dateEl.textContent = r.datum.substring(0, 5); // dd.mm.
+    // Highlight Feiertage/Wochenende in aktion grid
+    const cell = document.getElementById(`adc-${i}`);
+    if (cell) {
+      cell.style.opacity = (r.wochentag === 'So') ? '0.6' : '1';
+    }
+  });
+}
+
+// ── Run forecast ──────────────────────────────────────────────────────
+async function runForecast(silent = false) {
+  const filiale = document.getElementById('sel-filiale').value;
+  const artikel = document.getElementById('sel-artikel').value;
+  const btn     = document.getElementById('btn-run');
+
+  if (!silent) showState('loading');
   btn.disabled = true;
 
-  // Longer wait message after 3 s (first-time training)
-  const msgTimer = setTimeout(() => {
-    document.getElementById('loading-msg').textContent = 'Feature-Engineering + LightGBM Training läuft …';
-  }, 3000);
+  // Progressive loading messages
+  let msgIdx = 0;
+  const msgs = [
+    'Datensatz wird vorbereitet …',
+    'Feature-Engineering läuft …',
+    'LightGBM Training (CPU) …',
+    'Prognose wird berechnet …',
+  ];
+  const msgEl = document.getElementById('loading-msg');
+  const msgTimer = isFirstRun ? setInterval(() => {
+    msgIdx = (msgIdx + 1) % msgs.length;
+    if (msgEl) msgEl.textContent = msgs[msgIdx];
+  }, 2000) : null;
 
   try {
     const res = await fetch('/api/forecasting_model/run', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({filiale, artikel, with_aktion}),
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({filiale, artikel, aktion_days: aktionDays}),
     });
-    clearTimeout(msgTimer);
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Server-Fehler');
-    }
+    if (msgTimer) clearInterval(msgTimer);
+    if (!res.ok) { const e=await res.json(); throw new Error(e.error||'Server-Fehler'); }
     const data = await res.json();
+    if (isFirstRun) { updateAktionLabels(data.forecast); isFirstRun = false; }
     renderResults(data);
     showState('result');
   } catch(e) {
-    clearTimeout(msgTimer);
+    if (msgTimer) clearInterval(msgTimer);
     document.getElementById('error-msg').textContent = e.message;
     showState('error');
   } finally {
     btn.disabled = false;
-    document.getElementById('loading-msg').textContent = 'Modell wird trainiert …';
   }
 }
 
-// ── State management ──────────────────────────────────────────────────
-function showState(state) {
-  document.getElementById('state-initial').style.display = 'none';
-  document.getElementById('state-loading').style.display = 'none';
-  document.getElementById('state-error').style.display   = 'none';
-  document.getElementById('result-content').style.display= 'none';
-  if (state === 'initial')  document.getElementById('state-initial').style.display  = 'flex';
-  if (state === 'loading')  document.getElementById('state-loading').style.display  = 'flex';
-  if (state === 'error')    document.getElementById('state-error').style.display    = 'flex';
-  if (state === 'result')   document.getElementById('result-content').style.display = 'block';
+function showState(s) {
+  ['state-initial','state-loading','state-error','result-content'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  if (s === 'initial') document.getElementById('state-initial').style.display  = 'flex';
+  if (s === 'loading') document.getElementById('state-loading').style.display  = 'flex';
+  if (s === 'error')   document.getElementById('state-error').style.display    = 'flex';
+  if (s === 'result')  document.getElementById('result-content').style.display = 'block';
 }
 
-// ── Render all results ────────────────────────────────────────────────
+// ── Render all ────────────────────────────────────────────────────────
 function renderResults(d) {
-  // Headline
   document.getElementById('result-headline').textContent =
-    `${d.filiale} · ${d.artikel}  (letzte Prognose: ${d.last_date})`;
+    `${d.filiale} · ${d.artikel}  (Daten bis ${d.last_date})`;
 
-  // Metrics
   document.getElementById('m-wape-model').textContent  = d.metrics.wape_model  + ' %';
   document.getElementById('m-wape-naive').textContent  = d.metrics.wape_naive  + ' %';
   document.getElementById('m-improvement').textContent = '−' + d.metrics.improvement_pct + ' %';
   document.getElementById('m-mae-model').textContent   = d.metrics.mae_model   + ' Stk';
   document.getElementById('m-mae-naive').textContent   = d.metrics.mae_naive   + ' Stk';
-  const biasVal = d.metrics.bias;
-  document.getElementById('m-bias').textContent        = (biasVal >= 0 ? '+' : '') + biasVal + ' Stk';
+  const b = d.metrics.bias;
+  document.getElementById('m-bias').textContent        = (b>=0?'+':'')+b+' Stk';
   document.getElementById('imp-val').textContent       = d.metrics.improvement_pct + ' %';
 
   renderForecastChart(d);
@@ -417,199 +432,68 @@ function renderResults(d) {
 
 // ── Forecast chart ────────────────────────────────────────────────────
 function renderForecastChart(d) {
-  if (chartForecast) { chartForecast.destroy(); }
+  if (chartForecast) chartForecast.destroy();
 
-  const histDates = d.history.dates;
-  const histVals  = d.history.menge;
-  const fcDates   = d.forecast.map(r => r.datum);
-  const fcVals    = d.forecast.map(r => r.prognose);
-  const fcLower   = d.forecast.map(r => r.lower);
-  const fcUpper   = d.forecast.map(r => r.upper);
-  const naiveVals = d.forecast.map(r => r.naive);
+  const hDates = d.history.dates;
+  const hVals  = d.history.menge;
+  const fcRows = d.forecast;
+  const fcLabels  = fcRows.map(r => r.wochentag + ' ' + r.datum.substring(0,5));
+  const allLabels = [...hDates, ...fcLabels];
 
-  const allDates  = [...histDates, ...fcDates];
+  const histData  = [...hVals, ...fcRows.map(() => null)];
+  const joinVal   = hVals[hVals.length - 1];
 
-  // History dataset (null-padded for forecast segment)
-  const histData  = [...histVals, ...fcDates.map(() => null)];
-  // Forecast dataset (null-padded for history segment, with join point)
-  const fcData    = [...histDates.map(() => null),
-                      histVals[histVals.length - 1], // join point
-                      ...fcVals];
-  const allDatesFC = [...histDates, ...fcDates];
+  // Forecast with leading join point
+  const fcData    = [...hDates.map(() => null), joinVal, ...fcRows.map(r => r.prognose)];
+  const upperData = [...hDates.map(() => null), joinVal, ...fcRows.map(r => r.upper)];
+  const lowerData = [...hDates.map(() => null), joinVal, ...fcRows.map(r => r.lower)];
+  const naiveData = [...hDates.map(() => null), joinVal, ...fcRows.map(r => r.naive)];
 
-  // Confidence band: upper/lower as two datasets for fill-between
-  const upperData = [...histDates.map(() => null), histVals[histVals.length-1], ...fcUpper];
-  const lowerData = [...histDates.map(() => null), histVals[histVals.length-1], ...fcLower];
-  const naiveData = [...histDates.map(() => null), histVals[histVals.length-1], ...naiveVals];
+  // Aktion markers: null where no aktion, prognose where aktion
+  const aktionData= [...hDates.map(() => null), null, ...fcRows.map(r => r.is_aktion ? r.prognose : null)];
+
+  const allDates = [...hDates, ...fcLabels];
 
   const ctx = document.getElementById('chart-forecast').getContext('2d');
   chartForecast = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: allDatesFC,
+      labels: allDates,
       datasets: [
-        {
-          label: 'Ist-Absatz (30 Tage)',
-          data: histData,
-          borderColor: 'rgba(126,184,247,0.9)',
-          backgroundColor: 'rgba(126,184,247,0.05)',
-          borderWidth: 2,
-          pointRadius: 2,
-          tension: 0.3,
-          fill: false,
-          spanGaps: false,
-        },
-        {
-          label: 'LightGBM Prognose',
-          data: fcData,
-          borderColor: 'rgba(245,158,11,0.95)',
-          backgroundColor: 'rgba(245,158,11,0.05)',
-          borderWidth: 2.5,
-          pointRadius: 4,
-          pointBackgroundColor: 'rgba(245,158,11,0.9)',
-          tension: 0.3,
-          fill: false,
-          spanGaps: false,
-        },
-        {
-          label: 'Konfidenz Obere',
-          data: upperData,
-          borderColor: 'transparent',
-          backgroundColor: 'rgba(245,158,11,0.12)',
-          borderWidth: 0,
-          pointRadius: 0,
-          fill: '+1',
-          spanGaps: false,
-        },
-        {
-          label: 'Konfidenz Untere',
-          data: lowerData,
-          borderColor: 'rgba(245,158,11,0.25)',
-          backgroundColor: 'rgba(245,158,11,0.12)',
-          borderWidth: 1,
-          borderDash: [4,3],
-          pointRadius: 0,
-          fill: false,
-          spanGaps: false,
-        },
-        {
-          label: 'Seasonal Naive',
-          data: naiveData,
-          borderColor: 'rgba(148,163,184,0.5)',
-          backgroundColor: 'transparent',
-          borderWidth: 1.5,
-          borderDash: [6, 4],
-          pointRadius: 0,
-          fill: false,
-          spanGaps: false,
-        },
+        {label:'Ist-Absatz (30 Tage)',data:histData,borderColor:'rgba(126,184,247,.85)',
+         backgroundColor:'rgba(126,184,247,.05)',borderWidth:2,pointRadius:2,tension:.3,fill:false,spanGaps:false},
+        {label:'LightGBM Prognose',data:fcData,borderColor:'rgba(245,158,11,.95)',
+         backgroundColor:'rgba(245,158,11,.05)',borderWidth:2.5,pointRadius:4,
+         pointBackgroundColor:'rgba(245,158,11,.9)',tension:.3,fill:false,spanGaps:false},
+        {label:'Konfidenz oben',data:upperData,borderColor:'transparent',
+         backgroundColor:'rgba(245,158,11,.12)',borderWidth:0,pointRadius:0,fill:'+1',spanGaps:false},
+        {label:'Konfidenz unten',data:lowerData,borderColor:'rgba(245,158,11,.3)',
+         backgroundColor:'rgba(245,158,11,.12)',borderWidth:1,borderDash:[4,3],
+         pointRadius:0,fill:false,spanGaps:false},
+        {label:'Seasonal Naive',data:naiveData,borderColor:'rgba(148,163,184,.45)',
+         backgroundColor:'transparent',borderWidth:1.5,borderDash:[6,4],
+         pointRadius:0,fill:false,spanGaps:false},
+        {label:'Aktion-Tag',data:aktionData,borderColor:'transparent',
+         backgroundColor:'rgba(251,146,60,.0)',borderWidth:0,
+         pointRadius:7,pointStyle:'star',pointBackgroundColor:'rgba(251,146,60,.9)',
+         fill:false,showLine:false,spanGaps:false},
       ]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: {
-          position: 'top',
-          labels: {
-            color: '#94a3b8',
-            font: { size: 11 },
-            padding: 16,
-            filter: item => !item.text.includes('Obere'),
-          }
-        },
-        tooltip: {
-          backgroundColor: '#0f0f28',
-          borderColor: '#2a2a55',
-          borderWidth: 1,
-          titleColor: '#e2e8f0',
-          bodyColor: '#94a3b8',
-          callbacks: {
-            label: ctx => {
-              if (ctx.parsed.y === null) return null;
-              return ` ${ctx.dataset.label}: ${Math.round(ctx.parsed.y)} Stk`;
-            }
-          }
-        }
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'top',labels:{color:'#94a3b8',font:{size:11},padding:14,
+          filter:item => !item.text.includes('Konfidenz oben')}},
+        tooltip:{backgroundColor:'#0f0f28',borderColor:'#2a2a55',borderWidth:1,
+          titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+          callbacks:{label:ctx => ctx.parsed.y===null?null:` ${ctx.dataset.label}: ${Math.round(ctx.parsed.y)} Stk`}}
       },
-      scales: {
-        x: {
-          ticks: {
-            color: '#4a5568', font: { size: 10 },
-            maxTicksLimit: 10,
-            callback: (val, i) => {
-              const lbl = allDatesFC[i];
-              if (!lbl) return '';
-              // Show only Mon + forecast start
-              return lbl;
-            }
-          },
-          grid: { color: 'rgba(30,30,66,0.8)' }
-        },
-        y: {
-          ticks: { color: '#4a5568', font: { size: 11 } },
-          grid:  { color: 'rgba(30,30,66,0.8)' },
-          title: { display: true, text: 'Menge (Stk)', color: '#4a5568', font: { size: 11 } }
-        }
-      }
-    }
-  });
-}
-
-// ── Feature importance chart ──────────────────────────────────────────
-function renderImportanceChart(fi) {
-  if (chartImportance) { chartImportance.destroy(); }
-
-  const labels = fi.features;
-  const values = fi.importance.map(v => Math.round(v * 1000) / 10); // to %
-
-  // Gradient colors
-  const colors = labels.map((_, i) => {
-    const t = i / Math.max(labels.length - 1, 1);
-    const r = Math.round(167 + (52 - 167) * t);
-    const g = Math.round(139 + (211 - 139) * t);
-    const b = Math.round(250 + (153 - 250) * t);
-    return `rgba(${r},${g},${b},0.75)`;
-  });
-
-  const ctx = document.getElementById('chart-importance').getContext('2d');
-  chartImportance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Importance (%)',
-        data: values,
-        backgroundColor: colors,
-        borderRadius: 4,
-        borderWidth: 0,
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#0f0f28',
-          borderColor: '#2a2a55',
-          borderWidth: 1,
-          titleColor: '#e2e8f0',
-          bodyColor: '#94a3b8',
-          callbacks: { label: ctx => ` ${ctx.parsed.x.toFixed(1)} %` }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: '#4a5568', font: { size: 11 }, callback: v => v + ' %' },
-          grid:  { color: 'rgba(30,30,66,0.8)' }
-        },
-        y: {
-          ticks: { color: '#94a3b8', font: { size: 11 } },
-          grid:  { display: false }
-        }
+      scales:{
+        x:{ticks:{color:'#4a5568',font:{size:10},maxTicksLimit:12},
+           grid:{color:'rgba(30,30,66,.8)'}},
+        y:{ticks:{color:'#4a5568',font:{size:11}},grid:{color:'rgba(30,30,66,.8)'},
+           title:{display:true,text:'Menge (Stk)',color:'#4a5568',font:{size:11}}}
       }
     }
   });
@@ -619,28 +503,76 @@ function renderImportanceChart(fi) {
 function renderTable(rows) {
   const tbody = document.getElementById('fc-tbody');
   tbody.innerHTML = '';
-  rows.forEach(r => {
-    const dow   = r.wochentag;
-    const isWE  = dow === 'Sa' || dow === 'So';
+  rows.forEach((r, i) => {
+    const isWE  = r.wochentag === 'Sa' || r.wochentag === 'So';
     const isFT  = r.is_feiertag;
-    const tr    = document.createElement('tr');
-    if (isFT) tr.classList.add('feiertag');
-    else if (isWE) tr.classList.add('weekend');
+    const isSF  = r.is_schulferien;
+    const isAk  = r.is_aktion;
+
+    const tr = document.createElement('tr');
+    if (isFT) tr.classList.add('is-feiertag');
+    else if (isWE) tr.classList.add('is-weekend');
+    if (isAk) tr.classList.add('has-aktion');
 
     const badges = [];
-    if (isFT) badges.push(`<span class="badge badge-ft">Feiertag</span>`);
-    if (isWE && !isFT) badges.push(`<span class="badge badge-we">Wochenende</span>`);
+    if (isFT) badges.push(`<span class="badge b-ft">🎌 ${r.feiertag_name || 'Feiertag'}</span>`);
+    else if (isWE) badges.push(`<span class="badge b-we">Wochenende</span>`);
+    if (isSF) badges.push(`<span class="badge b-sf">Schulferien</span>`);
+    if (isAk) badges.push(`<span class="badge b-ak">🏷 Aktion</span>`);
+
+    // Temperature color hint
+    const tempColor = r.temperatur > 25 ? '#fb923c' : r.temperatur < 5 ? '#7eb8f7' : '';
+    const tempStyle = tempColor ? `style="color:${tempColor}"` : '';
 
     tr.innerHTML = `
-      <td>${r.datum}</td>
-      <td>${dow}</td>
-      <td class="col-prognose">${r.prognose} Stk</td>
-      <td class="col-conf">${r.lower} – ${r.upper}</td>
-      <td class="col-naive">${r.naive} Stk</td>
-      <td class="temp-val">${r.temperatur} °C</td>
-      <td>${badges.join(' ')}&nbsp;</td>
+      <td><strong>${r.datum}</strong></td>
+      <td>${r.wochentag}</td>
+      <td class="col-prognose">${r.prognose}&thinsp;Stk</td>
+      <td class="col-conf">${r.lower}–${r.upper}</td>
+      <td class="col-naive">${r.naive}&thinsp;Stk</td>
+      <td class="col-temp" ${tempStyle}>${r.temperatur} °C</td>
+      <td>${badges.join('')}&nbsp;</td>
+      <td class="col-aktion-cb">
+        <input type="checkbox" id="fc-cb-${i}" ${aktionDays[i]?'checked':''} onchange="onFcTableAktionChange(${i}, this.checked)">
+      </td>
     `;
     tbody.appendChild(tr);
+  });
+}
+
+function onFcTableAktionChange(idx, checked) {
+  aktionDays[idx] = checked;
+  // Sync to controls grid
+  const ctrl = document.getElementById(`adc-cb-${idx}`);
+  if (ctrl) ctrl.checked = checked;
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => runForecast(true), 400);
+}
+
+// ── Feature importance chart ──────────────────────────────────────────
+function renderImportanceChart(fi) {
+  if (chartImportance) chartImportance.destroy();
+  const vals = fi.importance.map(v => Math.round(v*1000)/10);
+  const colors = fi.features.map((_,i) => {
+    const t = i / Math.max(fi.features.length-1, 1);
+    const r = Math.round(167+(52-167)*t), g = Math.round(139+(211-139)*t), b2 = Math.round(250+(153-250)*t);
+    return `rgba(${r},${g},${b2},.75)`;
+  });
+  const ctx = document.getElementById('chart-importance').getContext('2d');
+  chartImportance = new Chart(ctx, {
+    type:'bar',
+    data:{labels:fi.features,datasets:[{label:'Importance (%)',data:vals,backgroundColor:colors,borderRadius:4,borderWidth:0}]},
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{backgroundColor:'#0f0f28',borderColor:'#2a2a55',borderWidth:1,
+          titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+          callbacks:{label:ctx=>` ${ctx.parsed.x.toFixed(1)} %`}}},
+      scales:{
+        x:{ticks:{color:'#4a5568',font:{size:11},callback:v=>v+' %'},grid:{color:'rgba(30,30,66,.8)'}},
+        y:{ticks:{color:'#94a3b8',font:{size:11}},grid:{display:false}}
+      }
+    }
   });
 }
 
