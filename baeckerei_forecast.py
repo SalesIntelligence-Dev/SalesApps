@@ -233,17 +233,13 @@ def _get_model():
 
 # ── Public API ────────────────────────────────────────────────────────────
 
-_FLAG_DIFF_THRESH = 0.30   # >30 % Abweichung Modell vs. Naive → auffällig
-_FLAG_CI_THRESH   = 0.45   # CI-Breite >45 % der Prognose     → unsicher
+_FLAG_DIFF_THRESH = 0.55   # >55 % Abweichung Modell vs. Naive → auffällig
 
 
 def _flag(pred: int, naive: int, lower: int, upper: int) -> str:
     rel_diff = abs(pred - naive) / naive if naive > 0 else 0
-    ci_width = (upper - lower) / pred    if pred  > 0 else 0
     if rel_diff > _FLAG_DIFF_THRESH:
         return "auffaellig"
-    if ci_width > _FLAG_CI_THRESH:
-        return "unsicher"
     return "ok"
 
 
@@ -438,19 +434,14 @@ def run_overview(aktion_days: Optional[list] = None) -> dict:
             fc = run_forecast(filiale, artikel, aktion_days)
             row_flags = [r["flag"] for r in fc["forecast"]]
 
-            if "auffaellig" in row_flags:
-                row_flag = "auffaellig"
-            elif "unsicher" in row_flags:
-                row_flag = "unsicher"
-            else:
-                row_flag = "ok"
+            row_flag = "auffaellig" if "auffaellig" in row_flags else "ok"
 
             serien.append({
                 "filiale":      filiale,
                 "artikel":      artikel,
                 "tage":         fc["forecast"],
                 "flag":         row_flag,
-                "n_flagged":    sum(1 for f in row_flags if f != "ok"),
+                "n_flagged":    sum(1 for f in row_flags if f == "auffaellig"),
             })
 
     fc_dates = [
@@ -464,6 +455,5 @@ def run_overview(aktion_days: Optional[list] = None) -> dict:
         "fc_dates":     fc_dates,
         "n_total":      len(serien),
         "n_auffaellig": sum(1 for s in serien if s["flag"] == "auffaellig"),
-        "n_unsicher":   sum(1 for s in serien if s["flag"] == "unsicher"),
         "n_ok":         sum(1 for s in serien if s["flag"] == "ok"),
     }

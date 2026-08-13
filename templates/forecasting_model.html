@@ -152,14 +152,13 @@ select:focus{outline:none;border-color:var(--accent)}
 .ov-wrap{display:flex;flex-direction:column;gap:18px}
 
 /* Summary tiles */
-.ov-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
-@media(max-width:700px){.ov-summary{grid-template-columns:repeat(3,1fr)}}
+.ov-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:700px){.ov-summary{grid-template-columns:repeat(2,1fr)}}
 .ov-stat{background:var(--card);border:1px solid var(--border);
          border-radius:var(--radius);padding:14px;text-align:center}
 .ov-stat-val{font-size:28px;font-weight:700;color:var(--text)}
 .ov-stat-lbl{font-size:11px;color:var(--sub);margin-top:3px}
 .ov-stat.s-auf .ov-stat-val{color:var(--accent)}
-.ov-stat.s-uns .ov-stat-val{color:var(--blue)}
 .ov-stat.s-kor .ov-stat-val{color:var(--teal)}
 .ov-stat.s-ok  .ov-stat-val{color:var(--sub)}
 
@@ -396,7 +395,6 @@ select:focus{outline:none;border-color:var(--accent)}
       <div class="ov-summary">
         <div class="ov-stat"><div class="ov-stat-val">40</div><div class="ov-stat-lbl">Serien gesamt</div></div>
         <div class="ov-stat s-auf"><div class="ov-stat-val" id="ov-n-auf">–</div><div class="ov-stat-lbl">⚠ Auffällig</div></div>
-        <div class="ov-stat s-uns"><div class="ov-stat-val" id="ov-n-uns">–</div><div class="ov-stat-lbl">❓ Unsicher</div></div>
         <div class="ov-stat s-kor"><div class="ov-stat-val" id="ov-n-kor">0</div><div class="ov-stat-lbl">✏ Korrigiert</div></div>
         <div class="ov-stat s-ok"><div class="ov-stat-val" id="ov-n-ok">–</div><div class="ov-stat-lbl">✓ Freigegeben</div></div>
       </div>
@@ -405,7 +403,7 @@ select:focus{outline:none;border-color:var(--accent)}
       <div class="exception-banner">
         <div>
           <strong>Ausnahme-basierte Prüfung</strong><br>
-          Mitarbeiter prüfen nur <span id="ov-flagged-count">–</span> markierte Prognosen — auffällige Abweichungen oder hohe Unsicherheit.
+          Mitarbeiter prüfen nur <span id="ov-flagged-count">–</span> auffällige Serien — Modellprognose weicht deutlich vom Vorwochenwert ab.
           Zelle anklicken → Wert korrigieren → Enter.
         </div>
         <div style="font-size:12px;color:var(--sub)" id="ov-timestamp"></div>
@@ -414,7 +412,7 @@ select:focus{outline:none;border-color:var(--accent)}
       <!-- Controls bar -->
       <div class="ov-ctrl-bar">
         <div class="ov-filter-btns">
-          <button class="ov-filter-btn active" id="filter-btn-flagged" onclick="setFilter('flagged')">Nur Markierte &amp; Unsichere</button>
+          <button class="ov-filter-btn active" id="filter-btn-flagged" onclick="setFilter('flagged')">Nur Auffällige</button>
           <button class="ov-filter-btn" id="filter-btn-all" onclick="setFilter('all')">Alle 40 Serien</button>
           <button class="ov-filter-btn" id="filter-btn-corrected" onclick="setFilter('corrected')">Nur Korrigierte</button>
         </div>
@@ -443,8 +441,7 @@ select:focus{outline:none;border-color:var(--accent)}
 
       <!-- Legend -->
       <div class="ov-legend">
-        <span><span class="leg-dot leg-auf"></span>⚠ Auffällig – Modell weicht &gt;30 % vom Seasonal-Naive-Wert ab</span>
-        <span><span class="leg-dot leg-uns"></span>❓ Unsicher – Konfidenzband &gt;45 % der Prognose</span>
+        <span><span class="leg-dot leg-auf"></span>⚠ Auffällig – Modell weicht &gt;55 % vom Seasonal-Naive-Wert ab</span>
         <span><span class="leg-dot leg-kor"></span>✏ Manuell korrigiert (Wert überschreibt Modell)</span>
         <span><span class="leg-dot leg-ok"></span>✓ Freigegeben – keine Aktion erforderlich</span>
         <span style="color:var(--sub);font-size:10px">Klick auf Zellwert → Eingabe → Enter zum Speichern · ESC zum Abbrechen · Leer = Korrektur aufheben</span>
@@ -480,6 +477,7 @@ async function loadMeta() {
 
 function onAktionChange() {
   aktionDays = Array.from({length:7}, (_,i) => document.getElementById(`adc-cb-${i}`).checked);
+  if (isFirstRun) return;   // vor erster Prognose keine Auto-Ausführung
   clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => runForecast(true), 400);
 }
@@ -650,11 +648,10 @@ function renderOverview() {
 
   // Summary
   document.getElementById('ov-n-auf').textContent = d.n_auffaellig;
-  document.getElementById('ov-n-uns').textContent = d.n_unsicher;
   document.getElementById('ov-n-ok').textContent  = d.n_ok;
   document.getElementById('ov-n-kor').textContent = nCorrections;
 
-  const nFlagged = d.n_auffaellig + d.n_unsicher;
+  const nFlagged = d.n_auffaellig;
   document.getElementById('ov-flagged-count').textContent = `${nFlagged} von 40`;
 
   // Tab badges
@@ -702,15 +699,14 @@ function renderOverview() {
       const hasCorrValue = corrVal !== undefined && corrVal !== null;
       const cellClass = hasCorrValue ? 'corrected' : tag.flag;
       const title = tag.flag==='auffaellig'
-        ? `Abweichung: ${tag.rel_diff_pct}% vom Naive-Wert`
-        : tag.flag==='unsicher' ? 'Hohes Konfidenzband – manuelle Prüfung empfohlen' : '';
+        ? `Abweichung: ${tag.rel_diff_pct}% vom Naive-Wert` : '';
 
       let inner = '';
       if (hasCorrValue) {
         inner = `<span class="orig">${tag.prognose}</span><span class="corr">${corrVal}</span>`;
       } else {
-        const flagCls = tag.flag==='auffaellig'?'flag-auf':tag.flag==='unsicher'?'flag-uns':'';
-        const icon    = tag.flag==='auffaellig'?'⚠':tag.flag==='unsicher'?'❓':'';
+        const flagCls = tag.flag==='auffaellig' ? 'flag-auf' : '';
+        const icon    = tag.flag==='auffaellig' ? '⚠' : '';
         inner = `<span class="pred ${flagCls}">${tag.prognose}${icon?`<span class="flag-icon">${icon}</span>`:''}</span>`;
       }
 
@@ -723,9 +719,8 @@ function renderOverview() {
     // Status col
     const corrCount = serie.tage.filter(t => corrections[`${serie.filiale}|${serie.artikel}|${t.datum_iso}`] !== undefined).length;
     let statusCls, statusTxt;
-    if (corrCount > 0) { statusCls='s-kor'; statusTxt=`✏ ${corrCount} Kor.`; }
+    if (corrCount > 0)                  { statusCls='s-kor'; statusTxt=`✏ ${corrCount} Kor.`; }
     else if (serie.flag==='auffaellig') { statusCls='s-auf'; statusTxt='⚠ Auffällig'; }
-    else if (serie.flag==='unsicher')   { statusCls='s-uns'; statusTxt='❓ Unsicher'; }
     else                                { statusCls='s-ok';  statusTxt='✓ OK'; }
     html += `<td class="ov-status ${statusCls}">${statusTxt}</td>`;
 
