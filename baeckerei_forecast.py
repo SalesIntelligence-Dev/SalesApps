@@ -373,9 +373,16 @@ def run_forecast(
         lower = max(0, round(pred - 1.5 * sigma))
         upper = round(pred + 1.5 * sigma)
 
-        naive_date = fc_date - timedelta(days=7)
-        naive_row  = working[working["datum"] == naive_date]
-        naive_val  = int(naive_row["menge"].values[-1]) if len(naive_row) > 0 else round(lag_7)
+        # Naive immer aus echten CSV-Daten – nicht aus Gap-Fill-Schätzungen,
+        # da sonst Modell mit sich selbst verglichen wird (Diff ≈ 0, kein Flag).
+        naive_date    = fc_date - timedelta(days=7)
+        naive_actual  = series[series["datum"] == naive_date]
+        if len(naive_actual) > 0:
+            naive_val = int(naive_actual["menge"].values[-1])
+        else:
+            # Gap-Fill-Woche: 14 Tage zurück (gleicher Wochentag, echte Daten)
+            naive_actual2 = series[series["datum"] == naive_date - timedelta(days=7)]
+            naive_val = int(naive_actual2["menge"].values[-1]) if len(naive_actual2) > 0 else round(lag_7)
 
         feiertag_name = NRW_HOLIDAY_NAMES.get(fc_date, "") if is_feiertag else ""
         day_flag      = _flag(pred_int, naive_val, lower, upper)
