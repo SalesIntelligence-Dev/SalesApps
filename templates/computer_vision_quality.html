@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PerceptIQ – Industrial Anomaly Detection</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  [x-cloak]{display:none!important}
+  .sidebar-item{@apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-700/60 hover:text-white transition-all cursor-pointer text-sm font-medium;}
+  .sidebar-item.active{@apply bg-sky-600/30 text-sky-300 border border-sky-600/40;}
+  .card{@apply bg-white rounded-xl shadow-sm border border-slate-200 p-5;}
+  .btn-primary{@apply inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium rounded-lg transition-colors;}
+  .btn-secondary{@apply inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-colors;}
+  .btn-danger{@apply inline-flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 text-sm font-medium rounded-lg transition-colors;}
+  .badge-ok{@apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700;}
+  .badge-nok{@apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700;}
+  .badge-info{@apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-700;}
+  .badge-warn{@apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700;}
+  .kpi-card{@apply card flex flex-col gap-1;}
+  .input-field{@apply w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent;}
+  .label-field{@apply block text-sm font-medium text-slate-700 mb-1;}
+  .progress-bar{@apply h-2 bg-sky-500 rounded-full transition-all duration-300;}
+  .spinner{display:inline-block;width:1.25rem;height:1.25rem;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .drop-zone{@apply border-2 border-dashed border-slate-300 rounded-xl p-10 text-center cursor-pointer hover:border-sky-400 hover:bg-sky-50/40 transition-all;}
+  .drop-zone.dragging{@apply border-sky-500 bg-sky-50;}
+  body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;}
+</style>
+</head>
+<body x-data="cvApp()" x-cloak>
+
+<!-- Toast notifications -->
+<div class="fixed top-4 right-4 z-50 flex flex-col gap-2" style="min-width:280px">
+  <template x-for="n in notifications" :key="n.id">
+    <div x-show="n.visible" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-end="opacity-0 translate-x-8"
+      :class="{'bg-green-600':n.type==='success','bg-red-600':n.type==='error','bg-sky-600':n.type==='info','bg-amber-500':n.type==='warning'}"
+      class="text-white text-sm px-4 py-3 rounded-xl shadow-lg flex items-start gap-3">
+      <span x-text="n.type==='success'?'✓':n.type==='error'?'✕':'ℹ'" class="font-bold mt-0.5 shrink-0"></span>
+      <span x-text="n.msg" class="flex-1"></span>
+      <button @click="n.visible=false" class="opacity-70 hover:opacity-100 shrink-0">✕</button>
+    </div>
+  </template>
+</div>
+
+<!-- Layout -->
+<div class="flex h-screen overflow-hidden">
+
+  <!-- Sidebar -->
+  <aside class="w-60 bg-slate-900 flex flex-col shrink-0 overflow-y-auto">
+    <!-- Logo -->
+    <div class="px-5 py-5 border-b border-slate-700/50">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 bg-sky-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">PQ</div>
+        <div>
+          <div class="text-white font-semibold text-sm">PerceptIQ</div>
+          <div class="text-slate-400 text-xs">Visual Quality AI</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 px-3 py-4 flex flex-col gap-0.5">
+      <div class="text-slate-500 text-xs font-semibold uppercase tracking-wider px-4 mb-2">Overview</div>
+      <div class="sidebar-item" :class="{active:page==='dashboard'}" @click="navigate('dashboard')">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="2"/></svg>
+        Dashboard
+      </div>
+      <div class="sidebar-item" :class="{active:page==='projects'}" @click="navigate('projects')">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+        Projects
+        <span x-show="projects.length" x-text="projects.length" class="ml-auto bg-slate-700 text-slate-300 text-xs px-1.5 py-0.5 rounded-full"></span>
+      </div>
+
+      <div class="text-slate-500 text-xs font-semibold uppercase tracking-wider px-4 mt-4 mb-2">Data & Training</div>
+      <div class="sidebar-item" :class="{active:page==='dataset'}" @click="navigate('dataset')">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4 16l4-4 4 4 4-8 4 4"/></svg>
+        Dataset
+      </div>
+      <div class="sidebar-item" :class="{active:page==='annotation'}" @click="navigate('annotation')">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l6.536-6.536a2 2 0 112.828 2.828L11.828 13.828A2 2 0 0111 14H9v-2a2 2 0 01.172-.768z"/></svg>
+        Annotation
+      </div>
+      <div class="sidebar-item" :class="{active:page==='training'}" @click="navigate('training')">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        Training
+      </div>
+
+      <div class="text-slate-500 text-xs font-semibold uppercase tracking-wider px-4 mt-4 mb-2">Models</div>
+      <div class="sidebar-item" :class="{active:page==='models'}" @click="navigate('models')">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18"/></svg>
+        Models
+      </div>
+      <div class="sidebar-item" :class="{active:page==='test'}" @click="navigate('test')">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke-width="2"/><path stroke-width="2" d="M21 21l-4.35-4.35"/></svg>
+        Single Image Test
+      </div>
+      <div class="sidebar-item" :class="{active:page==='foundad'}" @click="navigate('foundad')">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Foundation AI
+      </div>
+
+      <div class="text-slate-500 text-xs font-semibold uppercase tracking-wider px-4 mt-4 mb-2">Insights</div>
+      <div class="sidebar-item" :class="{active:page==='monitoring'}" @click="navigate('monitoring')">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Monitoring
+        <span x-show="alerts.filter(a=>!a.read).length" x-text="alerts.filter(a=>!a.read).length" class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full"></span>
+      </div>
+      <div class="sidebar-item" :class="{active:page==='reports'}" @click="navigate('reports')">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0120 9.414V19a2 2 0 01-2 2z"/></svg>
+        Reports
+      </div>
+    </nav>
+
+    <!-- Bottom: demo button -->
+    <div class="px-3 py-4 border-t border-slate-700/50">
+      <button @click="startDemo()" :disabled="demoRunning"
+        class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-sm font-semibold rounded-lg transition-all disabled:opacity-60">
+        <span x-show="!demoRunning">⚡ Try Demo</span>
+        <span x-show="demoRunning" class="flex items-center gap-2"><span class="spinner"></span> Running...</span>
+      </button>
+      <div class="text-slate-500 text-xs text-center mt-2">CPU · No account needed</div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 overflow-y-auto">
+
+    <!-- ════════════════════════════════ DASHBOARD ════════════════════════ -->
+    <section x-show="page==='dashboard'" class="p-6 max-w-6xl mx-auto">
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+        <p class="text-slate-500 text-sm mt-1">Industrial AI Quality Control Overview</p>
+      </div>
+
+      <!-- KPI Row -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="kpi-card">
+          <div class="text-slate-500 text-xs font-medium uppercase tracking-wide">Projects</div>
+          <div class="text-3xl font-bold text-slate-900" x-text="projects.length"></div>
+          <div class="text-slate-400 text-xs">active inspections</div>
+        </div>
+        <div class="kpi-card">
+          <div class="text-slate-500 text-xs font-medium uppercase tracking-wide">Trained Models</div>
+          <div class="text-3xl font-bold text-slate-900" x-text="models.length"></div>
+          <div class="text-slate-400 text-xs">ready for deployment</div>
+        </div>
+        <div class="kpi-card">
+          <div class="text-slate-500 text-xs font-medium uppercase tracking-wide">Inspected Images</div>
+          <div class="text-3xl font-bold text-slate-900" x-text="stats.total ?? '–'"></div>
+          <div class="text-slate-400 text-xs">total results</div>
+        </div>
+        <div class="kpi-card">
+          <div class="text-slate-500 text-xs font-medium uppercase tracking-wide">Anomaly Rate</div>
+          <div class="text-3xl font-bold" :class="(stats.nok_rate??0)>10?'text-red-600':(stats.nok_rate??0)>5?'text-amber-600':'text-green-600'" x-text="(stats.nok_rate??0)+'%'"></div>
+          <div class="text-slate-400 text-xs">last 7 days</div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div class="card lg:col-span-2">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-slate-800">Inspection Trend (7 days)</h3>
+            <span class="badge-info">Live</span>
+          </div>
+          <canvas id="trendChart" height="160"></canvas>
+        </div>
+        <div class="card">
+          <h3 class="font-semibold text-slate-800 mb-4">OK / NOK Split</h3>
+          <canvas id="donutChart" height="160"></canvas>
+          <div class="mt-3 flex justify-center gap-6 text-xs text-slate-600">
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span> OK <b x-text="stats.ok_rate??0"></b>%</span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> NOK <b x-text="stats.nok_rate??0"></b>%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent projects -->
+      <div class="card">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-slate-800">Recent Projects</h3>
+          <button @click="navigate('projects')" class="text-sky-600 hover:text-sky-700 text-sm font-medium">View all →</button>
+        </div>
+        <div x-show="!projects.length" class="text-slate-400 text-sm py-4 text-center">No projects yet. <button @click="startDemo()" class="text-sky-600 underline">Try the demo</button> or <button @click="showCreateProject=true;navigate('projects')" class="text-sky-600 underline">create a project</button>.</div>
+        <div class="divide-y divide-slate-100">
+          <template x-for="p in projects.slice(0,4)" :key="p.id">
+            <div class="py-3 flex items-center gap-4">
+              <div class="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400 text-sm font-bold" x-text="p.name[0]"></div>
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-slate-800 text-sm truncate" x-text="p.name"></div>
+                <div class="text-xs text-slate-400 mt-0.5" x-text="p.normal_count+' normal · '+p.defect_count+' defect images'"></div>
+              </div>
+              <div>
+                <span x-text="models.filter(m=>m.project_id===p.id).length+' models'" class="badge-info text-xs"></span>
+              </div>
+              <button @click="activeProject=p;navigate('dataset')" class="btn-secondary text-xs py-1 px-3">Open</button>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- System status -->
+      <div class="card mt-4">
+        <h3 class="font-semibold text-slate-800 mb-3">System Status</h3>
+        <div class="flex flex-wrap gap-3 text-sm">
+          <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">
+            <span :class="health.torch_available?'text-green-500':'text-amber-500'" class="text-base">●</span>
+            PyTorch <span x-text="health.torch_available?'available':'not installed'" class="font-medium"></span>
+          </span>
+          <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">
+            <span class="text-green-500 text-base">●</span>
+            Device: <span x-text="health.device||'CPU'" class="font-medium ml-1"></span>
+          </span>
+          <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">
+            <span :class="health.runpod_enabled==='true'?'text-green-500':'text-slate-400'" class="text-base">●</span>
+            RunPod GPU: <span x-text="health.runpod_enabled==='true'?'Enabled':'Not configured'" class="font-medium ml-1"></span>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════ PROJECTS ════════════════════════ -->
+    <section x-show="page==='projects'" class="p-6 max-w-5xl mx-auto">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">Projects</h1>
+          <p class="text-slate-500 text-sm mt-1">Manage your inspection projects</p>
+        </div>
+        <button @click="showCreateProject=true" class="btn-primary">+ New Project</button>
+      </div>
+
+      <!-- Create project modal -->
+      <div x-show="showCreateProject" class="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4" @click.self="showCreateProject=false">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md" @click.stop>
+          <h2 class="text-lg font-bold text-slate-900 mb-4">Create New Project</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="label-field">Project Name *</label>
+              <input x-model="newProject.name" class="input-field" placeholder="e.g. Bearing Surface Inspection">
+            </div>
+            <div>
+              <label class="label-field">Description</label>
+              <textarea x-model="newProject.description" class="input-field resize-none" rows="3" placeholder="Describe the inspection task..."></textarea>
+            </div>
+          </div>
+          <div class="flex gap-3 mt-6">
+            <button @click="createProject()" :disabled="!newProject.name.trim()" class="btn-primary flex-1 justify-center" :class="{'opacity-50':!newProject.name.trim()}">Create Project</button>
+            <button @click="showCreateProject=false" class="btn-secondary flex-1 justify-center">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project list -->
+      <div x-show="!projects.length" class="card text-center py-16">
+        <div class="text-5xl mb-4">🏭</div>
+        <h3 class="font-semibold text-slate-700 mb-2">No projects yet</h3>
+        <p class="text-slate-400 text-sm mb-4">Create a project to start training anomaly detection models.</p>
+        <button @click="startDemo()" class="btn-primary mx-auto">⚡ Try Demo First</button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <template x-for="p in projects" :key="p.id">
+          <div class="card hover:shadow-md transition-shadow cursor-pointer" @click="activeProject=p;navigate('dataset')">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-indigo-500 rounded-xl flex items-center justify-center text-white font-bold text-lg" x-text="p.name[0]"></div>
+                <div>
+                  <div class="font-semibold text-slate-800" x-text="p.name"></div>
+                  <div class="text-xs text-slate-400" x-text="new Date(p.created_at*1000).toLocaleDateString()"></div>
+                </div>
+              </div>
+              <span :class="p.status==='active'?'badge-ok':'badge-warn'" x-text="p.status"></span>
+            </div>
+            <p class="text-slate-500 text-sm mb-3 line-clamp-2" x-text="p.description||'No description'"></p>
+            <div class="flex gap-4 text-xs text-slate-500 border-t border-slate-100 pt-3">
+              <span>🟢 <b x-text="p.normal_count"></b> normal</span>
+              <span>🔴 <b x-text="p.defect_count"></b> defect</span>
+              <span>🤖 <b x-text="models.filter(m=>m.project_id===p.id).length"></b> models</span>
+            </div>
+          </div>
+        </template>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════ DATASET ════════════════════════ -->
+    <section x-show="page==='dataset'" class="p-6 max-w-4xl mx-auto">
+      <div class="mb-6">
+        <div class="flex items-center gap-2 text-sm text-slate-500 mb-2">
+          <button @click="navigate('projects')" class="hover:text-sky-600">Projects</button>
+          <span>/</span>
+          <span x-text="activeProject?.name||'Select a project'" class="text-slate-800 font-medium"></span>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-900">Dataset</h1>
+        <p class="text-slate-500 text-sm mt-1">Upload and manage training images</p>
+      </div>
+
+      <div x-show="!activeProject" class="card text-center py-12">
+        <p class="text-slate-400 mb-3">No project selected.</p>
+        <button @click="navigate('projects')" class="btn-primary mx-auto">Choose a Project</button>
+      </div>
+
+      <div x-show="activeProject">
+        <!-- Stats row -->
+        <div class="grid grid-cols-3 gap-4 mb-6">
+          <div class="kpi-card text-center">
+            <div class="text-2xl font-bold text-green-600" x-text="activeProject?.normal_count??0"></div>
+            <div class="text-xs text-slate-500 font-medium">Normal Images</div>
+          </div>
+          <div class="kpi-card text-center">
+            <div class="text-2xl font-bold text-red-600" x-text="activeProject?.defect_count??0"></div>
+            <div class="text-xs text-slate-500 font-medium">Defect Images</div>
+          </div>
+          <div class="kpi-card text-center">
+            <div class="text-2xl font-bold text-slate-800" x-text="(activeProject?.image_count??0)"></div>
+            <div class="text-xs text-slate-500 font-medium">Total</div>
+          </div>
+        </div>
+
+        <!-- Upload zones -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="card">
+            <h3 class="font-semibold text-slate-800 mb-3 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>Normal Images</h3>
+            <p class="text-slate-400 text-xs mb-3">Defect-free reference images. PatchCore learns normal state from these.</p>
+            <div class="drop-zone" :class="{dragging:dragLabel==='normal'}" @dragover.prevent="dragLabel='normal'" @dragleave="dragLabel=''" @drop.prevent="handleDrop($event,'normal')" @click="$refs.normalInput.click()">
+              <div class="text-3xl mb-2">📂</div>
+              <div class="text-sm font-medium text-slate-600">Drop images or click to select</div>
+              <div class="text-xs text-slate-400 mt-1">JPG · PNG · TIFF · ZIP supported</div>
+            </div>
+            <input x-ref="normalInput" type="file" accept="image/*,.zip" multiple class="hidden" @change="uploadFiles($event.target.files,'normal')">
+            <div x-show="uploadProgress.normal>0" class="mt-3">
+              <div class="flex justify-between text-xs text-slate-500 mb-1"><span>Uploading...</span><span x-text="uploadProgress.normal+'%'"></span></div>
+              <div class="h-1.5 bg-slate-200 rounded-full"><div class="progress-bar" :style="`width:${uploadProgress.normal}%`"></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="font-semibold text-slate-800 mb-3 flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>Defect Images <span class="text-xs text-slate-400 font-normal">(optional)</span></h3>
+            <p class="text-slate-400 text-xs mb-3">Anomalous images for evaluation. Not required for PatchCore training.</p>
+            <div class="drop-zone" :class="{dragging:dragLabel==='defect'}" @dragover.prevent="dragLabel='defect'" @dragleave="dragLabel=''" @drop.prevent="handleDrop($event,'defect')" @click="$refs.defectInput.click()">
+              <div class="text-3xl mb-2">⚠️</div>
+              <div class="text-sm font-medium text-slate-600">Drop defect images here</div>
+              <div class="text-xs text-slate-400 mt-1">Used for evaluation only</div>
+            </div>
+            <input x-ref="defectInput" type="file" accept="image/*,.zip" multiple class="hidden" @change="uploadFiles($event.target.files,'defect')">
+          </div>
+        </div>
+
+        <!-- Data quality indicator -->
+        <div class="card mb-6">
+          <h3 class="font-semibold text-slate-800 mb-3">Data Quality</h3>
+          <div class="flex items-center gap-4 mb-3">
+            <div class="text-3xl font-bold" :class="dataQualityScore>=80?'text-green-600':dataQualityScore>=60?'text-amber-600':'text-red-600'" x-text="dataQualityScore+' / 100'"></div>
+            <div class="flex-1">
+              <div class="h-2 bg-slate-200 rounded-full overflow-hidden">
+                <div class="h-2 rounded-full transition-all" :class="dataQualityScore>=80?'bg-green-500':dataQualityScore>=60?'bg-amber-500':'bg-red-500'" :style="`width:${dataQualityScore}%`"></div>
+              </div>
+            </div>
+          </div>
+          <div class="text-xs text-slate-400 italic">Heuristic quality indicators — not a formal metric</div>
+          <div class="mt-2 space-y-1">
+            <div x-show="(activeProject?.normal_count??0)<5" class="flex items-center gap-2 text-sm text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
+              ⚠️ Upload at least 5 normal images for reliable training
+            </div>
+            <div x-show="(activeProject?.normal_count??0)>=5" class="flex items-center gap-2 text-sm text-green-700 bg-green-50 rounded-lg px-3 py-2">
+              ✓ Normal image count looks good
+            </div>
+            <div x-show="(activeProject?.defect_count??0)===0" class="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 rounded-lg px-3 py-2">
+              ℹ️ No defect images — evaluation metrics won't include defect samples
+            </div>
+          </div>
+        </div>
+
+        <!-- Train button -->
+        <div class="flex gap-3">
+          <button @click="navigate('training')" :disabled="(activeProject?.normal_count??0)<1" class="btn-primary" :class="{'opacity-50':(activeProject?.normal_count??0)<1}">
+            🚀 Train Model
+          </button>
+          <button @click="navigate('annotation')" class="btn-secondary">✏️ Annotate Images</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════ ANNOTATION ════════════════════════ -->
+    <section x-show="page==='annotation'" class="p-6 max-w-5xl mx-auto">
+      <h1 class="text-2xl font-bold text-slate-900 mb-1">Annotation Editor</h1>
+      <p class="text-slate-500 text-sm mb-6">Label images and draw defect regions for ground truth generation</p>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Toolbox -->
+        <div class="card">
+          <h3 class="font-semibold text-slate-800 mb-3">Tools</h3>
+          <div class="space-y-1.5">
+            <template x-for="tool in annotationTools" :key="tool.id">
+              <button @click="activeTool=tool.id" :class="activeTool===tool.id?'bg-sky-50 border-sky-400 text-sky-700':'border-slate-200 text-slate-600 hover:bg-slate-50'" class="w-full flex items-center gap-2 px-3 py-2 border rounded-lg text-sm font-medium transition-colors">
+                <span x-text="tool.icon"></span><span x-text="tool.name"></span>
+              </button>
+            </template>
+          </div>
+          <div class="mt-4 space-y-3">
+            <div>
+              <label class="label-field">Label</label>
+              <select x-model="annotationLabel" class="input-field">
+                <option value="normal">Normal</option>
+                <option value="defect">Defect</option>
+                <option value="scratch">Scratch</option>
+                <option value="dent">Dent</option>
+                <option value="crack">Crack</option>
+              </select>
+            </div>
+            <div>
+              <label class="label-field">Brush Size</label>
+              <input type="range" x-model="brushSize" min="2" max="40" class="w-full accent-sky-600">
+            </div>
+          </div>
+          <div class="mt-4 flex flex-col gap-2">
+            <button @click="annotationUndo()" class="btn-secondary text-xs justify-center py-1.5">↩ Undo</button>
+            <button @click="annotationClear()" class="btn-danger text-xs justify-center py-1.5">🗑 Clear</button>
+            <button @click="annotationSave()" class="btn-primary text-xs justify-center py-1.5">💾 Save Annotation</button>
+          </div>
+        </div>
+        <!-- Canvas -->
+        <div class="lg:col-span-2 card p-3">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-medium text-slate-700">Canvas — Upload an image to annotate</span>
+            <label class="btn-secondary text-xs cursor-pointer py-1.5">
+              📷 Load Image<input type="file" accept="image/*" class="hidden" @change="loadAnnotationImage($event)">
+            </label>
+          </div>
+          <canvas id="annotationCanvas" class="w-full rounded-lg bg-slate-100 border border-slate-200 cursor-crosshair" height="400"
+            @mousedown="canvasMouseDown($event)" @mousemove="canvasMouseMove($event)" @mouseup="canvasMouseUp($event)">
+          </canvas>
+          <div class="mt-2 text-xs text-slate-400 text-center" x-text="canvasMsg"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════ TRAINING ════════════════════════ -->
+    <section x-show="page==='training'" class="p-6 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold text-slate-900 mb-1">Training</h1>
+      <p class="text-slate-500 text-sm mb-6">Configure and start model training</p>
+
+      <!-- Active jobs -->
+      <div class="card mb-4" x-show="Object.values(activeJobs).length>0">
+        <h3 class="font-semibold text-slate-800 mb-3">Active Jobs</h3>
+        <div class="space-y-3">
+          <template x-for="job in Object.values(activeJobs)" :key="job.id">
+            <div class="border border-slate-200 rounded-xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-medium text-sm text-slate-800" x-text="job.model_name"></span>
+                <span :class="{'badge-info':job.status==='running'||job.status==='preparing','badge-ok':job.status==='completed','badge-nok':job.status==='failed','badge-warn':job.status==='queued'}" x-text="job.status"></span>
+              </div>
+              <div class="h-2 bg-slate-100 rounded-full mb-2"><div class="progress-bar" :style="`width:${job.progress}%`"></div></div>
+              <div class="text-xs text-slate-500" x-text="job.log?.slice(-1)[0]||'Waiting...'"></div>
+              <div x-show="job.status==='completed' && job.model_id" class="mt-2">
+                <button @click="navigate('test')" class="btn-primary text-xs py-1.5">→ Test Model</button>
+              </div>
+              <div x-show="job.error" class="mt-2 text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2" x-text="job.error"></div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Training wizard -->
+      <div class="card">
+        <h3 class="font-semibold text-slate-800 mb-4">New Training Job</h3>
+
+        <div class="space-y-5">
+          <!-- Project select -->
+          <div>
+            <label class="label-field">Project</label>
+            <select x-model="trainForm.project_id" class="input-field">
+              <option value="">Select project...</option>
+              <template x-for="p in projects" :key="p.id">
+                <option :value="p.id" x-text="p.name"></option>
+              </template>
+            </select>
+          </div>
+
+          <!-- Algorithm tabs -->
+          <div>
+            <label class="label-field">Algorithm</label>
+            <div class="flex gap-2">
+              <button @click="trainForm.algorithm='patchcore'" :class="trainForm.algorithm==='patchcore'?'btn-primary':'btn-secondary'" class="flex-1 justify-center text-sm py-2">PatchCore <span class="badge-ok ml-1 text-xs">CPU</span></button>
+              <button @click="trainForm.algorithm='foundad'" :class="trainForm.algorithm==='foundad'?'btn-primary':'btn-secondary'" class="flex-1 justify-center text-sm py-2">Foundation AI <span class="badge-warn ml-1 text-xs">GPU+</span></button>
+            </div>
+          </div>
+
+          <!-- PatchCore params -->
+          <div x-show="trainForm.algorithm==='patchcore'">
+            <div class="flex items-center justify-between mb-2">
+              <label class="label-field">Parameters</label>
+              <button @click="trainForm.expert=!trainForm.expert" class="text-xs text-sky-600 hover:text-sky-700" x-text="trainForm.expert?'Simple Mode':'Expert Mode'"></button>
+            </div>
+            <div x-show="!trainForm.expert" class="bg-slate-50 rounded-xl p-4 text-sm text-slate-600">
+              <p>🤖 PatchCore with default settings will be used.</p>
+              <p class="mt-1 text-xs text-slate-400">Backbone: ResNet-18 · Coreset: 10% · k-NN: 9 · Size: 224px</p>
+              <p class="mt-2 text-xs text-slate-500">The model extracts features from your normal images and builds a reference representation of the defect-free state. No GPU needed.</p>
+            </div>
+            <div x-show="trainForm.expert" class="grid grid-cols-2 gap-4 bg-slate-50 rounded-xl p-4">
+              <div>
+                <label class="label-field text-xs">Backbone</label>
+                <select x-model="trainForm.backbone" class="input-field text-sm">
+                  <option value="resnet18">ResNet-18 (fast)</option>
+                  <option value="wide_resnet50_2">WideResNet-50 (accurate)</option>
+                </select>
+              </div>
+              <div>
+                <label class="label-field text-xs">Image Size</label>
+                <select x-model="trainForm.input_size" class="input-field text-sm">
+                  <option value="224">224 px (default)</option>
+                  <option value="256">256 px</option>
+                  <option value="320">320 px</option>
+                </select>
+              </div>
+              <div>
+                <label class="label-field text-xs">Coreset Ratio</label>
+                <select x-model="trainForm.coreset_ratio" class="input-field text-sm">
+                  <option value="0.05">5% (fastest)</option>
+                  <option value="0.1">10% (default)</option>
+                  <option value="0.25">25% (accurate)</option>
+                </select>
+              </div>
+              <div>
+                <label class="label-field text-xs">k-Neighbors</label>
+                <input type="number" x-model="trainForm.k_neighbors" min="1" max="50" class="input-field text-sm">
+              </div>
+            </div>
+          </div>
+
+          <!-- FoundAD params -->
+          <div x-show="trainForm.algorithm==='foundad'" class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-amber-600 font-semibold text-sm">⚡ Foundation AI – Few-Shot Anomaly Detection</span>
+            </div>
+            <p class="text-xs text-amber-700 mb-3">Uses DINOv2 ViT-B/14 foundation encoder. Full training requires GPU (RunPod). A reduced 100-step version runs on CPU (~15-30 min).</p>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="label-field text-xs">Few-shot Count</label>
+                <select x-model="trainForm.n_shot" class="input-field text-sm">
+                  <option value="1">1-shot</option>
+                  <option value="2">2-shot</option>
+                  <option value="4" selected>4-shot (default)</option>
+                  <option value="8">8-shot</option>
+                </select>
+              </div>
+              <div>
+                <label class="label-field text-xs">Training Steps</label>
+                <select x-model="trainForm.steps" class="input-field text-sm">
+                  <option value="100">100 (CPU-OK)</option>
+                  <option value="200">200 (slow on CPU)</option>
+                  <option value="1000">1000 (GPU recommended)</option>
+                </select>
+              </div>
+            </div>
+            <p class="text-xs text-amber-600 mt-2">ℹ️ Few-shot means even 1–4 reference images can be sufficient for detection.</p>
+          </div>
+
+          <!-- Start button -->
+          <button @click="startTraining()" :disabled="!trainForm.project_id" class="btn-primary w-full justify-center py-3 text-base" :class="{'opacity-50':!trainForm.project_id}">
+            🚀 Start Training
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════ MODELS ════════════════════════ -->
+    <section x-show="page==='models'" class="p-6 max-w-5xl mx-auto">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">Models</h1>
+          <p class="text-slate-500 text-sm mt-1">Trained anomaly detection models</p>
+        </div>
+        <button @click="navigate('training')" class="btn-primary">+ Train New</button>
+      </div>
+      <div x-show="!models.length" class="card text-center py-12 text-slate-400">
+        No models trained yet. <button @click="startDemo()" class="text-sky-600 underline">Try the demo</button>.
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <template x-for="m in models" :key="m.id">
+          <div class="card hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <div class="font-semibold text-slate-800" x-text="m.name"></div>
+                <div class="text-xs text-slate-400 mt-0.5" x-text="m.algorithm+' · '+m.backbone+' · v'+m.version"></div>
+              </div>
+              <span :class="m.status==='deployed'?'badge-ok':m.status==='ready'?'badge-info':'badge-warn'" x-text="m.status"></span>
+            </div>
+            <!-- Metrics -->
+            <div class="grid grid-cols-3 gap-2 bg-slate-50 rounded-lg p-3 mb-3 text-center">
+              <div>
+                <div class="text-sm font-bold text-slate-800" x-text="m.metrics?.image_auroc??(m.metrics?.train_images?'–':'–')"></div>
+                <div class="text-xs text-slate-400">AUROC</div>
+              </div>
+              <div>
+                <div class="text-sm font-bold text-slate-800" x-text="m.metrics?.f1??'–'"></div>
+                <div class="text-xs text-slate-400">F1</div>
+              </div>
+              <div>
+                <div class="text-sm font-bold text-slate-800" x-text="m.threshold"></div>
+                <div class="text-xs text-slate-400">Threshold</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+              <span class="px-2 py-0.5 rounded bg-slate-100" x-text="m.device"></span>
+              <span x-text="new Date(m.created_at*1000).toLocaleDateString()"></span>
+            </div>
+            <div class="flex gap-2">
+              <button @click="selectedModel=m;navigate('test')" class="btn-primary text-xs py-1.5 flex-1 justify-center">🔍 Test</button>
+              <button @click="deployModel(m)" x-show="m.status!=='deployed'" class="btn-secondary text-xs py-1.5 flex-1 justify-center">🚀 Deploy</button>
+              <span x-show="m.status==='deployed'" class="badge-ok text-xs flex-1 justify-center flex items-center">✓ Deployed</span>
+            </div>
+          </div>
+        </template>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════ TEST ════════════════════════ -->
+    <section x-show="page==='test'" class="p-6 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold text-slate-900 mb-1">Single Image Inspection</h1>
+      <p class="text-slate-500 text-sm mb-6">Upload a test image to get an anomaly prediction</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Input -->
+        <div class="space-y-4">
+          <div class="card">
+            <h3 class="font-semibold text-slate-800 mb-3">Select Model</h3>
+            <div x-show="!models.length" class="text-slate-400 text-sm">No models available. <button @click="startDemo()" class="text-sky-600 underline">Train a demo model</button>.</div>
+            <div class="space-y-2">
+              <template x-for="m in models" :key="m.id">
+                <div @click="selectedModel=m" :class="selectedModel?.id===m.id?'border-sky-500 bg-sky-50':'border-slate-200 hover:border-slate-300'" class="flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all">
+                  <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold" :class="m.algorithm==='PatchCore'?'bg-sky-600':'bg-indigo-600'" x-text="m.algorithm==='PatchCore'?'PC':'FA'"></div>
+                  <div class="flex-1 min-w-0">
+                    <div class="font-medium text-sm text-slate-800 truncate" x-text="m.name"></div>
+                    <div class="text-xs text-slate-400" x-text="m.algorithm+' · '+m.device"></div>
+                  </div>
+                  <div x-show="selectedModel?.id===m.id" class="text-sky-600">✓</div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="font-semibold text-slate-800 mb-3">Upload Test Image</h3>
+            <div class="drop-zone" :class="{dragging:dragTest}" @dragover.prevent="dragTest=true" @dragleave="dragTest=false" @drop.prevent="handleTestDrop($event)" @click="$refs.testInput.click()">
+              <div x-show="!testImagePreview" class="text-center">
+                <div class="text-3xl mb-2">🖼️</div>
+                <div class="text-sm font-medium text-slate-600">Drop test image here</div>
+                <div class="text-xs text-slate-400 mt-1">JPG · PNG · TIFF</div>
+              </div>
+              <img x-show="testImagePreview" :src="testImagePreview" class="max-h-48 mx-auto rounded-lg object-contain">
+            </div>
+            <input x-ref="testInput" type="file" accept="image/*" class="hidden" @change="handleTestFile($event)">
+            <button @click="runInference()" :disabled="!selectedModel || !testFile || inferenceLoading"
+              class="btn-primary w-full justify-center py-3 mt-3 text-base" :class="{'opacity-50':!selectedModel||!testFile}">
+              <span x-show="inferenceLoading" class="spinner"></span>
+              <span x-show="!inferenceLoading">🔍 Run Inspection</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div class="card" :class="inferenceResult?'':'flex items-center justify-center min-h-64'">
+          <div x-show="!inferenceResult && !inferenceLoading" class="text-center text-slate-400">
+            <div class="text-4xl mb-3">🔍</div>
+            <div class="text-sm">Prediction result will appear here</div>
+          </div>
+          <div x-show="inferenceLoading && !inferenceResult" class="text-center">
+            <div class="spinner mx-auto mb-3" style="width:2rem;height:2rem;border-color:rgba(14,165,233,0.3);border-top-color:#0ea5e9"></div>
+            <div class="text-sm text-slate-500">Running inference...</div>
+          </div>
+          <div x-show="inferenceResult" class="w-full">
+            <!-- Decision banner -->
+            <div :class="inferenceResult?.decision==='anomalous'?'bg-red-500':'bg-green-500'" class="rounded-xl p-4 text-white text-center mb-4">
+              <div class="text-3xl font-bold" x-text="inferenceResult?.decision==='anomalous'?'⚠ ANOMALOUS':'✓ NORMAL'"></div>
+              <div class="text-sm opacity-90 mt-1">Anomaly Score: <b x-text="inferenceResult?.anomaly_score"></b> · Threshold: <b x-text="inferenceResult?.threshold"></b></div>
+            </div>
+            <!-- Images row -->
+            <div class="grid grid-cols-2 gap-2 mb-4">
+              <div>
+                <div class="text-xs font-medium text-slate-500 mb-1 text-center">Original</div>
+                <img :src="testImagePreview" class="w-full rounded-lg object-contain max-h-36 bg-slate-100">
+              </div>
+              <div>
+                <div class="text-xs font-medium text-slate-500 mb-1 text-center">Anomaly Overlay</div>
+                <div x-show="inferenceResult?.overlay_b64">
+                  <img :src="'data:image/png;base64,'+inferenceResult?.overlay_b64" class="w-full rounded-lg object-contain max-h-36">
+                </div>
+                <div x-show="!inferenceResult?.overlay_b64" class="w-full h-36 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 text-xs">Heatmap not available</div>
+              </div>
+            </div>
+            <!-- Explainability note -->
+            <div x-show="inferenceResult?.decision==='anomalous'" class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700 mb-3">
+              🔍 The strongest anomaly signal is visible in the colored regions of the overlay. Red/warm areas indicate the highest anomaly scores.
+            </div>
+            <!-- Metadata -->
+            <div class="grid grid-cols-2 gap-2 text-xs text-slate-600">
+              <span class="bg-slate-50 rounded-lg px-3 py-2">⏱ <b x-text="inferenceResult?.inference_ms"></b> ms</span>
+              <span class="bg-slate-50 rounded-lg px-3 py-2">💻 <b x-text="inferenceResult?.device"></b></span>
+              <span class="bg-slate-50 rounded-lg px-3 py-2">🤖 <b x-text="inferenceResult?.model||inferenceResult?.algorithm||'–'"></b></span>
+              <span x-show="inferenceResult?.simulated" class="bg-amber-50 rounded-lg px-3 py-2 text-amber-600 col-span-2">⚠ Demo simulation – train with real images for actual predictions</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════ FOUNDATION AI ════════════════════════ -->
+    <section x-show="page==='foundad'" class="p-6 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold text-slate-900 mb-1">Foundation AI Anomaly Detection</h1>
+      <p class="text-slate-500 text-sm mb-2">Few-shot anomaly detection with frozen foundation visual encoders</p>
+      <div class="badge-info mb-6">Based on: Foundation Visual Encoders Are Secretly Few-Shot Anomaly Detectors (TU Munich)</div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        <div class="card border-indigo-200 bg-gradient-to-br from-indigo-50 to-slate-50">
+          <h3 class="font-semibold text-indigo-800 mb-2">How It Works</h3>
+          <ul class="text-sm text-slate-600 space-y-2">
+            <li>1️⃣ Select 1–8 normal reference images</li>
+            <li>2️⃣ DINOv2 ViT-B/14 extracts rich patch-level features</li>
+            <li>3️⃣ A lightweight manifold projector is trained on these features</li>
+            <li>4️⃣ At test time, reconstruction error reveals anomalies</li>
+          </ul>
+          <div class="mt-3 text-xs text-slate-400">No task-specific pre-training needed · Works across many defect types</div>
+        </div>
+        <div class="card" x-data="{info:null}" x-init="fetch('/cv/api/foundad/info').then(r=>r.json()).then(d=>info=d)">
+          <h3 class="font-semibold text-slate-800 mb-3">GPU Status</h3>
+          <div x-show="info">
+            <div class="space-y-2 text-sm">
+              <div class="flex items-center gap-2">
+                <span :class="info?.gpu_available?'text-green-500':'text-slate-400'" class="text-lg">●</span>
+                <span>Local GPU: <b x-text="info?.gpu_available?'Available':'Not available'"></b></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span :class="info?.runpod_configured?'text-green-500':'text-slate-400'" class="text-lg">●</span>
+                <span>RunPod: <b x-text="info?.runpod_configured?'Configured':'Not configured'"></b></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span :class="info?.device_recommendation?.can_run?'text-green-500':'text-amber-500'" class="text-lg">●</span>
+                <span x-text="info?.device_recommendation?.device||'Unknown'"></span>
+              </div>
+            </div>
+            <div x-show="info?.device_recommendation?.warning" class="mt-3 text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2" x-text="info?.device_recommendation?.warning"></div>
+            <div x-show="!info?.runpod_configured && !info?.gpu_available" class="mt-3 text-xs text-slate-500">
+              Set RUNPOD_API_KEY + RUNPOD_ENDPOINT_ID in environment to enable GPU training.
+            </div>
+          </div>
+          <div x-show="!info" class="text-slate-400 text-sm animate-pulse">Loading...</div>
+        </div>
+      </div>
+
+      <!-- FoundAD training form -->
+      <div class="card">
+        <h3 class="font-semibold text-slate-800 mb-4">Start Foundation AI Training</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="label-field">Project (must have normal images uploaded)</label>
+            <select x-model="trainForm.project_id" class="input-field">
+              <option value="">Select project...</option>
+              <template x-for="p in projects" :key="p.id">
+                <option :value="p.id" x-text="p.name+'  ('+p.normal_count+' normal images)'"></option>
+              </template>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="label-field">Few-shot Count</label>
+              <select x-model="trainForm.n_shot" class="input-field">
+                <option value="1">1-shot</option>
+                <option value="2">2-shot</option>
+                <option value="4">4-shot (recommended)</option>
+                <option value="8">8-shot</option>
+              </select>
+            </div>
+            <div>
+              <label class="label-field">Training Steps</label>
+              <select x-model="trainForm.steps" class="input-field">
+                <option value="100">100 (CPU-compatible)</option>
+                <option value="200">200 (slow CPU / fast GPU)</option>
+                <option value="1000">1000 (GPU recommended)</option>
+              </select>
+            </div>
+          </div>
+          <button @click="trainForm.algorithm='foundad';startTraining()" :disabled="!trainForm.project_id" class="btn-primary w-full justify-center py-3" :class="{'opacity-50':!trainForm.project_id}">
+            ⚡ Start Foundation AI Training
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════ MONITORING ════════════════════════ -->
+    <section x-show="page==='monitoring'" class="p-6 max-w-5xl mx-auto">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">Production Monitoring</h1>
+          <p class="text-slate-500 text-sm mt-1">Real-time quality inspection insights</p>
+        </div>
+        <button @click="refreshStats()" class="btn-secondary text-sm">↻ Refresh</button>
+      </div>
+
+      <!-- KPI row -->
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+        <div class="kpi-card text-center col-span-1"><div class="text-2xl font-bold text-slate-900" x-text="stats.total??0"></div><div class="text-xs text-slate-500 mt-0.5">Total Inspected</div></div>
+        <div class="kpi-card text-center"><div class="text-2xl font-bold text-green-600" x-text="stats.ok??0"></div><div class="text-xs text-slate-500 mt-0.5">OK</div></div>
+        <div class="kpi-card text-center"><div class="text-2xl font-bold text-red-600" x-text="stats.nok??0"></div><div class="text-xs text-slate-500 mt-0.5">NOK</div></div>
+        <div class="kpi-card text-center"><div class="text-2xl font-bold" :class="(stats.nok_rate??0)>10?'text-red-600':'text-green-600'" x-text="(stats.nok_rate??0)+'%'"></div><div class="text-xs text-slate-500 mt-0.5">Anomaly Rate</div></div>
+        <div class="kpi-card text-center"><div class="text-2xl font-bold text-slate-800" x-text="stats.avg_latency_ms??'–'"></div><div class="text-xs text-slate-500 mt-0.5">Avg Latency ms</div></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        <div class="card">
+          <h3 class="font-semibold text-slate-800 mb-3">NOK Rate Trend</h3>
+          <canvas id="monitoringChart" height="150"></canvas>
+        </div>
+        <div class="card">
+          <h3 class="font-semibold text-slate-800 mb-3">Score Distribution</h3>
+          <canvas id="scoreChart" height="150"></canvas>
+        </div>
+      </div>
+
+      <!-- Recent inspections table -->
+      <div class="card mb-4">
+        <h3 class="font-semibold text-slate-800 mb-3">Recent Inspections</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr class="border-b border-slate-100 text-xs text-slate-400 uppercase tracking-wide">
+              <th class="text-left py-2">Time</th><th class="text-left py-2">Score</th>
+              <th class="text-left py-2">Decision</th><th class="text-left py-2">Latency</th><th class="text-left py-2">Device</th>
+            </tr></thead>
+            <tbody>
+              <template x-for="r in recentResults.slice(0,15)" :key="r.id">
+                <tr class="border-b border-slate-50 hover:bg-slate-50">
+                  <td class="py-2 text-slate-500 text-xs" x-text="new Date(r.created_at*1000).toLocaleTimeString()"></td>
+                  <td class="py-2"><span :class="r.anomaly_score>r.threshold?'text-red-600':'text-green-600'" class="font-medium" x-text="r.anomaly_score"></span></td>
+                  <td class="py-2"><span :class="r.decision==='anomalous'?'badge-nok':'badge-ok'" x-text="r.decision"></span></td>
+                  <td class="py-2 text-slate-500" x-text="r.inference_ms+' ms'"></td>
+                  <td class="py-2 text-slate-500 text-xs" x-text="r.device"></td>
+                </tr>
+              </template>
+              <tr x-show="!recentResults.length"><td colspan="5" class="text-center py-6 text-slate-400 text-sm">No inspection results yet. Run the demo or test an image.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Alerts -->
+      <div class="card">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-slate-800">Alerts</h3>
+          <span class="badge-warn text-xs" x-text="alerts.filter(a=>!a.read).length+' unread'"></span>
+        </div>
+        <div class="space-y-2">
+          <template x-for="a in alerts.slice().reverse().slice(0,5)" :key="a.id">
+            <div :class="a.level==='warning'?'bg-amber-50 border-amber-200':'bg-red-50 border-red-200'" class="flex items-start gap-3 border rounded-lg px-3 py-2.5">
+              <span class="text-sm" x-text="a.level==='warning'?'⚠':'🔴'"></span>
+              <div class="flex-1 text-sm" x-text="a.message"></div>
+              <span class="text-xs text-slate-400" x-text="new Date(a.timestamp*1000).toLocaleTimeString()"></span>
+            </div>
+          </template>
+          <div x-show="!alerts.length" class="text-slate-400 text-sm text-center py-4">No alerts. System operating normally.</div>
+        </div>
+
+        <!-- Alert rules (simulated) -->
+        <div class="mt-4 border-t border-slate-100 pt-4">
+          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Alert Rules</div>
+          <div class="space-y-2 text-sm text-slate-600">
+            <div class="flex items-center justify-between bg-slate-50 rounded-lg px-3 py-2">
+              <span>NOK rate > 20%</span><span class="badge-ok text-xs">Active</span>
+            </div>
+            <div class="flex items-center justify-between bg-slate-50 rounded-lg px-3 py-2">
+              <span>Anomaly score > 0.85</span><span class="badge-ok text-xs">Active</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 mt-2">MVP: email/webhook alerts coming in a future release.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════ REPORTS ════════════════════════ -->
+    <section x-show="page==='reports'" class="p-6 max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold text-slate-900 mb-1">Reports</h1>
+      <p class="text-slate-500 text-sm mb-6">Export inspection data and analysis</p>
+      <div class="card">
+        <h3 class="font-semibold text-slate-800 mb-4">Export Report</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="label-field">Project (optional)</label>
+            <select x-model="reportProjectId" class="input-field">
+              <option value="">All Projects</option>
+              <template x-for="p in projects" :key="p.id">
+                <option :value="p.id" x-text="p.name"></option>
+              </template>
+            </select>
+          </div>
+          <div class="grid grid-cols-3 gap-3 bg-slate-50 rounded-xl p-4 text-center text-sm">
+            <div><div class="text-xl font-bold text-slate-800" x-text="stats.total??0"></div><div class="text-xs text-slate-400">Images</div></div>
+            <div><div class="text-xl font-bold text-green-600" x-text="(stats.ok_rate??0)+'%'"></div><div class="text-xs text-slate-400">OK Rate</div></div>
+            <div><div class="text-xl font-bold text-red-600" x-text="(stats.nok_rate??0)+'%'"></div><div class="text-xs text-slate-400">NOK Rate</div></div>
+          </div>
+          <a :href="'/cv/api/reports/export'+(reportProjectId?'?project_id='+reportProjectId:'')" class="btn-primary inline-flex" download>⬇ Export CSV</a>
+          <div class="text-xs text-slate-400">PDF export: planned for next release (MVP)</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+function cvApp() {
+  return {
+    page: 'dashboard',
+    projects: [],
+    models: [],
+    activeProject: null,
+    selectedModel: null,
+    stats: {},
+    recentResults: [],
+    alerts: [],
+    health: {},
+    notifications: [],
+    activeJobs: {},
+    jobPollInterval: null,
+    trendChart: null,
+    donutChart: null,
+    monitoringChart: null,
+    scoreChart: null,
+    // upload
+    dragLabel: '',
+    uploadProgress: {normal:0, defect:0},
+    // test
+    testFile: null,
+    testImagePreview: null,
+    dragTest: false,
+    inferenceResult: null,
+    inferenceLoading: false,
+    // demo
+    demoRunning: false,
+    demoJobId: null,
+    // training form
+    trainForm: {
+      project_id: '', algorithm: 'patchcore', backbone: 'resnet18',
+      coreset_ratio: 0.1, k_neighbors: 9, input_size: 224,
+      expert: false, n_shot: 4, steps: 200
+    },
+    newProject: {name:'', description:''},
+    showCreateProject: false,
+    // annotation
+    activeTool: 'brush',
+    annotationLabel: 'defect',
+    brushSize: 8,
+    canvasDrawing: false,
+    canvasCtx: null,
+    canvasHistory: [],
+    canvasMsg: 'Load an image to begin annotation',
+    annotationTools: [
+      {id:'brush', icon:'🖌', name:'Brush'},
+      {id:'rect', icon:'⬜', name:'Rectangle'},
+      {id:'eraser', icon:'🧹', name:'Eraser'},
+    ],
+    // reports
+    reportProjectId: '',
+
+    async init() {
+      await Promise.all([this.loadProjects(), this.loadModels(), this.refreshStats(), this.loadAlerts(), this.checkHealth()]);
+      this.$nextTick(() => { this.initCharts(); });
+    },
+
+    navigate(p) {
+      this.page = p;
+      this.$nextTick(() => { this.initCharts(); });
+    },
+
+    notify(msg, type='info') {
+      const n = {id: Date.now(), msg, type, visible:true};
+      this.notifications.push(n);
+      setTimeout(() => { n.visible = false; }, 4500);
+    },
+
+    async checkHealth() {
+      try { this.health = await fetch('/cv/api/health').then(r=>r.json()); } catch(e) {}
+    },
+
+    async loadProjects() {
+      try { this.projects = await fetch('/cv/api/projects').then(r=>r.json()); } catch(e) {}
+    },
+
+    async loadModels() {
+      try { this.models = await fetch('/cv/api/models').then(r=>r.json()); } catch(e) {}
+    },
+
+    async refreshStats() {
+      try {
+        this.stats = await fetch('/cv/api/monitoring/stats').then(r=>r.json());
+        this.recentResults = await fetch('/cv/api/monitoring/results?limit=20').then(r=>r.json());
+        this.$nextTick(() => this.initCharts());
+      } catch(e) {}
+    },
+
+    async loadAlerts() {
+      try { this.alerts = await fetch('/cv/api/alerts').then(r=>r.json()); } catch(e) {}
+    },
+
+    get dataQualityScore() {
+      if (!this.activeProject) return 0;
+      let s = 50;
+      if (this.activeProject.normal_count >= 5) s += 20;
+      if (this.activeProject.normal_count >= 20) s += 15;
+      if (this.activeProject.defect_count > 0) s += 15;
+      return Math.min(s, 100);
+    },
+
+    async createProject() {
+      if (!this.newProject.name.trim()) return;
+      try {
+        const p = await fetch('/cv/api/projects', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(this.newProject)
+        }).then(r=>r.json());
+        if (p.error) { this.notify(p.error, 'error'); return; }
+        this.projects.unshift(p);
+        this.activeProject = p;
+        this.showCreateProject = false;
+        this.newProject = {name:'', description:''};
+        this.notify('Project "'+p.name+'" created', 'success');
+        this.navigate('dataset');
+      } catch(e) { this.notify('Failed to create project', 'error'); }
+    },
+
+    async uploadFiles(files, label) {
+      if (!this.activeProject) { this.notify('Select a project first', 'warning'); return; }
+      const fd = new FormData();
+      for (const f of files) fd.append('images', f);
+      fd.append('label', label);
+      this.uploadProgress[label] = 10;
+      try {
+        const r = await fetch(`/cv/api/projects/${this.activeProject.id}/upload`, {method:'POST', body:fd}).then(r=>r.json());
+        this.uploadProgress[label] = 100;
+        setTimeout(() => { this.uploadProgress[label]=0; }, 1500);
+        if (r.error) { this.notify(r.error, 'error'); return; }
+        this.notify(`Uploaded ${r.saved} ${label} image(s)`, 'success');
+        // Refresh project
+        const updated = await fetch(`/cv/api/projects/${this.activeProject.id}`).then(r=>r.json());
+        this.activeProject = updated;
+        this.projects = this.projects.map(p => p.id===updated.id ? updated : p);
+      } catch(e) { this.notify('Upload failed', 'error'); this.uploadProgress[label]=0; }
+    },
+
+    handleDrop(e, label) {
+      this.dragLabel = '';
+      this.uploadFiles(e.dataTransfer.files, label);
+    },
+
+    async startTraining() {
+      if (!this.trainForm.project_id) { this.notify('Select a project', 'warning'); return; }
+      try {
+        const body = {...this.trainForm};
+        const r = await fetch(`/cv/api/projects/${this.trainForm.project_id}/train`, {
+          method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+        }).then(r=>r.json());
+        if (r.error) { this.notify(r.error, 'error'); return; }
+        this.activeJobs[r.id] = r;
+        this.notify('Training started! Job: '+r.id, 'success');
+        this.navigate('training');
+        this.pollJob(r.id);
+      } catch(e) { this.notify('Failed to start training: '+e, 'error'); }
+    },
+
+    pollJob(jobId) {
+      const interval = setInterval(async () => {
+        try {
+          const job = await fetch(`/cv/api/jobs/${jobId}`).then(r=>r.json());
+          this.activeJobs[jobId] = job;
+          if (job.status === 'completed') {
+            clearInterval(interval);
+            this.notify('Training complete! Model ready.', 'success');
+            await this.loadModels();
+            delete this.activeJobs[jobId];
+          } else if (job.status === 'failed') {
+            clearInterval(interval);
+            this.notify('Training failed: '+(job.error||'Unknown error'), 'error');
+          }
+        } catch(e) { clearInterval(interval); }
+      }, 2000);
+    },
+
+    async startDemo() {
+      this.demoRunning = true;
+      try {
+        const r = await fetch('/cv/api/demo/start', {method:'POST'}).then(r=>r.json());
+        this.notify('Demo started! Training with synthetic images...', 'info');
+        await this.loadProjects();
+        const p = this.projects.find(x=>x.id===r.project_id);
+        if (p) { this.activeProject = p; this.trainForm.project_id = p.id; }
+        this.activeJobs[r.job_id] = {id:r.job_id, status:'queued', progress:0, model_name:'Demo-PatchCore-v1', log:[]};
+        this.navigate('training');
+        const interval = setInterval(async () => {
+          try {
+            const job = await fetch(`/cv/api/jobs/${r.job_id}`).then(x=>x.json());
+            this.activeJobs[r.job_id] = job;
+            if (job.status === 'completed') {
+              clearInterval(interval);
+              this.demoRunning = false;
+              this.notify('🎉 Demo trained! Try the Single Image Test.', 'success');
+              await Promise.all([this.loadModels(), this.loadProjects(), this.refreshStats()]);
+              delete this.activeJobs[r.job_id];
+              this.navigate('test');
+            } else if (job.status === 'failed') {
+              clearInterval(interval);
+              this.demoRunning = false;
+              this.notify('Demo failed: '+(job.error||'Check if torch is installed'), 'error');
+              delete this.activeJobs[r.job_id];
+            }
+          } catch(e) { clearInterval(interval); this.demoRunning=false; }
+        }, 2500);
+      } catch(e) { this.demoRunning = false; this.notify('Demo failed to start', 'error'); }
+    },
+
+    handleTestFile(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      this.testFile = f;
+      const reader = new FileReader();
+      reader.onload = ev => { this.testImagePreview = ev.target.result; };
+      reader.readAsDataURL(f);
+      this.inferenceResult = null;
+    },
+
+    handleTestDrop(e) {
+      this.dragTest = false;
+      const f = e.dataTransfer.files[0];
+      if (!f) return;
+      this.testFile = f;
+      const reader = new FileReader();
+      reader.onload = ev => { this.testImagePreview = ev.target.result; };
+      reader.readAsDataURL(f);
+      this.inferenceResult = null;
+    },
+
+    async runInference() {
+      if (!this.selectedModel || !this.testFile) return;
+      this.inferenceLoading = true;
+      this.inferenceResult = null;
+      try {
+        const fd = new FormData();
+        fd.append('image', this.testFile);
+        fd.append('model_id', this.selectedModel.id);
+        const r = await fetch('/cv/api/inference', {method:'POST', body:fd}).then(r=>r.json());
+        if (r.error) { this.notify(r.error, 'error'); return; }
+        this.inferenceResult = r;
+        await this.refreshStats();
+        await this.loadAlerts();
+      } catch(e) { this.notify('Inference failed', 'error'); }
+      finally { this.inferenceLoading = false; }
+    },
+
+    async deployModel(m) {
+      try {
+        await fetch(`/cv/api/models/${m.id}/deploy`, {method:'POST'});
+        m.status = 'deployed';
+        this.notify('Model deployed', 'success');
+      } catch(e) {}
+    },
+
+    // ── Annotation canvas ─────────────────────────────────────────────────
+    loadAnnotationImage(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.getElementById('annotationCanvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          this.canvasCtx = canvas.getContext('2d');
+          this.canvasCtx.drawImage(img, 0, 0);
+          this.canvasHistory = [this.canvasCtx.getImageData(0,0,canvas.width,canvas.height)];
+          this.canvasMsg = `Image loaded: ${img.width}×${img.height}px`;
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(f);
+    },
+
+    canvasMouseDown(e) {
+      if (!this.canvasCtx) return;
+      this.canvasDrawing = true;
+      const {x, y} = this._canvasPos(e);
+      if (this.activeTool === 'brush' || this.activeTool === 'eraser') {
+        this.canvasCtx.beginPath();
+        this.canvasCtx.arc(x, y, this.brushSize/2, 0, Math.PI*2);
+        this.canvasCtx.fillStyle = this.activeTool==='eraser' ? '#ffffff' : (this.annotationLabel==='defect'?'rgba(239,68,68,0.6)':'rgba(34,197,94,0.6)');
+        this.canvasCtx.fill();
+      }
+      if (this.activeTool === 'rect') { this._rectStart = {x,y}; }
+    },
+
+    canvasMouseMove(e) {
+      if (!this.canvasDrawing || !this.canvasCtx) return;
+      const {x, y} = this._canvasPos(e);
+      if (this.activeTool === 'brush' || this.activeTool === 'eraser') {
+        this.canvasCtx.beginPath();
+        this.canvasCtx.arc(x, y, this.brushSize/2, 0, Math.PI*2);
+        this.canvasCtx.fillStyle = this.activeTool==='eraser' ? '#ffffff' : (this.annotationLabel==='defect'?'rgba(239,68,68,0.6)':'rgba(34,197,94,0.6)');
+        this.canvasCtx.fill();
+      }
+    },
+
+    canvasMouseUp(e) {
+      if (!this.canvasCtx) return;
+      if (this.activeTool === 'rect' && this._rectStart) {
+        const {x, y} = this._canvasPos(e);
+        const s = this._rectStart;
+        this.canvasCtx.strokeStyle = this.annotationLabel==='defect'?'rgba(239,68,68,0.9)':'rgba(34,197,94,0.9)';
+        this.canvasCtx.lineWidth = 2;
+        this.canvasCtx.strokeRect(s.x, s.y, x-s.x, y-s.y);
+        this.canvasCtx.fillStyle = this.annotationLabel==='defect'?'rgba(239,68,68,0.15)':'rgba(34,197,94,0.15)';
+        this.canvasCtx.fillRect(s.x, s.y, x-s.x, y-s.y);
+        this._rectStart = null;
+      }
+      this.canvasDrawing = false;
+      const canvas = document.getElementById('annotationCanvas');
+      this.canvasHistory.push(this.canvasCtx.getImageData(0,0,canvas.width,canvas.height));
+      if (this.canvasHistory.length > 20) this.canvasHistory.shift();
+    },
+
+    _canvasPos(e) {
+      const canvas = document.getElementById('annotationCanvas');
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return {x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY};
+    },
+
+    annotationUndo() {
+      if (this.canvasHistory.length < 2) return;
+      this.canvasHistory.pop();
+      const canvas = document.getElementById('annotationCanvas');
+      if (this.canvasCtx && this.canvasHistory.length)
+        this.canvasCtx.putImageData(this.canvasHistory[this.canvasHistory.length-1], 0, 0);
+    },
+
+    annotationClear() {
+      const canvas = document.getElementById('annotationCanvas');
+      if (this.canvasCtx && this.canvasHistory.length)
+        this.canvasCtx.putImageData(this.canvasHistory[0], 0, 0);
+      this.canvasHistory = this.canvasHistory.slice(0,1);
+    },
+
+    annotationSave() {
+      this.notify('Annotation saved (in-memory)', 'success');
+      this.canvasMsg = 'Annotation saved ✓';
+    },
+
+    // ── Charts ─────────────────────────────────────────────────────────────
+    initCharts() {
+      if (this.page === 'dashboard') {
+        this._initTrendChart();
+        this._initDonutChart();
+      }
+      if (this.page === 'monitoring') {
+        this._initMonitoringChart();
+        this._initScoreChart();
+      }
+    },
+
+    _initTrendChart() {
+      const canvas = document.getElementById('trendChart');
+      if (!canvas) return;
+      const trend = this.stats.trend || [];
+      const labels = trend.map(t => { const d=new Date(); d.setDate(d.getDate()-6+t.day); return d.toLocaleDateString('de',{month:'short',day:'numeric'}); });
+      if (this.trendChart) this.trendChart.destroy();
+      this.trendChart = new Chart(canvas, {
+        type:'bar',
+        data:{
+          labels,
+          datasets:[
+            {label:'OK',data:trend.map(t=>t.ok),backgroundColor:'rgba(34,197,94,0.7)',borderRadius:4},
+            {label:'NOK',data:trend.map(t=>t.nok),backgroundColor:'rgba(239,68,68,0.7)',borderRadius:4},
+          ]
+        },
+        options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}}}
+      });
+    },
+
+    _initDonutChart() {
+      const canvas = document.getElementById('donutChart');
+      if (!canvas) return;
+      if (this.donutChart) this.donutChart.destroy();
+      const ok = this.stats.ok||0, nok=this.stats.nok||0;
+      this.donutChart = new Chart(canvas, {
+        type:'doughnut',
+        data:{labels:['OK','NOK'],datasets:[{data:[ok||1,nok||0],backgroundColor:['rgba(34,197,94,0.8)','rgba(239,68,68,0.8)'],borderWidth:0}]},
+        options:{responsive:true,plugins:{legend:{display:false}},cutout:'70%'}
+      });
+    },
+
+    _initMonitoringChart() {
+      const canvas = document.getElementById('monitoringChart');
+      if (!canvas) return;
+      const trend = this.stats.trend || [];
+      const labels = trend.map(t => { const d=new Date(); d.setDate(d.getDate()-6+t.day); return d.toLocaleDateString('de',{month:'short',day:'numeric'}); });
+      if (this.monitoringChart) this.monitoringChart.destroy();
+      this.monitoringChart = new Chart(canvas, {
+        type:'line',
+        data:{
+          labels,
+          datasets:[{label:'NOK Rate %',
+            data:trend.map(t=>t.total>0?Math.round(t.nok/t.total*100):0),
+            borderColor:'rgba(239,68,68,0.9)',backgroundColor:'rgba(239,68,68,0.1)',fill:true,tension:0.3,pointRadius:3}]
+        },
+        options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:100}}}
+      });
+    },
+
+    _initScoreChart() {
+      const canvas = document.getElementById('scoreChart');
+      if (!canvas) return;
+      const scores = this.recentResults.map(r=>r.anomaly_score);
+      if (!scores.length) return;
+      // Build histogram bins
+      const bins = 10; const min=0, max=1; const size=(max-min)/bins;
+      const buckets = Array(bins).fill(0);
+      scores.forEach(s => { const i=Math.min(Math.floor((s-min)/size),bins-1); buckets[i]++; });
+      const labels = Array.from({length:bins},(_,i)=>((i*size).toFixed(1)));
+      if (this.scoreChart) this.scoreChart.destroy();
+      this.scoreChart = new Chart(canvas, {
+        type:'bar',
+        data:{labels,datasets:[{label:'Count',data:buckets,backgroundColor:'rgba(14,165,233,0.7)',borderRadius:3}]},
+        options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+      });
+    },
+  };
+}
+</script>
+</body>
+</html>

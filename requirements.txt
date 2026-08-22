@@ -1,9 +1,15 @@
-# SalesIntelligence Web App – Render Dependencies
-# Aurora läuft auf RunPod – keine lokalen ML-Pakete nötig
+# SalesIntelligence + CV Quality Web App – Render Dependencies
 
 # Web Framework
 flask>=3.0.0
 gunicorn>=22.0.0
+
+# CV Quality – Anomaly Detection (PatchCore + FoundAD)
+# NOTE: torch + torchvision are installed CPU-only in render.yaml buildCommand
+# (pip install torch==2.1.0 torchvision==0.16.0 --index-url https://download.pytorch.org/whl/cpu)
+# Do NOT add them here again to avoid re-downloading the CUDA build.
+Pillow>=10.0.0
+scikit-image>=0.22.0
 
 # RunPod API Client
 requests>=2.31.0

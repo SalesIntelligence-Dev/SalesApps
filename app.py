@@ -47,7 +47,11 @@ logger = logging.getLogger("aurora-app")
 
 # ── App ───────────────────────────────────────────────────────────────────
 app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024  # 32 MB Upload-Limit
+app.config["MAX_CONTENT_LENGTH"] = 64 * 1024 * 1024  # 64 MB Upload-Limit
+
+# ── CV Quality Blueprint (isolated – no interaction with other routes) ────
+from cv_quality import cv_bp  # noqa: E402
+app.register_blueprint(cv_bp)
 
 DATASETS_DIR = Path(__file__).parent / "datasets"
 ALLOWED_EXT  = {".csv", ".xlsx", ".xls", ".txt"}
@@ -642,13 +646,14 @@ def bk_set_correction():
 
 @app.route("/api/forecasting_model/run", methods=["POST"])
 def bk_run():
-    data        = request.get_json(force=True)
-    filiale     = data.get("filiale", "Innenstadt")
-    artikel     = data.get("artikel",  "Brötchen")
-    aktion_days = data.get("aktion_days", [False] * 7)   # [bool×7]
+    data         = request.get_json(force=True)
+    filiale      = data.get("filiale", "Innenstadt")
+    artikel      = data.get("artikel",  "Brötchen")
+    aktion_days  = data.get("aktion_days", [False] * 7)   # [bool×7]
+    client_temps = data.get("temps") or None               # {ISO-str: float} vom Browser
 
     try:
-        result = bk_forecast(filiale, artikel, aktion_days=aktion_days)
+        result = bk_forecast(filiale, artikel, aktion_days=aktion_days, client_temps=client_temps)
         return jsonify(result)
     except Exception as exc:
         logger.error("Bäckerei-Forecast Fehler: %s", exc)
