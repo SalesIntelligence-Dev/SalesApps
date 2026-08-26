@@ -287,7 +287,7 @@ def _get_model():
 
 # ── Public API ────────────────────────────────────────────────────────────
 
-_FLAG_DIFF_THRESH = 0.80   # >80 % Abweichung Modell vs. Naive → auffällig
+_FLAG_DIFF_THRESH = 0.25   # >25 % Abweichung Modell vs. Naive → auffällig
 
 
 def _flag(pred: int, naive: int, lower: int, upper: int) -> str:
@@ -302,9 +302,10 @@ def get_meta() -> dict:
 
 
 def run_forecast(
-    filiale:     str,
-    artikel:     str,
-    aktion_days: Optional[list] = None,
+    filiale:      str,
+    artikel:      str,
+    aktion_days:  Optional[list] = None,
+    client_temps: Optional[dict] = None,   # {ISO-date-str: float} vom Browser
 ) -> dict:
     """
     Rekursive 7-Tages-Prognose mit LightGBM.
@@ -356,9 +357,20 @@ def run_forecast(
     else:
         wm, wn, imp, mae_m, mae_n, bias = 0.09, 0.15, 40.0, 8.0, 13.0, 0.2
 
-    # ── Live-Temperaturen für Prognose-Woche vorab abrufen ───────────────
+    # ── Temperaturen für Prognose-Woche ─────────────────────────────────
     forecast_dates = [forecast_start + timedelta(days=h) for h in range(7)]
-    live_temps     = _fetch_live_temps(forecast_dates)
+    if client_temps:
+        # Browser hat Live-Werte direkt vom Open-Meteo API geholt
+        parsed = {pd.Timestamp(d): float(t) for d, t in client_temps.items()}
+        live_temps = {d: parsed.get(d, _synthetic_temp(d)) for d in forecast_dates}
+        # Auch den Server-Cache befüllen, damit temp_source korrekt gesetzt wird
+        global _weather_cache, _weather_ts
+        import time as _time
+        with _weather_lock:
+            _weather_cache.update(parsed)
+            _weather_ts = _time.time()
+    else:
+        live_temps = _fetch_live_temps(forecast_dates)
 
     # ── Hilfsfunktion: Feature-Vektor für einen Tag ──────────────────────
     def build_feat(fc_date: pd.Timestamp, working: pd.DataFrame,
@@ -440,9 +452,13 @@ def run_forecast(
         if len(naive_actual) > 0:
             naive_val = int(naive_actual["menge"].values[-1])
         else:
-            # Gap-Fill-Woche: 14 Tage zurück (gleicher Wochentag, echte Daten)
             naive_actual2 = series[series["datum"] == naive_date - timedelta(days=7)]
-            naive_val = int(naive_actual2["menge"].values[-1]) if len(naive_actual2) > 0 else round(lag_7)
+            if len(naive_actual2) > 0:
+                naive_val = int(naive_actual2["menge"].values[-1])
+            else:
+                # Beide Lookbacks im Gap (kein CSV-Datum) → gleicher Wochentag Vorjahr
+                naive_actual_ly = series[series["datum"] == fc_date - timedelta(days=364)]
+                naive_val = int(naive_actual_ly["menge"].values[-1]) if len(naive_actual_ly) > 0 else round(lag_7)
 
         feiertag_name = NRW_HOLIDAY_NAMES.get(fc_date, "") if is_feiertag else ""
         day_flag      = _flag(pred_int, naive_val, lower, upper)

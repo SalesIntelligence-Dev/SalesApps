@@ -461,6 +461,28 @@ let chartImportance = null;
 let aktionDays      = [false,false,false,false,false,false,false];
 let debounceTimer   = null;
 let isFirstRun      = true;
+let weatherTemps    = {};   // {YYYY-MM-DD: float} – live vom Browser geholt
+let weatherReady    = null; // Promise – wird in DOMContentLoaded gesetzt
+
+async function loadWeather() {
+  try {
+    const r = await fetch(
+      'https://api.open-meteo.com/v1/forecast?latitude=51.83&longitude=7.28' +
+      '&daily=temperature_2m_max&timezone=Europe%2FBerlin&forecast_days=16',
+      {signal: AbortSignal.timeout(6000)}
+    );
+    if (!r.ok) return;
+    const d = await r.json();
+    weatherTemps = {};
+    (d.daily?.time || []).forEach((date, i) => {
+      const t = d.daily.temperature_2m_max[i];
+      if (t !== null && t !== undefined) weatherTemps[date] = t;
+    });
+    console.log('[Weather] Live-Werte geladen:', Object.keys(weatherTemps).length, 'Tage');
+  } catch(e) {
+    console.warn('[Weather] Browser-Abruf fehlgeschlagen, Synthese-Fallback aktiv:', e.message);
+  }
+}
 
 async function loadMeta() {
   try {
@@ -495,9 +517,10 @@ async function runForecast(silent=false) {
     msgTimer = setInterval(() => { mi=(mi+1)%msgs.length; document.getElementById('loading-msg').textContent=msgs[mi]; }, 2500);
   }
   try {
+    if (weatherReady) await weatherReady;   // sicherstellen, dass Wetterdaten vorliegen
     const res = await fetch('/api/forecasting_model/run', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({filiale, artikel, aktion_days: aktionDays}),
+      body: JSON.stringify({filiale, artikel, aktion_days: aktionDays, temps: weatherTemps}),
     });
     if (msgTimer) clearInterval(msgTimer);
     if (!res.ok) { const e=await res.json(); throw new Error(e.error||'Fehler'); }
@@ -832,6 +855,7 @@ function switchTab(name) {
 // ── Init ──────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   await loadMeta();
+  weatherReady = loadWeather();   // Promise speichern — runForecast wartet darauf
 });
 </script>
 </body>
