@@ -467,7 +467,7 @@ let weatherReady    = null; // Promise – wird in DOMContentLoaded gesetzt
 async function loadWeather() {
   try {
     const r = await fetch(
-      'https://api.open-meteo.com/v1/forecast?latitude=51.83&longitude=7.28' +
+      'https://api.open-meteo.com/v1/dwd-icon?latitude=51.83&longitude=7.28' +
       '&daily=temperature_2m_max&timezone=Europe%2FBerlin&forecast_days=16',
       {signal: AbortSignal.timeout(6000)}
     );

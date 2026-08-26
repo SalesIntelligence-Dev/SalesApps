@@ -134,7 +134,10 @@ def _synthetic_temp(d: pd.Timestamp) -> float:
     return float(base + rng.normal(0, 3.0))
 
 
-# ── Live-Wetterdaten Dülmen (Open-Meteo, kein API-Key) ───────────────────
+# ── Live-Wetterdaten Dülmen (Open-Meteo / DWD-ICON, kein API-Key) ────────
+# DWD-ICON = offizielles Modell des Deutschen Wetterdienstes; dieselbe
+# Datenbasis wie wetter.de / wetteronline. Ersetzt "best_match", das ein
+# gemischtes Modell nutzt und für DE-Standorte um mehrere °C abweichen kann.
 _DULMEN_LAT  =  51.83
 _DULMEN_LON  =   7.28
 _weather_cache: dict[pd.Timestamp, float] = {}
@@ -157,7 +160,7 @@ def _fetch_live_temps(dates: list[pd.Timestamp]) -> dict[pd.Timestamp, float]:
         if _weather_ts is None or now - _weather_ts > _WEATHER_TTL:
             try:
                 resp = _requests.get(
-                    "https://api.open-meteo.com/v1/forecast",
+                    "https://api.open-meteo.com/v1/dwd-icon",
                     params={
                         "latitude":     _DULMEN_LAT,
                         "longitude":    _DULMEN_LON,
@@ -360,8 +363,12 @@ def run_forecast(
     # ── Temperaturen für Prognose-Woche ─────────────────────────────────
     forecast_dates = [forecast_start + timedelta(days=h) for h in range(7)]
     if client_temps:
-        # Browser hat Live-Werte direkt vom Open-Meteo API geholt
-        parsed = {pd.Timestamp(d): float(t) for d, t in client_temps.items()}
+        # Browser hat Live-Werte direkt vom DWD-ICON API geholt (None ignorieren)
+        parsed = {
+            pd.Timestamp(d): float(t)
+            for d, t in client_temps.items()
+            if t is not None
+        }
         live_temps = {d: parsed.get(d, _synthetic_temp(d)) for d in forecast_dates}
         # Auch den Server-Cache befüllen, damit temp_source korrekt gesetzt wird
         global _weather_cache, _weather_ts
