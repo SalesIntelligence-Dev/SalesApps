@@ -235,3 +235,28 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
 - **Fehler aus v1 behoben:** `Registry.checks()` lieferte beim zweiten Aufruf für Stufe 3 die Ampel ohne Rückblick und Euro
   (Cache vor dem Einmischen). Jetzt wird bei jedem Aufruf frisch eingemischt (Regressionstest).
 - **Tests:** 57 grün. Render: 19 Seiten 200, 230 MB.
+
+## Umsetzungsnotizen nach Prompt 5
+
+- **Deployment:** v2-Prompts 1–4 gepusht (`1f46457`), Render live; nach dem Durchklicken aller Datensätze 389 MB von 512 MB
+  auf Render (lokal 230 MB) – beobachten, bei Engpass Plan „Standard“ (Rückfrage nötig).
+- **Neu: `graph_ml/pricing.py`** (AdventureWorks, Händlerpositionen) mit Listenpreis und Standardkosten **zum Auftragsdatum**
+  (Preis- und Kostenhistorie), Rabattstaffel aus `SpecialOffer`, Stücklisten-Tiefe aus `BillOfMaterials`.
+  Training 8 Quartale ab 01/2023, Test 01.01.–29.06.2025; Peer-Merkmale eines Quartals nur aus den 365 Tagen davor
+  (Test: Zukunft verändern → Merkmale gleich). Der gewährte Rabatt ist die Entscheidung und deshalb **kein** Merkmal.
+- **Preis- & Rabattempfehlung** (erzielbarer Nettopreis in % vom Listenpreis, MAE):
+  Regel (zuletzt erzielter Artikelpreis) 1,31 Pp. · LightGBM 0,98 · LightGBM + Peer-Preise (Graph) 0,98 · **TabPFN 0,85**
+  → +35,2 % (signifikant). Graph-Signal (Peers im Gebiet, Händler-Historie, Vertriebler-Portfolio) bringt hier nichts.
+- **Preis-Leakage** (Preis > 3 Pp. unter dem erwartbaren): TabPFN markiert 170 Positionen / 89.412 € im Halbjahr
+  (Regel: 555 Positionen / 108.797 € – mehr Fehlalarme). Beispiel: „Mountain-500 Silver“ zu 12 % vom Listenpreis,
+  erwartbar 60 %; die Abverkaufsaktion (40 %) erklärt höchstens 36 %.
+- **Konfigurations- & Angebotsprüfung:** Regelprüfung (Marge mit Kosten zum Datum < 10 %), Vorhersagekraft „nicht anwendbar“:
+  492 von 11.699 Aufträgen, 4.175 Verlustpositionen, −445.655 € Deckungsbeitrag im Halbjahr; Verluste nach Sonderaktion und
+  Stücklisten-Tiefe auf der Detailseite. Graph ML erst sinnvoll, wenn Kosten im Angebot geschätzt werden müssen.
+- **Euro (realistisch, AdventureWorks = künstlich, nur im AW-Kontext):** Preisempfehlung 53.017 € · Leakage 70.270 € ·
+  Angebotsprüfung 581.018 € pro Jahr. Formeln (Lücke × Quote − Prüfungen × Kosten, × 2 Halbjahre) in Python und JS identisch;
+  „Mehrwert ggü. Regel“ bei Lücken-Use-Cases bewusst leer (mehr gefundene Lücke ≠ besser).
+- **Fehler behoben:** neue Felder wurden nie zugeordnet, weil `semantics.FIELD_ORDER` sie nicht enthielt – betraf auch
+  `account_group` aus Prompt 3 (Einkaufsgemeinschaft in WWI jetzt erkannt). Neu: Felder `list_price`, `discount`, `sales_rep`;
+  Profile neu erzeugt. Route `/backtest/<uc>` lässt jetzt auch die eigenen Rückblicke (NBA, Pricing) zu.
+- **Tests:** 60 grün. Render: 19 Seiten 200, 230 MB.

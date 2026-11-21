@@ -15,8 +15,8 @@ from .graph_mapping import _norm
 from .usecases import FIELDS
 
 # Reihenfolge zählt: spätere Felder bevorzugen Tabellen früherer Bindungen
-FIELD_ORDER = ["order_key", "event_time", "customer_key", "product_key", "quantity", "price", "cost",
-               "product_group", "product_text", "country", "doc_type", "return_link", "campaign", "response",
+FIELD_ORDER = ["order_key", "event_time", "customer_key", "product_key", "quantity", "price", "list_price", "discount", "cost",
+               "product_group", "product_text", "country", "account_group", "sales_rep", "doc_type", "return_link", "campaign", "response",
                "serial_number", "batch", "warranty_claim", "defect_code", "supplier", "bom", "usage_data"]
 
 PREFER_WITH = {"quantity": "product_key", "price": "product_key", "event_time": "order_key",

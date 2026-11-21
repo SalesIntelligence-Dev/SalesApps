@@ -37,7 +37,8 @@ BINARY_UCS = ("churn", "lead_scoring", "cross_selling", "returns_root_cause", "a
 DATASET_DATES = {"v0": ("2011-09-01", "2010-03-01", "2010-03-01"),
                  "wwi": ("2016-02-01", "2014-01-01", "2014-01-01"),
                  "aw": ("2025-03-01", "2023-06-01", "2023-06-01")}
-DATASET_OF = {"account_scoring": "wwi", "territory_coverage": "aw"}
+DATASET_OF = {"account_scoring": "wwi", "territory_coverage": "aw", "price_recommendation": "aw", "price_leakage": "aw",
+              "quote_check": "aw"}
 DATASET_NAMES = {"v0": "online_retail_ii", "wwi": "wwi", "aw": "adventureworks_data"}          # Use Cases, die auf einem anderen Datensatz gerechnet werden
 _TIME_LOCK = threading.RLock()
 

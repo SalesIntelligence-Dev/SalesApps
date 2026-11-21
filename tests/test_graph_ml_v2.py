@@ -176,5 +176,46 @@ class Prompt4Test(unittest.TestCase):
             self.assertAlmostEqual(g["g_grp_mean4"].iloc[i], Y[sib, o - 4:o].mean(1).mean(), places=6)  # ohne sich selbst
 
 
+class PricingTest(unittest.TestCase):
+    """Prompt 5: Preis- & Rabattempfehlung, Preis-Leakage, Angebotsprüfung (AdventureWorks)."""
+
+    def test_no_decision_leakage_in_features(self):
+        from graph_ml import pricing as pr
+        feats = pr.BASE_FEATS + pr.GRAPH_FEATS
+        self.assertFalse({"UnitPriceDiscount", "SpecialOfferID", "ratio", "net", "UnitPrice"} & set(feats))
+
+    def test_peer_features_from_past_only(self):
+        import pandas as pd
+
+        from graph_ml import pricing as pr
+        x = pr.base_lines()
+        Q = pd.Timestamp("2024-07-01")
+        cur = pr._features(x, Q, Q + pd.DateOffset(months=3))
+        self.assertTrue((cur["OrderDate"] >= Q).all())
+        late = x[(x["OrderDate"] >= Q) & x["store"]].copy()
+        late["ratio"] = 0.0                                       # Zukunft verändern …
+        x2 = pd.concat([x[x["OrderDate"] < Q], late])
+        cur2 = pr._features(x2, Q, Q + pd.DateOffset(months=3))
+        self.assertTrue(cur["g_peer_prod"].fillna(-1).equals(cur2["g_peer_prod"].fillna(-1)))   # … Merkmale bleiben gleich
+
+    def test_artifacts_and_business_case(self):
+        from graph_ml import business_case as bc
+        from graph_ml import evaluation as ev
+        rec = ev.load("price_recommendation")
+        self.assertEqual(rec["kind"], "regression")
+        self.assertTrue(rec["lower_is_better"])
+        maes = {e["id"]: e["metrics"]["mae"] for e in rec["engines"]}
+        self.assertLess(maes[rec["best"]], maes["rule"])
+        w = rec["whatif"]
+        e = w["engines"][rec["best"]]
+        a = bc.compute("price_leakage", w, {"rate": 40, "cost": 10, "periods": 2}, rec["best"])["annual"]
+        self.assertAlmostEqual(a, (e["leak_eur"] * 0.4 - e["n"] * 10) * 2, places=2)       # identisch zur JS-Formel
+        q = ev.load("quote_check")
+        self.assertEqual(q["vorhersagekraft"]["status"], "na")
+        self.assertGreater(q["pricing"]["check"]["orders_flag"], 0)
+        ov = bc.overview()
+        self.assertTrue(all(ov["cases"][u]["dataset"] == "adventureworks_data" for u in ("price_recommendation", "quote_check")))
+
+
 if __name__ == "__main__":
     unittest.main()

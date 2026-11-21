@@ -230,7 +230,7 @@ def api_backtest_summary():
 @graph_bp.route("/graph_ml/api/backtest/<uc>")
 def api_backtest(uc: str):
     from . import evaluation as ev
-    if uc not in ev.UC_ORDER:
+    if uc not in ev.UC_ORDER + ev.POLICY_UCS:
         return _err("Für diesen Use Case gibt es keinen Rückblick", 404)
     res = ev.load(uc)
     if not res:

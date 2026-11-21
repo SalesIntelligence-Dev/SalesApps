@@ -67,6 +67,18 @@ PARAMS: dict[str, list[dict]] = {
         {"id": "cost", "label": "Kosten je Besuch", "unit": "€", "default": 120, "min": 0, "max": 500, "step": 10, "role": "cost"},
         {"id": "margin", "label": "Ergebnisanteil", "unit": "%", "default": 100, "min": 10, "max": 100, "step": 5, "role": "fixed"},
         {"id": "periods", "label": "Besuchsrunden pro Jahr", "unit": "×", "default": 4, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
+    "price_recommendation": [
+        {"id": "rate", "label": "Anteil der Preislücke, der mit Preisempfehlung im Angebot geschlossen wird", "unit": "%", "default": 30, "min": 5, "max": 80, "step": 5, "role": "rate"},
+        {"id": "cost", "label": "Kosten je geprüftem Auftrag", "unit": "€", "default": 5, "min": 0, "max": 50, "step": 1, "role": "cost"},
+        {"id": "periods", "label": "Testzeiträume pro Jahr (Test = Halbjahr)", "unit": "×", "default": 2, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
+    "price_leakage": [
+        {"id": "rate", "label": "Anteil des Leakage, der durch Freigabeprozess vermieden wird", "unit": "%", "default": 40, "min": 5, "max": 80, "step": 5, "role": "rate"},
+        {"id": "cost", "label": "Kosten je geprüftem Auftrag", "unit": "€", "default": 10, "min": 0, "max": 50, "step": 1, "role": "cost"},
+        {"id": "periods", "label": "Testzeiträume pro Jahr (Test = Halbjahr)", "unit": "×", "default": 2, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
+    "quote_check": [
+        {"id": "rate", "label": "Anteil der Margenlücke, der in der Angebotsprüfung zurückgeholt wird", "unit": "%", "default": 25, "min": 5, "max": 80, "step": 5, "role": "rate"},
+        {"id": "cost", "label": "Kosten je geprüftem Angebot", "unit": "€", "default": 15, "min": 0, "max": 100, "step": 5, "role": "cost"},
+        {"id": "periods", "label": "Testzeiträume pro Jahr (Test = Halbjahr)", "unit": "×", "default": 2, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
     "next_best_action": [
         {"id": "periods", "label": "Kampagnen pro Jahr (eine Aktion je Kunde und Quartal)", "unit": "×", "default": 4, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
     "demand_forecast": [
@@ -84,6 +96,9 @@ STEP_LABELS = {"churn": ("Umsatz der Abwanderer", "davon in der Liste", "gerette
                "account_scoring": ("Mehrumsatz wachsender Accounts", "davon in der Liste", "gesichert (Annahme)"),
                "territory_coverage": ("Händlerumsatz im Quartal", "davon in der Besuchsliste", "Mehrumsatz (Annahme)"),
                "next_best_action": ("Wert aller Kandidaten-Aktionen", "gewählte Aktionen", "realisiert (Annahme)"),
+               "price_recommendation": ("Preislücke zum erwartbaren Preis", "geprüfte Aufträge", "geschlossen (Annahme)"),
+               "price_leakage": ("Leakage im Testzeitraum", "geprüfte Aufträge", "vermieden (Annahme)"),
+               "quote_check": ("Margenlücke unter 10 %", "geprüfte Angebote", "zurückgeholt (Annahme)"),
                "demand_forecast": ("Sicherheitsbestand", "Fehlerreduktion", "Kostensenkung")}
 FUNNEL = [
     {"id": "scan", "name": "Light-Scan", "stage": 1, "price": "kostenlos – 2.500 €", "cost": 2_500,
@@ -115,6 +130,12 @@ def compute(uc: str, w: dict, params: dict, engine: str, fx: float = FX_DEFAULT,
         return None
     scen = scen or {"rate": 1.0, "cost": 1.0}
     fx = fx if w.get("currency", "GBP") == "GBP" else 1.0
+    if w.get("kind") in ("leakage", "check"):     # Pricing: Lücke × Quote − geprüfte Aufträge × Kosten (pricing.py)
+        e = w["engines"][engine]
+        lk = e.get("leak_eur", e.get("gap_eur", 0.0))
+        gain, cost = lk * _p(params, "rate", 30) / 100 * scen["rate"], e["n"] * _p(params, "cost") * scen["cost"]
+        return {"base": lk, "caught": lk, "gain": gain, "cost": cost, "net": gain - cost,
+                "annual": (gain - cost) * _p(params, "periods", 2), "n_list": e["n"], "tp": e["n"]}
     if w.get("kind") == "policy":                # realisierter Netto-Wert der gewählten Aktionen (nba_eval)
         net = w["engines"][engine]["net"] * scen["rate"]
         return {"base": abs(net), "caught": abs(net), "gain": max(net, 0.0), "cost": 0.0, "net": net,
@@ -197,7 +218,7 @@ def use_case_case(uc: str, variant: str = "v0", fx: float = FX_DEFAULT) -> dict 
            "model": model, "model_name": next((e["meta"]["name"] for e in res["engines"] if e["id"] == model), model),
            "recommended": rec, "labels": STEP_LABELS[uc], "currency": w.get("currency"), "fx": fx,
            "dataset": res.get("dataset", "online_retail_ii")}
-    if out["dataset"] in ("wwi", "adventureworks_data"):
+    if out["dataset"] in ("wwi", "adventureworks_data"):   # künstliche Beispieldaten
         name = {"wwi": "WideWorldImporters", "adventureworks_data": "AdventureWorks"}[out["dataset"]]
         out["note"] = (f"Gerechnet auf {name} (künstliche Beispieldaten) – die Methode ist übertragbar, "
                        "die Euro-Größenordnung nicht.")
@@ -205,8 +226,10 @@ def use_case_case(uc: str, variant: str = "v0", fx: float = FX_DEFAULT) -> dict 
     for name, sc in SCENARIOS.items():
         m = compute(uc, w, params, model, fx, sc) if model else None
         r_ = compute(uc, w, params, "rule", fx, sc)
-        out["scenarios"][name] = {"model": m, "rule": r_,
-                                  "added": (m["annual"] - r_["annual"]) if m and r_ else None}
+        added = (m["annual"] - r_["annual"]) if m and r_ else None
+        if w.get("kind") in ("leakage", "check"):
+            added = None                  # mehr gefundene Lücke ≠ besser – die Regel markiert mehr Fehlalarme
+        out["scenarios"][name] = {"model": m, "rule": r_, "added": added}
     real = out["scenarios"]["realistisch"]
     out["euro"] = euro_status(real["model"]["annual"] if real["model"] else None)
     out["tornado"] = tornado(uc, w, params, model, fx) if model else []
@@ -241,7 +264,8 @@ def next_step(cases: dict, vk: dict | None = None) -> dict:
     names = {"churn": "Churn & Retention", "lead_scoring": "Neukunden-Scoring", "cross_selling": "Cross-Selling",
              "recommendation": "Produkt-Empfehlung", "returns_root_cause": "Retouren-Root-Cause",
              "demand_forecast": "Absatzprognose", "account_scoring": "Account-Scoring",
-             "territory_coverage": "Vertriebsabdeckung", "next_best_action": "Next Best Action"}
+             "territory_coverage": "Vertriebsabdeckung", "next_best_action": "Next Best Action",
+             "price_recommendation": "Preis- & Rabattempfehlung", "price_leakage": "Preis-Leakage", "quote_check": "Angebotsprüfung"}
     step = "Pilot" if stage == "pilot" else "Readiness-Sprint"
     roi_txt = str(round(roi, 1)).replace(".", ",")
     return {"stage": stage, "use_case": top, "annual": round(top_val), "year1_cost": year1, "roi": round(roi, 1),

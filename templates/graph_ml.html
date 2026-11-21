@@ -1833,6 +1833,32 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
                 <div class="text-[11px] muted mt-0.5" x-text="terrTable.note"></div>
               </div>
             </template>
+            <template x-if="['price_recommendation','price_leakage'].includes(ucOpen) && ucBt?.pricing?.examples?.length">
+              <div class="mt-3">
+                <div class="kpi-label" x-text="'Größte Preislücken im Test '+fmtDate(ucBt.pricing.test_from)+' – '+fmtDate(ucBt.pricing.test_to)+' (erwartbar laut '+(ucBt.recommendation?.name||'')+')'"></div>
+                <div class="scroll-x scroll-thin mt-1"><table class="tbl min-w-[620px] text-[12px]">
+                  <thead><tr><th>Auftrag</th><th>Artikel</th><th class="text-right">Menge</th><th>Gebiet</th><th>Sonderaktion</th><th class="text-right">erzielt</th><th class="text-right">erwartbar</th><th class="text-right">Lücke</th></tr></thead>
+                  <tbody><template x-for="e in ucBt.pricing.examples.slice(0, 8)" :key="'px'+e.order+e.product"><tr>
+                    <td class="tabular-nums" x-text="e.order"></td><td x-text="e.product"></td><td class="text-right tabular-nums" x-text="e.qty"></td>
+                    <td x-text="e.territory"></td><td class="text-[11px] sub" x-text="e.offer==='No Discount' ? '–' : e.offer"></td><td class="text-right tabular-nums" x-text="fmtPct(e.actual)"></td>
+                    <td class="text-right tabular-nums" x-text="fmtPct(e.expected)"></td><td class="text-right tabular-nums text-amber-300" x-text="fmtEur(e.eur)"></td></tr></template></tbody>
+                </table></div>
+                <div class="text-[11.5px] sub mt-1.5" x-text="'Preise in % vom Listenpreis. Eine Sonderaktion erklärt eine Lücke nur bis zu ihrem Rabatt – darüber hinaus ist sie freigabepflichtig. Leakage je Vertriebler: '+Object.entries(ucBt.pricing.leak_by_salesperson).slice(0,4).map(([k,v]) => k+' '+fmtEur(v)).join(' · ')"></div>
+              </div>
+            </template>
+            <template x-if="ucOpen==='quote_check' && ucBt?.pricing?.check">
+              <div class="mt-3">
+                <div class="kpi-label">Angebotsprüfung im Testzeitraum</div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
+                  <div class="panel-flat p-2.5"><div class="text-[10.5px] muted uppercase font-bold">Aufträge &lt; 10 %</div><div class="font-bold tabular-nums" x-text="fmtInt(ucBt.pricing.check.orders_flag)+' / '+fmtInt(ucBt.pricing.check.orders)"></div></div>
+                  <div class="panel-flat p-2.5"><div class="text-[10.5px] muted uppercase font-bold">Verlustpositionen</div><div class="font-bold tabular-nums" x-text="fmtInt(ucBt.pricing.check.lines_loss)"></div></div>
+                  <div class="panel-flat p-2.5"><div class="text-[10.5px] muted uppercase font-bold">neg. Deckungsbeitrag</div><div class="font-bold tabular-nums" x-text="fmtEur(ucBt.pricing.check.loss_eur)"></div></div>
+                  <div class="panel-flat p-2.5"><div class="text-[10.5px] muted uppercase font-bold">Lücke bis 10 %</div><div class="font-bold tabular-nums" x-text="fmtEur(ucBt.pricing.check.floor_gap_eur)"></div></div>
+                </div>
+                <div class="text-[12px] mt-2"><b>Verluste nach Sonderangebot:</b> <span class="sub" x-text="Object.entries(ucBt.pricing.check.by_offer).map(([k,v]) => k+' '+fmtEur(v)).join(' · ')"></span></div>
+                <div class="text-[12px] mt-1"><b>Anteil Verlustpositionen nach Stücklisten-Tiefe:</b> <span class="sub" x-text="Object.entries(ucBt.pricing.check.loss_share_by_bom_level).map(([k,v]) => 'Ebene '+k+': '+fmtPct(v)).join(' · ')"></span></div>
+              </div>
+            </template>
             <template x-if="ucOpen==='next_best_action' && ucBt?.policy_eval">
               <div class="mt-3">
                 <div class="kpi-label" x-text="'Policy-Rückblick am '+fmtDate(ucBt.policy_eval.T)+' · '+fmtInt(ucBt.policy_eval.customers)+' Kunden'"></div>
@@ -2637,6 +2663,10 @@ function graphReady() {
       const e = w.engines[engine];
       const p = (k, d = 0) => Number(params[k] ?? d);
       const r = k => p(k) / 100 * scen.rate, c = k => p(k) * scen.cost;
+      if (w.kind === 'leakage' || w.kind === 'check') {   // identisch zu business_case.compute (Pricing)
+        const lk = e.leak_eur ?? e.gap_eur ?? 0, gain = lk * p('rate', 30) / 100 * scen.rate, cost = e.n * p('cost') * scen.cost;
+        return { base: lk, caught: lk, gain, cost, net: gain - cost, annual: (gain - cost) * p('periods', 2), n_list: e.n, tp: e.n };
+      }
       if (w.kind === 'policy') {             // identisch zu business_case.compute (Policy-Rückblick NBA)
         const net = e.net * scen.rate;
         return { base: Math.abs(net), caught: Math.abs(net), gain: Math.max(net, 0), cost: 0, net, annual: net * p('periods', 4), n_list: 0, tp: 0 };
@@ -2942,6 +2972,10 @@ function graphReady() {
     },
     ucVerdict() {
       const rows = this.ucClassRows(); if (!rows.length) return '';
+      if (this.ucBt?.kind === 'check') {
+        return 'Angebotsprüfung ist eine Regelprüfung mit Kosten zum Auftragsdatum – kein Modell nötig. Graph ML hilft erst, wenn Kosten im Angebot fehlen ' +
+          'und über die Stückliste (Konfiguration → Bauteile → Kosten) geschätzt werden müssen.';
+      }
       if (this.ucBt?.kind === 'policy') {
         const vk = this.ucBt.vorhersagekraft || {};
         return `Die NBA-Policy mit Modell-Scores (LightGBM + Graph-Merkmale) hätte im Rückblick ${this.fmtLift(vk.lift)} mehr Netto-Wert erzielt ` +

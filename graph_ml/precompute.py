@@ -64,8 +64,10 @@ def main(argv: list[str] | None = None) -> int:
         art = act.build(log=lambda m: print(m, flush=True))
         act.build_reco_paths(log=lambda m: print(m, flush=True))
         act.build_territory_table(log=lambda m: print(m, flush=True))
-        from . import nba_eval
+        from . import nba_eval, pricing
         ev.save(nba_eval.to_result(nba_eval.evaluate(log=lambda m: print(m, flush=True))))
+        for res in pricing.to_results(pricing.evaluate(log=lambda m: print(m, flush=True))).values():
+            ev.save(res)
         for uc, L in art["lists"].items():
             print(f"    {uc:20s} {L['engine']['name']:28s} Liste {L['summary']['in_list']:5d} · "
                   f"Wert {L['summary']['ev_list']:>12,.0f} € · ECE {L['calibration']['ece_before']} → "

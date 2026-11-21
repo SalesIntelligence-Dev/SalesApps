@@ -29,7 +29,8 @@ ARTIFACTS = Path(__file__).parent / "artifacts"
 RESULT_VERSION = 1
 UC_ORDER = ["churn", "lead_scoring", "cross_selling", "recommendation", "returns_root_cause", "demand_forecast",
             "account_scoring", "territory_coverage"]
-POLICY_UCS = ["next_best_action"]          # Rückblick als Offline-Policy-Vergleich (graph_ml/nba_eval.py)
+# Eigene Rückblicke außerhalb von run_use_case: NBA-Policy (nba_eval.py) und Pricing (pricing.py)
+POLICY_UCS = ["next_best_action", "price_recommendation", "price_leakage", "quote_check"]
 NOT_MEASURABLE = {
     "margin": "Einstandspreis fehlt – kein Label, Vorhersagekraft nicht messbar.",
     "warranty_root_cause": "Seriennummer, Charge und Garantiefälle fehlen – kein Backtest möglich.",
