@@ -25,7 +25,7 @@ from collections import deque
 import numpy as np
 import pandas as pd
 
-ARTIFACT_VERSION = 3
+ARTIFACT_VERSION = 4
 
 ID_SUFFIXES = ("id", "nr", "no", "nummer", "number", "code", "key", "schluessel")
 TIME_HINTS  = ("date", "datum", "time", "zeit", "timestamp", "created", "modified")
@@ -300,6 +300,7 @@ def build_mapping(tables: dict[str, pd.DataFrame], *, dataset_id: str, extra: di
         "relations": relations,
         "paths": paths,
     }
+    mapping["derived_columns"] = list(extra.get("derived_columns", []))
     mapping["graph"] = _graph_summary(mapping)
     mapping["findings"] = _findings(mapping) + list(extra.get("findings", []))
     mapping["insights"] = _insights(mapping, extra.get("insight_hints", []))

@@ -8,7 +8,9 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from flask import Blueprint, jsonify, render_template, request
+import json
+
+from flask import Blueprint, Response, jsonify, render_template, request
 
 from .data_loader import get_registry
 from .jobs import run_selftest, store, system_info
@@ -164,3 +166,40 @@ def api_subgraph(ds_id: str):
         return jsonify(reg.customer_subgraph(cid, max_nodes=min(request.args.get("max_nodes", 150, type=int), 150)))
     except KeyError as exc:
         return _err(str(exc).strip("'"), 404)
+
+
+# ── Readiness-Checks (Modul 3) ────────────────────────────────────────────────
+
+@graph_bp.route("/graph_ml/api/checks", methods=["POST"])
+def api_checks():
+    body = request.get_json(silent=True) or {}
+    ds_id = body.get("dataset", "online_retail_ii")
+    reg = get_registry()
+    if not reg.has(ds_id):
+        return _err("Datensatz nicht gefunden", 404)
+    try:
+        stage = int(body.get("stage", 2))
+    except (TypeError, ValueError):
+        return _err("Stufe muss 1, 2 oder 3 sein")
+    use_cases = body.get("use_cases") or None
+    try:
+        return jsonify(reg.checks(ds_id, stage, use_cases))
+    except Exception as exc:
+        log.exception("Checks %s", ds_id)
+        return _err(f"Readiness-Checks fehlgeschlagen: {exc}", 500)
+
+
+@graph_bp.route("/graph_ml/api/datasets/<ds_id>/profile")
+def api_profile(ds_id: str):
+    """Kennzahlen-Profil (Stufe 2) als JSON-Download – zeigt, was beim Profilcheck das Unternehmen verlässt."""
+    reg = get_registry()
+    if not reg.has(ds_id):
+        return _err("Datensatz nicht gefunden", 404)
+    prof = reg.profile(ds_id)
+    if prof is None:
+        return _err("Für ein reines Schema gibt es kein Profil – Stufe 2 braucht Daten oder einen Profil-Export")
+    prof = {k: v for k, v in prof.items() if k not in ("source_version", "artifact_version")}
+    name = f"graphready_profil_{ds_id}.json"
+    return Response(json.dumps(prof, ensure_ascii=False, indent=1), mimetype="application/json",
+                    headers={"Content-Disposition": f'attachment; filename="{name}"'})
+

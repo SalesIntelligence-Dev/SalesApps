@@ -190,6 +190,7 @@ def main(argv: list[str] | None = None) -> int:
             reg.mapping(ds_id, refresh=True)
             if reg.get(ds_id).kind == "data":
                 reg.overview(ds_id)
+                reg.profile(ds_id)
             _log(f"Artefakte geschrieben: {ds_id}")
     return 0
 

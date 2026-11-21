@@ -105,6 +105,34 @@ body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-ser
 .pb{font-size:10.5px;font-weight:700;color:#c4b5fd;border:1px solid rgba(139,124,246,.4);border-radius:6px;padding:1px 6px;white-space:nowrap}
 .amp{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px 3px 8px;font-size:11px;font-weight:600;white-space:nowrap}
 .amp-pending{color:var(--muted);border:1px dashed var(--border2)}
+.amp-ok{color:#6ee7b7;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.42)}
+.amp-warn{color:#fcd34d;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.45)}
+.amp-bad{color:#fca5a5;background:rgba(248,113,113,.13);border:1px solid rgba(248,113,113,.48)}
+.amp-na{color:var(--muted);border:1px dashed var(--border2);background:transparent}
+.amp-prov{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.09) 0 3px,transparent 3px 7px)}
+.amp-ic{width:15px;height:15px;border-radius:999px;display:grid;place-items:center;font-size:9.5px;font-weight:900;flex:none;line-height:1}
+.amp-ok .amp-ic{background:#34d399;color:#05261a}.amp-warn .amp-ic{background:#fbbf24;color:#2b1d00}
+.amp-bad .amp-ic{background:#f87171;color:#2d0707}.amp-na .amp-ic{border:1.5px solid var(--off);color:var(--muted)}
+.amp-cell{min-width:58px;justify-content:center;cursor:pointer;transition:transform .12s}
+.amp-cell:hover{transform:translateY(-1px)}
+.amp-lg{font-size:13px;padding:5px 12px 5px 8px}
+.mx th{text-align:center}.mx th:first-child{text-align:left}
+.mx td{vertical-align:middle;text-align:center}.mx td:first-child{text-align:left}
+.mx tr.row-click{cursor:pointer}
+.mx .sticky-col{position:sticky;left:0;background:#111130;z-index:2}
+.mx th.sticky-col{z-index:3;background:#13132f}
+.core-dot{width:5px;height:5px;border-radius:99px;background:#8b7cf6;display:inline-block;margin-left:4px;vertical-align:middle}
+.drawer.drawer-wide{width:min(780px,100%)}
+.chk{border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.02);padding:12px 14px}
+.chk.focus{border-color:rgba(34,211,238,.6);box-shadow:0 0 0 1px rgba(34,211,238,.3)}
+.metric-chip{display:inline-flex;gap:6px;align-items:baseline;border-radius:8px;padding:3px 8px;background:rgba(255,255,255,.04);
+             border:1px solid var(--border);font-size:11.5px;margin:2px 4px 2px 0}
+.metric-chip b{color:var(--text);font-weight:700}
+.field-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(34,34,74,.6);font-size:12.5px}
+.banner{border-radius:14px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start;border:1px solid}
+.banner-1{border-color:rgba(251,191,36,.35);background:linear-gradient(90deg,rgba(251,191,36,.09),rgba(251,191,36,.02))}
+.banner-2{border-color:rgba(52,211,153,.35);background:linear-gradient(90deg,rgba(52,211,153,.10),rgba(52,211,153,.02))}
+.banner-3{border-color:rgba(139,124,246,.4);background:linear-gradient(90deg,rgba(139,124,246,.12),rgba(139,124,246,.02))}
 .amp-pending .ring{width:9px;height:9px;border-radius:999px;border:1.5px solid var(--off);flex:none}
 .cy{width:100%;border-radius:12px;background:radial-gradient(600px 300px at 50% 40%,rgba(139,124,246,.07),transparent 70%),#0a0a1f;
     border:1px solid var(--border)}
@@ -131,7 +159,7 @@ body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-ser
 </style>
 </head>
 
-<body x-data="graphReady()" @keydown.escape.window="systemOpen=false">
+<body x-data="graphReady()" @keydown.escape.window="systemOpen=false; closeUc()">
 <div class="bg-glow"></div><div class="grid-bg"></div>
 
 <div class="wrap min-h-screen flex flex-col">
@@ -271,13 +299,13 @@ body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-ser
             <div class="flex items-center gap-2.5">
               <span class="w-9 h-9 rounded-xl grid place-items-center text-[17px]"
                     :style="d.kind==='schema' ? 'background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.35)' : 'background:rgba(139,124,246,.14);border:1px solid rgba(139,124,246,.4)'"
-                    x-text="d.kind==='schema' ? '🗂️' : (d.builtin ? '🛒' : '📄')"></span>
+                    x-text="d.kind==='schema' ? '🗂️' : d.kind==='profile' ? '📊' : (d.builtin ? '🛒' : '📄')"></span>
               <div>
                 <div class="font-semibold text-[14px]" x-text="d.name"></div>
                 <div class="text-[11px] sub" x-text="d.source"></div>
               </div>
             </div>
-            <span class="chip !py-0.5" x-text="d.kind==='schema' ? 'nur Schema' : 'Daten'"></span>
+            <span class="chip !py-0.5" x-text="d.kind==='schema' ? 'nur Schema' : d.kind==='profile' ? 'Profil' : 'Daten'"></span>
           </div>
           <p class="text-[12px] sub mt-3 line-clamp-2" x-text="d.description"></p>
           <div class="flex items-center justify-between mt-3 text-[11.5px]">
@@ -300,7 +328,7 @@ body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-ser
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a0a8bf" stroke-width="2" stroke-linecap="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>
             </div>
             <div class="font-semibold text-[13.5px] mt-2">Eigene Daten hochladen</div>
-            <div class="text-[11.5px] sub mt-1">CSV, XLSX, Parquet – je Datei eine Tabelle<br>oder Schema (JSON / CSV „tabelle,spalte,typ“)</div>
+            <div class="text-[11.5px] sub mt-1">CSV, XLSX, Parquet – je Datei eine Tabelle<br>Schema (JSON / CSV „tabelle,spalte,typ“) oder Profil-JSON</div>
           </div>
         </template>
         <template x-if="upload.busy">
@@ -594,7 +622,184 @@ body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-ser
     </div>
   </section>
 
-  <!-- ═════════════════════════ SCHRITTE 3–6 · PLATZHALTER ═════════════════════════ -->
+  <!-- ═════════════════════════ SCHRITT 3 · READINESS-CHECKS ═════════════════════════ -->
+  <section x-show="step===3" x-cloak class="fade-in space-y-5">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
+      <div>
+        <div class="eyebrow">Schritt 3 · Readiness-Checks</div>
+        <h2 class="text-[22px] font-bold mt-1">Trägt die Datenlage den Use Case?</h2>
+        <p class="sub text-[13.5px] mt-1 max-w-[820px]">Neun Prüfdimensionen je Use Case – die ersten fünf (●) sind use-case-spezifisch
+          und zählen 70 %. Jede Bewertung mit Begründung und konkreter Maßnahme.</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a x-show="dataset && dataset.kind!=='schema'" :href="'/graph_ml/api/datasets/'+dsId+'/profile'" class="btn btn-ghost text-[12.5px]"
+           title="Genau diese Kennzahlen verlassen beim Profilcheck das Unternehmen">⬇ Profil (JSON)</a>
+        <label class="btn btn-ghost text-[12.5px] cursor-pointer" title="Profil aus dem lokalen Profiler hochladen">
+          <input type="file" class="hidden" accept=".json" @change="doUpload($event.target.files)">⬆ Profil hochladen
+        </label>
+      </div>
+    </div>
+
+    <!-- Stufen-Banner -->
+    <div class="banner" :class="'banner-'+(checks?.stage_used===1 ? 1 : stage===3 ? 3 : 2)" x-show="checks">
+      <span class="text-[20px] leading-none mt-0.5" x-text="checks?.stage_used===1 ? '⚠️' : stage===3 ? '⏳' : '🛡️'"></span>
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="font-semibold text-[13.5px]" x-text="'Stufe '+checks?.stage_used+' · '+(stages[(checks?.stage_used||1)-1]?.name || '')"></span>
+          <span class="chip !py-0.5" x-show="checks?.downgraded">angepasst an den Datensatz</span>
+          <span class="chip !py-0.5" x-show="checks?.stage_used===1"><span class="w-3 h-2 rounded-sm amp-prov inline-block border border-[#30305f]"></span>schraffiert = vorläufig</span>
+        </div>
+        <div class="text-[12.5px] sub mt-0.5" x-text="checks?.stage_note"></div>
+        <div class="text-[11.5px] muted mt-1" x-show="checks?.profile_meta" x-text="'Profil: '+(checks?.profile_meta?.source||'')+' · erzeugt '+fmtDateTime(checks?.profile_meta?.generated_at)"></div>
+      </div>
+      <div class="hidden sm:flex gap-1 flex-none">
+        <template x-for="sn in [1,2,3]" :key="sn">
+          <button class="tab !px-2.5" :class="{active: stage===sn}" @click="stage=sn" :disabled="sn > (checks?.max_stage_dataset||3)"
+                  :title="sn > (checks?.max_stage_dataset||3) ? 'Für diesen Datensatz nicht verfügbar' : stages[sn-1].name" x-text="'Stufe '+sn"></button>
+        </template>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3" x-show="checks">
+      <div class="kpi"><div class="kpi-label">Grün</div><div class="kpi-value text-emerald-300" x-text="checks?.counts.ok"></div><div class="kpi-sub">trägt</div></div>
+      <div class="kpi"><div class="kpi-label">Gelb</div><div class="kpi-value text-amber-300" x-text="checks?.counts.warn"></div><div class="kpi-sub">mit Maßnahmen</div></div>
+      <div class="kpi"><div class="kpi-label">Rot</div><div class="kpi-value text-red-300" x-text="checks?.counts.bad"></div><div class="kpi-sub">Daten fehlen</div></div>
+      <div class="kpi"><div class="kpi-label">Ø Datenreife</div><div class="kpi-value" x-text="checks?.avg_readiness"></div><div class="kpi-sub">von 100</div></div>
+      <template x-for="u in (checks?.use_cases||[]).filter(u => u.lighthouse)" :key="'lh'+u.id">
+        <button class="kpi text-left hover:border-[#30305f]" @click="openUc(u.id)">
+          <div class="kpi-label">★ Leuchtturm</div>
+          <div class="mt-1.5"><span class="amp amp-lg" :class="ampClass(u.readiness)"><span class="amp-ic" x-text="ampIcon(u.readiness.status)"></span><span x-text="u.readiness.score"></span></span></div>
+          <div class="kpi-sub truncate" x-text="u.name"></div>
+        </button>
+      </template>
+    </div>
+
+    <!-- Matrix -->
+    <div class="panel p-4 sm:p-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+        <div>
+          <div class="font-semibold">Readiness-Matrix</div>
+          <div class="text-[12px] sub">Zelle antippen für Begründung und Maßnahmen</div>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="flex flex-wrap gap-x-3 gap-y-1 text-[11px] sub">
+            <span class="flex items-center gap-1"><span class="amp amp-ok !px-1.5 !py-0.5"><span class="amp-ic">✓</span></span>trägt</span>
+            <span class="flex items-center gap-1"><span class="amp amp-warn !px-1.5 !py-0.5"><span class="amp-ic">!</span></span>mit Maßnahmen</span>
+            <span class="flex items-center gap-1"><span class="amp amp-bad !px-1.5 !py-0.5"><span class="amp-ic">✕</span></span>blockiert</span>
+            <span class="flex items-center gap-1"><span class="amp amp-na !px-1.5 !py-0.5"><span class="amp-ic">–</span></span>nicht prüfbar</span>
+          </div>
+          <div class="flex gap-1.5">
+            <template x-for="f in ['Alle','Sales','After Sales']" :key="'mx'+f">
+              <button class="tab focusable" :class="{active: ucFilter===f}" @click="ucFilter=f" x-text="f"></button>
+            </template>
+          </div>
+        </div>
+      </div>
+      <div x-show="checksLoading && !checks" class="space-y-2"><template x-for="i in 6"><div class="skel h-9"></div></template></div>
+      <div class="rounded-xl border border-[#22224a] overflow-hidden" x-show="checks" :class="checksLoading ? 'opacity-60' : ''">
+        <div class="scroll-x scroll-thin">
+          <table class="tbl mx min-w-[980px]">
+            <thead><tr>
+              <th class="sticky-col">Use Case</th>
+              <th>Datenreife</th>
+              <template x-for="d in (checks?.dimensions||[])" :key="'h'+d.id">
+                <th :title="d.name + (d.core ? ' – Kernprüfung' : '')"><span x-text="d.short"></span><span x-show="d.core" class="core-dot"></span></th>
+              </template>
+            </tr></thead>
+            <tbody>
+              <template x-for="u in filteredChecks()" :key="'r'+u.id">
+                <tr>
+                  <td class="sticky-col whitespace-nowrap">
+                    <button class="text-left focusable rounded" @click="openUc(u.id)">
+                      <span class="flex items-center gap-1.5"><span x-show="u.lighthouse" class="text-amber-300">★</span><span class="font-semibold" x-text="u.name"></span></span>
+                      <span class="block text-[10.5px] muted" x-text="u.area+' · max. Stufe '+u.max_stage"></span>
+                    </button>
+                  </td>
+                  <td>
+                    <button class="amp amp-lg focusable" :class="ampClass(u.readiness)" @click="openUc(u.id)" :title="u.readiness.reason">
+                      <span class="amp-ic" x-text="ampIcon(u.readiness.status)"></span><span x-text="u.readiness.score"></span>
+                      <span class="font-medium" x-text="ampText(u.readiness.status)"></span>
+                    </button>
+                  </td>
+                  <template x-for="c in u.checks" :key="u.id+c.dim">
+                    <td>
+                      <button class="amp amp-cell focusable" :class="ampClass(c)" @click="openUc(u.id, c.dim)"
+                              :title="dimName(c.dim)+': '+c.reason" :aria-label="dimName(c.dim)+' '+ampText(c.status)">
+                        <span class="amp-ic" x-text="ampIcon(c.status)"></span><span x-text="c.score ?? '–'"></span>
+                      </button>
+                    </td>
+                  </template>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="text-[11.5px] muted mt-2">● Kernprüfung (je 14 %), übrige je 7,5 %. Grün ab 75 ohne rote Kernprüfung · Rot unter 50 oder bei roter Struktur-/Label-Prüfung. „Nicht prüfbar“ zählt nicht.</p>
+    </div>
+
+    <div class="grid lg:grid-cols-12 gap-4">
+      <!-- Spalten-Ampel -->
+      <div class="panel p-4 sm:p-5 lg:col-span-7">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+          <div>
+            <div class="font-semibold">Spalten-Ampel</div>
+            <div class="text-[12px] sub" x-text="checks?.stage_used===1 ? 'Stufe 1: nur Typen und Rollen – Werte erst im Profilcheck' : 'Füllgrad, Werteprobleme und konkrete Reparaturen'"></div>
+          </div>
+          <select class="select !w-full sm:!w-64" x-show="(checks?.columns||[]).length > 6" x-model="colTable3">
+            <template x-for="t in (checks?.columns||[])" :key="'cs'+t.table"><option :value="t.table" x-text="t.table"></option></template>
+          </select>
+        </div>
+        <div class="flex gap-1.5 scroll-x scroll-thin pb-2" x-show="(checks?.columns||[]).length <= 6">
+          <template x-for="t in (checks?.columns||[])" :key="'ct'+t.table">
+            <button class="tab focusable" :class="{active: colTable3===t.table}" @click="colTable3=t.table">
+              <span x-text="t.label"></span>
+              <span class="ml-1 inline-block w-1.5 h-1.5 rounded-full align-middle" :class="tableWorst(t)==='bad' ? 'bg-red-400' : tableWorst(t)==='warn' ? 'bg-amber-300' : 'bg-emerald-400'"></span>
+            </button>
+          </template>
+        </div>
+        <div class="space-y-1.5 mt-1 max-h-[420px] scroll-y scroll-thin pr-1">
+          <template x-for="c in (colAmpelTable()?.columns||[])" :key="'cc'+c.name">
+            <div class="flex items-start gap-3 panel-flat px-3 py-2">
+              <span class="amp !px-1.5 !py-0.5 mt-0.5" :class="ampClass({status: c.status, provisional: checks?.stage_used===1})"><span class="amp-ic" x-text="ampIcon(c.status)"></span></span>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-x-2">
+                  <span class="mono font-medium text-[12.5px]" x-text="c.name"></span>
+                  <template x-for="r in c.roles"><span class="role" :class="roleClass(r)" x-text="r"></span></template>
+                  <span x-show="c.field_label" class="text-[11px] text-[#a5b4fc]" x-text="'→ '+c.field_label"></span>
+                  <span x-show="c.null_rate!=null && c.null_rate>0" class="text-[11px] sub" x-text="fmtPct(c.null_rate)+' leer'"></span>
+                </div>
+                <template x-for="i in c.issues" :key="i.text">
+                  <div class="text-[12px] sub flex items-start justify-between gap-2 mt-0.5">
+                    <span x-text="i.text"></span><span class="pb" x-show="i.playbook" x-text="i.playbook"></span>
+                  </div>
+                </template>
+                <div x-show="!c.issues.length" class="text-[11.5px] muted" x-text="c.status==='na' ? 'Werte im Strukturcheck unbekannt' : 'unauffällig'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <!-- Feldzuordnung -->
+      <div class="panel p-4 sm:p-5 lg:col-span-5">
+        <div class="font-semibold">Feldzuordnung</div>
+        <div class="text-[12px] sub mb-2">Automatisch über ERP-Synonyme erkannt (z. B. Kundennummer ~ customer_id ~ KUNNR ~ CustomerID)</div>
+        <div class="max-h-[440px] scroll-y scroll-thin pr-1">
+          <template x-for="f in bindingList()" :key="'b'+f.field">
+            <div class="field-row">
+              <span class="w-4 text-center" :class="f.binding ? 'text-emerald-300' : 'muted'" x-text="f.binding ? '✓' : '–'"></span>
+              <span class="flex-1 min-w-0" :class="f.binding ? '' : 'muted'" x-text="f.label"></span>
+              <span class="mono text-[11.5px] text-right truncate max-w-[55%]" :class="f.binding ? 'sub' : 'muted'"
+                    x-text="f.binding ? (f.binding.table+'.'+f.binding.column+(f.binding.via==='table' ? ' (Tabelle)' : '')) : 'nicht gefunden'"></span>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════════════════ SCHRITTE 4–6 · PLATZHALTER ═════════════════════════ -->
   <template x-for="s in steps.filter(s => !s.ready)" :key="'ph'+s.n">
     <section x-show="step===s.n" x-cloak class="fade-in">
       <div class="eyebrow" x-text="'Schritt '+s.n+' · '+s.name"></div>
@@ -634,7 +839,8 @@ body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-ser
       <div>
         <div class="eyebrow">Use-Case-Readiness-Ampel</div>
         <h2 class="text-[20px] font-bold mt-1">9 Vorlagen aus Sales und After Sales</h2>
-        <p class="text-[13px] sub mt-1">Drei Dimensionen je Use Case: Datenreife · Vorhersagekraft · Euro-Potenzial. Wird ab Schritt 3 befüllt.</p>
+        <p class="text-[13px] sub mt-1">Drei Dimensionen je Use Case: Datenreife · Vorhersagekraft · Euro-Potenzial.
+          <span x-show="checks" x-text="'Datenreife aus Stufe '+checks?.stage_used+' – Vorhersagekraft und Euro-Potenzial folgen mit Rückblick und Was-wäre-wenn.'"></span></p>
       </div>
       <div class="flex gap-1.5">
         <template x-for="f in ['Alle','Sales','After Sales']" :key="f">
@@ -664,17 +870,33 @@ body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-ser
                   <span x-show="!u.app_route" class="muted" x-text="u.app_name"></span>
                 </td>
                 <td class="sub min-w-[220px]"><span x-text="u.label"></span><span x-show="u.note" class="block text-[11px] muted" x-text="u.note"></span></td>
-                <td class="whitespace-nowrap"><span class="font-semibold tabular-nums" x-text="u.max_stage"></span><span class="muted"> / 3</span></td>
-                <template x-for="d in ['Datenreife','Vorhersagekraft','Euro-Potenzial','Gesamt']" :key="d">
-                  <td><span class="amp amp-pending" :title="d+' – wird in Schritt 3–4 berechnet'"><span class="ring"></span>offen</span></td>
-                </template>
+                <td class="whitespace-nowrap"><span class="font-semibold tabular-nums" x-text="ucCheck(u.id)?.max_stage ?? u.max_stage"></span><span class="muted"> / 3</span></td>
+                <td>
+                  <template x-if="ucCheck(u.id)">
+                    <button class="amp focusable" :class="ampClass(ucCheck(u.id).readiness)" @click="openUc(u.id)" :title="ucCheck(u.id).readiness.reason">
+                      <span class="amp-ic" x-text="ampIcon(ucCheck(u.id).readiness.status)"></span>
+                      <span x-text="ucCheck(u.id).readiness.score+' · '+ampText(ucCheck(u.id).readiness.status)"></span>
+                    </button>
+                  </template>
+                  <template x-if="!ucCheck(u.id)"><span class="amp amp-pending"><span class="ring"></span>offen</span></template>
+                </td>
+                <td><span class="amp amp-pending" title="Rückblick (Stufe 3) – folgt mit dem Backtest"><span class="ring"></span>Stufe 3</span></td>
+                <td><span class="amp amp-pending" title="Was-wäre-wenn – folgt mit den Fix-Playbooks"><span class="ring"></span>offen</span></td>
+                <td>
+                  <template x-if="ucCheck(u.id)">
+                    <span class="amp amp-prov" :class="ampClass(ucCheck(u.id).readiness)" title="Vorläufig: bisher ist nur die Datenreife belastbar">
+                      <span class="amp-ic" x-text="ampIcon(ucCheck(u.id).readiness.status)"></span><span>vorläufig</span>
+                    </span>
+                  </template>
+                  <template x-if="!ucCheck(u.id)"><span class="amp amp-pending"><span class="ring"></span>offen</span></template>
+                </td>
               </tr>
             </template>
           </tbody>
         </table>
       </div>
     </div>
-    <p class="text-[11.5px] muted mt-2">★ Leuchtturm-Use-Cases (wie im Konzept: Retention und Root Cause). Max. Stufe = was mit Online Retail II höchstens prüfbar ist.</p>
+    <p class="text-[11.5px] muted mt-2">★ Leuchtturm-Use-Cases (wie im Konzept: Retention und Root Cause). Max. Stufe = wie weit der Use Case mit diesem Datensatz prüfbar ist. Gesamt = schwächste belastbare Dimension.</p>
   </section>
 </main>
 
@@ -686,6 +908,125 @@ body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-ser
   </div>
 </footer>
 </div>
+
+<!-- ═════════════════════════ USE-CASE-DRAWER ═════════════════════════ -->
+<div x-show="ucOpen" x-cloak class="overlay" x-transition.opacity @click="closeUc()"></div>
+<aside x-show="ucOpen" x-cloak class="drawer drawer-wide flex flex-col" x-transition:enter="transition duration-200" x-transition:enter-start="translate-x-full"
+       x-transition:leave="transition duration-150" x-transition:leave-end="translate-x-full" role="dialog" aria-label="Use-Case-Details">
+  <template x-if="ucDetail()">
+    <div class="flex flex-col h-full">
+      <div class="flex items-start justify-between gap-3 px-5 py-4 border-b border-[#1c1c42] flex-none">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <span x-show="ucDetail().lighthouse" class="text-amber-300">★</span>
+            <span class="font-bold text-[16px]" x-text="ucDetail().name"></span>
+            <span class="chip !py-0.5" x-text="ucDetail().area"></span>
+          </div>
+          <div class="text-[12px] sub mt-1" x-text="'Stufe '+checks?.stage_used+' · max. Stufe '+ucDetail().max_stage+' · '+ucDetail().readiness.reason"></div>
+        </div>
+        <div class="flex items-center gap-2 flex-none">
+          <span class="amp amp-lg" :class="ampClass(ucDetail().readiness)"><span class="amp-ic" x-text="ampIcon(ucDetail().readiness.status)"></span>
+            <span x-text="ucDetail().readiness.score+' · '+ampText(ucDetail().readiness.status)"></span></span>
+          <button class="w-8 h-8 rounded-lg grid place-items-center hover:bg-white/10" @click="closeUc()" aria-label="Schließen">✕</button>
+        </div>
+      </div>
+      <div class="flex-1 scroll-y scroll-thin p-5 space-y-5">
+        <!-- Ampel 3 Dimensionen -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div class="panel-flat p-3"><div class="kpi-label">Datenreife</div>
+            <div class="mt-1.5"><span class="amp" :class="ampClass(ucDetail().readiness)"><span class="amp-ic" x-text="ampIcon(ucDetail().readiness.status)"></span><span x-text="ucDetail().readiness.score"></span></span></div></div>
+          <div class="panel-flat p-3"><div class="kpi-label">Vorhersagekraft</div><div class="mt-1.5"><span class="amp amp-pending"><span class="ring"></span>Stufe 3</span></div></div>
+          <div class="panel-flat p-3"><div class="kpi-label">Euro-Potenzial</div><div class="mt-1.5"><span class="amp amp-pending"><span class="ring"></span>offen</span></div></div>
+          <div class="panel-flat p-3"><div class="kpi-label">Gesamt</div>
+            <div class="mt-1.5"><span class="amp amp-prov" :class="ampClass(ucDetail().readiness)"><span class="amp-ic" x-text="ampIcon(ucDetail().readiness.status)"></span>vorläufig</span></div></div>
+        </div>
+
+        <!-- Label -->
+        <div class="panel p-4">
+          <div class="eyebrow">Vorhersageziel (Label)</div>
+          <div class="font-semibold mt-1.5" x-text="ucDetail().label"></div>
+          <div class="text-[12.5px] sub mt-1" x-text="ucDetail().label_detail"></div>
+          <div class="grid sm:grid-cols-3 gap-3 mt-3 text-[12px]">
+            <div><div class="muted text-[10.5px] uppercase tracking-wide font-bold">Regel-Baseline</div><div x-text="ucDetail().baseline"></div></div>
+            <div><div class="muted text-[10.5px] uppercase tracking-wide font-bold">Hebel</div><div x-text="ucDetail().lever"></div></div>
+            <div><div class="muted text-[10.5px] uppercase tracking-wide font-bold">Bisherige App</div>
+              <a x-show="ucDetail().app_route" :href="ucDetail().app_route" class="text-[#a5b4fc] hover:underline" x-text="ucDetail().app_name"></a>
+              <span x-show="!ucDetail().app_route" class="muted" x-text="ucDetail().app_name"></span></div>
+          </div>
+          <div class="flex flex-wrap gap-1.5 mt-3"><template x-for="b in ucDetail().blockers"><span class="chip !py-0.5">⚑ <span x-text="b"></span></span></template></div>
+        </div>
+
+        <!-- Daten -->
+        <div class="panel p-4">
+          <div class="flex items-center justify-between">
+            <div class="eyebrow">Benötigte vs. vorhandene Daten</div>
+            <span class="text-[11px] muted">rot gestrichelt = fehlt</span>
+          </div>
+          <div id="cyUc" class="cy h-[240px] mt-3"></div>
+          <div class="mt-3">
+            <template x-for="f in ucDetail().fields" :key="'f'+f.field">
+              <div class="field-row">
+                <span class="w-4 text-center font-bold" :class="f.state==='found' ? 'text-emerald-300' : f.state==='substituted' ? 'text-amber-300' : (f.importance==='optional' ? 'muted' : 'text-red-300')"
+                      x-text="f.state==='found' ? '✓' : f.state==='substituted' ? '≈' : '✕'"></span>
+                <span class="flex-1 min-w-0">
+                  <span x-text="f.label"></span>
+                  <span class="text-[10.5px] muted ml-1" x-text="f.importance"></span>
+                  <span x-show="f.state==='substituted'" class="block text-[11px] text-amber-200" x-text="'ersetzt über '+f.alt_label"></span>
+                </span>
+                <span class="mono text-[11.5px] sub text-right truncate max-w-[45%]" x-text="f.binding ? f.binding.table+'.'+f.binding.column : (f.state==='substituted' ? '' : 'fehlt')"></span>
+                <span class="pb" x-show="f.playbook && f.state!=='found'" x-text="f.playbook"></span>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Engine -->
+        <div class="panel p-4" x-show="ucDetail().engine">
+          <div class="eyebrow">Empfohlene Engine</div>
+          <div class="flex flex-wrap items-center gap-2 mt-2">
+            <span class="chip !text-[12px] !py-1" style="color:#c4b5fd;border-color:rgba(139,124,246,.5);background:rgba(139,124,246,.12)" x-text="ucDetail().engine?.primary"></span>
+            <template x-for="c in (ucDetail().engine?.challengers||[])"><span class="chip !py-1" x-text="'Herausforderer: '+c"></span></template>
+            <span class="chip !py-1" x-text="'Baseline: '+(ucDetail().engine?.baseline||'')"></span>
+          </div>
+          <div class="text-[12.5px] sub mt-2" x-text="ucDetail().engine?.reason"></div>
+        </div>
+
+        <!-- Prüfergebnisse -->
+        <div>
+          <div class="eyebrow mb-2">Prüfergebnisse</div>
+          <div class="space-y-2.5">
+            <template x-for="c in ucDetail().checks" :key="'chk'+c.dim">
+              <div class="chk" :class="{focus: ucFocusDim===c.dim}" :id="'chk-'+c.dim">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-center gap-2">
+                    <span class="amp" :class="ampClass(c)"><span class="amp-ic" x-text="ampIcon(c.status)"></span><span x-text="c.score ?? '–'"></span></span>
+                    <span class="font-semibold text-[13.5px]" x-text="dimName(c.dim)"></span>
+                    <span x-show="dimCore(c.dim)" class="core-dot" title="Kernprüfung"></span>
+                  </div>
+                  <span class="text-[10.5px] muted" x-text="c.provisional ? 'vorläufig' : ''"></span>
+                </div>
+                <div class="text-[12.5px] mt-1.5" x-text="c.reason"></div>
+                <div class="mt-1.5" x-show="c.metrics.length">
+                  <template x-for="m in c.metrics"><span class="metric-chip"><span class="sub" x-text="m.label"></span><b x-text="m.value"></b></span></template>
+                </div>
+                <template x-if="c.leakage && c.leakage.length">
+                  <div class="mt-2 text-[12px]"><div class="muted text-[10.5px] uppercase tracking-wide font-bold">Leakage-Kandidaten</div>
+                    <template x-for="l in c.leakage"><div class="flex gap-2"><span class="mono text-amber-200" x-text="l.column"></span><span class="sub" x-text="l.note"></span></div></template></div>
+                </template>
+                <template x-if="c.checklist">
+                  <div class="mt-2 text-[12px] sub grid sm:grid-cols-2 gap-x-4"><template x-for="i in c.checklist"><div>☐ <span x-text="i"></span></div></template></div>
+                </template>
+                <div class="mt-2 space-y-1" x-show="c.actions.length">
+                  <template x-for="a in c.actions"><div class="flex items-start justify-between gap-2 text-[12px]"><span>→ <span x-text="a.text"></span></span><span class="pb" x-show="a.playbook" x-text="a.playbook" :title="playbookName(a.playbook)"></span></div></template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+</aside>
 
 <!-- ═════════════════════════ SYSTEM-DRAWER ═════════════════════════ -->
 <div x-show="systemOpen" x-cloak class="overlay" x-transition.opacity @click="systemOpen=false"></div>
@@ -851,7 +1192,7 @@ function graphReady() {
     steps: [
       { n: 1, name: 'Konnektoren', sub: 'ERP · CRM · Export', ready: true },
       { n: 2, name: 'Graph-Mapping', sub: 'Schlüssel · Zeit · Kanten', ready: true },
-      { n: 3, name: 'Readiness-Checks', sub: '9 Prüfungen je Use Case', ready: false, prompt: 2, icon: '🚦',
+      { n: 3, name: 'Readiness-Checks', sub: '9 Prüfungen je Use Case', ready: true, prompt: 2, icon: '🚦',
         title: 'Trägt die Datenlage den Use Case?',
         desc: 'Neun Prüfdimensionen je Use Case ergeben einen Readiness-Score mit konkreten Maßnahmen – für Strukturcheck (Stufe 1) und Profilcheck (Stufe 2).',
         bullets: ['Use-Case-Bibliothek mit Label-Definition, Pflichttabellen und typischen Blockern', 'Struktur, Zeit & Leakage, Label & Historie, Modellwahl, Cold Start, Spaltenqualität, Freitext, Limits, Governance', 'Profil-Export für Kunden: nur Kennzahlen, keine personenbezogenen Daten', 'Ampel-Matrix mit Begründung je Prüfung'] },
@@ -876,6 +1217,11 @@ function graphReady() {
     customers: [], customerId: null, subgraph: null, subLoadedFor: null,
     cySelection: '', subSelection: '',
     loading: { ds: true, sub: false },
+    stageAuto: false, checks: null, checksLoading: false, checksSeq: 0, ucOpen: null, ucFocusDim: null, colTable3: null,
+    playbooks: { 'PB-01': 'Fehlende Kundennummern', 'PB-02': 'Stornos ohne Originalbezug', 'PB-03': 'Nicht-Artikel-Codes',
+                 'PB-04': 'Artikelstamm konsolidieren', 'PB-05': 'Freitext → Kategorien', 'PB-06': 'Dubletten entfernen',
+                 'PB-07': 'Preis 0 / negative Mengen', 'PB-08': 'Währung umrechnen', 'PB-09': 'Governance-Checkliste',
+                 'PB-10': 'Fehlende Tabellen anfordern' },
     upload: { busy: false, error: null, drag: false },
     toast: null,
 
@@ -898,6 +1244,8 @@ function graphReady() {
       this.$watch('mapping', m => { if (m) afterRender(() => this.renderStep()); });
       this.$watch('overview', o => { if (o && this.step === 1) afterRender(() => this.drawMonthly()); });
       this.$watch('subgraph', g => { if (g) afterRender(() => this.drawSubgraph()); });
+      this.$watch('stage', () => this.loadChecks());
+      this.$watch('dsId', () => this.loadChecks());
       window.addEventListener('hashchange', () => { const h = location.hash.match(/s(\d)/); if (h) this.step = Math.min(6, Math.max(1, +h[1])); });
       this.loadSystem();
       try {
@@ -945,7 +1293,11 @@ function graphReady() {
           this.customers = await this.api(`/datasets/${id}/customers`);
           this.customerId = this.customers[0]?.customer_id ?? null;
         } else { this.customers = []; }
-        if (this.dataset?.kind === 'schema') this.stage = 1;
+        const kind = this.dataset?.kind;
+        if (kind === 'schema') { if (this.stage !== 1) { this.stage = 1; this.stageAuto = true; } }
+        else if (kind === 'profile' && this.stage === 3) { this.stage = 2; }
+        else if (this.stageAuto) { this.stage = 2; this.stageAuto = false; }
+        this.loadChecks();
         this.loadPreview();
       } catch (e) { this.notify(e.message, 'bad'); }
       finally { this.loading.ds = false; }
@@ -1006,8 +1358,106 @@ function graphReady() {
     statusColor(s) { return STATUS_COLORS[s] || STATUS_COLORS.unknown; },
     roleClass(r) { return { PK: 'role-PK', FK: 'role-FK', Zeit: 'role-Zeit', Freitext: 'role-Freitext', 'Hohe Kardinalität': 'role-HK' }[r] || 'role-other'; },
 
+    // ── Readiness-Checks ──
+    async loadChecks() {
+      if (!this.dsId) return;
+      const seq = ++this.checksSeq;
+      this.checksLoading = true;
+      try {
+        const res = await this.api('/checks', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                               body: JSON.stringify({ dataset: this.dsId, stage: this.stage }) });
+        if (seq !== this.checksSeq) return;
+        this.checks = res;
+        if (!res.columns.some(t => t.table === this.colTable3)) {
+          const pick = res.columns.find(t => this.tableWorst(t) !== 'ok' && this.tableWorst(t) !== 'na') || res.columns[0];
+          this.colTable3 = pick?.table || null;
+        }
+        if (this.ucOpen) afterRender(() => this.drawUcGraph());
+      } catch (e) { if (seq === this.checksSeq) this.notify('Readiness-Checks: ' + e.message, 'bad'); }
+      finally { if (seq === this.checksSeq) this.checksLoading = false; }
+    },
+    filteredChecks() {
+      const u = this.checks?.use_cases || [];
+      return this.ucFilter === 'Alle' ? u : u.filter(x => x.area === this.ucFilter);
+    },
+    ucCheck(id) { return this.checks?.use_cases.find(u => u.id === id) || null; },
+    ucDetail() { return this.ucOpen ? this.ucCheck(this.ucOpen) : null; },
+    dimName(id) { return this.checks?.dimensions.find(d => d.id === id)?.name || id; },
+    dimCore(id) { return !!this.checks?.dimensions.find(d => d.id === id)?.core; },
+    playbookName(pb) { return pb ? pb + ' · ' + (this.playbooks[pb] || '') : ''; },
+    ampClass(c) {
+      if (!c) return 'amp-na';
+      const prov = c.provisional ?? (this.checks?.stage_used === 1);
+      return 'amp-' + (c.status || 'na') + (prov && c.status !== 'na' ? ' amp-prov' : '');
+    },
+    ampIcon(st) { return { ok: '✓', warn: '!', bad: '✕', na: '–' }[st] || '–'; },
+    ampText(st) { return { ok: 'Grün', warn: 'Gelb', bad: 'Rot', na: 'n. p.' }[st] || ''; },
+    tableWorst(t) {
+      const st = t.columns.map(c => c.status);
+      return st.includes('bad') ? 'bad' : st.includes('warn') ? 'warn' : st.every(s => s === 'na') ? 'na' : 'ok';
+    },
+    colAmpelTable() { return this.checks?.columns.find(t => t.table === this.colTable3) || this.checks?.columns[0]; },
+    bindingList() {
+      const b = this.checks?.bindings || {};
+      const labels = {};
+      (this.checks?.use_cases || []).forEach(u => u.fields.forEach(f => { labels[f.field] = f.label; }));
+      return Object.keys(labels).map(k => ({ field: k, label: labels[k], binding: b[k] }))
+        .sort((a, z) => (z.binding ? 1 : 0) - (a.binding ? 1 : 0));
+    },
+    openUc(id, dim = null) {
+      this.ucOpen = id; this.ucFocusDim = dim;
+      afterRender(() => this.drawUcGraph());
+      if (dim) setTimeout(() => document.getElementById('chk-' + dim)?.scrollIntoView({ block: 'center' }), 350);
+    },
+    closeUc() { this.ucOpen = null; this.ucFocusDim = null; if (CY.uc) { CY.uc.destroy(); CY.uc = null; } },
+    fmtDateTime(iso) { if (!iso) return '–'; const d = new Date(iso); return d.toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' }); },
+
+    drawUcGraph(attempt = 0) {
+      const u = this.ucDetail(), el = document.getElementById('cyUc');
+      if (!u) return;
+      // Drawer fährt per Transition ein – warten, bis der Container sichtbar ist
+      if (!el || el.offsetParent === null || el.offsetWidth < 50) {
+        if (attempt < 20) setTimeout(() => this.drawUcGraph(attempt + 1), 60);
+        return;
+      }
+      if (CY.uc) CY.uc.destroy();
+      const byTable = {};
+      u.fields.filter(f => f.binding).forEach(f => { (byTable[f.binding.table] ||= []).push(f.label); });
+      const tables = Object.keys(byTable);
+      const short = n => n.includes('.') ? n.split('.').pop() : (this.mapping?.tables.find(t => t.name === n)?.label || n);
+      const nodes = tables.map(t => {
+        const label = short(t) + '\n' + byTable[t].slice(0, 3).join(' · ') + (byTable[t].length > 3 ? ' …' : '');
+        const longest = Math.max(...label.split('\n').map(l => l.length));
+        return { data: { id: t, label, w: Math.round(longest * 6.1 + 22), h: 40, kind: 'have' } };
+      });
+      const missing = u.fields.filter(f => f.state === 'missing' && f.importance !== 'optional');
+      missing.forEach(f => {
+        const label = '✕ ' + f.label;
+        nodes.push({ data: { id: 'miss:' + f.field, label, w: Math.round(label.length * 6.1 + 22), h: 30, kind: 'missing' } });
+      });
+      const edges = [];
+      const rels = (this.mapping?.relations || []).filter(r => r.kind !== 'missing');
+      rels.forEach(r => { if (tables.includes(r.from_table) && tables.includes(r.to_table) && r.from_table !== r.to_table)
+        edges.push({ data: { id: 'e' + edges.length, source: r.from_table, target: r.to_table, kind: 'rel' } }); });
+      if (tables.length) missing.forEach(f => edges.push({ data: { id: 'm' + f.field, source: tables[0], target: 'miss:' + f.field, kind: 'missing' } }));
+      CY.uc = cytoscape({
+        container: el, elements: [...nodes, ...edges], minZoom: 0.3, maxZoom: 2,
+        style: [
+          { selector: 'node', style: { 'shape': 'round-rectangle', 'label': 'data(label)', 'text-wrap': 'wrap', 'font-size': 10, 'font-family': 'Inter',
+            'color': '#e7e9f3', 'text-valign': 'center', 'text-halign': 'center', 'width': 'data(w)', 'height': 'data(h)',
+            'background-color': 'rgba(52,211,153,.12)', 'border-width': 1.5, 'border-color': '#34d399' } },
+          { selector: 'node[kind = "missing"]', style: { 'background-color': 'rgba(248,113,113,.08)', 'border-color': '#f87171', 'border-style': 'dashed', 'color': '#fca5a5' } },
+          { selector: 'edge', style: { 'width': 1.6, 'line-color': '#4b5a8a', 'curve-style': 'bezier', 'target-arrow-shape': 'triangle', 'target-arrow-color': '#4b5a8a', 'arrow-scale': .7 } },
+          { selector: 'edge[kind = "missing"]', style: { 'line-style': 'dashed', 'line-color': '#f87171', 'target-arrow-color': '#f87171', 'opacity': .7 } },
+        ],
+        layout: { name: tables.length + missing.length > 2 ? 'cose' : 'grid', animate: false, padding: 16, nodeRepulsion: 9000, idealEdgeLength: 70, randomize: false },
+      });
+      guardWheel(el);
+    },
+
     cardFacts(d) {
       const f = d.facts || {};
+      if (d.kind === 'profile') return `${f.tables} Tabellen · ${this.fmtCompact(f.rows)} Zeilen (nur Kennzahlen)`;
       if (d.kind === 'schema') return `${f.tables} Tabellen · ${f.foreign_keys} FKs`;
       if (d.builtin) return `${this.fmtCompact(f.rows)} Zeilen · ${f.months} Monate`;
       return `${f.tables} Tabelle(n) · ${this.fmtCompact(f.rows)} Zeilen`;
@@ -1015,6 +1465,18 @@ function graphReady() {
     kpis() {
       const d = this.dataset; if (!d) return [];
       const f = d.facts || {};
+      if (d.kind === 'profile') {
+        const s = this.mapping?.summary || {};
+        return [
+          { label: 'Tabellen', value: this.fmtInt(f.tables) },
+          { label: 'Zeilen', value: this.fmtCompact(f.rows), sub: 'laut Profil' },
+          { label: 'Zeitraum', value: f.months ? Math.round(f.months) + ' Monate' : '–' },
+          { label: 'Ø Verknüpfung', value: this.fmtPct(s.avg_linkage) },
+          { label: 'Beziehungen', value: this.fmtInt(s.relations) },
+          { label: 'Erzeugt', value: this.fmtDate(f.generated_at) },
+          { label: 'Rohdaten', value: 'keine', sub: 'nur Kennzahlen' },
+        ];
+      }
       if (d.kind === 'schema') {
         return [
           { label: 'Tabellen', value: this.fmtInt(f.tables) },
@@ -1077,6 +1539,7 @@ function graphReady() {
     },
     previewNote() {
       const p = this.preview; if (!p) return '';
+      if (p.profile_only) return 'Das Profil enthält keine Datenzeilen – gezeigt werden Spaltenkennzahlen.';
       if (p.schema_only) return 'Nur Struktur: Ob die Felder gefüllt sind, ist in Stufe 1 unbekannt.';
       if (p.table === 'rohdaten') return `Ausschnitt aus ${this.fmtInt(p.total_rows)} Zeilen – zweite Hälfte bewusst Positionen ohne Kundennummer (∅).`;
       return `Erste ${p.rows.length} von ${this.fmtInt(p.total_rows)} Zeilen.`;

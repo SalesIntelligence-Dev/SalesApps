@@ -28,6 +28,8 @@ import pandas as pd
 
 from .graph_mapping import ARTIFACT_VERSION, build_mapping, build_schema_mapping
 
+PROFILE_KIND = "profile"
+
 log = logging.getLogger("graph_ml.data")
 
 DATA_DIR      = Path(__file__).parent / "data"
@@ -57,6 +59,7 @@ class Dataset:
     version: str
     facts: dict = field(default_factory=dict)
     schema: dict | None = None      # kind == "schema"
+    profile: dict | None = None     # kind == "profile" (hochgeladenes Kennzahlen-Profil, Stufe 2)
     tables: dict | None = None      # kind == "data" (lazy für builtin)
     labels: dict = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
@@ -329,6 +332,8 @@ class Registry:
         self._customer_stats: pd.DataFrame | None = None
         self._arrays: dict | None = None
         self._product_desc: pd.Series | None = None
+        self._profiles: dict[str, dict] = {}
+        self._checks: dict[tuple, dict] = {}
         self.reload_builtin()
 
     # builtin -----------------------------------------------------------------
@@ -360,6 +365,12 @@ class Registry:
                 )
             self._mappings.clear()
             self._overviews.clear()
+            self._profiles.clear()
+            self._checks.clear()
+
+    def max_stage(self, ds_id: str) -> int:
+        kind = self.get(ds_id).kind
+        return 1 if kind == "schema" else 2 if kind == PROFILE_KIND else 3
 
     def has(self, ds_id: str) -> bool:
         return ds_id in self._datasets
@@ -434,7 +445,11 @@ class Registry:
             if art:
                 self._mappings[ds_id] = art
                 return art
-        if ds.kind == "schema":
+        if ds.kind == PROFILE_KIND:
+            from .profiler import profile_to_mapping
+            m = profile_to_mapping(ds.profile)
+            m["dataset_id"] = ds_id
+        elif ds.kind == "schema":
             m = build_schema_mapping(ds.schema, dataset_id=ds_id)
         else:
             tables = self.tables(ds_id)
@@ -454,6 +469,11 @@ class Registry:
         return {
             "labels": TABLE_LABELS_ORII,
             "declared_pks": {"invoice_lines": "line_id"},
+            "derived_columns": [
+                {"column": "customers.country", "note": "häufigstes Land über den Gesamtzeitraum abgeleitet"},
+                {"column": "products.description", "note": "häufigste Beschreibung über den Gesamtzeitraum"},
+                {"column": "products.n_beschreibungen", "note": "über den Gesamtzeitraum gezählt"},
+            ],
             "missing_relations": [{
                 "id": "invoices.storno->invoices.original",
                 "from_table": "invoices", "from_column": "(keine Referenzspalte)",
@@ -503,6 +523,13 @@ class Registry:
         if art:
             self._overviews[ds_id] = art
             return art
+        if ds.kind == PROFILE_KIND:
+            ov = {"dataset": ds.card(), "tables": [
+                {"name": t["name"], "label": t.get("label", t["name"]), "rows": t.get("rows"),
+                 "n_columns": t.get("n_columns") or len(t["columns"]), "columns": [c["name"] for c in t["columns"]]}
+                for t in ds.profile["tables"]]}
+            self._overviews[ds_id] = ov
+            return ov
         if ds.kind == "schema":
             ov = {"dataset": ds.card(), "tables": [
                 {"name": t["name"], "schema": t.get("schema"), "rows": None, "n_columns": len(t["columns"]),
@@ -538,6 +565,15 @@ class Registry:
     def _preview_live(self, ds_id: str, table: str | None, n: int = 50) -> dict:
         ds = self.get(ds_id)
         n = max(5, min(int(n), 200))
+        if ds.kind == PROFILE_KIND:
+            tables = {t["name"]: t for t in ds.profile["tables"]}
+            table = table if table in tables else next(iter(tables))
+            cols = ["Spalte", "Typ", "Rollen", "Leerwerte", "Ausprägungen"]
+            rows = [[c["name"], c.get("kind"), ", ".join(c.get("roles", [])),
+                     None if c.get("null_rate") is None else f"{c['null_rate'] * 100:.1f} %".replace(".", ","),
+                     c.get("n_unique")] for c in tables[table]["columns"]]
+            return {"table": table, "columns": cols, "rows": rows, "total_rows": tables[table].get("rows"),
+                    "schema_only": False, "profile_only": True}
         if ds.kind == "schema":
             tables = {t["name"]: t for t in ds.schema["tables"]}
             table = table if table in tables else next(iter(tables))
@@ -573,7 +609,10 @@ class Registry:
             ext = Path(fname).suffix.lower()
             names.append(fname)
             if ext == ".json":
-                schema = _schema_from_json(json.loads(raw.decode("utf-8-sig")))
+                obj = json.loads(raw.decode("utf-8-sig"))
+                if isinstance(obj, dict) and "profile_version" in obj:
+                    return self._add_profile(fname, obj)
+                schema = _schema_from_json(obj)
                 continue
             if ext in (".csv", ".txt"):
                 df = _read_csv(raw)
@@ -620,6 +659,71 @@ class Registry:
             self._datasets[ds_id] = ds
         return ds
 
+    def _add_profile(self, fname: str, profile: dict) -> Dataset:
+        from .profiler import assert_privacy
+        assert_privacy(profile)
+        ds_id = "upload_" + uuid.uuid4().hex[:8]
+        ev = profile.get("events") or {}
+        facts = {"tables": len(profile.get("tables", [])),
+                 "rows": int(sum(t.get("rows") or 0 for t in profile.get("tables", []))),
+                 "months": (ev.get("time") or {}).get("months"), "generated_at": profile.get("generated_at")}
+        ds = Dataset(id=ds_id, name=profile.get("dataset_name") or fname, kind=PROFILE_KIND,
+                     source="Profil-Export (nur Kennzahlen)", license="–",
+                     description="Kennzahlen-Profil aus dem Profiler – keine Datenzeilen, keine personenbezogenen Daten.",
+                     builtin=False, version=ds_id, facts=facts, profile=profile, files=[fname])
+        with self._lock:
+            self._datasets[ds_id] = ds
+        return ds
+
+    # Profil (Stufe 2) ----------------------------------------------------------
+    def profile(self, ds_id: str) -> dict | None:
+        """Kennzahlen-Profil. Für Online Retail II aus dem Artefakt (wie ein lokaler Kunden-Export)."""
+        ds = self.get(ds_id)
+        if ds.kind == PROFILE_KIND:
+            return ds.profile
+        if ds.kind == "schema":
+            return None
+        if ds_id in self._profiles:
+            return self._profiles[ds_id]
+        art = self._load_artifact("profile", ds)
+        if art:
+            self._profiles[ds_id] = art
+            return art
+        from .profiler import assemble_events, build_profile, events_from_online_retail
+        from .semantics import bind_fields, schema_view
+        mapping = self.mapping(ds_id)
+        tables = self.tables(ds_id)
+        if ds_id == "online_retail_ii":
+            events = events_from_online_retail(self.raw_online_retail())
+        else:
+            events = assemble_events(tables, mapping, bind_fields(schema_view(mapping)))
+        prof = build_profile(dataset_name=ds.name, mapping=mapping, tables=tables, events=events,
+                             source=f"GraphReady Profiler · {ds.source}")
+        self._profiles[ds_id] = prof
+        self._save_artifact("profile", ds, prof)
+        return prof
+
+    def schema_view(self, ds_id: str) -> dict:
+        from .semantics import schema_view
+        return schema_view(self.mapping(ds_id))
+
+    def checks(self, ds_id: str, stage: int, use_cases: list[str] | None = None) -> dict:
+        from .checks import run_checks
+        ds = self.get(ds_id)
+        stage = max(1, min(int(stage), 3))
+        key = (ds_id, ds.version, stage, tuple(sorted(use_cases or [])))
+        if key in self._checks:
+            return self._checks[key]
+        if stage == 1 or ds.kind == "schema":
+            res = run_checks(stage=stage, view=self.schema_view(ds_id), use_case_ids=use_cases, dataset_id=ds_id)
+        else:
+            res = run_checks(stage=stage, view={}, profile=self.profile(ds_id), use_case_ids=use_cases,
+                             dataset_id=ds_id)
+        res["dataset_kind"] = ds.kind
+        res["max_stage_dataset"] = self.max_stage(ds_id)
+        self._checks[key] = res
+        return res
+
     def delete(self, ds_id: str) -> bool:
         with self._lock:
             ds = self._datasets.get(ds_id)
@@ -628,6 +732,8 @@ class Registry:
             self._datasets.pop(ds_id)
             self._mappings.pop(ds_id, None)
             self._overviews.pop(ds_id, None)
+            self._profiles.pop(ds_id, None)
+            self._checks = {k: v for k, v in self._checks.items() if k[0] != ds_id}
             return True
 
     # Beispiel-Subgraph (Online Retail II) ------------------------------------
