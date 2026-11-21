@@ -696,3 +696,54 @@ Aufgabe: Modul 6 „Aktivierung“, Monitoring, Report-Export und der Feinschlif
   - Das Worker-Image muss für `graphml_pipeline` neu gebaut werden, weil sich der Handler geändert hat: `./runpod_graphml/build.sh <dockerhub-user> 2`, danach das Image im RunPod-Endpoint tauschen.
   - Für den Report liefern `business_case.overview(variant)` und `playbooks.load_variant(vid)` alle Zahlen.
   - Der Push auf `main` löst das Render-Deploy aus und braucht die Zustimmung des Nutzers.
+
+---
+
+## Umsetzungsnotizen nach Prompt 5 (Abschluss)
+
+- **Bausteine:**
+  - `activation.py`: Aktionslisten, Kalibrierung, Klartext-Gründe, Next Best Action, Kontrollgruppe, Fallzahl, Export, CRM-Vorschau, Monitoring
+  - `report.py` und `report_template.html`: Readiness-Report als HTML (`/graph_ml/report`, druckbar als PDF) und XLSX (`/graph_ml/report.xlsx`)
+  - Artefakte `activation.json` (2,8 MB, Texte als Wörterbuch kodiert) und `monitoring.json`
+  - Vorberechnung: `.venv/bin/python -m graph_ml.precompute --only-activation` (≈ 7 Min. auf der RTX 3060)
+- **Aktivierung:**
+  - Stichtag 10.12.2011 (Tag nach dem letzten Beleg), Retouren ab 01.11.2011. Trainiert wird auf allen Stichtagen mit vollständig beobachtetem 90-Tage-Label (bis 01.09.2011). Datenstand: empfohlenes Playbook-Paket v1 (`p2b5639ce`).
+  - Dafür setzt `activation.anchored(T)` den Test-Stichtag des Backtests vorübergehend um (mit Lock, nur Vorberechnung und lokale Jobs). `reco_snapshot` bewertet bei einem Stichtag ohne Zukunft alle aktiven Kunden.
+  - Kalibrierung: isotonisch auf dem Rückblick-Testfenster (gleiche Engine, ohne den Stichtag trainiert). Güte per 2-fach-Kreuzanpassung, Wahrscheinlichkeit begrenzt auf 0,5–99,5 %.
+  - Schwelle aus Kosten und Nutzen: Aktion, wenn p × Wert × Quote − Kosten > 0 (Annahmen wie in Schritt 5). Dazu eine Kapazität: oberste x % bzw. 2.000 Retouren-Prüfungen.
+  - Unsicher sind Fälle mit Grenzfall (|p − Schwelle| ≤ max(3 Pp., 25 %)), uneinigen Engines (Rang weicht vom Baum-Modell um > 35 Perzentile ab) oder wenig Historie. „Sicher“ heißt kalibriert ≥ 80 % und keine Markierung.
+  - Gründe: TreeSHAP (`pred_contrib`) von LightGBM + Graph-Features, auch wenn GNN oder TabPFN bewerten. Graph-Einbettungen sind nach überproportional vertretenen Artikelgruppen benannt.
+- **Ergebnisse:**
+
+  | Liste | Engine | Kalibrierfehler (ECE) | in der Liste | unsicher |
+  |---|---|---|---|---|
+  | Churn | GNN | 0,124 → 0,018 | 120 von 426 Plätzen | 84 |
+  | Neukunden | Regel (Vorhersagekraft rot) | – → 0,056 | 73 | 30 |
+  | Cross-Selling | TabPFN | 0,034 → 0,001 | 418 | 3 |
+  | Retouren | LightGBM + Graph | 0,003 → 0,0004 | 2.000 | 271 |
+
+  - Churn zeigt die Lehre aus dem Kumo-Test: 1.254 rohe „sichere“ GNN-Vorhersagen (≥ 80 %), davon nur 76 % eingetreten.
+  - Nur 120 Churn-Kunden haben einen positiven erwarteten Wert (Kontakt 50 €). Der Pilot weist deshalb mit einer Kampagne keinen Effekt nach: Für −25 % Abwanderung sind 559 Fälle nötig, also ≈ 5 Kampagnen.
+- **Next Best Action** (5 Regeln): Kontrollgruppe unberührt → Retention vor Verkauf (Risiko ≥ 50 %) → Neukunden-Impuls → höchster erwarteter Wert → 1 Aktion je Kunde und Quartal. Ergebnis: 97 Retention, 155 Neukunden, 991 Cross-Selling, 2.010 Empfehlung, 852 Kontrollgruppe, 2.875 aufgelöste Konflikte.
+- **Kontrollgruppe:** 20 %, stratifiziert nach Abwanderungsrisiko-Dezil × Umsatz-Terzil, Seed 7, auf Kundenebene über alle Listen.
+- **Mensch in der Schleife:** übernommen oder verworfen (mit Grund). Gespeichert im Browser (`localStorage`), mitgesendet bei Liste, Export und Vorschau.
+- **Export:** generisches CRM-Format (26 Felder) als CSV, XLSX (mit Blättern Kontrollgruppe, CRM-Mapping, Info) und JSON. Kontrollgruppe getrennt, verworfene Einträge ausgelassen. Mapping-Vorlage für Salesforce, HubSpot und Dynamics 365. Die Vorschau zeigt den echten API-Aufruf je CRM; `sent` ist immer `false`.
+- **Monitoring:**
+  - Datenqualität je Monat (Füllgrad, Stornos mit Original, Preis 0, Nicht-Artikel, Dubletten). Befund: Dezember 2010 enthält 35 % Dubletten, genau die Zeilen, die PB-06 bereinigt.
+  - Drift per PSI je Merkmal und Score (Schwellen 0,10 / 0,25), dazu ein Drift-Verlauf. Die Drift am Stichtag ist teils Saison (Weihnachtsgeschäft) und teils Datenbeginn 12/2009 („Kundentreue“); das steht als Einordnung in der UI.
+  - „Erneut prüfen“ läuft als Job. Lokal werden Datenqualität und Churn-Drift neu berechnet, auf Render nur die Datenqualität (Speicher).
+- **UI:**
+  - Schritt 6 mit Listen, Next Best Action, Pilot-Rechner (JS-Port von `pilot_size`), Export und CRM-Vorschau, Monitoring und Report
+  - Demo-Tour „Pitch in 3 Akten“ (7 Stationen, ← → und Esc)
+  - Infobox „Markt & Zeitleiste“ mit den Quellen aus dem PDF
+  - Fallback-Banner, wenn der RunPod-Endpoint konfiguriert, aber nicht erreichbar ist
+  - Aufwand je Playbook, Sprunglink, Pfeiltasten im Stepper, `--muted` für Kontrast angehoben
+- **Qualität:**
+  - 46 Tests grün, davon neu `tests/test_graph_ml_activation.py`
+  - 375 px ohne horizontales Scrollen in allen 6 Schritten
+  - API-Antworten < 0,1 s, Seite 233 KB
+  - Render-Modus: Spitze 396 MB mit allen Endpunkten und Neuprüfung, torch nicht geladen
+- **Deployment (erst nach Freigabe):**
+  1. `git push` → Render baut automatisch. `render.yaml` und `requirements.txt` bleiben unverändert (openpyxl ist schon enthalten).
+  2. Danach prüfen: `https://salesapps.onrender.com/graph_ml`, `/graph_ml/api/system`, `/api/health`, `/graph_ml/report`.
+  3. RunPod (optional, für Live-GPU auf Render): `./runpod_graphml/build.sh <dockerhub-user> 2`, Image im Endpoint setzen. In Render `RUNPOD_GRAPHML_ENDPOINT_ID` eintragen (`RUNPOD_API_KEY` ist gesetzt), optional `KUMO_API_KEY`.

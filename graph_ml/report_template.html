@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Readiness-Report · GraphReady · {{ d.date_de }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14142b;--sub:#4b5168;--muted:#6b7187;--line:#e3e5ee;--soft:#f6f7fb;--violet:#5b4bd6;
+      --ok:#047857;--okbg:#d1fae5;--warn:#92400e;--warnbg:#fef3c7;--bad:#b91c1c;--badbg:#fee2e2;--na:#475569;--nabg:#eef0f5}
+*{box-sizing:border-box}
+html{background:#e9ebf3}
+body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--ink);font-size:12.5px;line-height:1.5;background:#e9ebf3}
+a{color:var(--violet)}
+.bar{position:sticky;top:0;z-index:5;background:#0b0b20;color:#e7e9f3;display:flex;gap:10px;align-items:center;
+     justify-content:space-between;padding:10px 16px;flex-wrap:wrap}
+.bar a,.bar button{color:#e7e9f3;background:#1b1b3d;border:1px solid #30305f;border-radius:9px;padding:7px 12px;
+     font:600 12.5px Inter,sans-serif;text-decoration:none;cursor:pointer}
+.bar button.primary{background:linear-gradient(135deg,#8b7cf6,#22d3ee);color:#07071a;border:0}
+.bar a:focus-visible,.bar button:focus-visible{outline:2px solid #22d3ee;outline-offset:2px}
+.page{max-width:210mm;margin:18px auto;background:#fff;padding:16mm 15mm;box-shadow:0 10px 40px -18px rgba(20,20,60,.35)}
+h1{font-size:24px;margin:0 0 2px;letter-spacing:-.01em}
+h2{font-size:15.5px;margin:22px 0 8px;padding-bottom:5px;border-bottom:2px solid var(--ink)}
+h3{font-size:13px;margin:14px 0 6px}
+.eyebrow{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--violet)}
+.sub{color:var(--sub)} .muted{color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:var(--soft)}
+.kpi b{display:block;font-size:17px}
+.kpi span{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+table{width:100%;border-collapse:collapse;margin:6px 0 4px;font-size:11.5px}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1.5px solid var(--ink);
+   padding:5px 6px;font-weight:700}
+td{border-bottom:1px solid var(--line);padding:5px 6px;vertical-align:top}
+tr{break-inside:avoid}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.amp{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:999px;font-weight:700;font-size:10.5px;white-space:nowrap}
+.amp-ok{color:var(--ok);background:var(--okbg)} .amp-warn{color:var(--warn);background:var(--warnbg)}
+.amp-bad{color:var(--bad);background:var(--badbg)} .amp-na,.amp-{color:var(--na);background:var(--nabg)}
+.box{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--soft);margin:8px 0}
+.note{border-left:3px solid #f59e0b;background:#fffbeb;padding:8px 11px;border-radius:0 8px 8px 0;margin:10px 0}
+.next{border:1.5px solid var(--violet);background:#f3f1ff;border-radius:10px;padding:10px 12px;margin:10px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.small{font-size:10.5px}
+.toc{columns:2;font-size:11.5px;margin:6px 0 0;padding-left:18px}
+.brk{break-before:page}
+footer{margin-top:18px;padding-top:8px;border-top:1px solid var(--line);font-size:10px;color:var(--muted)}
+@media (max-width:700px){.page{padding:18px 14px;margin:0}.kpis{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}
+  .wide{display:block;overflow-x:auto}}
+@page{size:A4;margin:14mm 13mm}
+@media print{
+  html,body{background:#fff}
+  .bar{display:none}
+  .page{box-shadow:none;margin:0;padding:0;max-width:none}
+  a{color:var(--ink);text-decoration:none}
+  h2{break-after:avoid}
+  .amp,.kpi,.box,.note,.next{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="bar" role="toolbar" aria-label="Report-Aktionen">
+  <strong>GraphReady · Readiness-Report</strong>
+  <span style="display:flex;gap:8px;flex-wrap:wrap">
+    <a href="/graph_ml#s6">← zurück zur Plattform</a>
+    <a href="/graph_ml/report.xlsx">⬇ Excel</a>
+    <button class="primary" onclick="window.print()">Drucken / als PDF speichern</button>
+  </span>
+</div>
+
+<main class="page">
+  <div class="eyebrow">Readiness-Report · Stufe 3 Rückblick</div>
+  <h1>Trägt Graph ML mit diesen Daten?</h1>
+  <div class="sub">{{ d.dataset.name }} · {{ de_int(d.dataset.rows) }} Positionen · {{ de_int(d.dataset.customers) }} Kunden ·
+    {{ d.dataset.period }} · erstellt am {{ d.date_de }}</div>
+
+  <div class="kpis">
+    <div class="kpi"><span>Use Cases</span><b>{{ d.ampel|length }}</b><div class="small muted">Sales &amp; After Sales</div></div>
+    <div class="kpi"><span>Gesamtampel</span><b>{{ d.counts.ok }} · {{ d.counts.warn }} · {{ d.counts.bad }}</b><div class="small muted">Grün · Gelb · Rot</div></div>
+    <div class="kpi"><span>Größter Hebel</span><b>{{ de_eur(d.best_case.euro.annual) if d.best_case else '–' }}</b><div class="small muted">{{ d.best_case.name if d.best_case else '' }} · pro Jahr</div></div>
+    <div class="kpi"><span>Reparaturplan</span><b>{{ de_num(d.plan_effort[0], 1) }}–{{ de_num(d.plan_effort[1], 1) }} PT</b><div class="small muted">{{ d.plan|length }} Playbooks</div></div>
+  </div>
+
+  <h2>1 Zusammenfassung</h2>
+  <p>GraphReady hat {{ d.ampel|length }} Vertriebs- und After-Sales-Use-Cases in drei Dimensionen geprüft:
+    <b>Datenreife</b> (9 Prüfungen), <b>Vorhersagekraft</b> (zeitlich getrennter Rückblick gegen die Regel, die der Vertrieb heute nutzt)
+    und <b>Euro-Potenzial</b> (12 Monate, realistisches Szenario, netto). Die Gesamtampel ist jeweils die schwächste belastbare Dimension.</p>
+  <ul>
+    {% for a in d.ampel if a.gesamt.status == 'ok' %}<li><b>{{ a.name }}</b> trägt bereits: {{ a.gesamt.note or '' }}</li>{% endfor %}
+    {% if d.best_case %}<li>Größter Hebel: <b>{{ d.best_case.name }}</b> mit {{ de_eur(d.best_case.euro.annual) }} pro Jahr
+      ({{ d.best_case.model }}).</li>{% endif %}
+    <li>{{ d.counts.bad }} Use Cases tragen noch nicht – meist wegen fehlender Tabellen (Datenanforderung in Abschnitt 5) oder
+      weil das Modell die Regel nicht belastbar schlägt.</li>
+  </ul>
+  <div class="next"><b>Nächster Schritt:</b> {{ d.next_step.text }}</div>
+  <div class="note"><b>Wichtig:</b> {{ d.disclaimer }} Der Rückblick ist streng nach Datum getrennt (kein Leakage).</div>
+  <ol class="toc">
+    <li>Zusammenfassung</li><li>Ampel je Use Case</li><li>Prüfergebnisse</li><li>Modellvergleich</li>
+    <li>Reparaturplan</li><li>Business Case</li><li>Aktivierung &amp; Monitoring</li><li>Quellen &amp; Annahmen</li>
+  </ol>
+
+  <h2>2 Ampel je Use Case</h2>
+  <div class="wide"><table>
+    <thead><tr><th>Use Case</th><th>Datenreife</th><th>Vorhersagekraft</th><th>Euro-Potenzial</th><th>Gesamt</th>{% if d.recommended_variant %}<th>nach Playbooks</th>{% endif %}</tr></thead>
+    <tbody>
+    {% for a in d.ampel %}
+      <tr>
+        <td><b>{% if a.lighthouse %}★ {% endif %}{{ a.name }}</b><div class="small muted">{{ a.area }} · {{ a.label }}</div></td>
+        <td><span class="amp amp-{{ a.datenreife.status }}">{{ a.datenreife.score }} · {{ st.get(a.datenreife.status) }}</span></td>
+        <td><span class="amp amp-{{ a.vorhersagekraft.status or 'na' }}">{% if a.vorhersagekraft.status in ('ok','warn','bad') %}{{ ('%+.1f' % (a.vorhersagekraft.lift * 100)).replace('.', ',') }} %{% else %}nicht messbar{% endif %}</span>
+          <div class="small muted">{{ a.vorhersagekraft.reason or '' }}</div></td>
+        <td><span class="amp amp-{{ a.euro.status or 'na' }}">{% if a.euro.annual is not none %}{{ de_eur(a.euro.annual) }}{% else %}nicht messbar{% endif %}</span></td>
+        <td><span class="amp amp-{{ a.gesamt.status }}">{{ st.get(a.gesamt.status) }}</span><div class="small muted">{{ a.gesamt.note or '' }}</div></td>
+        {% if d.recommended_variant %}<td>{% if a.v1 %}<span class="amp amp-{{ a.v1.gesamt }}">{{ st.get(a.v1.gesamt) }}</span>
+          <div class="small muted">Reife {{ a.v1.score }}</div>{% endif %}</td>{% endif %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  <p class="small muted">Schwellen: Datenreife Grün ab 75 Punkten ohne rote Kern-Prüfung · Vorhersagekraft Grün ab +20 % und signifikant,
+    Gelb ab +5 % · Euro Grün ab {{ de_eur(d.thresholds.green) }}, Gelb ab {{ de_eur(d.thresholds.yellow) }} pro Jahr.</p>
+
+  <h2 class="brk">3 Prüfergebnisse</h2>
+  <p class="sub small">Neun Prüfdimensionen je Use Case (die ersten fünf sind Kern-Prüfungen mit zusammen 70 % Gewicht). Gezeigt sind die
+    Befunde mit Handlungsbedarf (Gelb oder Rot).</p>
+  <div class="wide"><table>
+    <thead><tr><th>Use Case</th><th>Prüfung</th><th>Status</th><th>Befund</th><th>Maßnahme</th></tr></thead>
+    <tbody>
+    {% for c in d.checks if c.status in ('warn', 'bad') %}
+      <tr><td>{{ c.uc }}</td><td>{{ c.dim }}</td><td><span class="amp amp-{{ c.status }}">{{ c.score }} · {{ st.get(c.status) }}</span></td>
+        <td>{{ c.reason }}</td><td class="small">{{ c.actions }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+
+  <h2 class="brk">4 Modellvergleich</h2>
+  <p class="sub small">Modellunabhängig: Regel-Baseline, Baum-Modell, Graph-Merkmale, Tabular Foundation Model, Graph Neural Network und
+    relationales Foundation Model auf demselben zeitlichen Split (Training bis 01.06.2011, Test ab 01.09.2011).</p>
+  {% for m in d.models %}
+    <h3>{{ m.name }} <span class="muted small">· {{ m.metric }}{% if m.lower %} (niedriger ist besser){% endif %}</span></h3>
+    <table>
+      <thead><tr><th>Engine</th><th>Modellklasse</th><th class="num">Wert</th><th>Status</th></tr></thead>
+      <tbody>{% for e in m.engines %}
+        <tr><td>{% if e.best %}<b>★ {{ e.name }}</b>{% else %}{{ e.name }}{% endif %}</td><td>{{ e.klass }}</td>
+          <td class="num">{{ de_num(e.value, 3) if e.value is not none else '–' }}</td>
+          <td class="small">{{ 'gerechnet' if e.status == 'ok' else 'nicht verfügbar' }}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    <div class="small"><span class="amp amp-{{ m.vk.status }}">{{ st.get(m.vk.status) }}</span> {{ m.vk.reason }} · {{ m.recommendation }}</div>
+  {% endfor %}
+
+  <h2 class="brk">5 Reparaturplan</h2>
+  <p class="sub small">Reproduzierbare Fix-Playbooks auf einer Kopie der Rohdaten (Pipeline v0 → v1{% if d.recommended_variant %}, Version {{ d.recommended_variant }}{% endif %}).
+    Aufwand in Personentagen (PT) als Schätzung für einen Readiness-Sprint.</p>
+  <table>
+    <thead><tr><th>Playbook</th><th>Problem</th><th>Lösung</th><th>Wirkung</th><th class="num">Aufwand</th></tr></thead>
+    <tbody>{% for p in d.plan %}
+      <tr><td><b>{{ p.id }}</b> {{ p.title }}</td><td class="small">{{ p.problem }}</td><td class="small">{{ p.option }}</td>
+        <td class="small">{{ p.effect }}</td><td class="num">{{ p.effort }}{% if p.effort_note %}<div class="small muted" style="white-space:normal">{{ p.effort_note }}</div>{% endif %}</td></tr>{% endfor %}
+      <tr><td colspan="4"><b>Summe</b></td><td class="num"><b>{{ de_num(d.plan_effort[0], 1) }}–{{ de_num(d.plan_effort[1], 1) }} PT</b></td></tr>
+    </tbody>
+  </table>
+  {% if d.data_request %}
+  <h3>Datenanforderung für blockierte Use Cases</h3>
+  <ul>{% for s in d.data_request %}<li><b>{{ s.name }}:</b> {{ s.fields|map(attribute='label')|join(', ') }}</li>{% endfor %}</ul>
+  {% endif %}
+
+  <h2 class="brk">6 Business Case</h2>
+  <p class="sub small">Euro-Potenzial aus echten Rückblick-Zahlen (wie viele Fälle bzw. wie viel Umsatz die Top-Liste im Testfenster erfasst
+    hätte) × klar benannte Annahmen. 12 Monate, netto nach Kontaktkosten, GBP → EUR mit {{ de_num(d.fx, 2) }} €/£.</p>
+  <div class="wide"><table>
+    <thead><tr><th>Use Case</th><th class="num">konservativ</th><th class="num">realistisch</th><th class="num">optimistisch</th>
+      <th class="num">Mehrwert ggü. Regel</th>{% if d.recommended_variant %}<th class="num">nach Playbooks</th>{% endif %}<th>Ampel</th></tr></thead>
+    <tbody>{% for c in d.cases %}
+      <tr><td><b>{{ c.name }}</b><div class="small muted">{{ c.model }}</div></td>
+        <td class="num">{{ de_eur(c.konservativ) }}</td><td class="num"><b>{{ de_eur(c.realistisch) }}</b></td>
+        <td class="num">{{ de_eur(c.optimistisch) }}</td><td class="num">{{ de_eur(c.added) }}</td>
+        {% if d.recommended_variant %}<td class="num">{{ de_eur(c.v1) }}</td>{% endif %}
+        <td><span class="amp amp-{{ c.euro.status }}">{{ st.get(c.euro.status) }}</span></td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+  <h3>Annahmen je Use Case (realistisch)</h3>
+  {% for c in d.cases %}<div class="small"><b>{{ c.name }}:</b> {{ c.assumptions|join(' · ') }}</div>{% endfor %}
+  <p class="small muted">Szenarien: konservativ = Wirkungsquote × 0,5 und Kosten × 1,5 · optimistisch = Quote × 1,5 und Kosten × 0,75.</p>
+  <h3>Trichter</h3>
+  <table><tbody>{% for f in d.funnel %}<tr><td><b>{{ f.name }}</b></td><td class="small">{{ f.what }}</td><td class="num">{{ f.price }}</td></tr>{% endfor %}</tbody></table>
+  <div class="next"><b>Empfehlung:</b> {{ d.next_step.text }}</div>
+
+  <h2 class="brk">7 Aktivierung &amp; Monitoring</h2>
+  {% if d.activation %}{% set a = d.activation %}
+  <p class="sub small">Aktionslisten zum Stichtag {{ a.t_now }} ({{ a.variant_label }}), gültig bis {{ a.valid_until }}. Wahrscheinlichkeiten
+    isotonisch kalibriert; Aktion nur bei positivem erwartetem Wert. Kontrollgruppe {{ de_pct(a.control_share) }} stratifiziert
+    (Seed {{ a.control.seed }}) – sie wird nicht kontaktiert und misst den echten Effekt.</p>
+  <div class="wide"><table>
+    <thead><tr><th>Liste</th><th>Engine</th><th class="num">in der Liste</th><th class="num">erwarteter Wert</th><th class="num">unsicher</th>
+      <th>Kalibrierung (ECE)</th><th>Pilot: nachweisbar ab</th></tr></thead>
+    <tbody>{% for L in a.lists.values() %}
+      <tr><td><b>{{ L.name }}</b><div class="small muted">{{ L.action }}</div></td><td class="small">{{ L.engine.name }}</td>
+        <td class="num">{{ de_int(L.summary.in_list) }}</td><td class="num">{{ de_eur(L.summary.ev_list) }}</td>
+        <td class="num">{{ de_int(L.summary.uncertain_list) }}</td>
+        <td class="small">{% if L.calibration.ece_before is not none %}{{ de_num(L.calibration.ece_before, 3) }} → {% endif %}{{ de_num(L.calibration.ece_after, 3) }}</td>
+        <td class="small">{{ de_pct(L.pilot.mde_rel) }} relativ · erwartet {{ de_pct(L.pilot.effect_rel) }} ·
+          <b>{{ 'nachweisbar' if L.pilot.detectable else 'nicht nachweisbar – ' ~ de_int(L.pilot.n_required) ~ ' Fälle nötig' }}</b></td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+  <div class="small">Next Best Action: {% for k, v in a.nba.counts.items() %}{{ k }} {{ de_int(v) }}{% if not loop.last %} · {% endif %}{% endfor %}
+    · Konflikte aufgelöst: {{ de_int(a.nba.conflicts) }}.</div>
+  {% else %}<p class="muted">Aktionslisten noch nicht vorberechnet.</p>{% endif %}
+  {% if d.monitoring %}{% set m = d.monitoring %}
+  <h3>Monitoring</h3>
+  <p class="small">{{ m.alarms|length }} Alarme ({{ m.psi_text }}). {{ m.season_note }}</p>
+  <table><thead><tr><th>Alarm</th><th>Zeitpunkt</th><th class="num">Wert</th><th>Status</th></tr></thead>
+    <tbody>{% for x in m.alarms[:12] %}<tr><td>{{ x.name }}</td><td>{{ x.month }}</td><td class="num">{{ de_num(x.value, 3) }}</td>
+      <td><span class="amp amp-{{ x.status }}">{{ st.get(x.status) }}</span></td></tr>{% endfor %}</tbody></table>
+  {% endif %}
+
+  <h2>8 Quellen &amp; Annahmen</h2>
+  <ul class="small">{% for s in d.sources %}<li><a href="{{ s[1] }}">{{ s[0] }}</a></li>{% endfor %}</ul>
+  <p class="small muted">Preise im Trichter sind Annahmen aus dem Konzept „Graph-ML-Readiness-Plattform“. Die Online-Retail-II-Daten
+    stammen von einem britischen Online-Händler (12/2009–12/2011) und werden unter CC BY 4.0 genutzt.</p>
+  <footer>GraphReady · Graph-ML-Readiness-Plattform · Readiness-Report vom {{ d.date_de }} · erzeugt aus vorberechneten Artefakten</footer>
+</main>
+</body>
+</html>

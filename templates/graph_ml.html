@@ -22,7 +22,7 @@ tailwind.config = {
 <style>
 :root{
   --bg:#07071a;--bg2:#0b0b20;--panel:#10102a;--panel2:#15153a;--border:#22224a;--border2:#30305f;
-  --text:#e7e9f3;--sub:#a0a8bf;--muted:#6f7894;
+  --text:#e7e9f3;--sub:#a0a8bf;--muted:#8089a6;
   --violet:#8b7cf6;--cyan:#22d3ee;--amber:#f59e0b;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;--off:#64748b;--pink:#f472b6;
 }
 [x-cloak]{display:none!important}
@@ -150,6 +150,19 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
 .mini-amp{display:inline-flex;flex-direction:column;align-items:center;gap:3px;min-width:58px}
 .mini-amp .lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
 .funnel-step{border:1px solid var(--border);border-radius:12px;padding:12px;background:rgba(255,255,255,.02)}
+.btn-danger{background:rgba(248,113,113,.16);border-color:rgba(248,113,113,.55);color:#fecaca}
+.tour-hl{position:relative;z-index:45;box-shadow:0 0 0 2px var(--cyan),0 0 0 8px rgba(34,211,238,.18),0 20px 60px -20px rgba(34,211,238,.45)!important;
+         transition:box-shadow .25s ease}
+.tour-card{position:fixed;z-index:65;right:20px;bottom:20px;width:min(400px,calc(100% - 32px));background:#0f0f2b;border:1px solid rgba(34,211,238,.45);
+           border-radius:16px;box-shadow:0 30px 80px -20px rgba(0,0,0,.75);padding:16px}
+@media (max-width:640px){.tour-card{right:16px;left:16px;bottom:12px;width:auto}}
+.tl-row{display:flex;gap:0;overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}
+.tl-item{flex:1 0 108px;position:relative;padding:14px 8px 0 0}
+.tl-item::before{content:"";position:absolute;top:5px;left:0;right:0;height:2px;background:linear-gradient(90deg,rgba(139,124,246,.5),rgba(34,211,238,.5))}
+.tl-item::after{content:"";position:absolute;top:1px;left:0;width:10px;height:10px;border-radius:999px;background:#8b7cf6;box-shadow:0 0 0 3px rgba(139,124,246,.2)}
+.tl-item.now::after{background:#22d3ee;box-shadow:0 0 0 3px rgba(34,211,238,.25)}
+.skip-link{position:absolute;left:-9999px;top:8px;z-index:80}
+.skip-link:focus{left:12px}
 .funnel-step.rec{border-color:rgba(245,158,11,.6);background:linear-gradient(180deg,rgba(245,158,11,.12),rgba(245,158,11,.02))}
 .banner-3{border-color:rgba(139,124,246,.4);background:linear-gradient(90deg,rgba(139,124,246,.12),rgba(139,124,246,.02))}
 .amp-pending .ring{width:9px;height:9px;border-radius:999px;border:1.5px solid var(--off);flex:none}
@@ -178,7 +191,8 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
 </style>
 </head>
 
-<body x-data="graphReady()" @keydown.escape.window="systemOpen=false; closeUc()">
+<body x-data="graphReady()" @keydown.escape.window="systemOpen=false; closeUc(); endTour()" @keydown.window="tourKey($event)">
+<a href="#main" class="skip-link btn btn-primary">Zum Inhalt springen</a>
 <div class="bg-glow"></div><div class="grid-bg"></div>
 
 <div class="wrap min-h-screen flex flex-col">
@@ -222,7 +236,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
   </div>
 </header>
 
-<main class="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 pb-16">
+<main id="main" class="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 pb-16">
 
   <!-- ═════════════════════════ HERO + STUFEN ═════════════════════════ -->
   <section class="grid lg:grid-cols-12 gap-6 pt-8 sm:pt-10 pb-6">
@@ -239,6 +253,31 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
         <span class="chip"><span class="dot dot-ok"></span>Echte Daten: Online Retail II</span>
         <span class="chip">6 Module · 3 Stufen · 9 Use Cases</span>
         <span class="chip">Regel · LightGBM · TabPFN · GNN · KumoRFM · Aurora</span>
+      </div>
+      <div class="mt-5 flex flex-wrap gap-2">
+        <button class="btn btn-primary focusable" @click="startTour()">▶ Demo-Tour: Pitch in 3 Akten</button>
+        <button class="btn btn-ghost focusable" @click="timelineOpen=!timelineOpen" :aria-expanded="timelineOpen">ⓘ Markt &amp; Zeitleiste</button>
+      </div>
+      <div class="panel p-4 mt-4" x-show="timelineOpen" x-cloak x-transition.opacity>
+        <div class="flex items-center justify-between gap-2">
+          <div class="text-[12.5px] font-semibold">Ein sehr junger Markt</div>
+          <button class="text-[12px] sub hover:text-white focusable rounded" @click="timelineOpen=false" aria-label="Zeitleiste schließen">✕</button>
+        </div>
+        <div class="text-[11.5px] sub">Graph-ML seit rund zehn Jahren, Foundation Models für Tabellen seit 2022, für verknüpfte Unternehmensdatenbanken erst seit 2025.</div>
+        <div class="tl-row mt-3">
+          <template x-for="t in timeline" :key="t.y">
+            <div class="tl-item" :class="{now: t.now}">
+              <div class="text-[11px] font-bold" :class="t.now ? 'text-[#67e8f9]' : 'text-[#c4b5fd]'" x-text="t.y"></div>
+              <div class="text-[12px] font-semibold leading-tight mt-0.5" x-text="t.t"></div>
+              <div class="text-[10.5px] muted leading-snug mt-0.5" x-text="t.d"></div>
+              <a x-show="t.src" :href="t.src" target="_blank" rel="noopener" class="text-[10.5px] text-[#a5b4fc] hover:underline" x-text="'Quelle: '+t.s"></a>
+            </div>
+          </template>
+        </div>
+        <details class="mt-2 text-[11.5px]"><summary class="cursor-pointer text-[#a5b4fc]">Quellen aus dem Konzept-PDF</summary>
+          <ul class="mt-1 space-y-0.5"><template x-for="q in TIMELINE_SOURCES" :key="q[1]"><li><a class="hover:underline sub" :href="q[1]" target="_blank" rel="noopener" x-text="q[0]"></a></li></template></ul>
+          <div class="muted mt-1">Lehre aus dem Kumo-Praxistest: zu viele falsche „sichere“ Vorhersagen – daher kalibrierte Schwellen und Mensch in der Schleife (Schritt 6).</div>
+        </details>
       </div>
     </div>
 
@@ -282,7 +321,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
   <!-- ═════════════════════════ STEPPER ═════════════════════════ -->
   <nav class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mb-6" aria-label="Module">
     <template x-for="s in steps" :key="s.n">
-      <button class="step focusable" :class="{active: step===s.n, done: s.ready && step!==s.n}" @click="step=s.n"
+      <button class="step focusable" :class="{active: step===s.n, done: s.ready && step!==s.n}" @click="step=s.n" :data-step="s.n" @keydown="stepKey($event, s.n)"
               :aria-current="step===s.n ? 'step' : null">
         <div class="flex items-center gap-2.5 pr-3">
           <span class="step-num" x-text="s.n"></span>
@@ -296,6 +335,15 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
       </button>
     </template>
   </nav>
+
+  <!-- Fehlerzustand: GPU-Worker konfiguriert, aber nicht erreichbar → klarer Hinweis auf den Fallback -->
+  <div class="panel p-3 mb-5 flex items-start gap-3 border-[rgba(251,191,36,.45)]" x-show="runpodDown() && step >= 4" x-cloak role="status">
+    <span class="text-[18px]">⚠️</span>
+    <div class="text-[12.5px]"><b>RunPod-GPU-Worker nicht erreichbar</b> <span class="sub" x-text="'('+runpodDown()+')'"></span>.
+      <span class="sub">Fallback: Rückblick, Playbooks und Aktivierung kommen aus der Vorberechnung, CPU-Engines rechnen weiter. Live-GPU-Läufe
+        starten wieder, sobald der Endpoint antwortet – Status im System-Panel.</span></div>
+    <button class="btn btn-ghost !py-1 !px-2.5 text-[12px] ml-auto focusable" @click="openSystem()">System</button>
+  </div>
 
   <!-- ═════════════════════════ SCHRITT 1 · KONNEKTOREN ═════════════════════════ -->
   <section x-show="step===1" x-cloak class="fade-in space-y-5">
@@ -382,7 +430,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
         </div>
         <div class="relative h-[260px]"><canvas id="chartMonthly"></canvas></div>
       </div>
-      <div class="panel p-4 sm:p-5" :class="overview?.monthly ? 'lg:col-span-5' : 'lg:col-span-12'">
+      <div class="panel p-4 sm:p-5" data-tour="s1-facts" :class="overview?.monthly ? 'lg:col-span-5' : 'lg:col-span-12'">
         <div class="flex items-center justify-between mb-3">
           <div class="font-semibold">Datenlage auf einen Blick</div>
           <span class="text-[11px] muted">automatisch erkannt</span>
@@ -460,7 +508,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
     </div>
 
     <div class="grid lg:grid-cols-12 gap-4">
-      <div class="panel p-4 sm:p-5" :class="mapping?.mode==='schema' ? 'lg:col-span-12' : 'lg:col-span-7'">
+      <div class="panel p-4 sm:p-5" data-tour="s2-graph" :class="mapping?.mode==='schema' ? 'lg:col-span-12' : 'lg:col-span-7'">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div>
             <div class="font-semibold">Schema-Graph</div>
@@ -919,7 +967,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
         </div>
 
         <!-- Leaderboard -->
-        <div class="panel p-4 sm:p-5">
+        <div class="panel p-4 sm:p-5" data-tour="s4-leader">
           <div class="flex items-center justify-between mb-3">
             <div>
               <div class="font-semibold">Leaderboard</div>
@@ -1088,9 +1136,10 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
         <template x-for="c in (pb?.catalog||[])" :key="'pb'+c.id">
           <div class="pb-card min-w-0" :class="{on: c.kind==='data' && pbSel[c.id]?.on}">
             <div class="flex items-start justify-between gap-2">
-              <div class="flex items-center gap-2 min-w-0">
+              <div class="flex items-center gap-2 min-w-0 flex-wrap">
                 <span class="pb" x-text="c.id"></span>
                 <span class="font-semibold text-[13.5px] leading-tight" x-text="c.title"></span>
+                <span class="text-[10.5px] muted" x-show="c.effort" :title="c.effort_note || 'Aufwandsschätzung für den Readiness-Sprint'" x-text="'≈ '+c.effort"></span>
               </div>
               <template x-if="c.kind==='data' && pbSel[c.id]">
                 <label class="flex items-center gap-1.5 text-[12px] cursor-pointer flex-none">
@@ -1240,7 +1289,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
     </div>
 
     <!-- Was-wäre-wenn -->
-    <div class="panel p-4 sm:p-5" x-show="bcCase()">
+    <div class="panel p-4 sm:p-5" data-tour="s5-whatif" x-show="bcCase()">
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
         <div>
           <div class="font-semibold" x-text="'Was wäre wenn – '+ucName(bcUc)"></div>
@@ -1315,39 +1364,322 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
     </div>
   </section>
 
-  <!-- ═════════════════════════ SCHRITT 6 · PLATZHALTER ═════════════════════════ -->
-  <template x-for="s in steps.filter(s => !s.ready)" :key="'ph'+s.n">
-    <section x-show="step===s.n" x-cloak class="fade-in">
-      <div class="eyebrow" x-text="'Schritt '+s.n+' · '+s.name"></div>
-      <h2 class="text-[22px] font-bold mt-1" x-text="s.title"></h2>
-      <p class="sub text-[13.5px] mt-1 max-w-[780px]" x-text="s.desc"></p>
-      <div class="grid lg:grid-cols-12 gap-4 mt-5">
-        <div class="panel p-5 lg:col-span-5">
-          <div class="flex items-center gap-2"><span class="chip"><span class="dot dot-off"></span>folgt mit Prompt <span x-text="s.prompt"></span></span></div>
-          <div class="font-semibold mt-4">Was hier entsteht</div>
-          <ul class="mt-2 space-y-2">
-            <template x-for="b in s.bullets"><li class="flex gap-2 text-[13px] sub"><span class="text-[#8b7cf6]">▸</span><span x-text="b"></span></li></template>
-          </ul>
+  <!-- ═════════════════════════ SCHRITT 6 · AKTIVIERUNG ═════════════════════════ -->
+  <section x-show="step===6" x-cloak class="fade-in space-y-5">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
+      <div>
+        <div class="eyebrow">Schritt 6 · Aktivierung, Monitoring &amp; Report</div>
+        <h2 class="text-[22px] font-bold mt-1">Vorhersagen dorthin, wo der Vertrieb arbeitet</h2>
+        <p class="sub text-[13.5px] mt-1 max-w-[900px]">Priorisierte Aktionslisten mit kalibrierten Wahrscheinlichkeiten und Gründen im Klartext,
+          ein Mensch entscheidet je Eintrag. Eine Kontrollgruppe misst im Pilot den echten Effekt – der Rückspielweg ins CRM ist hier nur eine Vorschau.</p>
+      </div>
+      <div class="flex flex-wrap gap-2 items-center" x-show="act?.available">
+        <span class="chip"><span class="dot dot-ok"></span><span x-text="'Stichtag '+fmtDate(act?.t_now)"></span></span>
+        <span class="chip" x-text="act?.variant_label"></span>
+        <span class="chip" x-text="'Kontrollgruppe '+fmtPct(act?.control_share)"></span>
+        <span class="chip"><span class="dot dot-warn"></span>CRM: nur Vorschau</span>
+      </div>
+    </div>
+
+    <template x-if="actLoading && !act">
+      <div class="grid lg:grid-cols-3 gap-4"><template x-for="i in 3"><div class="panel p-5 space-y-3"><div class="skel h-4 w-1/2"></div><div class="skel h-3 w-full"></div><div class="skel h-3 w-4/5"></div><div class="skel h-24 w-full"></div></div></template></div>
+    </template>
+    <template x-if="act && !act.available">
+      <div class="panel p-6 text-center">
+        <div class="text-[30px]">🚀</div>
+        <div class="font-semibold mt-1">Aktionslisten sind noch nicht vorberechnet</div>
+        <div class="text-[12.5px] sub mt-1" x-text="act.hint"></div>
+      </div>
+    </template>
+
+    <template x-if="act?.available">
+    <div class="space-y-5">
+    <!-- Aktionslisten -->
+    <div class="panel p-4 sm:p-5" data-tour="s6-lists">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+        <div>
+          <div class="font-semibold">Aktionslisten</div>
+          <div class="text-[12px] sub">Eine Liste je Use Case aus der empfohlenen Engine · Next Best Action führt sie je Kunde zusammen</div>
         </div>
-        <div class="panel p-5 lg:col-span-7 relative overflow-hidden">
-          <div class="space-y-3 opacity-70">
-            <div class="flex gap-3"><div class="ph-line w-1/3"></div><div class="ph-line w-1/5"></div></div>
-            <template x-for="i in 6"><div class="flex items-center gap-3">
-              <div class="ph-line w-1/4"></div>
-              <template x-for="j in 4"><div class="w-14 h-5 rounded-full border border-dashed border-[#30305f]"></div></template>
-            </div></template>
+        <div class="flex flex-wrap gap-1.5" role="tablist" aria-label="Liste wählen">
+          <template x-for="t in actTabs()" :key="t.id">
+            <button class="tab focusable" role="tab" :aria-selected="actUc===t.id" :class="{active: actUc===t.id}" @click="selectAct(t.id)" x-text="t.name"></button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Kopfzeile der Liste -->
+      <template x-if="actList()">
+        <div class="grid md:grid-cols-3 gap-3 mb-4">
+          <div class="panel-flat p-3">
+            <div class="text-[11px] muted uppercase tracking-wide font-bold">Engine &amp; Kalibrierung</div>
+            <div class="font-semibold text-[13.5px] mt-1" x-text="actList().engine.name"></div>
+            <div class="text-[11.5px] sub" x-text="'Gründe aus: '+actList().engine.reasons_from"></div>
+            <div class="text-[12px] mt-1.5">
+              <span x-show="actList().calibration.ece_before !== null" x-text="'Kalibrierfehler '+fmtNum(actList().calibration.ece_before,3)+' → '"></span>
+              <b class="text-[#6ee7b7]" x-text="fmtNum(actList().calibration.ece_after,3)"></b>
+              <span class="muted" x-text="' (ECE, isotonisch)'"></span>
+            </div>
+            <div class="text-[11.5px] sub mt-1" x-show="actList().calibration.sure_before" x-text="sureText(actList().calibration)"></div>
+            <template x-for="n in (actList().notes||[])"><div class="text-[11px] text-amber-200/90 mt-1" x-text="n"></div></template>
           </div>
-          <div class="absolute inset-0 grid place-items-center">
-            <div class="text-center px-6">
-              <div class="text-[34px]" x-text="s.icon"></div>
-              <div class="font-semibold mt-1" x-text="s.name"></div>
-              <div class="text-[12px] sub mt-1">Vorschau – die Daten aus Schritt 1 und 2 stehen bereit</div>
+          <div class="panel-flat p-3">
+            <div class="text-[11px] muted uppercase tracking-wide font-bold">Schwelle &amp; Kapazität</div>
+            <div class="text-[12px] mt-1" x-text="actList().threshold_text"></div>
+            <div class="text-[11.5px] sub mt-1" x-text="'Wert: '+actList().value_text"></div>
+          </div>
+          <div class="panel-flat p-3">
+            <div class="text-[11px] muted uppercase tracking-wide font-bold">Liste</div>
+            <div class="flex items-baseline gap-2 mt-1"><span class="text-[22px] font-bold tabular-nums" x-text="fmtInt(actList().summary.in_list)"></span>
+              <span class="text-[12px] sub" x-text="'von '+fmtInt(actList().capacity)+' Plätzen lohnen sich'"></span></div>
+            <div class="text-[12px]"><b x-text="fmtEur(actList().summary.ev_list)"></b> <span class="sub">erwarteter Wert je Kampagne</span></div>
+            <div class="flex flex-wrap gap-1.5 mt-2 text-[11px]">
+              <span class="chip !py-0 delta-up" x-text="fmtInt(actList().summary.sure_list)+' sicher'"></span>
+              <span class="chip !py-0 text-amber-200" x-text="fmtInt(actList().summary.uncertain_list)+' unsicher'"></span>
+              <span class="chip !py-0" x-text="'Stichtag '+fmtDate(actList().anchor)"></span>
             </div>
           </div>
         </div>
+      </template>
+      <template x-if="actUc==='next_best_action'">
+        <div class="panel-flat p-3 mb-4">
+          <div class="text-[11px] muted uppercase tracking-wide font-bold mb-1">Regelwerk mit Konfliktauflösung</div>
+          <ol class="text-[12px] space-y-0.5"><template x-for="r in act.nba.rules"><li x-text="r"></li></template></ol>
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            <template x-for="[k, v] in Object.entries(act.nba.counts)" :key="k">
+              <span class="chip !py-0 !text-[11px]" x-text="nbaName(k)+' '+fmtInt(v)"></span>
+            </template>
+            <span class="chip !py-0 !text-[11px] text-amber-200" x-text="fmtInt(act.nba.conflicts)+' Konflikte aufgelöst'"></span>
+          </div>
+        </div>
+      </template>
+
+      <!-- Filter -->
+      <div class="flex flex-wrap items-center gap-2 mb-3" x-show="!['recommendation'].includes(actUc)">
+        <template x-for="f in actFilters()" :key="f.id">
+          <button class="tab focusable !text-[12px]" :class="{active: actFilter===f.id}" @click="actFilter=f.id; loadActRows(0)" x-text="f.name"></button>
+        </template>
+        <button class="btn btn-ghost !py-1 !px-2.5 text-[12px] md:ml-auto" x-show="actList()" @click="acceptSure()" title="Alle sicheren Einträge dieser Seite übernehmen">✓ Sichere dieser Seite übernehmen</button>
       </div>
-    </section>
-  </template>
+
+      <!-- Tabelle -->
+      <div class="scroll-x scroll-thin">
+        <template x-if="actList()">
+          <table class="tbl min-w-[880px]">
+            <thead><tr><th>#</th><th x-text="actList().entity"></th><th>Wahrscheinlichkeit</th><th class="text-right">Erw. Wert</th><th>Gründe</th><th>Entscheidung</th></tr></thead>
+            <tbody>
+              <template x-for="r in actRows" :key="actUc+r.id">
+                <tr :class="{'opacity-60': decision(r).status==='verworfen'}">
+                  <td class="tabular-nums muted" x-text="r.rank"></td>
+                  <td class="whitespace-nowrap">
+                    <div class="font-semibold tabular-nums" x-text="'Kunde '+r.cust"></div>
+                    <div class="text-[11px] sub" x-text="rowObject(r)"></div>
+                    <div class="flex flex-wrap gap-1 mt-1">
+                      <span x-show="r.control" class="chip !py-0 !text-[10.5px]" style="border-color:rgba(148,163,184,.5)" title="Kontrollgruppe – nicht kontaktieren">Kontrolle</span>
+                      <span x-show="r.sure" class="chip !py-0 !text-[10.5px] delta-up" title="kalibriert ≥ 80 %, keine Unsicherheit">sicher</span>
+                      <template x-for="u in r.unc"><span class="chip !py-0 !text-[10.5px] text-amber-200" :title="act.unc_text[u]" x-text="uncShort(u)"></span></template>
+                    </div>
+                  </td>
+                  <td class="min-w-[130px]">
+                    <div class="flex items-center gap-2"><div class="bar flex-1"><span :style="'width:'+(r.p*100)+'%;background:'+(r.p>=act.sure?'#34d399':r.p>=0.5?'#22d3ee':'#8b7cf6')"></span></div>
+                      <span class="tabular-nums text-[12px] font-semibold" x-text="fmtPct(r.p)"></span></div>
+                    <div class="text-[10.5px] muted" x-text="'Schwelle '+(r.thr>=9 ? '–' : fmtPct(r.thr))"></div>
+                  </td>
+                  <td class="text-right tabular-nums whitespace-nowrap"><span class="font-semibold" x-text="fmtEur(r.ev)"></span>
+                    <div class="text-[10.5px] muted" x-text="'Wert '+fmtEur(r.value)"></div></td>
+                  <td class="min-w-[260px]"><ul class="text-[12px] space-y-0.5"><template x-for="g in r.reasons"><li class="flex gap-1.5"><span class="text-[#8b7cf6]">▸</span><span x-text="g"></span></li></template></ul></td>
+                  <td class="whitespace-nowrap">
+                    <div class="flex gap-1.5" x-show="!r.control">
+                      <button class="btn !py-1 !px-2 text-[12px] focusable" :class="decision(r).status==='übernommen' ? 'btn-primary' : 'btn-ghost'" @click="decide(r, 'übernommen')" :aria-pressed="decision(r).status==='übernommen'">✓ übernehmen</button>
+                      <button class="btn !py-1 !px-2 text-[12px] focusable" :class="decision(r).status==='verworfen' ? 'btn-danger' : 'btn-ghost'" @click="decide(r, 'verworfen')" :aria-pressed="decision(r).status==='verworfen'">✕</button>
+                    </div>
+                    <span x-show="r.control" class="text-[11px] muted">misst den Effekt</span>
+                    <template x-if="decision(r).status==='verworfen'">
+                      <select class="select !py-1 !text-[11.5px] mt-1.5" :value="decision(r).reason" @change="decide(r, 'verworfen', $event.target.value)" aria-label="Grund für Verwerfen">
+                        <option value="">Grund wählen …</option>
+                        <template x-for="g in rejectReasons"><option :value="g" x-text="g"></option></template>
+                      </select>
+                    </template>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </template>
+        <template x-if="actUc==='recommendation'">
+          <table class="tbl min-w-[760px]">
+            <thead><tr><th>#</th><th>Kunde</th><th>Top-3-Empfehlungen</th><th class="text-right">Erw. Wert</th></tr></thead>
+            <tbody><template x-for="r in actRows" :key="'rc'+r.cust"><tr>
+              <td class="muted tabular-nums" x-text="r.rank"></td><td class="font-semibold tabular-nums" x-text="'Kunde '+r.cust"></td>
+              <td><template x-for="(n, i) in r.items"><div class="text-[12px] flex gap-2"><span class="flex-1" x-text="titleCase(n)"></span><span class="tabular-nums muted" x-text="fmtPct(r.p[i])"></span></div></template></td>
+              <td class="text-right tabular-nums font-semibold" x-text="fmtEur(r.ev)"></td></tr></template></tbody>
+          </table>
+        </template>
+        <template x-if="actUc==='next_best_action'">
+          <table class="tbl min-w-[860px]">
+            <thead><tr><th>#</th><th>Kunde</th><th>Next Best Action</th><th>Kanal</th><th class="text-right">Erw. Wert</th><th>Warum · Konflikte</th></tr></thead>
+            <tbody><template x-for="r in actRows" :key="'nba'+r.cust"><tr>
+              <td class="muted tabular-nums" x-text="r.rank"></td><td class="font-semibold tabular-nums" x-text="'Kunde '+r.cust"></td>
+              <td><span class="chip !py-0.5 !text-[11.5px]" :style="nbaStyle(r.action)" x-text="r.text"></span></td>
+              <td class="text-[12px] sub" x-text="r.channel"></td>
+              <td class="text-right tabular-nums font-semibold" x-text="r.ev ? fmtEur(r.ev) : '–'"></td>
+              <td class="text-[12px] min-w-[260px]"><div x-text="r.why"></div>
+                <template x-for="c in r.conflicts"><div class="text-[11px] text-amber-200/90" x-text="'⚖ '+c"></div></template></td>
+            </tr></template></tbody>
+          </table>
+        </template>
+        <div x-show="!actLoading && !actRows.length" class="text-center text-[12.5px] sub py-8">Keine Einträge für diesen Filter.</div>
+        <div x-show="actLoading" class="space-y-2 py-3"><template x-for="i in 5"><div class="skel h-8 w-full"></div></template></div>
+      </div>
+      <div class="flex items-center justify-between mt-3 text-[12px]" x-show="actTotal > actLimit">
+        <span class="sub" x-text="(actOffset+1)+'–'+Math.min(actOffset+actLimit, actTotal)+' von '+fmtInt(actTotal)"></span>
+        <div class="flex gap-1.5">
+          <button class="btn btn-ghost !py-1 !px-2.5 focusable" :disabled="actOffset===0" @click="loadActRows(Math.max(0, actOffset-actLimit))" aria-label="vorherige Seite">←</button>
+          <button class="btn btn-ghost !py-1 !px-2.5 focusable" :disabled="actOffset+actLimit>=actTotal" @click="loadActRows(actOffset+actLimit)" aria-label="nächste Seite">→</button>
+        </div>
+      </div>
+      <div class="text-[11px] muted mt-2" x-text="decisionSummary()"></div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-4">
+      <!-- Kontrollgruppe & Pilot -->
+      <div class="panel p-4 sm:p-5">
+        <div class="font-semibold">Kontrollgruppe &amp; Fallzahl für den Pilot</div>
+        <div class="text-[12px] sub mt-0.5" x-text="act.control.method+' · '+fmtInt(act.control.control)+' von '+fmtInt(act.control.customers)+' Kunden'"></div>
+        <div class="flex flex-wrap gap-1.5 mt-2 text-[11px]">
+          <span class="chip !py-0" x-text="'Schichten: '+act.control.strata.length"></span>
+          <span class="chip !py-0" x-text="'Anteil je Schicht '+fmtPct(Math.min(...act.control.strata.map(s=>s.control_share)))+' – '+fmtPct(Math.max(...act.control.strata.map(s=>s.control_share)))"></span>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-x-5 gap-y-3 mt-4">
+          <label class="text-[12px]"><span class="flex justify-between"><span class="sub">Liste</span></span>
+            <select class="select mt-1" x-model="pil.uc" @change="pilotReset()"><template x-for="(L, k) in act.lists" :key="k"><option :value="k" x-text="L.name"></option></template></select></label>
+          <label class="text-[12px]"><span class="flex justify-between"><span class="sub">Fälle in der Liste je Kampagne</span><b class="tabular-nums" x-text="fmtInt(pil.n)"></b></span>
+            <input type="range" class="rng mt-2" min="20" max="5000" step="10" x-model.number="pil.n"></label>
+          <label class="text-[12px]"><span class="flex justify-between"><span class="sub">Anteil Kontrollgruppe</span><b x-text="pil.c+' %'"></b></span>
+            <input type="range" class="rng mt-2" min="10" max="50" step="5" x-model.number="pil.c"></label>
+          <label class="text-[12px]"><span class="flex justify-between"><span class="sub" x-text="'Ereignisrate ohne Aktion ('+(act.lists[pil.uc]?.event||'')+')'"></span><b x-text="pil.p0+' %'"></b></span>
+            <input type="range" class="rng mt-2" min="1" max="95" step="1" x-model.number="pil.p0"></label>
+          <label class="text-[12px]"><span class="flex justify-between"><span class="sub">angenommener Effekt (relativ)</span><b x-text="(pil.eff>0?'+':'')+pil.eff+' %'"></b></span>
+            <input type="range" class="rng mt-2" min="-60" max="60" step="1" x-model.number="pil.eff"></label>
+          <div class="text-[12px] grid grid-cols-2 gap-2">
+            <label><span class="sub">Signifikanz</span><select class="select mt-1" x-model.number="pil.alpha"><option value="0.05">5 %</option><option value="0.1">10 %</option></select></label>
+            <label><span class="sub">Power</span><select class="select mt-1" x-model.number="pil.power"><option value="0.8">80 %</option><option value="0.9">90 %</option></select></label>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 mt-4">
+          <div class="panel-flat p-3"><div class="text-[10.5px] muted uppercase font-bold">nachweisbar ab</div><div class="text-[17px] font-bold tabular-nums" x-text="fmtPct(pilotCalc().mde_rel)"></div><div class="text-[11px] sub" x-text="fmtNum(pilotCalc().mde_abs*100,1)+' Prozentpunkte'"></div></div>
+          <div class="panel-flat p-3"><div class="text-[10.5px] muted uppercase font-bold">Fälle nötig</div><div class="text-[17px] font-bold tabular-nums" x-text="pilotCalc().n_required ? fmtInt(pilotCalc().n_required) : '–'"></div><div class="text-[11px] sub" x-text="pilotCalc().periods ? '≈ '+pilotCalc().periods+' Kampagne(n)' : ''"></div></div>
+          <div class="panel-flat p-3" :class="pilotCalc().detectable ? 'border-[rgba(52,211,153,.5)]' : 'border-[rgba(248,113,113,.45)]'"><div class="text-[10.5px] muted uppercase font-bold">Ergebnis</div>
+            <div class="text-[13.5px] font-bold mt-1" :class="pilotCalc().detectable ? 'text-[#6ee7b7]' : 'text-[#fca5a5]'" x-text="pilotCalc().detectable ? 'Effekt nachweisbar' : 'zu wenige Fälle'"></div></div>
+        </div>
+        <div class="text-[11px] muted mt-2">Zwei-Stichproben-Test auf Anteile (zweiseitig, Normal-Approximation). Mehrere Kampagnen bzw. Quartale lassen sich für den Nachweis bündeln.</div>
+      </div>
+
+      <!-- Export & Rückspielweg -->
+      <div class="panel p-4 sm:p-5">
+        <div class="flex items-center justify-between gap-2">
+          <div><div class="font-semibold">Export &amp; Rückspielweg</div>
+            <div class="text-[12px] sub" x-text="'Liste: '+(actExportUc()==='next_best_action' ? 'Next Best Action' : act.lists[actExportUc()]?.name)+' · Kontrollgruppe getrennt, verworfene Einträge ausgelassen'"></div></div>
+          <span class="chip !text-[11px]"><span class="dot dot-warn"></span>nichts wird gesendet</span>
+        </div>
+        <div class="flex flex-wrap gap-2 mt-3">
+          <template x-for="f in ['csv','xlsx','json']"><button class="btn btn-ghost text-[12.5px] focusable" @click="exportList(f)" :disabled="exporting" x-text="'⬇ '+f.toUpperCase()"></button></template>
+          <a class="btn btn-ghost text-[12.5px] focusable" href="/graph_ml/api/activation/mapping.csv">⬇ Mapping-Vorlage</a>
+        </div>
+        <div class="flex gap-1.5 mt-4" role="tablist" aria-label="CRM wählen">
+          <template x-for="[k, n] in Object.entries(act.crms||{})" :key="k"><button class="tab focusable !text-[12px]" :class="{active: crm===k}" @click="crm=k; loadPreview6()" x-text="n"></button></template>
+        </div>
+        <template x-if="preview6">
+          <div class="mt-3">
+            <div class="text-[12px]"><span class="mono text-[#a5b4fc]" x-text="preview6.method+' '+preview6.endpoint"></span></div>
+            <div class="text-[11px] sub mt-0.5" x-text="preview6.auth+' · '+preview6.note"></div>
+            <pre class="mono text-[10.5px] leading-[1.45] mt-2 p-3 rounded-lg bg-[#0a0a1f] border border-[#22224a] max-h-[220px] scroll-y scroll-thin whitespace-pre-wrap break-all" x-text="JSON.stringify(preview6.body, null, 1)"></pre>
+            <details class="mt-2 text-[12px]"><summary class="cursor-pointer text-[#a5b4fc]">Feld-Mapping für <span x-text="preview6.crm_name"></span></summary>
+              <div class="scroll-x scroll-thin"><table class="tbl mt-1 min-w-[420px]"><tbody><template x-for="m in preview6.mapping.filter(m => m[crm])" :key="m.field">
+                <tr><td class="mono text-[11px]" x-text="m.field"></td><td class="text-[11.5px]" x-text="m[crm]"></td></tr></template></tbody></table></div>
+            </details>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Monitoring -->
+    <div class="panel p-4 sm:p-5" data-tour="s6-monitoring">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+        <div>
+          <div class="font-semibold">Monitoring: Datenqualität &amp; Drift</div>
+          <div class="text-[12px] sub" x-text="mon ? (mon.psi_text+' · Stand '+fmtDateTime(mon.rechecked_at||mon.generated_at)) : 'lädt …'"></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span x-show="monJob && monJob.status!=='completed' && monJob.status!=='failed'" class="text-[11.5px] sub" x-text="monJob?.message || 'läuft …'"></span>
+          <button class="btn btn-primary text-[12.5px] focusable" @click="recheckMonitoring()" :disabled="monJob && (monJob.status==='running' || monJob.status==='queued')">↻ Erneut prüfen</button>
+        </div>
+      </div>
+      <template x-if="mon?.available">
+        <div class="space-y-4">
+          <div class="flex flex-wrap gap-1.5">
+            <template x-for="a in mon.alarms.slice(0, 8)" :key="a.name+a.month">
+              <span class="amp !whitespace-normal max-w-full text-left" :class="'amp-'+a.status" :title="'Wert '+fmtNum(a.value,3)+' · Schwelle '+fmtNum(a.threshold,2)">
+                <span class="amp-ic" x-text="ampIcon(a.status)"></span><span x-text="a.name+' · '+a.month"></span></span>
+            </template>
+            <span x-show="mon.alarms.length > 8" class="chip !py-0.5 !text-[11px]" x-text="'+ '+(mon.alarms.length-8)+' weitere'"></span>
+            <span x-show="!mon.alarms.length" class="amp amp-ok"><span class="amp-ic">✓</span>keine Alarme</span>
+          </div>
+          <div class="grid lg:grid-cols-2 gap-4">
+            <div><div class="text-[12.5px] font-semibold">Datenqualität je Monat (Rohdaten)</div>
+              <div class="relative h-[220px] mt-1"><canvas id="chartDq"></canvas></div></div>
+            <div><div class="text-[12.5px] font-semibold">Fehlerquoten je Monat</div>
+              <div class="relative h-[220px] mt-1"><canvas id="chartDqErr"></canvas></div></div>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <template x-for="k in Object.keys(mon.drift||{})" :key="'md'+k"><button class="tab focusable !text-[12px]" :class="{active: monUc===k}" @click="monUc=k" x-text="ucName(k)"></button></template>
+          </div>
+          <div class="grid lg:grid-cols-12 gap-4">
+            <div class="lg:col-span-5">
+              <div class="text-[12.5px] font-semibold">Drift je Merkmal (PSI)</div>
+              <div class="text-[11px] sub" x-text="'Referenz: Trainingszeitraum · aktuell: Stichtag'"></div>
+              <div class="space-y-1.5 mt-2 max-h-[260px] scroll-y scroll-thin pr-1">
+                <template x-for="d in (mon.drift?.[monUc]||[]).slice(0, 14)" :key="d.feature">
+                  <div class="flex items-center gap-2 text-[12px]">
+                    <span class="w-[46%] truncate" :title="d.label" x-text="d.label"></span>
+                    <div class="bar flex-1"><span :style="'width:'+Math.min(100,(d.psi||0)/0.5*100)+'%;background:'+(d.status==='bad'?'#f87171':d.status==='warn'?'#fbbf24':'#34d399')"></span></div>
+                    <span class="tabular-nums w-11 text-right" x-text="fmtNum(d.psi,2)"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+            <div class="lg:col-span-7">
+              <div class="text-[12.5px] font-semibold">Score-Verteilung</div>
+              <div class="text-[11px] sub" x-text="mon.scores?.[monUc] ? ('PSI '+fmtNum(mon.scores[monUc].psi,3)+' · Ø '+fmtPct(mon.scores[monUc].ref_mean)+' → '+fmtPct(mon.scores[monUc].cur_mean)) : ''"></div>
+              <div class="relative h-[220px] mt-1"><canvas id="chartScore"></canvas></div>
+            </div>
+          </div>
+          <div x-show="mon.timeline && monUc==='churn'">
+            <div class="text-[12.5px] font-semibold">Drift-Verlauf der wichtigsten Churn-Merkmale</div>
+            <div class="text-[11px] sub">PSI je Stichtag gegen die ersten sechs Trainingsmonate · gestrichelt: Beobachten 0,10 und Alarm 0,25</div>
+            <div class="relative h-[220px] mt-1"><canvas id="chartDrift"></canvas></div>
+          </div>
+          <div class="text-[11.5px] text-amber-200/90" x-text="mon.season_note"></div>
+        </div>
+      </template>
+    </div>
+
+    <!-- Report -->
+    <div class="panel p-4 sm:p-5 flex flex-col md:flex-row md:items-center gap-4 banner-3">
+      <div class="insight-ic">📄</div>
+      <div class="flex-1">
+        <div class="font-semibold">Readiness-Report</div>
+        <div class="text-[12.5px] sub">Zusammenfassung, Ampel je Use Case mit drei Dimensionen, Prüfergebnisse, Modellvergleich, Reparaturplan mit Aufwand,
+          Business Case mit Annahmen, Aktivierung und nächster Schritt – druckbar als PDF oder als Excel-Mappe.</div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a class="btn btn-primary text-[12.5px] focusable" href="/graph_ml/report" target="_blank" rel="noopener">Report öffnen (PDF)</a>
+        <a class="btn btn-ghost text-[12.5px] focusable" href="/graph_ml/report.xlsx">⬇ Excel</a>
+      </div>
+    </div>
+    </div>
+    </template>
+  </section>
 
   <!-- ═════════════════════════ AMPEL-MATRIX ═════════════════════════ -->
   <section class="mt-8" id="ampel">
@@ -1436,6 +1768,28 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
     <a href="/" class="hover:text-white">← SalesApps</a>
   </div>
 </footer>
+</div>
+
+<!-- ═════════════════════════ DEMO-TOUR ═════════════════════════ -->
+<div class="tour-card fade-in" x-show="tour.on" x-cloak role="dialog" aria-live="polite" aria-label="Demo-Tour">
+  <template x-if="tour.on">
+    <div>
+      <div class="flex items-center justify-between gap-2">
+        <span class="eyebrow" x-text="'Akt '+tourSteps[tour.i].act+' von 3 · '+['','Lücken sichtbar machen','Graph-Mapping','Rückblick & €-Potenzial'][tourSteps[tour.i].act]"></span>
+        <button class="text-[12px] sub hover:text-white focusable rounded" @click="endTour()" aria-label="Tour überspringen">Überspringen ✕</button>
+      </div>
+      <div class="font-bold text-[16px] mt-1" x-text="tourSteps[tour.i].title"></div>
+      <p class="text-[13px] sub mt-1" x-text="tourSteps[tour.i].text"></p>
+      <div class="flex items-center justify-between mt-3">
+        <div class="flex gap-1"><template x-for="(t, i) in tourSteps" :key="'td'+i"><span class="w-2 h-2 rounded-full" :class="i===tour.i ? 'bg-[#22d3ee]' : i<tour.i ? 'bg-[#8b7cf6]' : 'bg-[#30305f]'"></span></template></div>
+        <div class="flex gap-2">
+          <button class="btn btn-ghost !py-1.5 !px-3 focusable" @click="tourNext(-1)" :disabled="tour.i===0">← Zurück</button>
+          <button class="btn btn-primary !py-1.5 !px-3 focusable" @click="tourNext(1)" x-text="tour.i===tourSteps.length-1 ? 'Fertig' : 'Weiter →'"></button>
+        </div>
+      </div>
+      <div class="text-[10.5px] muted mt-2">Tastatur: ← → blättern · Esc beendet</div>
+    </div>
+  </template>
 </div>
 
 <!-- ═════════════════════════ USE-CASE-DRAWER ═════════════════════════ -->
@@ -1678,6 +2032,41 @@ const API = '/graph_ml/api';
 const CY = {};
 let monthlyChart = null;
 const CHARTS = {};
+// Markt & Zeitleiste (Konzept-Chat und Quellen aus dem PDF „Graph-ML-Readiness-Plattform“)
+const TIMELINE = [
+  { y: '2012/13', t: 'Klassisches AutoML', d: 'DataRobot und H2O.ai (2012), Dataiku (2013)' },
+  { y: '2017', t: 'Graph Neural Networks', d: 'in der Forschung verbreitet, u. a. Jure Leskovec (Stanford)', src: 'https://arxiv.org/pdf/2312.04615', s: 'Fey et al.' },
+  { y: '2021', t: 'Kumo gegründet', d: 'Leskovec, Vanja Josifovski, Hema Raghavan' },
+  { y: '2022', t: 'TabPFN', d: 'erstes Tabular Foundation Model (ICLR 2023); 2025 v2 in Nature' },
+  { y: '2024', t: 'RDL & RelBench', d: 'Relational Deep Learning (ICML) und RelBench (NeurIPS)', src: 'https://docs.nvidia.com/sdgm/research/relbench.md', s: 'NVIDIA RelBench' },
+  { y: '05/2025', t: 'KumoRFM', d: 'erstes relationales Foundation Model', src: 'https://kumo.ai/pricing', s: 'Kumo' },
+  { y: '11/2025', t: 'SAP RPT-1', d: 'Tabular Foundation Model von SAP' },
+  { y: '2026', t: 'Konsolidierung', d: 'NEXUS (Fundamental), KumoRFM-2, Nvidia übernimmt Kumo, Modelle offen', now: true },
+];
+const TIMELINE_SOURCES = [
+  ['Gartner: 60 % der KI-Projekte ohne KI-taugliche Daten', 'https://www.gartner.com/en/newsroom/press-releases/2025-02-26-lack-of-ai-ready-data-puts-ai-projects-at-risk'],
+  ['Beyond IID: Wann Tabular Foundation Models gewinnen (NeurIPS 2026)', 'https://neurips.cc/virtual/2026/poster/139490'],
+  ['Surprising Generalization of Tabular Foundation Models (NeurIPS 2026)', 'https://neurips.cc/virtual/2026/poster/150354'],
+  ['Fey et al.: Relational Deep Learning', 'https://arxiv.org/pdf/2312.04615'],
+  ['NVIDIA: RelBench', 'https://docs.nvidia.com/sdgm/research/relbench.md'],
+  ['Productize: unabhängiger Test von NVIDIA Kumo', 'https://productize.life/blog/nvidia-kumo-ai-test/en'],
+];
+const TOUR = [
+  { act: 1, title: 'Echte Daten, echte Lücken', step: 1, stage: 2, ds: 'online_retail_ii', target: '[data-tour="s1-facts"]',
+    text: 'Online Retail II: 1,07 Mio. Positionen eines britischen Händlers. 22,8 % ohne Kundennummer, Stornos ohne Originalbeleg, Dubletten, Preis 0 – so sehen ERP-Exporte aus.' },
+  { act: 1, title: 'Die Ampel macht sichtbar, was trägt', step: 3, stage: 2, target: '#ampel',
+    text: 'Neun Use Cases, neun Prüfungen. Schon der Profilcheck – nur Kennzahlen, keine Rohdaten – zeigt: Warranty und Marge tragen nicht, Churn und Retouren schon.' },
+  { act: 2, title: 'Die Datenbank als Graph', step: 2, ds: 'online_retail_ii', target: '[data-tour="s2-graph"]',
+    text: 'Jede Tabelle ein Knotentyp, jeder Schlüssel eine Kante. Verknüpfungsquoten zeigen, wo der Graph reißt – hier fehlen Kunden an 22,8 % der Positionen.' },
+  { act: 2, title: 'ERP-Schema: AdventureWorks', step: 2, ds: 'adventureworks', target: '[data-tour="s2-graph"]',
+    text: '68 Tabellen eines Fahrradherstellers, nur das Schema. Der Strukturcheck (Stufe 1) erkennt Schlüssel und zeigt, welche Use Cases grundsätzlich abbildbar sind.' },
+  { act: 3, title: 'Rückblick: Wer gewinnt?', step: 4, stage: 3, ds: 'online_retail_ii', btUc: 'churn', target: '[data-tour="s4-leader"]',
+    text: 'Streng nach Datum getrennt: Regel des Vertriebs gegen Bäume, TabPFN und Graph Neural Network. Bei Churn gewinnt das GNN mit +15 % Umsatz-Recall.' },
+  { act: 3, title: 'Was wäre wenn – in Euro', step: 5, bcUc: 'churn', target: '[data-tour="s5-whatif"]',
+    text: 'Aus echten Rückblick-Zahlen und klar benannten Annahmen: Rettungsquote, Kosten, Kampagnen. Den echten Effekt belegt erst der Pilot mit Kontrollgruppe.' },
+  { act: 3, title: 'Aktivieren statt nur prüfen', step: 6, target: '[data-tour="s6-lists"]',
+    text: 'Kalibrierte Aktionslisten mit Gründen, ein Mensch entscheidet, eine Kontrollgruppe misst – und der Readiness-Report fasst alles als PDF zusammen.' },
+];
 
 // Nach dem nächsten DOM-Update ausführen. Alpine aktualisiert das DOM per Microtask;
 // ein Timer läuft danach – auch in Hintergrund-Tabs, wo requestAnimationFrame pausiert.
@@ -1741,7 +2130,7 @@ function graphReady() {
         title: 'Lücken schließen, bis der Use Case trägt',
         desc: 'Reproduzierbare Reparaturschritte mit Vorher/Nachher-Ampel – und die Was-wäre-wenn-Rechnung mit Euro-Potenzial unter klar benannten Annahmen.',
         bullets: ['PB-01 fehlende Kundennummern · PB-02 Storno-Matching · PB-05 Artikelgruppen aus Freitext …', 'Ampel aus Datenreife, Vorhersagekraft und Euro-Potenzial', 'Was-wäre-wenn mit Schiebereglern: Listengröße, Rettungsquote, Kosten', 'Trichter vom Light-Scan bis zur Lizenz'] },
-      { n: 6, name: 'Aktivierung', sub: 'CRM · Kontrollgruppe', ready: false, prompt: 5, icon: '🚀',
+      { n: 6, name: 'Aktivierung', sub: 'CRM · Kontrollgruppe', ready: true, prompt: 5, icon: '🚀',
         title: 'Vorhersagen dorthin, wo der Vertrieb arbeitet',
         desc: 'Priorisierte Aktionslisten mit Gründen, Mensch in der Schleife, Kontrollgruppe für den Pilot, Monitoring von Datenqualität und Drift.',
         bullets: ['Aktionslisten je Use Case mit kalibrierten Schwellen', 'Export für CRM-Import (Salesforce, HubSpot, Dynamics) als Vorschau', 'Kontrollgruppe und Fallzahlschätzung für den Pilot', 'Readiness-Report als PDF und Excel'] },
@@ -1755,6 +2144,13 @@ function graphReady() {
     cySelection: '', subSelection: '',
     loading: { ds: true, sub: false },
     pb: null, pbSel: {}, pbGov: {}, pbBacktest: false, pbResult: null, pbJob: null,
+    act: null, actLoading: false, actUc: 'churn', actFilter: 'list', actRows: [], actTotal: 0, actOffset: 0, actLimit: 25,
+    decisions: {}, crm: 'salesforce', preview6: null, exporting: false,
+    rejectReasons: ['bereits in Kontakt', 'kein Bedarf beim Kunden', 'Daten veraltet / Kunde unbekannt', 'Kunde gesperrt', 'anderer Grund'],
+    pil: { uc: 'churn', n: 100, c: 20, p0: 50, eff: -25, alpha: 0.05, power: 0.8 },
+    mon: null, monUc: 'churn', monJob: null,
+    tour: { on: false, i: 0 }, timelineOpen: false,
+    timeline: TIMELINE, tourSteps: TOUR, TIMELINE_SOURCES,
     bc: null, bcVariant: 'v0', bcUc: 'churn', bcParams: {}, bcScenario: 'realistisch', bcThr: { green: 100000, yellow: 25000 },
     bt: null, btUc: 'churn', btRes: null, btLoading: false, btErr: '', btJob: null, btSeries: 0,
     stageAuto: false, checks: null, checksLoading: false, checksSeq: 0, ucOpen: null, ucFocusDim: null, colTable3: null,
@@ -1790,6 +2186,10 @@ function graphReady() {
       this.loadBacktest();
       this.loadPlaybooks();
       this.loadBC('v0');
+      this.loadActivation();
+      this.loadMonitoring();
+      this.$watch('monUc', () => afterRender(() => this.drawMonCharts()));
+      try { this.decisions = JSON.parse(localStorage.getItem('graphready.decisions') || '{}'); } catch (_) { this.decisions = {}; }
       this.$watch('bcParams', () => afterRender(() => this.drawBcCharts()), { deep: true });
       this.$watch('bcUc', () => afterRender(() => this.drawBcCharts()));
       this.$watch('bcScenario', () => afterRender(() => this.drawBcCharts()));
@@ -1811,6 +2211,7 @@ function graphReady() {
     gpuState() { return this.system?.chips?.find(c => c.id === 'gpu')?.state || 'off'; },
     deviceLabel(d) { return { local_gpu: 'Lokale GPU', runpod: 'RunPod GPU', cpu: 'CPU' }[d] || '–'; },
     healthText(h) { if (!h) return ''; return h.ok ? ` · ${h.workers_ready} Worker bereit` : ` · ${h.error}`; },
+    runpodDown() { const g = this.system?.runpod?.graphml; return g?.endpoint_set && g.health && !g.health.ok ? (g.health.error || 'keine Antwort') : ''; },
 
     async runSelftest() {
       try {
@@ -1886,10 +2287,201 @@ function graphReady() {
       if (this.step === 1) this.drawMonthly();
       if (this.step === 4 && this.btRes) this.drawBtCharts();
       if (this.step === 5) this.drawBcCharts();
+      if (this.step === 6) this.drawMonCharts();
       if (this.step === 2) {
         this.drawSchema();
         if (this.dsId === 'online_retail_ii' && this.subLoadedFor !== this.customerId) this.loadSubgraph();
         else if (CY.sub) { CY.sub.resize(); CY.sub.fit(undefined, 24); }
+      }
+    },
+
+    // ── Aktivierung (Modul 6) ──
+    async loadActivation() {
+      this.actLoading = true;
+      try {
+        this.act = await this.api('/activation');
+        if (this.act.available) { this.pilotReset(); await this.loadActRows(0); this.loadPreview6(); }
+      } catch (e) { this.act = { available: false, hint: 'Aktivierung nicht erreichbar: ' + e.message }; }
+      this.actLoading = false;
+    },
+    actTabs() {
+      if (!this.act?.available) return [];
+      return [...Object.entries(this.act.lists).map(([k, L]) => ({ id: k, name: L.name })),
+              { id: 'recommendation', name: 'Empfehlung' }, { id: 'next_best_action', name: 'Next Best Action' }];
+    },
+    actList() { return this.act?.lists?.[this.actUc] || null; },
+    actFilters() {
+      if (this.actUc === 'next_best_action') return [{ id: 'list', name: 'Aktionen' }, { id: 'retention', name: 'Retention' },
+        { id: 'onboarding', name: 'Neukunden' }, { id: 'cross', name: 'Cross-Selling' }, { id: 'reco', name: 'Empfehlung' },
+        { id: 'control', name: 'Kontrollgruppe' }, { id: 'none', name: 'keine Aktion' }];
+      return [{ id: 'list', name: 'Liste' }, { id: 'sure', name: 'sicher' }, { id: 'uncertain', name: 'unsicher – prüfen' },
+              { id: 'control', name: 'Kontrollgruppe' }, { id: 'übernommen', name: 'übernommen' }, { id: 'verworfen', name: 'verworfen' },
+              { id: 'all', name: 'alle bewerteten' }];
+    },
+    selectAct(uc) { this.actUc = uc; this.actFilter = 'list'; this.loadActRows(0); if (this.act.lists[uc]) { this.pil.uc = uc; this.pilotReset(); } this.loadPreview6(); },
+    async loadActRows(offset) {
+      this.actLoading = true; this.actOffset = offset;
+      try {
+        const r = await this.api('/activation/rows', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uc: this.actUc, filter: this.actFilter, offset, limit: this.actLimit, decisions: this.decisions }) });
+        this.actRows = r.rows; this.actTotal = r.total;
+      } catch (e) { this.actRows = []; this.actTotal = 0; this.notify(e.message, 'bad'); }
+      this.actLoading = false;
+    },
+    decKey(r) { return this.actUc + '|' + r.id; },
+    decision(r) { return this.decisions[this.decKey(r)] || { status: 'offen', reason: '' }; },
+    saveDecisions() { try { localStorage.setItem('graphready.decisions', JSON.stringify(this.decisions)); } catch (_) {} },
+    decide(r, status, reason) {
+      const k = this.decKey(r), cur = this.decisions[k];
+      if (reason === undefined && cur?.status === status) { const d = { ...this.decisions }; delete d[k]; this.decisions = d; }
+      else this.decisions = { ...this.decisions, [k]: { status, reason: reason ?? (cur?.reason || ''), at: new Date().toISOString() } };
+      this.saveDecisions();
+    },
+    acceptSure() {
+      let n = 0;
+      this.actRows.filter(r => r.sure && !r.control && this.decision(r).status === 'offen').forEach(r => { this.decide(r, 'übernommen'); n++; });
+      this.notify(n ? `${n} sichere Einträge übernommen` : 'Auf dieser Seite gibt es keine offenen sicheren Einträge');
+    },
+    decisionSummary() {
+      const v = Object.entries(this.decisions).filter(([k]) => k.startsWith(this.actUc + '|')).map(([, d]) => d.status);
+      const a = v.filter(x => x === 'übernommen').length, b = v.filter(x => x === 'verworfen').length;
+      return `Mensch in der Schleife: ${a} übernommen · ${b} verworfen (im Browser gespeichert, fließt in den Export ein). Kontrollgruppe ist nicht entscheidbar.`;
+    },
+    rowObject(r) {
+      const e = r.extra || {};
+      if (e.group_name) return 'Gruppe ' + e.group_name;
+      if (e.product) return `${this.titleCase(e.product)} · ${e.qty} Stk. · Beleg ${e.invoice} · ${this.fmtDate(e.date)}`;
+      if (e.first_value != null) return 'erster Warenkorb ' + this.fmtEur(e.first_value);
+      if (e.recency != null) return `${e.recency <= 1 ? 'Kauf gestern' : 'seit '+e.recency+' Tagen ohne Kauf'} · ${this.fmtEur(e.monetary_365)} / Jahr`;
+      return '';
+    },
+    uncShort(u) { return { grenzfall: 'Grenzfall', uneinig: 'Engines uneinig', wenig_historie: 'wenig Historie' }[u] || u; },
+    nbaName(k) { return { control: 'Kontrollgruppe', retention: 'Retention', onboarding: 'Neukunden', cross: 'Cross-Selling', reco: 'Empfehlung', none: 'keine Aktion' }[k] || k; },
+    nbaStyle(k) { const c = { retention: '#f87171', onboarding: '#fbbf24', cross: '#22d3ee', reco: '#8b7cf6', control: '#94a3b8', none: '#64748b' }[k] || '#64748b';
+      return `border-color:${c}88;color:${c}`; },
+    sureText(cal) {
+      const b = cal.sure_before, a = cal.sure_after;
+      if (!b) return '';
+      return `„Sichere“ Vorhersagen (≥ 80 %): roh ${this.fmtInt(b.n)}, davon eingetreten ${b.observed == null ? '–' : this.fmtPct(b.observed)} · kalibriert ${this.fmtInt(a.n)}` +
+        (a.observed == null ? '' : `, eingetreten ${this.fmtPct(a.observed)}`);
+    },
+    pilotReset() {
+      const L = this.act?.lists?.[this.pil.uc]; if (!L) return;
+      const P = L.pilot;
+      this.pil = { ...this.pil, n: Math.max(20, P.n_t + P.n_c), c: Math.round(this.act.control_share * 100), p0: Math.max(1, Math.round(P.p0 * 100)),
+                   eff: Math.round(P.effect_rel * 100) };
+    },
+    pilotCalc() {
+      // identisch zu activation.pilot_size (Zwei-Stichproben-Test auf Anteile, Normal-Approximation)
+      const za = this.pil.alpha == 0.1 ? 1.644854 : 1.959964, zb = this.pil.power == 0.9 ? 1.281552 : 0.841621, z = za + zb;
+      const clamp = x => Math.min(Math.max(x, 1e-4), 1 - 1e-4);
+      const p0 = clamp(this.pil.p0 / 100), p1 = clamp(p0 * (1 + this.pil.eff / 100)), d = Math.abs(p1 - p0);
+      const c = this.pil.c / 100, n = this.pil.n, nc = Math.max(1, Math.round(n * c)), nt = Math.max(1, n - nc);
+      const mde = z * Math.sqrt(p0 * (1 - p0) * (1 / nt + 1 / nc));
+      const req = d > 0 ? z * z * (p0 * (1 - p0) / c + p1 * (1 - p1) / (1 - c)) / (d * d) : null;
+      return { mde_abs: mde, mde_rel: mde / p0, detectable: d >= mde, n_required: req ? Math.ceil(req) : null, periods: req ? Math.ceil(req / n) : null };
+    },
+    actExportUc() { return this.act?.lists?.[this.actUc] || this.actUc === 'next_best_action' ? this.actUc : 'churn'; },
+    async exportList(fmt) {
+      this.exporting = true;
+      try {
+        const r = await fetch(API + '/activation/export', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uc: this.actExportUc(), format: fmt, decisions: this.decisions }) });
+        if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `HTTP ${r.status}`);
+        const blob = await r.blob(), name = (r.headers.get('Content-Disposition') || '').match(/filename="(.+?)"/)?.[1] || `graphready.${fmt}`;
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        this.notify(`${name} erstellt – nichts wurde an ein CRM gesendet`);
+      } catch (e) { this.notify('Export: ' + e.message, 'bad'); }
+      this.exporting = false;
+    },
+    async loadPreview6() {
+      if (!this.act?.available) return;
+      try {
+        this.preview6 = await this.api('/activation/preview', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uc: this.actExportUc(), crm: this.crm, decisions: this.decisions }) });
+      } catch (e) { this.preview6 = null; }
+    },
+
+    // ── Monitoring ──
+    async loadMonitoring() {
+      try { this.mon = await this.api('/monitoring'); afterRender(() => this.drawMonCharts()); } catch (e) { this.mon = { available: false }; }
+    },
+    async recheckMonitoring() {
+      try {
+        let job = await this.api('/monitoring/recheck', { method: 'POST' }); this.monJob = job;
+        while (job.status === 'queued' || job.status === 'running') {
+          await new Promise(res => setTimeout(res, 1200)); job = await this.api('/jobs/' + job.id); this.monJob = job;
+        }
+        if (job.status === 'failed') throw new Error(job.error || 'Job fehlgeschlagen');
+        await this.loadMonitoring(); this.notify('Monitoring neu geprüft');
+      } catch (e) { this.notify('Erneut prüfen: ' + e.message, 'bad'); }
+    },
+    drawMonCharts() {
+      if (this.step !== 6 || !this.mon?.available) return;
+      const mk = (id, cfg) => { const el = document.getElementById(id); if (!el) return; if (CHARTS[id]) CHARTS[id].destroy(); CHARTS[id] = new Chart(el, cfg); };
+      const tick = { color: '#8089a6', font: { size: 10 } }, grid = { color: 'rgba(255,255,255,.05)' };
+      const pct = v => (v * 100).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' %';
+      const base = { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { labels: { color: '#a0a8bf', boxWidth: 10, font: { size: 10 } } },
+                   tooltip: { callbacks: { label: x => ` ${x.dataset.label}: ${x.raw == null ? '–' : pct(x.raw)}` } } },
+        scales: { x: { ticks: tick, grid: { display: false } }, y: { ticks: { ...tick, callback: pct }, grid } } };
+      const M = this.mon.months, labels = M.map(m => m.month.slice(5) + '/' + m.month.slice(2, 4));
+      const line = (label, key, color) => ({ label, data: M.map(m => m[key]), borderColor: color, backgroundColor: color, pointRadius: 0, borderWidth: 2, tension: .25, spanGaps: true });
+      mk('chartDq', { type: 'line', data: { labels, datasets: [line('Füllgrad Kundennummer', 'cust_fill', '#22d3ee'),
+        line('Stornos mit Original', 'storno_linked', '#8b7cf6'), line('Beschreibung gefüllt', 'desc_fill', '#34d399')] },
+        options: { ...base, scales: { ...base.scales, y: { ...base.scales.y, min: 0.4, max: 1 } } } });
+      mk('chartDqErr', { type: 'line', data: { labels, datasets: [line('Dubletten', 'dup', '#f87171'), line('Preis 0', 'price0', '#fbbf24'),
+        line('Nicht-Artikel', 'non_article', '#f472b6')] }, options: { ...base, scales: { ...base.scales, y: { ...base.scales.y, min: 0 } } } });
+      const sc = this.mon.scores?.[this.monUc];
+      if (sc) mk('chartScore', { type: 'bar', data: { labels: sc.ref.map((_, i) => (i * 5) + '–' + (i * 5 + 5) + ' %'),
+        datasets: [{ label: sc.ref_label, data: sc.ref, backgroundColor: 'rgba(139,124,246,.6)', borderRadius: 3 },
+                   { label: sc.cur_label, data: sc.cur, backgroundColor: 'rgba(34,211,238,.75)', borderRadius: 3 }] },
+        options: { ...base, scales: { x: { ticks: { ...tick, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 }, grid: { display: false } }, y: { ticks: { ...tick, callback: pct }, grid } } } });
+      const T = this.mon.timeline;
+      if (T && this.monUc === 'churn') {
+        const cols = ['#22d3ee', '#8b7cf6', '#34d399', '#fbbf24', '#f472b6'];
+        const thr = (v, c) => ({ label: v === 0.1 ? 'Beobachten 0,10' : 'Alarm 0,25', data: T.labels.map(() => v), borderColor: c, borderDash: [5, 4], borderWidth: 1.2, pointRadius: 0 });
+        mk('chartDrift', { type: 'line', data: { labels: T.labels, datasets: [...T.series.map((s, i) => ({ label: s.label, data: s.psi, borderColor: cols[i % 5],
+            backgroundColor: cols[i % 5], pointRadius: 1.5, borderWidth: 2, tension: .25 })), thr(0.1, '#fbbf24'), thr(0.25, '#f87171')] },
+          options: { ...base, plugins: { ...base.plugins, tooltip: { callbacks: { label: x => ` ${x.dataset.label}: ${this.fmtNum(x.raw, 3)}` } } },
+            scales: { x: { ticks: tick, grid: { display: false } }, y: { ticks: { ...tick, callback: v => this.fmtNum(v, 2) }, grid, min: 0 } } } });
+      }
+    },
+
+    // ── Demo-Tour „Pitch in 3 Akten“ ──
+    startTour() { this.tour = { on: true, i: 0 }; this.tourGo(); },
+    endTour() { this.tour.on = false; document.querySelectorAll('.tour-hl').forEach(e => e.classList.remove('tour-hl')); },
+    tourNext(d) { const i = this.tour.i + d; if (i < 0) return; if (i >= this.tourSteps.length) return this.endTour(); this.tour.i = i; this.tourGo(); },
+    async tourGo() {
+      const t = this.tourSteps[this.tour.i];
+      document.querySelectorAll('.tour-hl').forEach(e => e.classList.remove('tour-hl'));
+      if (t.ds && t.ds !== this.dsId) await this.selectDataset(t.ds);
+      if (t.stage && this.stage !== t.stage) this.stage = t.stage;
+      if (t.step) this.step = t.step;
+      if (t.bcUc) this.bcUc = t.bcUc;
+      if (t.btUc) this.selectBt(t.btUc);
+      const i = this.tour.i;
+      const show = (behavior) => {             // zweimal: Inhalte (Graph, Charts) ändern nach dem Laden ihre Höhe
+        if (!this.tour.on || this.tour.i !== i) return;
+        const el = t.target && document.querySelector(t.target);
+        if (!el) return;
+        el.classList.add('tour-hl');
+        const r = el.getBoundingClientRect();
+        const top = r.top + scrollY - (r.height > innerHeight * 0.7 ? 76 : (innerHeight - r.height) / 2);
+        window.scrollTo({ top: Math.max(0, top), behavior });
+      };
+      setTimeout(() => show('smooth'), 450); setTimeout(() => show('instant'), 1600);
+    },
+    tourKey(e) {
+      if (!this.tour.on) return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); this.tourNext(1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); this.tourNext(-1); }
+    },
+    stepKey(e, n) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault(); const k = Math.min(6, Math.max(1, n + (e.key === 'ArrowRight' ? 1 : -1)));
+        this.step = k; this.$nextTick(() => document.querySelector(`[data-step="${k}"]`)?.focus());
       }
     },
 
@@ -1903,6 +2495,8 @@ function graphReady() {
       return n.toLocaleString('de-DE');
     },
     fmtDate(iso) { if (!iso) return '–'; const d = new Date(iso); return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }); },
+    fmtNum(x, d = 2) { return x == null || isNaN(x) ? '–' : Number(x).toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d }); },
+    titleCase(s) { return (s || '').toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase()); },
     shortName(n) { return n.includes('.') ? n.split('.').pop() : n; },
     tblLabel(name) { return this.mapping?.tables.find(t => t.name === name)?.label || name; },
     statusColor(s) { return STATUS_COLORS[s] || STATUS_COLORS.unknown; },

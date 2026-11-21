@@ -559,7 +559,10 @@ def reco_snapshot(b: Base, T: pd.Timestamp) -> dict:
     """Historie (365 Tage vor T) und Ground Truth (90 Tage ab T) für aktive, kaufende Kunden."""
     hist = b.lines[(b.lines["time"] < T) & (b.lines["time"] >= T - pd.Timedelta(days=HISTORY))]
     fut = b.lines[(b.lines["time"] >= T) & (b.lines["time"] < T + pd.Timedelta(days=HORIZON))]
-    users = np.intersect1d(hist["cust"].unique(), fut["cust"].unique())
+    if T > b.tmax:          # Aktivierungs-Stichtag ohne Zukunft: alle aktiven Kunden bewerten (Truth bleibt leer)
+        users = np.sort(hist.loc[hist["cust"] > 0, "cust"].unique())
+    else:
+        users = np.intersect1d(hist["cust"].unique(), fut["cust"].unique())
     uidx = {u: i for i, u in enumerate(users)}
     h = hist[hist["cust"].isin(users)]
     R = sparse.csr_matrix((np.ones(len(h)), (h["cust"].map(uidx).to_numpy(), h["prod"].to_numpy())),

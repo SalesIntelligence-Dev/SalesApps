@@ -90,8 +90,22 @@ CATALOG: list[dict] = [
 ]
 
 
+# Aufwand in Personentagen (von–bis) für den Reparaturplan im Report – Schätzung für einen Readiness-Sprint
+EFFORT_DAYS = {"PB-01": (0.5, 1), "PB-02": (1, 2), "PB-03": (0.5, 0.5), "PB-04": (0.5, 1), "PB-05": (1.5, 3),
+               "PB-06": (0.25, 0.5), "PB-07": (0.5, 1), "PB-08": (0.25, 0.25), "PB-09": (1, 3), "PB-10": (5, 15)}
+EFFORT_NOTE = {"PB-05": "inkl. fachlicher Abnahme der Gruppen", "PB-09": "Abstimmung mit Datenschutz, Betriebsrat, IT",
+               "PB-10": "Datenbeschaffung beim Kunden (ERP-Export, Garantiefälle, Kampagnen)"}
+
+
+def effort_text(pid: str) -> str:
+    lo, hi = EFFORT_DAYS.get(pid, (0, 0))
+    f = lambda x: (f"{x:.2f}".rstrip("0").rstrip(".")).replace(".", ",")  # noqa: E731
+    return f"{f(lo)} PT" if lo == hi else f"{f(lo)}–{f(hi)} PT"
+
+
 def catalog() -> list[dict]:
-    return CATALOG
+    return [{**c, "effort": effort_text(c["id"]), "effort_days": list(EFFORT_DAYS.get(c["id"], (0, 0))),
+             "effort_note": EFFORT_NOTE.get(c["id"])} for c in CATALOG]
 
 
 # ── einzelne Playbooks (immer auf Kopien, idempotent) ─────────────────────────

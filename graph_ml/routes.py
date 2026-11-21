@@ -376,3 +376,123 @@ def api_business_case():
     out["available_variants"] = ["v0"] + ([_recommended_vid()] if _recommended_vid() else [])
     return jsonify(out)
 
+
+
+# ── Aktivierung, Monitoring, Report (Modul 6) ─────────────────────────────────
+
+_ACT_HINT = "Noch nicht vorberechnet – .venv/bin/python -m graph_ml.precompute --only-activation ausführen"
+
+
+@graph_bp.route("/graph_ml/api/activation")
+def api_activation():
+    from . import activation as act
+    s = act.summary()
+    if not s:
+        return jsonify({"available": False, "hint": _ACT_HINT})
+    return jsonify({"available": True, **s, "crms": act.CRMS, "fields": act.EXPORT_FIELDS})
+
+
+def _body() -> dict:
+    return request.get_json(silent=True) or {}
+
+
+@graph_bp.route("/graph_ml/api/activation/rows", methods=["POST"])
+def api_activation_rows():
+    from . import activation as act
+    b = _body()
+    uc = b.get("uc", "churn")
+    if not act.load():
+        return _err(_ACT_HINT, 404)
+    if uc not in act.LIST_UCS + ["recommendation", "next_best_action"]:
+        return _err("Unbekannte Liste", 404)
+    limit = max(1, min(int(b.get("limit") or 25), 200))
+    return jsonify(act.rows(uc, b.get("filter", "list"), max(0, int(b.get("offset") or 0)), limit,
+                            b.get("decisions") or {}))
+
+
+@graph_bp.route("/graph_ml/api/activation/export", methods=["POST"])
+def api_activation_export():
+    """Export im generischen CRM-Format (CSV · XLSX · JSON) – Kontrollgruppe getrennt, nichts wird gesendet."""
+    from . import activation as act
+    b = _body()
+    uc, fmt = b.get("uc", "churn"), b.get("format", "csv")
+    if not act.load():
+        return _err(_ACT_HINT, 404)
+    if uc not in act.LIST_UCS + ["next_best_action"]:
+        return _err("Diese Liste ist nicht exportierbar", 400)
+    recs, ctrl = act.export_records(uc, b.get("decisions") or {})
+    name = f"graphready_{uc}_{act.load()['t_now']}"
+    if fmt == "xlsx":
+        return Response(act.to_xlsx(uc, recs, ctrl),
+                        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        headers={"Content-Disposition": f'attachment; filename="{name}.xlsx"'})
+    if fmt == "json":
+        art = act.load()
+        payload = {"meta": {"source": "GraphReady", "list": uc, "list_date": art["t_now"],
+                            "valid_until": art["valid_until"], "data_version": art["variant"],
+                            "format": "generic-crm-import/1", "fields": dict(act.EXPORT_FIELDS),
+                            "control_group": "separat unter control_group – nicht kontaktieren",
+                            "note": "Nur Export – GraphReady sendet nichts an externe Systeme."},
+                   "records": recs, "control_group": ctrl}
+        return Response(json.dumps(payload, ensure_ascii=False, indent=1, default=str), mimetype="application/json",
+                        headers={"Content-Disposition": f'attachment; filename="{name}.json"'})
+    return Response("﻿" + act.to_csv(recs), mimetype="text/csv",
+                    headers={"Content-Disposition": f'attachment; filename="{name}.csv"'})
+
+
+@graph_bp.route("/graph_ml/api/activation/mapping.csv")
+def api_activation_mapping():
+    from . import activation as act
+    return Response("﻿" + act.mapping_csv(), mimetype="text/csv",
+                    headers={"Content-Disposition": 'attachment; filename="graphready_crm_mapping.csv"'})
+
+
+@graph_bp.route("/graph_ml/api/activation/preview", methods=["POST"])
+def api_activation_preview():
+    from . import activation as act
+    b = _body()
+    crm, uc = b.get("crm", "salesforce"), b.get("uc", "churn")
+    if crm not in act.CRMS:
+        return _err("Unbekanntes CRM", 400)
+    if not act.load():
+        return _err(_ACT_HINT, 404)
+    recs, _ = act.export_records(uc, b.get("decisions") or {})
+    return jsonify({"crm": crm, "crm_name": act.CRMS[crm], "sent": False, "records": len(recs),
+                    "mapping": act.mapping_rows(), **act.push_preview(crm, recs)})
+
+
+@graph_bp.route("/graph_ml/api/monitoring")
+def api_monitoring():
+    from . import activation as act
+    mon = act.load_monitoring()
+    if not mon:
+        return jsonify({"available": False, "hint": _ACT_HINT})
+    return jsonify({"available": True, **mon})
+
+
+def _recheck_job(ctx):
+    from . import activation as act
+    ctx.set_device("Lokal" if _live_mode()["mode"] == "local" else "Render-CPU")
+    return act.recheck_monitoring(ctx)
+
+
+@graph_bp.route("/graph_ml/api/monitoring/recheck", methods=["POST"])
+def api_monitoring_recheck():
+    """„Erneut prüfen“: Datenqualität und Merkmals-Drift neu (CPU, ohne Modelltraining) – als Job."""
+    job = store.submit("monitoring", "Monitoring erneut prüfen", _recheck_job)
+    return jsonify(job.to_dict()), 202
+
+
+@graph_bp.route("/graph_ml/report")
+def graph_ml_report():
+    from . import report
+    variant = request.args.get("variant", "v0")
+    return Response(report.render_html(report.collect(variant)), mimetype="text/html")
+
+
+@graph_bp.route("/graph_ml/report.xlsx")
+def graph_ml_report_xlsx():
+    from . import report
+    data = report.collect(request.args.get("variant", "v0"))
+    return Response(report.to_xlsx(data), mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    headers={"Content-Disposition": f'attachment; filename="graphready_readiness_report_{data["date"]}.xlsx"'})

@@ -7,6 +7,7 @@ graph_ml/artifacts/backtest_<use_case>.json – Render zeigt sie sofort an.
   .venv/bin/python -m graph_ml.precompute              # mit lokaler GPU (RTX 3060): alle Engines
   python3 -m graph_ml.precompute --engines rule,lgbm  # nur CPU-Engines
   python3 -m graph_ml.precompute --use-cases churn
+  .venv/bin/python -m graph_ml.precompute --only-activation   # Modul 6: Aktionslisten, NBA, Monitoring
 
 GPU-Engines, die in der aktuellen Umgebung nicht laufen, behalten ihr
 Ergebnis aus einer früheren Vorberechnung (falls vorhanden).
@@ -27,12 +28,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--playbooks", action="store_true",
                     help="zusätzlich: Wirkung je Playbook + empfohlenes Paket (v1) inkl. Rückblick")
     ap.add_argument("--only-playbooks", action="store_true", help="nur den Playbook-Teil rechnen")
+    ap.add_argument("--activation", action="store_true",
+                    help="zusätzlich: Aktionslisten, Next Best Action, Kontrollgruppe und Monitoring (Modul 6)")
+    ap.add_argument("--only-activation", action="store_true", help="nur Modul 6 rechnen")
     args = ap.parse_args(argv)
     gpu = local_gpu()
     print(f"[precompute] Gerät: {'Lokale GPU · ' + gpu[1] if gpu[0] else 'nur CPU'}", flush=True)
     engines = [e for e in args.engines.split(",") if e] or None
     t_all = time.time()
-    for uc in ([] if args.only_playbooks else args.use_cases.split(",")):
+    for uc in ([] if args.only_playbooks or args.only_activation else args.use_cases.split(",")):
         t0 = time.time()
         res = ev.run_use_case(uc, engine_ids=engines, previous=ev.load(uc))
         ev.save(res)
@@ -43,7 +47,7 @@ def main(argv: list[str] | None = None) -> int:
             m = e.get("metrics", {}).get(res["main_metric"])
             print(f"    {e['id']:11s} {e['status']:12s} {res['main_metric']}={m if m is None else round(m, 4)}"
                   f"  {e.get('meta', {}).get('device', '')}  {e.get('reason', '')[:70]}", flush=True)
-    if args.playbooks or args.only_playbooks:
+    if (args.playbooks or args.only_playbooks) and not args.only_activation:
         import json
         from . import playbooks as pb
         pb.compute_single_effects(log=lambda m: print(m, flush=True))
@@ -55,6 +59,15 @@ def main(argv: list[str] | None = None) -> int:
             print(f"    {c['id']:20s} {c['before']['score']} → {c['after']['score']} ({c['delta']:+d})", flush=True)
         for uc, b in res.get("backtest", {}).items():
             print(f"    Rückblick {uc:20s} {b['best']} · {b['vorhersagekraft'].get('reason')}", flush=True)
+    if args.activation or args.only_activation:
+        from . import activation as act
+        art = act.build(log=lambda m: print(m, flush=True))
+        for uc, L in art["lists"].items():
+            print(f"    {uc:20s} {L['engine']['name']:28s} Liste {L['summary']['in_list']:5d} · "
+                  f"Wert {L['summary']['ev_list']:>12,.0f} € · ECE {L['calibration']['ece_before']} → "
+                  f"{L['calibration']['ece_after']}", flush=True)
+        print(f"    NBA {art['nba']['counts']} · Kontrollgruppe {art['control']['control']} von "
+              f"{art['control']['customers']}", flush=True)
     print(f"[precompute] fertig in {time.time() - t_all:.0f} s", flush=True)
     return 0
 
