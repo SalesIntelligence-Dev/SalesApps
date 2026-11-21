@@ -131,7 +131,8 @@ class RoutesTest(unittest.TestCase):
         sysinfo = self.client.get("/graph_ml/api/system?health=0").get_json()
         self.assertEqual({c["id"] for c in sysinfo["chips"]}, {"cpu", "gpu", "kumo", "tabpfn"})
         ids = [d["id"] for d in self.client.get("/graph_ml/api/datasets").get_json()]
-        self.assertEqual(ids[:2], ["online_retail_ii", "adventureworks"])
+        self.assertEqual(ids[0], "online_retail_ii")
+        self.assertIn("adventureworks", ids)
         self.assertEqual(len(self.client.get("/graph_ml/api/usecases").get_json()), 9)
 
     def test_upload_roundtrip(self):

@@ -244,9 +244,14 @@ def build_mapping(tables: dict[str, pd.DataFrame], *, dataset_id: str, extra: di
             key_cache[(t, c)] = _unique_keys(tables[t][c])
         return key_cache[(t, c)]
 
-    # Fremdschlüssel: Namensähnlichkeit als Vorfilter, Werte-Inklusion als Beweis
+    # Fremdschlüssel: deklarierte Schlüssel (ERP-Datenbanken) messen – sonst Namensähnlichkeit + Werte-Inklusion
     relations = []
-    for a, dfa in tables.items():
+    declared = extra.get("declared_fks")
+    for fk in declared or []:
+        rel = _measure_declared(fk, tables)
+        if rel:
+            relations.append(rel)
+    for a, dfa in ({} if declared else tables).items():
         for col in dfa.columns:
             pa = profiles[a][col]
             if pa["kind"] in ("float", "datetime", "bool") or (col == pks[a] and _is_surrogate(a, col)):
@@ -285,11 +290,12 @@ def build_mapping(tables: dict[str, pd.DataFrame], *, dataset_id: str, extra: di
         time_cols = [c["name"] for c in cols if "Zeit" in c["roles"]]
         table_out.append({
             "name": t, "label": extra.get("labels", {}).get(t, t), "rows": int(len(df)),
+            **({"schema": extra["schemas"][t]} if t in (extra.get("schemas") or {}) else {}),
             "n_columns": int(df.shape[1]), "primary_key": pks[t], "time_columns": time_cols,
             "columns": cols,
         })
 
-    paths = _path_coverage(tables, relations, pks)
+    paths = _path_coverage(tables, [r for r in relations if not r.get("composite")], pks)
     mapping = {
         "artifact_version": ARTIFACT_VERSION,
         "dataset_id": dataset_id,
@@ -307,6 +313,42 @@ def build_mapping(tables: dict[str, pd.DataFrame], *, dataset_id: str, extra: di
     mapping["summary"] = _summary(mapping)
     mapping["compute_seconds"] = round(time.time() - t0, 2)
     return mapping
+
+
+def _measure_declared(fk: dict, tables: dict) -> dict | None:
+    """Deklarierten (auch zusammengesetzten) Fremdschlüssel messen: Anteil der befüllten Werte mit Treffer."""
+    a, b = fk["from_table"], fk["to_table"]
+    ca, cb = list(fk["from_columns"]), list(fk["to_columns"])
+    if a not in tables or b not in tables or not set(ca) <= set(tables[a].columns) or not set(cb) <= set(tables[b].columns):
+        return None
+    src, dst = tables[a][ca], tables[b][cb]
+    if len(src) > MAX_FK_SAMPLE:
+        src = src.sample(MAX_FK_SAMPLE, random_state=0)
+    filled = src.notna().all(axis=1)
+
+    def key(df):                         # vergleichbare (zusammengesetzte) Schlüssel – 279.0 == 279
+        parts = [_key_values(df[c]).map(lambda v: "" if v is None or v != v else
+                                        (str(int(v)) if isinstance(v, float) and v.is_integer() else str(v)))
+                 for c in df.columns]
+        return pd.Series(parts[0] if len(parts) == 1 else
+                         pd.concat(parts, axis=1).agg("\x1f".join, axis=1), index=df.index)
+
+    sv = key(src[filled])
+    dv = set(key(dst.dropna()))
+    found = int(sv.isin(dv).sum()) if len(sv) else 0
+    n_full, n, m = len(tables[a]), len(src), int(filled.sum())
+    rate = found / m if m else 1.0
+    scale = n_full / n if n else 1
+    # zusammengesetzte Schlüssel: gemessen wird das Tupel; from_column = erste Spalte (für Rollen/Anzeige)
+    return {"id": f"{a}.{'+'.join(ca)}->{b}.{'+'.join(cb)}", "kind": "fk", "declared": True,
+            "from_table": a, "from_column": ca[0], "to_table": b, "to_column": cb[0],
+            **({"composite": True, "from_columns": ca, "to_columns": cb,
+                "label": f"{a}.({', '.join(ca)}) → {b}"} if len(ca) > 1 else {}),
+            "name_score": 1.0, "inclusion": round(rate, 4), "rows": n_full,
+            "linked_rows": int(round(found * scale)), "null_rows": int(round((n - m) * scale)),
+            "orphan_rows": int(round((m - found) * scale)), "linkage_rate": round(rate, 4),
+            "status": "ok" if rate >= LINK_OK else "warn" if rate >= LINK_WARN else "bad",
+            "sampled": n_full > MAX_FK_SAMPLE, **({"self": True} if a == b else {})}
 
 
 def _is_surrogate(table: str, col: str) -> bool:

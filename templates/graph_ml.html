@@ -298,13 +298,16 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
             <div class="flex items-center gap-2.5">
               <span class="w-9 h-9 rounded-xl grid place-items-center text-[17px]"
                     :style="d.kind==='schema' ? 'background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.35)' : 'background:rgba(139,124,246,.14);border:1px solid rgba(139,124,246,.4)'"
-                    x-text="d.kind==='schema' ? '🗂️' : d.kind==='profile' ? '📊' : (d.builtin ? '🛒' : '📄')"></span>
+                    x-text="d.kind==='schema' ? '🗂️' : d.kind==='profile' ? '📊' : ({online_retail_ii: '🛒', adventureworks_data: '🚲', wwi: '📦', scania: '🚚', cmapss: '✈️'}[d.id] || (d.builtin ? '🗄️' : '📄'))"></span>
               <div>
                 <div class="font-semibold text-[14px]" x-text="d.name"></div>
                 <div class="text-[11px] sub" x-text="d.source"></div>
               </div>
             </div>
-            <span class="chip !py-0.5" x-text="d.kind==='schema' ? 'nur Schema' : d.kind==='profile' ? 'Profil' : 'Daten'"></span>
+            <span class="flex gap-1 flex-none">
+              <span class="chip !py-0.5" x-show="d.facts?.synthetic" title="künstliche Beispieldaten – zeigt die Methode, nicht die Modellgüte beim Kunden">künstlich</span>
+              <span class="chip !py-0.5" x-text="d.kind==='schema' ? 'nur Schema' : d.kind==='profile' ? 'Profil' : 'Daten'"></span>
+            </span>
           </div>
           <p class="text-[12px] sub mt-3 line-clamp-2" x-text="d.description"></p>
           <div class="flex items-center justify-between mt-3 text-[11.5px]">
@@ -2125,7 +2128,9 @@ function guardWheel(el) {
 }
 
 const SCHEMA_COLORS = { Sales: '#8b7cf6', Production: '#22d3ee', Person: '#f59e0b', Purchasing: '#34d399', HumanResources: '#f472b6',
-                        Vertrieb: '#8b7cf6', Artikel: '#22d3ee', Kunden: '#f59e0b', Stammdaten: '#34d399', Daten: '#f472b6' };
+                        Vertrieb: '#8b7cf6', Artikel: '#22d3ee', Kunden: '#f59e0b', Stammdaten: '#34d399', Daten: '#f472b6',
+                        Application: '#f59e0b', Warehouse: '#22d3ee',
+                        Fahrzeuge: '#8b7cf6', Konfiguration: '#22d3ee', Service: '#f472b6', Betrieb: '#f59e0b', Anlagen: '#8b7cf6' };
 const STATUS_COLORS = { ok: '#34d399', warn: '#fbbf24', bad: '#f87171', unknown: '#5b6488' };
 
 function graphReady() {
@@ -2993,7 +2998,8 @@ function graphReady() {
       const f = d.facts || {};
       if (d.kind === 'profile') return `${f.tables} Tabellen · ${this.fmtCompact(f.rows)} Zeilen (nur Kennzahlen)`;
       if (d.kind === 'schema') return `${f.tables} Tabellen · ${f.foreign_keys} FKs`;
-      if (d.builtin) return `${this.fmtCompact(f.rows)} Zeilen · ${f.months} Monate`;
+      if (d.builtin && f.months) return `${this.fmtCompact(f.rows)} Zeilen · ${f.months} Monate`;
+      if (d.builtin) return `${f.tables} Tabellen · ${this.fmtCompact(f.rows)} Zeilen` + (f.foreign_keys ? ` · ${f.foreign_keys} FKs` : '');
       return `${f.tables} Tabelle(n) · ${this.fmtCompact(f.rows)} Zeilen`;
     },
     kpis() {

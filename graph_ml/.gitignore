@@ -1,3 +1,4 @@
 # Rohdownloads (Zip/Excel, ~90 MB) – werden per prepare_data.py neu geladen
 data/raw/
 __pycache__/
+local/

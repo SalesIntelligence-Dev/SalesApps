@@ -1,0 +1,454 @@
+{
+ "name": "SCANIA Component X (After Sales)",
+ "source": "Scania CV AB · Swedish National Data Service (DOI 10.5878/jvb5-d390)",
+ "source_url": "https://doi.org/10.5878/jvb5-d390",
+ "license": "CC BY 4.0 · Kharazian et al., Scientific Data 12 (2025) 493",
+ "render": true,
+ "synthetic": false,
+ "description": "Echte Lkw-Flotte (anonymisiert): Fahrzeugkonfiguration, Betriebsdaten-Auslesungen in der Werkstatt und Reparaturen der Komponente X – offener Benchmark für Ausfall und Reparatur.",
+ "schemas": {
+  "vehicles": "Fahrzeuge",
+  "config_0": "Konfiguration",
+  "config_1": "Konfiguration",
+  "config_2": "Konfiguration",
+  "config_3": "Konfiguration",
+  "config_4": "Konfiguration",
+  "config_5": "Konfiguration",
+  "config_6": "Konfiguration",
+  "config_7": "Konfiguration",
+  "repairs": "Service",
+  "readout_summary": "Betrieb",
+  "readouts_sample": "Betrieb"
+ },
+ "labels": {
+  "vehicles": "Fahrzeuge",
+  "config_0": "Konfiguration 0",
+  "config_1": "Konfiguration 1",
+  "config_2": "Konfiguration 2",
+  "config_3": "Konfiguration 3",
+  "config_4": "Konfiguration 4",
+  "config_5": "Konfiguration 5",
+  "config_6": "Konfiguration 6",
+  "config_7": "Konfiguration 7",
+  "repairs": "Reparaturen Komponente X",
+  "readout_summary": "Auslesungen je Fahrzeug",
+  "readouts_sample": "Auslesungen (Stichprobe 400 Fahrzeuge)"
+ },
+ "foreign_keys": [
+  {
+   "from_table": "vehicles",
+   "from_columns": [
+    "spec_0"
+   ],
+   "to_table": "config_0",
+   "to_columns": [
+    "spec_0"
+   ]
+  },
+  {
+   "from_table": "vehicles",
+   "from_columns": [
+    "spec_1"
+   ],
+   "to_table": "config_1",
+   "to_columns": [
+    "spec_1"
+   ]
+  },
+  {
+   "from_table": "vehicles",
+   "from_columns": [
+    "spec_2"
+   ],
+   "to_table": "config_2",
+   "to_columns": [
+    "spec_2"
+   ]
+  },
+  {
+   "from_table": "vehicles",
+   "from_columns": [
+    "spec_3"
+   ],
+   "to_table": "config_3",
+   "to_columns": [
+    "spec_3"
+   ]
+  },
+  {
+   "from_table": "vehicles",
+   "from_columns": [
+    "spec_4"
+   ],
+   "to_table": "config_4",
+   "to_columns": [
+    "spec_4"
+   ]
+  },
+  {
+   "from_table": "vehicles",
+   "from_columns": [
+    "spec_5"
+   ],
+   "to_table": "config_5",
+   "to_columns": [
+    "spec_5"
+   ]
+  },
+  {
+   "from_table": "vehicles",
+   "from_columns": [
+    "spec_6"
+   ],
+   "to_table": "config_6",
+   "to_columns": [
+    "spec_6"
+   ]
+  },
+  {
+   "from_table": "vehicles",
+   "from_columns": [
+    "spec_7"
+   ],
+   "to_table": "config_7",
+   "to_columns": [
+    "spec_7"
+   ]
+  },
+  {
+   "from_table": "repairs",
+   "from_columns": [
+    "vehicle_id"
+   ],
+   "to_table": "vehicles",
+   "to_columns": [
+    "vehicle_id"
+   ]
+  },
+  {
+   "from_table": "readout_summary",
+   "from_columns": [
+    "vehicle_id"
+   ],
+   "to_table": "vehicles",
+   "to_columns": [
+    "vehicle_id"
+   ]
+  },
+  {
+   "from_table": "readouts_sample",
+   "from_columns": [
+    "vehicle_id"
+   ],
+   "to_table": "vehicles",
+   "to_columns": [
+    "vehicle_id"
+   ]
+  }
+ ],
+ "primary_keys": {
+  "vehicles": [
+   "vehicle_id"
+  ],
+  "repairs": [
+   "repair_id"
+  ],
+  "readout_summary": [
+   "vehicle_id"
+  ],
+  "readouts_sample": [
+   "readout_id"
+  ],
+  "config_0": [
+   "spec_0"
+  ],
+  "config_1": [
+   "spec_1"
+  ],
+  "config_2": [
+   "spec_2"
+  ],
+  "config_3": [
+   "spec_3"
+  ],
+  "config_4": [
+   "spec_4"
+  ],
+  "config_5": [
+   "spec_5"
+  ],
+  "config_6": [
+   "spec_6"
+  ],
+  "config_7": [
+   "spec_7"
+  ]
+ },
+ "local_files": [
+  "data/local/scania_readouts.npz"
+ ],
+ "counters": [
+  "171_0",
+  "666_0",
+  "427_0",
+  "837_0",
+  "309_0",
+  "835_0",
+  "370_0",
+  "100_0"
+ ],
+ "id": "scania",
+ "tables": {
+  "vehicles": [
+   {
+    "name": "vehicle_id",
+    "kind": "int"
+   },
+   {
+    "name": "spec_0",
+    "kind": "string"
+   },
+   {
+    "name": "spec_1",
+    "kind": "string"
+   },
+   {
+    "name": "spec_2",
+    "kind": "string"
+   },
+   {
+    "name": "spec_3",
+    "kind": "string"
+   },
+   {
+    "name": "spec_4",
+    "kind": "string"
+   },
+   {
+    "name": "spec_5",
+    "kind": "string"
+   },
+   {
+    "name": "spec_6",
+    "kind": "string"
+   },
+   {
+    "name": "spec_7",
+    "kind": "string"
+   },
+   {
+    "name": "study_length",
+    "kind": "float"
+   },
+   {
+    "name": "repaired",
+    "kind": "int"
+   }
+  ],
+  "config_0": [
+   {
+    "name": "spec_0",
+    "kind": "string"
+   },
+   {
+    "name": "n_vehicles",
+    "kind": "int"
+   }
+  ],
+  "config_1": [
+   {
+    "name": "spec_1",
+    "kind": "string"
+   },
+   {
+    "name": "n_vehicles",
+    "kind": "int"
+   }
+  ],
+  "config_2": [
+   {
+    "name": "spec_2",
+    "kind": "string"
+   },
+   {
+    "name": "n_vehicles",
+    "kind": "int"
+   }
+  ],
+  "config_3": [
+   {
+    "name": "spec_3",
+    "kind": "string"
+   },
+   {
+    "name": "n_vehicles",
+    "kind": "int"
+   }
+  ],
+  "config_4": [
+   {
+    "name": "spec_4",
+    "kind": "string"
+   },
+   {
+    "name": "n_vehicles",
+    "kind": "int"
+   }
+  ],
+  "config_5": [
+   {
+    "name": "spec_5",
+    "kind": "string"
+   },
+   {
+    "name": "n_vehicles",
+    "kind": "int"
+   }
+  ],
+  "config_6": [
+   {
+    "name": "spec_6",
+    "kind": "string"
+   },
+   {
+    "name": "n_vehicles",
+    "kind": "int"
+   }
+  ],
+  "config_7": [
+   {
+    "name": "spec_7",
+    "kind": "string"
+   },
+   {
+    "name": "n_vehicles",
+    "kind": "int"
+   }
+  ],
+  "repairs": [
+   {
+    "name": "repair_id",
+    "kind": "int"
+   },
+   {
+    "name": "vehicle_id",
+    "kind": "int"
+   },
+   {
+    "name": "repair_time_step",
+    "kind": "float"
+   }
+  ],
+  "readout_summary": [
+   {
+    "name": "vehicle_id",
+    "kind": "int"
+   },
+   {
+    "name": "n_readouts",
+    "kind": "int"
+   },
+   {
+    "name": "first_time_step",
+    "kind": "float"
+   },
+   {
+    "name": "last_time_step",
+    "kind": "float"
+   },
+   {
+    "name": "last_171_0",
+    "kind": "int"
+   },
+   {
+    "name": "last_666_0",
+    "kind": "int"
+   },
+   {
+    "name": "last_427_0",
+    "kind": "float"
+   },
+   {
+    "name": "last_837_0",
+    "kind": "int"
+   },
+   {
+    "name": "last_309_0",
+    "kind": "float"
+   },
+   {
+    "name": "last_835_0",
+    "kind": "float"
+   },
+   {
+    "name": "last_370_0",
+    "kind": "float"
+   },
+   {
+    "name": "last_100_0",
+    "kind": "float"
+   }
+  ],
+  "readouts_sample": [
+   {
+    "name": "readout_id",
+    "kind": "int"
+   },
+   {
+    "name": "vehicle_id",
+    "kind": "int"
+   },
+   {
+    "name": "time_step",
+    "kind": "float"
+   },
+   {
+    "name": "171_0",
+    "kind": "int"
+   },
+   {
+    "name": "666_0",
+    "kind": "int"
+   },
+   {
+    "name": "427_0",
+    "kind": "float"
+   },
+   {
+    "name": "837_0",
+    "kind": "int"
+   },
+   {
+    "name": "309_0",
+    "kind": "int"
+   },
+   {
+    "name": "835_0",
+    "kind": "int"
+   },
+   {
+    "name": "370_0",
+    "kind": "float"
+   },
+   {
+    "name": "100_0",
+    "kind": "float"
+   }
+  ]
+ },
+ "rows": {
+  "vehicles": 23550,
+  "config_0": 3,
+  "config_1": 29,
+  "config_2": 21,
+  "config_3": 4,
+  "config_4": 2,
+  "config_5": 5,
+  "config_6": 17,
+  "config_7": 9,
+  "repairs": 2272,
+  "readout_summary": 23550,
+  "readouts_sample": 19041
+ },
+ "prepared_at": "2026-11-21T20:19:29"
+}

@@ -157,3 +157,29 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
 - **Aufruf:** Use-Case-Name in der Ampel-Matrix, „ⓘ Use-Case-Seite“ am Leaderboard (Schritt 5) und an den Aktionslisten (Schritt 6).
 - **Qualität:** 48 Tests grün (neu `tests/test_graph_ml_v2.py`), 375 px ohne seitliches Scrollen in allen Schritten,
   19 Seiten 200.
+
+## Umsetzungsnotizen nach Prompt 2
+
+- **Antworten aus 0.5:**
+  - After-Sales-Benchmark = **SCANIA Component X** (echte Lkw-Flotte, CC BY 4.0, DOI 10.5878/jvb5-d390) – ersetzt den synthetischen Datensatz.
+  - Predictive Maintenance mit **NASA C-MAPSS** (Public Domain).
+  - Olist und SAP SALT: erst lokal, danach ggf. GitHub – offen (siehe unten).
+- **Neu: `graph_ml/connectors.py`** – Aufbereitung einmal lokal, Ablage als `data/<id>.npz` + `<id>.meta.json`
+  (Tabellen spaltenweise, Texte als Kategorien, Quelle, Lizenz, Gruppen, deklarierte Schlüssel). Render lädt nur diese Dateien.
+  `python -m graph_ml.connectors --only adventureworks_data,cmapss,scania,wwi`
+
+  | Datensatz | Tabellen | Zeilen | Beziehungen | Datei | Hinweis |
+  |---|---|---|---|---|---|
+  | AdventureWorks (mit Daten) | 61 | 739.124 | 79 deklariert | 5,0 MB | CSV aus `AdventureWorks-oltp-install-script.zip`; Binär-/XML-Tabellen ausgelassen |
+  | WideWorldImporters | 31 | 1.057.599 | 69 deklariert | 10,1 MB | `.bak` in einem lokalen SQL-Server-Container wiederhergestellt; JSON-Blobs entfernt |
+  | SCANIA Component X | 12 | 68.503 | 11 | 1,4 MB | 8 Konfigurationsmerkmale als eigene Tabellen (Graph: Fahrzeuge teilen Konfigurationen); 1,1 Mio. Auslesungen nur lokal (`data/local/scania_readouts.npz`, 337 MB, nicht in Git) |
+  | NASA C-MAPSS | 3 | 266.676 | 2 | 8,9 MB | Flotten → Triebwerke → Zyklen, Training (bis Ausfall) und Test (mit Rest-RUL) |
+
+- **Mapping:** `build_mapping` misst deklarierte Fremdschlüssel (`extra["declared_fks"]`, auch zusammengesetzt; 279.0 = 279) und
+  übernimmt Schema-Gruppen (`extra["schemas"]`) → die kompakte AdventureWorks-Darstellung gilt automatisch für alle.
+  Echte Befunde: AdventureWorks – nur 50 % der Positionen haben einen Vertriebler (Online-Aufträge), 89,5 % der Kunden < 3 Belege;
+  WideWorldImporters – 663 Kunden ohne einen einzigen Abwanderer (künstliche Daten → Churn nicht lernbar).
+- **Speicher (Render):** immer nur ein Datensatz v2 im Speicher; Text-Blobs (> 50 % eindeutig, Ø > 120 Zeichen) werden nicht
+  gespeichert. Spitze beim Durchklicken aller Datensätze + Report + Export: 329 MB.
+- **UI:** Datensatz-Karten mit Symbol, Tabellen/Zeilen/FKs, Chip „künstlich“ bei Beispieldaten.
+- **Offen:** Olist (Kaggle-Login nötig), SAP SALT (Freigabe auf Hugging Face mit eigenem Konto nötig), Odoo-Schema.

@@ -1,0 +1,2016 @@
+{
+ "name": "WideWorldImporters",
+ "source": "Microsoft sql-server-samples · WideWorldImporters-Full.bak",
+ "source_url": "https://github.com/microsoft/sql-server-samples/releases/tag/wide-world-importers-v1.0",
+ "license": "MIT (künstliche Beispieldaten)",
+ "render": true,
+ "synthetic": true,
+ "description": "Großhändler: Bestellung → Rechnung, Einkaufsgemeinschaften, Sonderkonditionen, Lieferanten, Lagerbewegungen – Angebots-, Account- und Lager-Use-Cases.",
+ "schemas": {
+  "Cities": "Application",
+  "Countries": "Application",
+  "DeliveryMethods": "Application",
+  "PaymentMethods": "Application",
+  "People": "Application",
+  "StateProvinces": "Application",
+  "SystemParameters": "Application",
+  "TransactionTypes": "Application",
+  "PurchaseOrderLines": "Purchasing",
+  "PurchaseOrders": "Purchasing",
+  "SupplierCategories": "Purchasing",
+  "Suppliers": "Purchasing",
+  "SupplierTransactions": "Purchasing",
+  "BuyingGroups": "Sales",
+  "CustomerCategories": "Sales",
+  "Customers": "Sales",
+  "CustomerTransactions": "Sales",
+  "InvoiceLines": "Sales",
+  "Invoices": "Sales",
+  "OrderLines": "Sales",
+  "Orders": "Sales",
+  "SpecialDeals": "Sales",
+  "ColdRoomTemperatures": "Warehouse",
+  "Colors": "Warehouse",
+  "PackageTypes": "Warehouse",
+  "StockGroups": "Warehouse",
+  "StockItemHoldings": "Warehouse",
+  "StockItems": "Warehouse",
+  "StockItemStockGroups": "Warehouse",
+  "StockItemTransactions": "Warehouse",
+  "VehicleTemperatures": "Warehouse"
+ },
+ "foreign_keys": [
+  {
+   "from_table": "StockItems",
+   "from_columns": [
+    "ColorID"
+   ],
+   "to_table": "Colors",
+   "to_columns": [
+    "ColorID"
+   ]
+  },
+  {
+   "from_table": "OrderLines",
+   "from_columns": [
+    "PackageTypeID"
+   ],
+   "to_table": "PackageTypes",
+   "to_columns": [
+    "PackageTypeID"
+   ]
+  },
+  {
+   "from_table": "InvoiceLines",
+   "from_columns": [
+    "PackageTypeID"
+   ],
+   "to_table": "PackageTypes",
+   "to_columns": [
+    "PackageTypeID"
+   ]
+  },
+  {
+   "from_table": "StockItems",
+   "from_columns": [
+    "UnitPackageID"
+   ],
+   "to_table": "PackageTypes",
+   "to_columns": [
+    "PackageTypeID"
+   ]
+  },
+  {
+   "from_table": "StockItems",
+   "from_columns": [
+    "OuterPackageID"
+   ],
+   "to_table": "PackageTypes",
+   "to_columns": [
+    "PackageTypeID"
+   ]
+  },
+  {
+   "from_table": "PurchaseOrderLines",
+   "from_columns": [
+    "PackageTypeID"
+   ],
+   "to_table": "PackageTypes",
+   "to_columns": [
+    "PackageTypeID"
+   ]
+  },
+  {
+   "from_table": "StockItemStockGroups",
+   "from_columns": [
+    "StockGroupID"
+   ],
+   "to_table": "StockGroups",
+   "to_columns": [
+    "StockGroupID"
+   ]
+  },
+  {
+   "from_table": "SpecialDeals",
+   "from_columns": [
+    "StockGroupID"
+   ],
+   "to_table": "StockGroups",
+   "to_columns": [
+    "StockGroupID"
+   ]
+  },
+  {
+   "from_table": "Cities",
+   "from_columns": [
+    "StateProvinceID"
+   ],
+   "to_table": "StateProvinces",
+   "to_columns": [
+    "StateProvinceID"
+   ]
+  },
+  {
+   "from_table": "SystemParameters",
+   "from_columns": [
+    "DeliveryCityID"
+   ],
+   "to_table": "Cities",
+   "to_columns": [
+    "CityID"
+   ]
+  },
+  {
+   "from_table": "SystemParameters",
+   "from_columns": [
+    "PostalCityID"
+   ],
+   "to_table": "Cities",
+   "to_columns": [
+    "CityID"
+   ]
+  },
+  {
+   "from_table": "Suppliers",
+   "from_columns": [
+    "DeliveryCityID"
+   ],
+   "to_table": "Cities",
+   "to_columns": [
+    "CityID"
+   ]
+  },
+  {
+   "from_table": "Suppliers",
+   "from_columns": [
+    "PostalCityID"
+   ],
+   "to_table": "Cities",
+   "to_columns": [
+    "CityID"
+   ]
+  },
+  {
+   "from_table": "Customers",
+   "from_columns": [
+    "DeliveryCityID"
+   ],
+   "to_table": "Cities",
+   "to_columns": [
+    "CityID"
+   ]
+  },
+  {
+   "from_table": "Customers",
+   "from_columns": [
+    "PostalCityID"
+   ],
+   "to_table": "Cities",
+   "to_columns": [
+    "CityID"
+   ]
+  },
+  {
+   "from_table": "StockItemTransactions",
+   "from_columns": [
+    "SupplierID"
+   ],
+   "to_table": "Suppliers",
+   "to_columns": [
+    "SupplierID"
+   ]
+  },
+  {
+   "from_table": "PurchaseOrders",
+   "from_columns": [
+    "SupplierID"
+   ],
+   "to_table": "Suppliers",
+   "to_columns": [
+    "SupplierID"
+   ]
+  },
+  {
+   "from_table": "StockItems",
+   "from_columns": [
+    "SupplierID"
+   ],
+   "to_table": "Suppliers",
+   "to_columns": [
+    "SupplierID"
+   ]
+  },
+  {
+   "from_table": "SupplierTransactions",
+   "from_columns": [
+    "SupplierID"
+   ],
+   "to_table": "Suppliers",
+   "to_columns": [
+    "SupplierID"
+   ]
+  },
+  {
+   "from_table": "CustomerTransactions",
+   "from_columns": [
+    "CustomerID"
+   ],
+   "to_table": "Customers",
+   "to_columns": [
+    "CustomerID"
+   ]
+  },
+  {
+   "from_table": "StockItemTransactions",
+   "from_columns": [
+    "CustomerID"
+   ],
+   "to_table": "Customers",
+   "to_columns": [
+    "CustomerID"
+   ]
+  },
+  {
+   "from_table": "Customers",
+   "from_columns": [
+    "BillToCustomerID"
+   ],
+   "to_table": "Customers",
+   "to_columns": [
+    "CustomerID"
+   ]
+  },
+  {
+   "from_table": "Orders",
+   "from_columns": [
+    "CustomerID"
+   ],
+   "to_table": "Customers",
+   "to_columns": [
+    "CustomerID"
+   ]
+  },
+  {
+   "from_table": "SpecialDeals",
+   "from_columns": [
+    "CustomerID"
+   ],
+   "to_table": "Customers",
+   "to_columns": [
+    "CustomerID"
+   ]
+  },
+  {
+   "from_table": "Invoices",
+   "from_columns": [
+    "CustomerID"
+   ],
+   "to_table": "Customers",
+   "to_columns": [
+    "CustomerID"
+   ]
+  },
+  {
+   "from_table": "Invoices",
+   "from_columns": [
+    "BillToCustomerID"
+   ],
+   "to_table": "Customers",
+   "to_columns": [
+    "CustomerID"
+   ]
+  },
+  {
+   "from_table": "StockItemTransactions",
+   "from_columns": [
+    "PurchaseOrderID"
+   ],
+   "to_table": "PurchaseOrders",
+   "to_columns": [
+    "PurchaseOrderID"
+   ]
+  },
+  {
+   "from_table": "PurchaseOrderLines",
+   "from_columns": [
+    "PurchaseOrderID"
+   ],
+   "to_table": "PurchaseOrders",
+   "to_columns": [
+    "PurchaseOrderID"
+   ]
+  },
+  {
+   "from_table": "SupplierTransactions",
+   "from_columns": [
+    "PurchaseOrderID"
+   ],
+   "to_table": "PurchaseOrders",
+   "to_columns": [
+    "PurchaseOrderID"
+   ]
+  },
+  {
+   "from_table": "OrderLines",
+   "from_columns": [
+    "OrderID"
+   ],
+   "to_table": "Orders",
+   "to_columns": [
+    "OrderID"
+   ]
+  },
+  {
+   "from_table": "Orders",
+   "from_columns": [
+    "BackorderOrderID"
+   ],
+   "to_table": "Orders",
+   "to_columns": [
+    "OrderID"
+   ]
+  },
+  {
+   "from_table": "Invoices",
+   "from_columns": [
+    "OrderID"
+   ],
+   "to_table": "Orders",
+   "to_columns": [
+    "OrderID"
+   ]
+  },
+  {
+   "from_table": "Invoices",
+   "from_columns": [
+    "SalespersonPersonID"
+   ],
+   "to_table": "People",
+   "to_columns": [
+    "PersonID"
+   ]
+  },
+  {
+   "from_table": "Invoices",
+   "from_columns": [
+    "PackedByPersonID"
+   ],
+   "to_table": "People",
+   "to_columns": [
+    "PersonID"
+   ]
+  },
+  {
+   "from_table": "Suppliers",
+   "from_columns": [
+    "PrimaryContactPersonID"
+   ],
+   "to_table": "People",
+   "to_columns": [
+    "PersonID"
+   ]
+  },
+  {
+   "from_table": "Suppliers",
+   "from_columns": [
+    "AlternateContactPersonID"
+   ],
+   "to_table": "People",
+   "to_columns": [
+    "PersonID"
+   ]
+  },
+  {
+   "from_table": "Customers",
+   "from_columns": [
+    "PrimaryContactPersonID"
+   ],
+   "to_table": "People",
+   "to_columns": [
+    "PersonID"
+   ]
+  },
+  {
+   "from_table": "Customers",
+   "from_columns": [
+    "AlternateContactPersonID"
+   ],
+   "to_table": "People",
+   "to_columns": [
+    "PersonID"
+   ]
+  },
+  {
+   "from_table": "PurchaseOrders",
+   "from_columns": [
+    "ContactPersonID"
+   ],
+   "to_table": "People",
+   "to_columns": [
+    "PersonID"
+   ]
+  },
+  {
+   "from_table": "Orders",
+   "from_columns": [
+    "SalespersonPersonID"
+   ],
+   "to_table": "People",
+   "to_columns": [
+    "PersonID"
+   ]
+  },
+  {
+   "from_table": "Orders",
+   "from_columns": [
+    "PickedByPersonID"
+   ],
+   "to_table": "People",
+   "to_columns": [
+    "PersonID"
+   ]
+  },
+  {
+   "from_table": "Orders",
+   "from_columns": [
+    "ContactPersonID"
+   ],
+   "to_table": "People",
+   "to_columns": [
+    "PersonID"
+   ]
+  },
+  {
+   "from_table": "Invoices",
+   "from_columns": [
+    "ContactPersonID"
+   ],
+   "to_table": "People",
+   "to_columns": [
+    "PersonID"
+   ]
+  },
+  {
+   "from_table": "Invoices",
+   "from_columns": [
+    "AccountsPersonID"
+   ],
+   "to_table": "People",
+   "to_columns": [
+    "PersonID"
+   ]
+  },
+  {
+   "from_table": "OrderLines",
+   "from_columns": [
+    "StockItemID"
+   ],
+   "to_table": "StockItems",
+   "to_columns": [
+    "StockItemID"
+   ]
+  },
+  {
+   "from_table": "StockItemStockGroups",
+   "from_columns": [
+    "StockItemID"
+   ],
+   "to_table": "StockItems",
+   "to_columns": [
+    "StockItemID"
+   ]
+  },
+  {
+   "from_table": "InvoiceLines",
+   "from_columns": [
+    "StockItemID"
+   ],
+   "to_table": "StockItems",
+   "to_columns": [
+    "StockItemID"
+   ]
+  },
+  {
+   "from_table": "StockItemTransactions",
+   "from_columns": [
+    "StockItemID"
+   ],
+   "to_table": "StockItems",
+   "to_columns": [
+    "StockItemID"
+   ]
+  },
+  {
+   "from_table": "StockItemHoldings",
+   "from_columns": [
+    "StockItemID"
+   ],
+   "to_table": "StockItems",
+   "to_columns": [
+    "StockItemID"
+   ]
+  },
+  {
+   "from_table": "PurchaseOrderLines",
+   "from_columns": [
+    "StockItemID"
+   ],
+   "to_table": "StockItems",
+   "to_columns": [
+    "StockItemID"
+   ]
+  },
+  {
+   "from_table": "SpecialDeals",
+   "from_columns": [
+    "StockItemID"
+   ],
+   "to_table": "StockItems",
+   "to_columns": [
+    "StockItemID"
+   ]
+  },
+  {
+   "from_table": "StateProvinces",
+   "from_columns": [
+    "CountryID"
+   ],
+   "to_table": "Countries",
+   "to_columns": [
+    "CountryID"
+   ]
+  },
+  {
+   "from_table": "Suppliers",
+   "from_columns": [
+    "DeliveryMethodID"
+   ],
+   "to_table": "DeliveryMethods",
+   "to_columns": [
+    "DeliveryMethodID"
+   ]
+  },
+  {
+   "from_table": "Customers",
+   "from_columns": [
+    "DeliveryMethodID"
+   ],
+   "to_table": "DeliveryMethods",
+   "to_columns": [
+    "DeliveryMethodID"
+   ]
+  },
+  {
+   "from_table": "PurchaseOrders",
+   "from_columns": [
+    "DeliveryMethodID"
+   ],
+   "to_table": "DeliveryMethods",
+   "to_columns": [
+    "DeliveryMethodID"
+   ]
+  },
+  {
+   "from_table": "Invoices",
+   "from_columns": [
+    "DeliveryMethodID"
+   ],
+   "to_table": "DeliveryMethods",
+   "to_columns": [
+    "DeliveryMethodID"
+   ]
+  },
+  {
+   "from_table": "CustomerTransactions",
+   "from_columns": [
+    "PaymentMethodID"
+   ],
+   "to_table": "PaymentMethods",
+   "to_columns": [
+    "PaymentMethodID"
+   ]
+  },
+  {
+   "from_table": "SupplierTransactions",
+   "from_columns": [
+    "PaymentMethodID"
+   ],
+   "to_table": "PaymentMethods",
+   "to_columns": [
+    "PaymentMethodID"
+   ]
+  },
+  {
+   "from_table": "CustomerTransactions",
+   "from_columns": [
+    "TransactionTypeID"
+   ],
+   "to_table": "TransactionTypes",
+   "to_columns": [
+    "TransactionTypeID"
+   ]
+  },
+  {
+   "from_table": "StockItemTransactions",
+   "from_columns": [
+    "TransactionTypeID"
+   ],
+   "to_table": "TransactionTypes",
+   "to_columns": [
+    "TransactionTypeID"
+   ]
+  },
+  {
+   "from_table": "SupplierTransactions",
+   "from_columns": [
+    "TransactionTypeID"
+   ],
+   "to_table": "TransactionTypes",
+   "to_columns": [
+    "TransactionTypeID"
+   ]
+  },
+  {
+   "from_table": "Suppliers",
+   "from_columns": [
+    "SupplierCategoryID"
+   ],
+   "to_table": "SupplierCategories",
+   "to_columns": [
+    "SupplierCategoryID"
+   ]
+  },
+  {
+   "from_table": "Customers",
+   "from_columns": [
+    "BuyingGroupID"
+   ],
+   "to_table": "BuyingGroups",
+   "to_columns": [
+    "BuyingGroupID"
+   ]
+  },
+  {
+   "from_table": "SpecialDeals",
+   "from_columns": [
+    "BuyingGroupID"
+   ],
+   "to_table": "BuyingGroups",
+   "to_columns": [
+    "BuyingGroupID"
+   ]
+  },
+  {
+   "from_table": "CustomerTransactions",
+   "from_columns": [
+    "InvoiceID"
+   ],
+   "to_table": "Invoices",
+   "to_columns": [
+    "InvoiceID"
+   ]
+  },
+  {
+   "from_table": "InvoiceLines",
+   "from_columns": [
+    "InvoiceID"
+   ],
+   "to_table": "Invoices",
+   "to_columns": [
+    "InvoiceID"
+   ]
+  },
+  {
+   "from_table": "StockItemTransactions",
+   "from_columns": [
+    "InvoiceID"
+   ],
+   "to_table": "Invoices",
+   "to_columns": [
+    "InvoiceID"
+   ]
+  },
+  {
+   "from_table": "Customers",
+   "from_columns": [
+    "CustomerCategoryID"
+   ],
+   "to_table": "CustomerCategories",
+   "to_columns": [
+    "CustomerCategoryID"
+   ]
+  },
+  {
+   "from_table": "SpecialDeals",
+   "from_columns": [
+    "CustomerCategoryID"
+   ],
+   "to_table": "CustomerCategories",
+   "to_columns": [
+    "CustomerCategoryID"
+   ]
+  }
+ ],
+ "primary_keys": {
+  "Colors": [
+   "ColorID"
+  ],
+  "OrderLines": [
+   "OrderLineID"
+  ],
+  "PackageTypes": [
+   "PackageTypeID"
+  ],
+  "StockGroups": [
+   "StockGroupID"
+  ],
+  "StockItemStockGroups": [
+   "StockItemStockGroupID"
+  ],
+  "StateProvinces": [
+   "StateProvinceID"
+  ],
+  "CustomerTransactions": [
+   "CustomerTransactionID"
+  ],
+  "Cities": [
+   "CityID"
+  ],
+  "SystemParameters": [
+   "SystemParameterID"
+  ],
+  "InvoiceLines": [
+   "InvoiceLineID"
+  ],
+  "Suppliers": [
+   "SupplierID"
+  ],
+  "StockItemTransactions": [
+   "StockItemTransactionID"
+  ],
+  "Customers": [
+   "CustomerID"
+  ],
+  "PurchaseOrders": [
+   "PurchaseOrderID"
+  ],
+  "Orders": [
+   "OrderID"
+  ],
+  "ColdRoomTemperatures": [
+   "ColdRoomTemperatureID"
+  ],
+  "VehicleTemperatures": [
+   "VehicleTemperatureID"
+  ],
+  "People": [
+   "PersonID"
+  ],
+  "StockItems": [
+   "StockItemID"
+  ],
+  "Countries": [
+   "CountryID"
+  ],
+  "StockItemHoldings": [
+   "StockItemID"
+  ],
+  "PurchaseOrderLines": [
+   "PurchaseOrderLineID"
+  ],
+  "DeliveryMethods": [
+   "DeliveryMethodID"
+  ],
+  "PaymentMethods": [
+   "PaymentMethodID"
+  ],
+  "SupplierTransactions": [
+   "SupplierTransactionID"
+  ],
+  "TransactionTypes": [
+   "TransactionTypeID"
+  ],
+  "SpecialDeals": [
+   "SpecialDealID"
+  ],
+  "SupplierCategories": [
+   "SupplierCategoryID"
+  ],
+  "BuyingGroups": [
+   "BuyingGroupID"
+  ],
+  "Invoices": [
+   "InvoiceID"
+  ],
+  "CustomerCategories": [
+   "CustomerCategoryID"
+  ]
+ },
+ "id": "wwi",
+ "tables": {
+  "Cities": [
+   {
+    "name": "CityID",
+    "kind": "int"
+   },
+   {
+    "name": "CityName",
+    "kind": "string"
+   },
+   {
+    "name": "StateProvinceID",
+    "kind": "int"
+   },
+   {
+    "name": "LatestRecordedPopulation",
+    "kind": "float"
+   }
+  ],
+  "Countries": [
+   {
+    "name": "CountryID",
+    "kind": "int"
+   },
+   {
+    "name": "CountryName",
+    "kind": "string"
+   },
+   {
+    "name": "FormalName",
+    "kind": "string"
+   },
+   {
+    "name": "IsoAlpha3Code",
+    "kind": "string"
+   },
+   {
+    "name": "IsoNumericCode",
+    "kind": "int"
+   },
+   {
+    "name": "CountryType",
+    "kind": "string"
+   },
+   {
+    "name": "LatestRecordedPopulation",
+    "kind": "int"
+   },
+   {
+    "name": "Continent",
+    "kind": "string"
+   },
+   {
+    "name": "Region",
+    "kind": "string"
+   },
+   {
+    "name": "Subregion",
+    "kind": "string"
+   }
+  ],
+  "DeliveryMethods": [
+   {
+    "name": "DeliveryMethodID",
+    "kind": "int"
+   },
+   {
+    "name": "DeliveryMethodName",
+    "kind": "string"
+   }
+  ],
+  "PaymentMethods": [
+   {
+    "name": "PaymentMethodID",
+    "kind": "int"
+   },
+   {
+    "name": "PaymentMethodName",
+    "kind": "string"
+   }
+  ],
+  "People": [
+   {
+    "name": "PersonID",
+    "kind": "int"
+   },
+   {
+    "name": "FullName",
+    "kind": "string"
+   },
+   {
+    "name": "PreferredName",
+    "kind": "string"
+   },
+   {
+    "name": "IsPermittedToLogon",
+    "kind": "int"
+   },
+   {
+    "name": "LogonName",
+    "kind": "string"
+   },
+   {
+    "name": "IsExternalLogonProvider",
+    "kind": "int"
+   },
+   {
+    "name": "IsSystemUser",
+    "kind": "int"
+   },
+   {
+    "name": "IsEmployee",
+    "kind": "int"
+   },
+   {
+    "name": "IsSalesperson",
+    "kind": "int"
+   },
+   {
+    "name": "UserPreferences",
+    "kind": "string"
+   },
+   {
+    "name": "PhoneNumber",
+    "kind": "string"
+   },
+   {
+    "name": "FaxNumber",
+    "kind": "string"
+   },
+   {
+    "name": "EmailAddress",
+    "kind": "string"
+   },
+   {
+    "name": "CustomFields",
+    "kind": "string"
+   }
+  ],
+  "StateProvinces": [
+   {
+    "name": "StateProvinceID",
+    "kind": "int"
+   },
+   {
+    "name": "StateProvinceCode",
+    "kind": "string"
+   },
+   {
+    "name": "StateProvinceName",
+    "kind": "string"
+   },
+   {
+    "name": "CountryID",
+    "kind": "int"
+   },
+   {
+    "name": "SalesTerritory",
+    "kind": "string"
+   },
+   {
+    "name": "LatestRecordedPopulation",
+    "kind": "int"
+   }
+  ],
+  "SystemParameters": [
+   {
+    "name": "SystemParameterID",
+    "kind": "float"
+   },
+   {
+    "name": "DeliveryAddressLine1",
+    "kind": "string"
+   },
+   {
+    "name": "DeliveryAddressLine2",
+    "kind": "string"
+   },
+   {
+    "name": "DeliveryCityID",
+    "kind": "float"
+   },
+   {
+    "name": "DeliveryPostalCode",
+    "kind": "string"
+   },
+   {
+    "name": "PostalAddressLine1",
+    "kind": "string"
+   },
+   {
+    "name": "PostalAddressLine2",
+    "kind": "string"
+   },
+   {
+    "name": "PostalCityID",
+    "kind": "float"
+   },
+   {
+    "name": "PostalPostalCode",
+    "kind": "string"
+   },
+   {
+    "name": "ApplicationSettings",
+    "kind": "string"
+   }
+  ],
+  "TransactionTypes": [
+   {
+    "name": "TransactionTypeID",
+    "kind": "int"
+   },
+   {
+    "name": "TransactionTypeName",
+    "kind": "string"
+   }
+  ],
+  "PurchaseOrderLines": [
+   {
+    "name": "PurchaseOrderLineID",
+    "kind": "int"
+   },
+   {
+    "name": "PurchaseOrderID",
+    "kind": "int"
+   },
+   {
+    "name": "StockItemID",
+    "kind": "int"
+   },
+   {
+    "name": "OrderedOuters",
+    "kind": "int"
+   },
+   {
+    "name": "Description",
+    "kind": "string"
+   },
+   {
+    "name": "ReceivedOuters",
+    "kind": "int"
+   },
+   {
+    "name": "PackageTypeID",
+    "kind": "int"
+   },
+   {
+    "name": "ExpectedUnitPricePerOuter",
+    "kind": "float"
+   },
+   {
+    "name": "LastReceiptDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "IsOrderLineFinalized",
+    "kind": "int"
+   }
+  ],
+  "PurchaseOrders": [
+   {
+    "name": "PurchaseOrderID",
+    "kind": "int"
+   },
+   {
+    "name": "SupplierID",
+    "kind": "int"
+   },
+   {
+    "name": "OrderDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "DeliveryMethodID",
+    "kind": "int"
+   },
+   {
+    "name": "ContactPersonID",
+    "kind": "int"
+   },
+   {
+    "name": "ExpectedDeliveryDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "SupplierReference",
+    "kind": "string"
+   },
+   {
+    "name": "IsOrderFinalized",
+    "kind": "int"
+   },
+   {
+    "name": "Comments",
+    "kind": "string"
+   },
+   {
+    "name": "InternalComments",
+    "kind": "string"
+   }
+  ],
+  "SupplierCategories": [
+   {
+    "name": "SupplierCategoryID",
+    "kind": "int"
+   },
+   {
+    "name": "SupplierCategoryName",
+    "kind": "string"
+   }
+  ],
+  "Suppliers": [
+   {
+    "name": "SupplierID",
+    "kind": "int"
+   },
+   {
+    "name": "SupplierName",
+    "kind": "string"
+   },
+   {
+    "name": "SupplierCategoryID",
+    "kind": "int"
+   },
+   {
+    "name": "PrimaryContactPersonID",
+    "kind": "int"
+   },
+   {
+    "name": "AlternateContactPersonID",
+    "kind": "int"
+   },
+   {
+    "name": "DeliveryMethodID",
+    "kind": "float"
+   },
+   {
+    "name": "DeliveryCityID",
+    "kind": "int"
+   },
+   {
+    "name": "PostalCityID",
+    "kind": "int"
+   },
+   {
+    "name": "SupplierReference",
+    "kind": "string"
+   },
+   {
+    "name": "BankAccountName",
+    "kind": "string"
+   },
+   {
+    "name": "BankAccountBranch",
+    "kind": "string"
+   },
+   {
+    "name": "BankAccountCode",
+    "kind": "string"
+   },
+   {
+    "name": "BankAccountNumber",
+    "kind": "string"
+   },
+   {
+    "name": "BankInternationalCode",
+    "kind": "string"
+   },
+   {
+    "name": "PaymentDays",
+    "kind": "int"
+   },
+   {
+    "name": "InternalComments",
+    "kind": "string"
+   },
+   {
+    "name": "PhoneNumber",
+    "kind": "string"
+   },
+   {
+    "name": "FaxNumber",
+    "kind": "string"
+   },
+   {
+    "name": "WebsiteURL",
+    "kind": "string"
+   },
+   {
+    "name": "DeliveryAddressLine1",
+    "kind": "string"
+   },
+   {
+    "name": "DeliveryAddressLine2",
+    "kind": "string"
+   },
+   {
+    "name": "DeliveryPostalCode",
+    "kind": "string"
+   },
+   {
+    "name": "PostalAddressLine1",
+    "kind": "string"
+   },
+   {
+    "name": "PostalAddressLine2",
+    "kind": "string"
+   },
+   {
+    "name": "PostalPostalCode",
+    "kind": "string"
+   }
+  ],
+  "SupplierTransactions": [
+   {
+    "name": "SupplierTransactionID",
+    "kind": "int"
+   },
+   {
+    "name": "SupplierID",
+    "kind": "int"
+   },
+   {
+    "name": "TransactionTypeID",
+    "kind": "int"
+   },
+   {
+    "name": "PurchaseOrderID",
+    "kind": "float"
+   },
+   {
+    "name": "PaymentMethodID",
+    "kind": "int"
+   },
+   {
+    "name": "SupplierInvoiceNumber",
+    "kind": "string"
+   },
+   {
+    "name": "TransactionDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "AmountExcludingTax",
+    "kind": "float"
+   },
+   {
+    "name": "TaxAmount",
+    "kind": "float"
+   },
+   {
+    "name": "TransactionAmount",
+    "kind": "float"
+   },
+   {
+    "name": "OutstandingBalance",
+    "kind": "int"
+   },
+   {
+    "name": "FinalizationDate",
+    "kind": "datetime"
+   }
+  ],
+  "BuyingGroups": [
+   {
+    "name": "BuyingGroupID",
+    "kind": "int"
+   },
+   {
+    "name": "BuyingGroupName",
+    "kind": "string"
+   }
+  ],
+  "CustomerCategories": [
+   {
+    "name": "CustomerCategoryID",
+    "kind": "int"
+   },
+   {
+    "name": "CustomerCategoryName",
+    "kind": "string"
+   }
+  ],
+  "Customers": [
+   {
+    "name": "CustomerID",
+    "kind": "int"
+   },
+   {
+    "name": "CustomerName",
+    "kind": "string"
+   },
+   {
+    "name": "BillToCustomerID",
+    "kind": "int"
+   },
+   {
+    "name": "CustomerCategoryID",
+    "kind": "int"
+   },
+   {
+    "name": "BuyingGroupID",
+    "kind": "float"
+   },
+   {
+    "name": "PrimaryContactPersonID",
+    "kind": "int"
+   },
+   {
+    "name": "AlternateContactPersonID",
+    "kind": "float"
+   },
+   {
+    "name": "DeliveryMethodID",
+    "kind": "int"
+   },
+   {
+    "name": "DeliveryCityID",
+    "kind": "int"
+   },
+   {
+    "name": "PostalCityID",
+    "kind": "int"
+   },
+   {
+    "name": "CreditLimit",
+    "kind": "float"
+   },
+   {
+    "name": "AccountOpenedDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "StandardDiscountPercentage",
+    "kind": "int"
+   },
+   {
+    "name": "IsStatementSent",
+    "kind": "int"
+   },
+   {
+    "name": "IsOnCreditHold",
+    "kind": "int"
+   },
+   {
+    "name": "PaymentDays",
+    "kind": "int"
+   },
+   {
+    "name": "PhoneNumber",
+    "kind": "string"
+   },
+   {
+    "name": "FaxNumber",
+    "kind": "string"
+   },
+   {
+    "name": "DeliveryRun",
+    "kind": "string"
+   },
+   {
+    "name": "RunPosition",
+    "kind": "string"
+   },
+   {
+    "name": "WebsiteURL",
+    "kind": "string"
+   },
+   {
+    "name": "DeliveryAddressLine1",
+    "kind": "string"
+   },
+   {
+    "name": "DeliveryAddressLine2",
+    "kind": "string"
+   },
+   {
+    "name": "DeliveryPostalCode",
+    "kind": "string"
+   },
+   {
+    "name": "PostalAddressLine1",
+    "kind": "string"
+   },
+   {
+    "name": "PostalAddressLine2",
+    "kind": "string"
+   },
+   {
+    "name": "PostalPostalCode",
+    "kind": "string"
+   }
+  ],
+  "CustomerTransactions": [
+   {
+    "name": "CustomerTransactionID",
+    "kind": "int"
+   },
+   {
+    "name": "CustomerID",
+    "kind": "int"
+   },
+   {
+    "name": "TransactionTypeID",
+    "kind": "int"
+   },
+   {
+    "name": "InvoiceID",
+    "kind": "float"
+   },
+   {
+    "name": "PaymentMethodID",
+    "kind": "float"
+   },
+   {
+    "name": "TransactionDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "AmountExcludingTax",
+    "kind": "float"
+   },
+   {
+    "name": "TaxAmount",
+    "kind": "float"
+   },
+   {
+    "name": "TransactionAmount",
+    "kind": "float"
+   },
+   {
+    "name": "OutstandingBalance",
+    "kind": "float"
+   },
+   {
+    "name": "FinalizationDate",
+    "kind": "datetime"
+   }
+  ],
+  "InvoiceLines": [
+   {
+    "name": "InvoiceLineID",
+    "kind": "int"
+   },
+   {
+    "name": "InvoiceID",
+    "kind": "int"
+   },
+   {
+    "name": "StockItemID",
+    "kind": "int"
+   },
+   {
+    "name": "Description",
+    "kind": "string"
+   },
+   {
+    "name": "PackageTypeID",
+    "kind": "int"
+   },
+   {
+    "name": "Quantity",
+    "kind": "int"
+   },
+   {
+    "name": "UnitPrice",
+    "kind": "float"
+   },
+   {
+    "name": "TaxRate",
+    "kind": "int"
+   },
+   {
+    "name": "TaxAmount",
+    "kind": "float"
+   },
+   {
+    "name": "LineProfit",
+    "kind": "float"
+   },
+   {
+    "name": "ExtendedPrice",
+    "kind": "float"
+   }
+  ],
+  "Invoices": [
+   {
+    "name": "InvoiceID",
+    "kind": "int"
+   },
+   {
+    "name": "CustomerID",
+    "kind": "int"
+   },
+   {
+    "name": "BillToCustomerID",
+    "kind": "int"
+   },
+   {
+    "name": "OrderID",
+    "kind": "int"
+   },
+   {
+    "name": "DeliveryMethodID",
+    "kind": "int"
+   },
+   {
+    "name": "ContactPersonID",
+    "kind": "int"
+   },
+   {
+    "name": "AccountsPersonID",
+    "kind": "int"
+   },
+   {
+    "name": "SalespersonPersonID",
+    "kind": "int"
+   },
+   {
+    "name": "PackedByPersonID",
+    "kind": "int"
+   },
+   {
+    "name": "InvoiceDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "CustomerPurchaseOrderNumber",
+    "kind": "string"
+   },
+   {
+    "name": "IsCreditNote",
+    "kind": "int"
+   },
+   {
+    "name": "CreditNoteReason",
+    "kind": "string"
+   },
+   {
+    "name": "Comments",
+    "kind": "string"
+   },
+   {
+    "name": "DeliveryInstructions",
+    "kind": "string"
+   },
+   {
+    "name": "InternalComments",
+    "kind": "string"
+   },
+   {
+    "name": "TotalDryItems",
+    "kind": "int"
+   },
+   {
+    "name": "TotalChillerItems",
+    "kind": "int"
+   },
+   {
+    "name": "DeliveryRun",
+    "kind": "string"
+   },
+   {
+    "name": "RunPosition",
+    "kind": "string"
+   }
+  ],
+  "OrderLines": [
+   {
+    "name": "OrderLineID",
+    "kind": "int"
+   },
+   {
+    "name": "OrderID",
+    "kind": "int"
+   },
+   {
+    "name": "StockItemID",
+    "kind": "int"
+   },
+   {
+    "name": "Description",
+    "kind": "string"
+   },
+   {
+    "name": "PackageTypeID",
+    "kind": "int"
+   },
+   {
+    "name": "Quantity",
+    "kind": "int"
+   },
+   {
+    "name": "UnitPrice",
+    "kind": "float"
+   },
+   {
+    "name": "TaxRate",
+    "kind": "int"
+   },
+   {
+    "name": "PickedQuantity",
+    "kind": "int"
+   },
+   {
+    "name": "PickingCompletedWhen",
+    "kind": "datetime"
+   }
+  ],
+  "Orders": [
+   {
+    "name": "OrderID",
+    "kind": "int"
+   },
+   {
+    "name": "CustomerID",
+    "kind": "int"
+   },
+   {
+    "name": "SalespersonPersonID",
+    "kind": "int"
+   },
+   {
+    "name": "PickedByPersonID",
+    "kind": "float"
+   },
+   {
+    "name": "ContactPersonID",
+    "kind": "int"
+   },
+   {
+    "name": "BackorderOrderID",
+    "kind": "float"
+   },
+   {
+    "name": "OrderDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "ExpectedDeliveryDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "CustomerPurchaseOrderNumber",
+    "kind": "string"
+   },
+   {
+    "name": "IsUndersupplyBackordered",
+    "kind": "int"
+   },
+   {
+    "name": "Comments",
+    "kind": "string"
+   },
+   {
+    "name": "DeliveryInstructions",
+    "kind": "string"
+   },
+   {
+    "name": "InternalComments",
+    "kind": "string"
+   },
+   {
+    "name": "PickingCompletedWhen",
+    "kind": "datetime"
+   }
+  ],
+  "SpecialDeals": [
+   {
+    "name": "SpecialDealID",
+    "kind": "int"
+   },
+   {
+    "name": "StockItemID",
+    "kind": "float"
+   },
+   {
+    "name": "CustomerID",
+    "kind": "float"
+   },
+   {
+    "name": "BuyingGroupID",
+    "kind": "int"
+   },
+   {
+    "name": "CustomerCategoryID",
+    "kind": "float"
+   },
+   {
+    "name": "StockGroupID",
+    "kind": "int"
+   },
+   {
+    "name": "DealDescription",
+    "kind": "string"
+   },
+   {
+    "name": "StartDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "EndDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "DiscountAmount",
+    "kind": "float"
+   },
+   {
+    "name": "DiscountPercentage",
+    "kind": "int"
+   },
+   {
+    "name": "UnitPrice",
+    "kind": "float"
+   }
+  ],
+  "ColdRoomTemperatures": [
+   {
+    "name": "ColdRoomTemperatureID",
+    "kind": "int"
+   },
+   {
+    "name": "ColdRoomSensorNumber",
+    "kind": "int"
+   },
+   {
+    "name": "RecordedWhen",
+    "kind": "datetime"
+   },
+   {
+    "name": "Temperature",
+    "kind": "float"
+   }
+  ],
+  "Colors": [
+   {
+    "name": "ColorID",
+    "kind": "int"
+   },
+   {
+    "name": "ColorName",
+    "kind": "string"
+   }
+  ],
+  "PackageTypes": [
+   {
+    "name": "PackageTypeID",
+    "kind": "int"
+   },
+   {
+    "name": "PackageTypeName",
+    "kind": "string"
+   }
+  ],
+  "StockGroups": [
+   {
+    "name": "StockGroupID",
+    "kind": "int"
+   },
+   {
+    "name": "StockGroupName",
+    "kind": "string"
+   }
+  ],
+  "StockItemHoldings": [
+   {
+    "name": "StockItemID",
+    "kind": "int"
+   },
+   {
+    "name": "QuantityOnHand",
+    "kind": "int"
+   },
+   {
+    "name": "BinLocation",
+    "kind": "string"
+   },
+   {
+    "name": "LastStocktakeQuantity",
+    "kind": "int"
+   },
+   {
+    "name": "LastCostPrice",
+    "kind": "float"
+   },
+   {
+    "name": "ReorderLevel",
+    "kind": "int"
+   },
+   {
+    "name": "TargetStockLevel",
+    "kind": "int"
+   }
+  ],
+  "StockItems": [
+   {
+    "name": "StockItemID",
+    "kind": "int"
+   },
+   {
+    "name": "StockItemName",
+    "kind": "string"
+   },
+   {
+    "name": "SupplierID",
+    "kind": "int"
+   },
+   {
+    "name": "ColorID",
+    "kind": "float"
+   },
+   {
+    "name": "UnitPackageID",
+    "kind": "int"
+   },
+   {
+    "name": "OuterPackageID",
+    "kind": "int"
+   },
+   {
+    "name": "Brand",
+    "kind": "string"
+   },
+   {
+    "name": "Size",
+    "kind": "string"
+   },
+   {
+    "name": "LeadTimeDays",
+    "kind": "int"
+   },
+   {
+    "name": "QuantityPerOuter",
+    "kind": "int"
+   },
+   {
+    "name": "IsChillerStock",
+    "kind": "int"
+   },
+   {
+    "name": "Barcode",
+    "kind": "string"
+   },
+   {
+    "name": "TaxRate",
+    "kind": "int"
+   },
+   {
+    "name": "UnitPrice",
+    "kind": "float"
+   },
+   {
+    "name": "RecommendedRetailPrice",
+    "kind": "float"
+   },
+   {
+    "name": "TypicalWeightPerUnit",
+    "kind": "float"
+   },
+   {
+    "name": "MarketingComments",
+    "kind": "string"
+   },
+   {
+    "name": "InternalComments",
+    "kind": "string"
+   },
+   {
+    "name": "CustomFields",
+    "kind": "string"
+   }
+  ],
+  "StockItemStockGroups": [
+   {
+    "name": "StockItemStockGroupID",
+    "kind": "int"
+   },
+   {
+    "name": "StockItemID",
+    "kind": "int"
+   },
+   {
+    "name": "StockGroupID",
+    "kind": "int"
+   }
+  ],
+  "StockItemTransactions": [
+   {
+    "name": "StockItemTransactionID",
+    "kind": "int"
+   },
+   {
+    "name": "StockItemID",
+    "kind": "int"
+   },
+   {
+    "name": "TransactionTypeID",
+    "kind": "int"
+   },
+   {
+    "name": "CustomerID",
+    "kind": "float"
+   },
+   {
+    "name": "InvoiceID",
+    "kind": "float"
+   },
+   {
+    "name": "SupplierID",
+    "kind": "float"
+   },
+   {
+    "name": "PurchaseOrderID",
+    "kind": "float"
+   },
+   {
+    "name": "TransactionOccurredWhen",
+    "kind": "datetime"
+   },
+   {
+    "name": "Quantity",
+    "kind": "int"
+   }
+  ],
+  "VehicleTemperatures": [
+   {
+    "name": "VehicleTemperatureID",
+    "kind": "int"
+   },
+   {
+    "name": "VehicleRegistration",
+    "kind": "string"
+   },
+   {
+    "name": "ChillerSensorNumber",
+    "kind": "int"
+   },
+   {
+    "name": "RecordedWhen",
+    "kind": "datetime"
+   },
+   {
+    "name": "Temperature",
+    "kind": "float"
+   },
+   {
+    "name": "IsCompressed",
+    "kind": "int"
+   }
+  ]
+ },
+ "rows": {
+  "Cities": 37940,
+  "Countries": 190,
+  "DeliveryMethods": 10,
+  "PaymentMethods": 4,
+  "People": 1111,
+  "StateProvinces": 53,
+  "SystemParameters": 148,
+  "TransactionTypes": 13,
+  "PurchaseOrderLines": 8367,
+  "PurchaseOrders": 2074,
+  "SupplierCategories": 9,
+  "Suppliers": 13,
+  "SupplierTransactions": 2438,
+  "BuyingGroups": 2,
+  "CustomerCategories": 8,
+  "Customers": 663,
+  "CustomerTransactions": 97147,
+  "InvoiceLines": 228265,
+  "Invoices": 70510,
+  "OrderLines": 231412,
+  "Orders": 73595,
+  "SpecialDeals": 2,
+  "ColdRoomTemperatures": 4,
+  "Colors": 36,
+  "PackageTypes": 14,
+  "StockGroups": 10,
+  "StockItemHoldings": 227,
+  "StockItems": 227,
+  "StockItemStockGroups": 442,
+  "StockItemTransactions": 236667,
+  "VehicleTemperatures": 65998
+ },
+ "prepared_at": "2026-11-21T20:03:50"
+}

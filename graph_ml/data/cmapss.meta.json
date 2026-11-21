@@ -1,0 +1,211 @@
+{
+ "name": "NASA C-MAPSS (Turbinen)",
+ "source": "NASA Prognostics Center of Excellence · Turbofan Engine Degradation Simulation",
+ "source_url": "https://www.nasa.gov/intelligent-systems-division/discovery-and-systems-health/pcoe/pcoe-data-set-repository/",
+ "license": "Public Domain (NASA)",
+ "render": true,
+ "synthetic": true,
+ "description": "Simulierte Triebwerke bis zum Ausfall: 4 Flotten, je Zyklus 3 Betriebsparameter und 21 Sensoren – Benchmark für Restlebensdauer und Predictive Maintenance.",
+ "schemas": {
+  "fleets": "Stammdaten",
+  "engines": "Anlagen",
+  "cycles": "Betrieb"
+ },
+ "foreign_keys": [
+  {
+   "from_table": "engines",
+   "from_columns": [
+    "fleet_id"
+   ],
+   "to_table": "fleets",
+   "to_columns": [
+    "fleet_id"
+   ]
+  },
+  {
+   "from_table": "cycles",
+   "from_columns": [
+    "engine_id"
+   ],
+   "to_table": "engines",
+   "to_columns": [
+    "engine_id"
+   ]
+  }
+ ],
+ "primary_keys": {
+  "fleets": [
+   "fleet_id"
+  ],
+  "engines": [
+   "engine_id"
+  ],
+  "cycles": [
+   "cycle_id"
+  ]
+ },
+ "labels": {
+  "fleets": "Flotten",
+  "engines": "Triebwerke",
+  "cycles": "Betriebszyklen"
+ },
+ "id": "cmapss",
+ "tables": {
+  "fleets": [
+   {
+    "name": "fleet_id",
+    "kind": "string"
+   },
+   {
+    "name": "conditions",
+    "kind": "string"
+   },
+   {
+    "name": "fault_modes",
+    "kind": "string"
+   }
+  ],
+  "engines": [
+   {
+    "name": "engine_id",
+    "kind": "string"
+   },
+   {
+    "name": "fleet_id",
+    "kind": "string"
+   },
+   {
+    "name": "split",
+    "kind": "string"
+   },
+   {
+    "name": "cycles_observed",
+    "kind": "int"
+   },
+   {
+    "name": "failed",
+    "kind": "bool"
+   },
+   {
+    "name": "rul_at_end",
+    "kind": "int"
+   }
+  ],
+  "cycles": [
+   {
+    "name": "cycle_id",
+    "kind": "int"
+   },
+   {
+    "name": "cycle",
+    "kind": "int"
+   },
+   {
+    "name": "setting_1",
+    "kind": "float"
+   },
+   {
+    "name": "setting_2",
+    "kind": "float"
+   },
+   {
+    "name": "setting_3",
+    "kind": "int"
+   },
+   {
+    "name": "sensor_1",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_2",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_3",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_4",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_5",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_6",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_7",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_8",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_9",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_10",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_11",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_12",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_13",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_14",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_15",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_16",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_17",
+    "kind": "int"
+   },
+   {
+    "name": "sensor_18",
+    "kind": "int"
+   },
+   {
+    "name": "sensor_19",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_20",
+    "kind": "float"
+   },
+   {
+    "name": "sensor_21",
+    "kind": "float"
+   },
+   {
+    "name": "engine_id",
+    "kind": "string"
+   }
+  ]
+ },
+ "rows": {
+  "fleets": 4,
+  "engines": 1416,
+  "cycles": 265256
+ },
+ "prepared_at": "2026-11-21T19:51:34"
+}

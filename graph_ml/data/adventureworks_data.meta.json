@@ -1,0 +1,2614 @@
+{
+ "name": "AdventureWorks (mit Daten)",
+ "source": "Microsoft sql-server-samples · AdventureWorks OLTP (CSV)",
+ "source_url": "https://github.com/microsoft/sql-server-samples/releases/tag/adventureworks",
+ "license": "MIT (künstliche Beispieldaten)",
+ "render": true,
+ "synthetic": true,
+ "description": "Fahrradhersteller mit Aufträgen und Rabatten, Sonderangeboten, Gebieten, Vertrieblern mit Quoten, Stücklisten, Fertigungsaufträgen mit Ausschuss und Lieferanten – ERP-typisch über 60 Tabellen.",
+ "schemas": {
+  "Department": "HumanResources",
+  "Employee": "HumanResources",
+  "EmployeeDepartmentHistory": "HumanResources",
+  "EmployeePayHistory": "HumanResources",
+  "Shift": "HumanResources",
+  "Address": "Person",
+  "AddressType": "Person",
+  "BusinessEntity": "Person",
+  "BusinessEntityAddress": "Person",
+  "BusinessEntityContact": "Person",
+  "ContactType": "Person",
+  "CountryRegion": "Person",
+  "EmailAddress": "Person",
+  "Person": "Person",
+  "PersonPhone": "Person",
+  "PhoneNumberType": "Person",
+  "StateProvince": "Person",
+  "BillOfMaterials": "Production",
+  "Culture": "Production",
+  "Location": "Production",
+  "Product": "Production",
+  "ProductCategory": "Production",
+  "ProductCostHistory": "Production",
+  "ProductDescription": "Production",
+  "ProductInventory": "Production",
+  "ProductListPriceHistory": "Production",
+  "ProductModel": "Production",
+  "ProductModelProductDescriptionCulture": "Production",
+  "ProductProductPhoto": "Production",
+  "ProductReview": "Production",
+  "ProductSubcategory": "Production",
+  "ScrapReason": "Production",
+  "TransactionHistory": "Production",
+  "TransactionHistoryArchive": "Production",
+  "UnitMeasure": "Production",
+  "WorkOrder": "Production",
+  "WorkOrderRouting": "Production",
+  "ProductVendor": "Purchasing",
+  "PurchaseOrderDetail": "Purchasing",
+  "PurchaseOrderHeader": "Purchasing",
+  "ShipMethod": "Purchasing",
+  "Vendor": "Purchasing",
+  "CountryRegionCurrency": "Sales",
+  "CreditCard": "Sales",
+  "Currency": "Sales",
+  "CurrencyRate": "Sales",
+  "Customer": "Sales",
+  "PersonCreditCard": "Sales",
+  "SalesOrderDetail": "Sales",
+  "SalesOrderHeader": "Sales",
+  "SalesOrderHeaderSalesReason": "Sales",
+  "SalesPerson": "Sales",
+  "SalesPersonQuotaHistory": "Sales",
+  "SalesReason": "Sales",
+  "SalesTaxRate": "Sales",
+  "SalesTerritory": "Sales",
+  "SalesTerritoryHistory": "Sales",
+  "ShoppingCartItem": "Sales",
+  "SpecialOffer": "Sales",
+  "SpecialOfferProduct": "Sales",
+  "Store": "Sales"
+ },
+ "foreign_keys": [
+  {
+   "from_table": "Address",
+   "from_columns": [
+    "StateProvinceID"
+   ],
+   "to_table": "StateProvince",
+   "to_columns": [
+    "StateProvinceID"
+   ]
+  },
+  {
+   "from_table": "BillOfMaterials",
+   "from_columns": [
+    "ProductAssemblyID"
+   ],
+   "to_table": "Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "from_table": "BillOfMaterials",
+   "from_columns": [
+    "ComponentID"
+   ],
+   "to_table": "Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "from_table": "BillOfMaterials",
+   "from_columns": [
+    "UnitMeasureCode"
+   ],
+   "to_table": "UnitMeasure",
+   "to_columns": [
+    "UnitMeasureCode"
+   ]
+  },
+  {
+   "from_table": "BusinessEntityAddress",
+   "from_columns": [
+    "AddressID"
+   ],
+   "to_table": "Address",
+   "to_columns": [
+    "AddressID"
+   ]
+  },
+  {
+   "from_table": "BusinessEntityAddress",
+   "from_columns": [
+    "AddressTypeID"
+   ],
+   "to_table": "AddressType",
+   "to_columns": [
+    "AddressTypeID"
+   ]
+  },
+  {
+   "from_table": "BusinessEntityAddress",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "BusinessEntity",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "BusinessEntityContact",
+   "from_columns": [
+    "PersonID"
+   ],
+   "to_table": "Person",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "BusinessEntityContact",
+   "from_columns": [
+    "ContactTypeID"
+   ],
+   "to_table": "ContactType",
+   "to_columns": [
+    "ContactTypeID"
+   ]
+  },
+  {
+   "from_table": "BusinessEntityContact",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "BusinessEntity",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "CountryRegionCurrency",
+   "from_columns": [
+    "CountryRegionCode"
+   ],
+   "to_table": "CountryRegion",
+   "to_columns": [
+    "CountryRegionCode"
+   ]
+  },
+  {
+   "from_table": "CountryRegionCurrency",
+   "from_columns": [
+    "CurrencyCode"
+   ],
+   "to_table": "Currency",
+   "to_columns": [
+    "CurrencyCode"
+   ]
+  },
+  {
+   "from_table": "CurrencyRate",
+   "from_columns": [
+    "FromCurrencyCode"
+   ],
+   "to_table": "Currency",
+   "to_columns": [
+    "CurrencyCode"
+   ]
+  },
+  {
+   "from_table": "CurrencyRate",
+   "from_columns": [
+    "ToCurrencyCode"
+   ],
+   "to_table": "Currency",
+   "to_columns": [
+    "CurrencyCode"
+   ]
+  },
+  {
+   "from_table": "Customer",
+   "from_columns": [
+    "PersonID"
+   ],
+   "to_table": "Person",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "Customer",
+   "from_columns": [
+    "StoreID"
+   ],
+   "to_table": "Store",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "Customer",
+   "from_columns": [
+    "TerritoryID"
+   ],
+   "to_table": "SalesTerritory",
+   "to_columns": [
+    "TerritoryID"
+   ]
+  },
+  {
+   "from_table": "EmailAddress",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Person",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "Employee",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Person",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "EmployeeDepartmentHistory",
+   "from_columns": [
+    "DepartmentID"
+   ],
+   "to_table": "Department",
+   "to_columns": [
+    "DepartmentID"
+   ]
+  },
+  {
+   "from_table": "EmployeeDepartmentHistory",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Employee",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "EmployeeDepartmentHistory",
+   "from_columns": [
+    "ShiftID"
+   ],
+   "to_table": "Shift",
+   "to_columns": [
+    "ShiftID"
+   ]
+  },
+  {
+   "from_table": "EmployeePayHistory",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Employee",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "Person",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "BusinessEntity",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "PersonCreditCard",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Person",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "PersonCreditCard",
+   "from_columns": [
+    "CreditCardID"
+   ],
+   "to_table": "CreditCard",
+   "to_columns": [
+    "CreditCardID"
+   ]
+  },
+  {
+   "from_table": "PersonPhone",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Person",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "PersonPhone",
+   "from_columns": [
+    "PhoneNumberTypeID"
+   ],
+   "to_table": "PhoneNumberType",
+   "to_columns": [
+    "PhoneNumberTypeID"
+   ]
+  },
+  {
+   "from_table": "Product",
+   "from_columns": [
+    "SizeUnitMeasureCode"
+   ],
+   "to_table": "UnitMeasure",
+   "to_columns": [
+    "UnitMeasureCode"
+   ]
+  },
+  {
+   "from_table": "Product",
+   "from_columns": [
+    "WeightUnitMeasureCode"
+   ],
+   "to_table": "UnitMeasure",
+   "to_columns": [
+    "UnitMeasureCode"
+   ]
+  },
+  {
+   "from_table": "Product",
+   "from_columns": [
+    "ProductModelID"
+   ],
+   "to_table": "ProductModel",
+   "to_columns": [
+    "ProductModelID"
+   ]
+  },
+  {
+   "from_table": "Product",
+   "from_columns": [
+    "ProductSubcategoryID"
+   ],
+   "to_table": "ProductSubcategory",
+   "to_columns": [
+    "ProductSubcategoryID"
+   ]
+  },
+  {
+   "from_table": "ProductCostHistory",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "from_table": "ProductInventory",
+   "from_columns": [
+    "LocationID"
+   ],
+   "to_table": "Location",
+   "to_columns": [
+    "LocationID"
+   ]
+  },
+  {
+   "from_table": "ProductInventory",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "from_table": "ProductListPriceHistory",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "from_table": "ProductModelProductDescriptionCulture",
+   "from_columns": [
+    "ProductDescriptionID"
+   ],
+   "to_table": "ProductDescription",
+   "to_columns": [
+    "ProductDescriptionID"
+   ]
+  },
+  {
+   "from_table": "ProductModelProductDescriptionCulture",
+   "from_columns": [
+    "CultureID",
+    "Production",
+    "Culture",
+    "CultureID",
+    "FK_ProductModelProductDescriptionCulture_ProductModel_ProductModelID",
+    "ProductModelID"
+   ],
+   "to_table": "ProductModel",
+   "to_columns": [
+    "ProductModelID"
+   ]
+  },
+  {
+   "from_table": "ProductProductPhoto",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "from_table": "ProductReview",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "from_table": "ProductSubcategory",
+   "from_columns": [
+    "ProductCategoryID"
+   ],
+   "to_table": "ProductCategory",
+   "to_columns": [
+    "ProductCategoryID"
+   ]
+  },
+  {
+   "from_table": "ProductVendor",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "from_table": "ProductVendor",
+   "from_columns": [
+    "UnitMeasureCode"
+   ],
+   "to_table": "UnitMeasure",
+   "to_columns": [
+    "UnitMeasureCode"
+   ]
+  },
+  {
+   "from_table": "ProductVendor",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Vendor",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "PurchaseOrderDetail",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "from_table": "PurchaseOrderDetail",
+   "from_columns": [
+    "PurchaseOrderID"
+   ],
+   "to_table": "PurchaseOrderHeader",
+   "to_columns": [
+    "PurchaseOrderID"
+   ]
+  },
+  {
+   "from_table": "PurchaseOrderHeader",
+   "from_columns": [
+    "EmployeeID"
+   ],
+   "to_table": "Employee",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "PurchaseOrderHeader",
+   "from_columns": [
+    "VendorID"
+   ],
+   "to_table": "Vendor",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "PurchaseOrderHeader",
+   "from_columns": [
+    "ShipMethodID"
+   ],
+   "to_table": "ShipMethod",
+   "to_columns": [
+    "ShipMethodID"
+   ]
+  },
+  {
+   "from_table": "SalesOrderDetail",
+   "from_columns": [
+    "SalesOrderID"
+   ],
+   "to_table": "SalesOrderHeader",
+   "to_columns": [
+    "SalesOrderID"
+   ]
+  },
+  {
+   "from_table": "SalesOrderDetail",
+   "from_columns": [
+    "SpecialOfferID",
+    "ProductID"
+   ],
+   "to_table": "SpecialOfferProduct",
+   "to_columns": [
+    "SpecialOfferID",
+    "ProductID"
+   ]
+  },
+  {
+   "from_table": "SalesOrderHeader",
+   "from_columns": [
+    "BillToAddressID"
+   ],
+   "to_table": "Address",
+   "to_columns": [
+    "AddressID"
+   ]
+  },
+  {
+   "from_table": "SalesOrderHeader",
+   "from_columns": [
+    "ShipToAddressID"
+   ],
+   "to_table": "Address",
+   "to_columns": [
+    "AddressID"
+   ]
+  },
+  {
+   "from_table": "SalesOrderHeader",
+   "from_columns": [
+    "CreditCardID"
+   ],
+   "to_table": "CreditCard",
+   "to_columns": [
+    "CreditCardID"
+   ]
+  },
+  {
+   "from_table": "SalesOrderHeader",
+   "from_columns": [
+    "CurrencyRateID"
+   ],
+   "to_table": "CurrencyRate",
+   "to_columns": [
+    "CurrencyRateID"
+   ]
+  },
+  {
+   "from_table": "SalesOrderHeader",
+   "from_columns": [
+    "CustomerID"
+   ],
+   "to_table": "Customer",
+   "to_columns": [
+    "CustomerID"
+   ]
+  },
+  {
+   "from_table": "SalesOrderHeader",
+   "from_columns": [
+    "SalesPersonID"
+   ],
+   "to_table": "SalesPerson",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "SalesOrderHeader",
+   "from_columns": [
+    "ShipMethodID"
+   ],
+   "to_table": "ShipMethod",
+   "to_columns": [
+    "ShipMethodID"
+   ]
+  },
+  {
+   "from_table": "SalesOrderHeader",
+   "from_columns": [
+    "TerritoryID"
+   ],
+   "to_table": "SalesTerritory",
+   "to_columns": [
+    "TerritoryID"
+   ]
+  },
+  {
+   "from_table": "SalesOrderHeaderSalesReason",
+   "from_columns": [
+    "SalesReasonID"
+   ],
+   "to_table": "SalesReason",
+   "to_columns": [
+    "SalesReasonID"
+   ]
+  },
+  {
+   "from_table": "SalesOrderHeaderSalesReason",
+   "from_columns": [
+    "SalesOrderID"
+   ],
+   "to_table": "SalesOrderHeader",
+   "to_columns": [
+    "SalesOrderID"
+   ]
+  },
+  {
+   "from_table": "SalesPerson",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Employee",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "SalesPerson",
+   "from_columns": [
+    "TerritoryID"
+   ],
+   "to_table": "SalesTerritory",
+   "to_columns": [
+    "TerritoryID"
+   ]
+  },
+  {
+   "from_table": "SalesPersonQuotaHistory",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "SalesPerson",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "SalesTaxRate",
+   "from_columns": [
+    "StateProvinceID"
+   ],
+   "to_table": "StateProvince",
+   "to_columns": [
+    "StateProvinceID"
+   ]
+  },
+  {
+   "from_table": "SalesTerritoryHistory",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "SalesPerson",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "SalesTerritoryHistory",
+   "from_columns": [
+    "TerritoryID"
+   ],
+   "to_table": "SalesTerritory",
+   "to_columns": [
+    "TerritoryID"
+   ]
+  },
+  {
+   "from_table": "ShoppingCartItem",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "from_table": "SpecialOfferProduct",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "from_table": "SpecialOfferProduct",
+   "from_columns": [
+    "SpecialOfferID"
+   ],
+   "to_table": "SpecialOffer",
+   "to_columns": [
+    "SpecialOfferID"
+   ]
+  },
+  {
+   "from_table": "StateProvince",
+   "from_columns": [
+    "CountryRegionCode"
+   ],
+   "to_table": "CountryRegion",
+   "to_columns": [
+    "CountryRegionCode"
+   ]
+  },
+  {
+   "from_table": "StateProvince",
+   "from_columns": [
+    "TerritoryID"
+   ],
+   "to_table": "SalesTerritory",
+   "to_columns": [
+    "TerritoryID"
+   ]
+  },
+  {
+   "from_table": "Store",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "BusinessEntity",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "Store",
+   "from_columns": [
+    "SalesPersonID"
+   ],
+   "to_table": "SalesPerson",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "TransactionHistory",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "from_table": "Vendor",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "BusinessEntity",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "from_table": "WorkOrder",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "from_table": "WorkOrder",
+   "from_columns": [
+    "ScrapReasonID"
+   ],
+   "to_table": "ScrapReason",
+   "to_columns": [
+    "ScrapReasonID"
+   ]
+  },
+  {
+   "from_table": "WorkOrderRouting",
+   "from_columns": [
+    "LocationID"
+   ],
+   "to_table": "Location",
+   "to_columns": [
+    "LocationID"
+   ]
+  },
+  {
+   "from_table": "WorkOrderRouting",
+   "from_columns": [
+    "WorkOrderID"
+   ],
+   "to_table": "WorkOrder",
+   "to_columns": [
+    "WorkOrderID"
+   ]
+  }
+ ],
+ "primary_keys": {
+  "Department": [
+   "DepartmentID"
+  ],
+  "Employee": [
+   "BusinessEntityID"
+  ],
+  "EmployeeDepartmentHistory": [
+   "BusinessEntityID",
+   "StartDate",
+   "DepartmentID",
+   "ShiftID"
+  ],
+  "EmployeePayHistory": [
+   "BusinessEntityID",
+   "RateChangeDate"
+  ],
+  "Shift": [
+   "ShiftID"
+  ],
+  "Address": [
+   "AddressID"
+  ],
+  "AddressType": [
+   "AddressTypeID"
+  ],
+  "BusinessEntity": [
+   "BusinessEntityID"
+  ],
+  "BusinessEntityAddress": [
+   "BusinessEntityID",
+   "AddressID",
+   "AddressTypeID"
+  ],
+  "BusinessEntityContact": [
+   "BusinessEntityID",
+   "PersonID",
+   "ContactTypeID"
+  ],
+  "ContactType": [
+   "ContactTypeID"
+  ],
+  "CountryRegion": [
+   "CountryRegionCode"
+  ],
+  "EmailAddress": [
+   "BusinessEntityID",
+   "EmailAddressID"
+  ],
+  "Person": [
+   "BusinessEntityID"
+  ],
+  "PersonPhone": [
+   "BusinessEntityID",
+   "PhoneNumber",
+   "PhoneNumberTypeID"
+  ],
+  "PhoneNumberType": [
+   "PhoneNumberTypeID"
+  ],
+  "StateProvince": [
+   "StateProvinceID"
+  ],
+  "BillOfMaterials": [
+   "BillOfMaterialsID"
+  ],
+  "Culture": [
+   "CultureID"
+  ],
+  "Location": [
+   "LocationID"
+  ],
+  "Product": [
+   "ProductID"
+  ],
+  "ProductCategory": [
+   "ProductCategoryID"
+  ],
+  "ProductCostHistory": [
+   "ProductID",
+   "StartDate"
+  ],
+  "ProductDescription": [
+   "ProductDescriptionID"
+  ],
+  "ProductInventory": [
+   "ProductID",
+   "LocationID"
+  ],
+  "ProductListPriceHistory": [
+   "ProductID",
+   "StartDate"
+  ],
+  "ProductModel": [
+   "ProductModelID"
+  ],
+  "ProductModelProductDescriptionCulture": [
+   "ProductModelID",
+   "ProductDescriptionID",
+   "CultureID"
+  ],
+  "ProductProductPhoto": [
+   "ProductID",
+   "ProductPhotoID"
+  ],
+  "ProductReview": [
+   "ProductReviewID"
+  ],
+  "ProductSubcategory": [
+   "ProductSubcategoryID"
+  ],
+  "ScrapReason": [
+   "ScrapReasonID"
+  ],
+  "TransactionHistory": [
+   "TransactionID"
+  ],
+  "TransactionHistoryArchive": [
+   "TransactionID"
+  ],
+  "UnitMeasure": [
+   "UnitMeasureCode"
+  ],
+  "WorkOrder": [
+   "WorkOrderID"
+  ],
+  "WorkOrderRouting": [
+   "WorkOrderID",
+   "ProductID",
+   "OperationSequence"
+  ],
+  "ProductVendor": [
+   "ProductID",
+   "BusinessEntityID"
+  ],
+  "PurchaseOrderDetail": [
+   "PurchaseOrderID",
+   "PurchaseOrderDetailID"
+  ],
+  "PurchaseOrderHeader": [
+   "PurchaseOrderID"
+  ],
+  "ShipMethod": [
+   "ShipMethodID"
+  ],
+  "Vendor": [
+   "BusinessEntityID"
+  ],
+  "CountryRegionCurrency": [
+   "CountryRegionCode",
+   "CurrencyCode"
+  ],
+  "CreditCard": [
+   "CreditCardID"
+  ],
+  "Currency": [
+   "CurrencyCode"
+  ],
+  "CurrencyRate": [
+   "CurrencyRateID"
+  ],
+  "Customer": [
+   "CustomerID"
+  ],
+  "PersonCreditCard": [
+   "BusinessEntityID",
+   "CreditCardID"
+  ],
+  "SalesOrderDetail": [
+   "SalesOrderID",
+   "SalesOrderDetailID"
+  ],
+  "SalesOrderHeader": [
+   "SalesOrderID"
+  ],
+  "SalesOrderHeaderSalesReason": [
+   "SalesOrderID",
+   "SalesReasonID"
+  ],
+  "SalesPerson": [
+   "BusinessEntityID"
+  ],
+  "SalesPersonQuotaHistory": [
+   "BusinessEntityID",
+   "QuotaDate",
+   "ProductCategoryID"
+  ],
+  "SalesReason": [
+   "SalesReasonID"
+  ],
+  "SalesTaxRate": [
+   "SalesTaxRateID"
+  ],
+  "SalesTerritory": [
+   "TerritoryID"
+  ],
+  "SalesTerritoryHistory": [
+   "BusinessEntityID",
+   "StartDate",
+   "TerritoryID"
+  ],
+  "ShoppingCartItem": [
+   "ShoppingCartItemID"
+  ],
+  "SpecialOffer": [
+   "SpecialOfferID"
+  ],
+  "SpecialOfferProduct": [
+   "SpecialOfferID",
+   "ProductID"
+  ],
+  "Store": [
+   "BusinessEntityID"
+  ]
+ },
+ "labels": {},
+ "id": "adventureworks_data",
+ "tables": {
+  "Department": [
+   {
+    "name": "DepartmentID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   },
+   {
+    "name": "GroupName",
+    "kind": "string"
+   }
+  ],
+  "Employee": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "NationalIDNumber",
+    "kind": "string"
+   },
+   {
+    "name": "LoginID",
+    "kind": "string"
+   },
+   {
+    "name": "OrganizationLevel",
+    "kind": "string"
+   },
+   {
+    "name": "JobTitle",
+    "kind": "string"
+   },
+   {
+    "name": "BirthDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "MaritalStatus",
+    "kind": "string"
+   },
+   {
+    "name": "Gender",
+    "kind": "string"
+   },
+   {
+    "name": "HireDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "SalariedFlag",
+    "kind": "int"
+   },
+   {
+    "name": "VacationHours",
+    "kind": "int"
+   },
+   {
+    "name": "SickLeaveHours",
+    "kind": "int"
+   },
+   {
+    "name": "CurrentFlag",
+    "kind": "int"
+   }
+  ],
+  "EmployeeDepartmentHistory": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "DepartmentID",
+    "kind": "int"
+   },
+   {
+    "name": "ShiftID",
+    "kind": "int"
+   },
+   {
+    "name": "StartDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "EndDate",
+    "kind": "datetime"
+   }
+  ],
+  "EmployeePayHistory": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "RateChangeDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "Rate",
+    "kind": "float"
+   },
+   {
+    "name": "PayFrequency",
+    "kind": "int"
+   }
+  ],
+  "Shift": [
+   {
+    "name": "ShiftID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   },
+   {
+    "name": "StartTime",
+    "kind": "datetime"
+   },
+   {
+    "name": "EndTime",
+    "kind": "datetime"
+   }
+  ],
+  "Address": [
+   {
+    "name": "AddressID",
+    "kind": "int"
+   },
+   {
+    "name": "AddressLine1",
+    "kind": "string"
+   },
+   {
+    "name": "AddressLine2",
+    "kind": "string"
+   },
+   {
+    "name": "City",
+    "kind": "string"
+   },
+   {
+    "name": "StateProvinceID",
+    "kind": "int"
+   },
+   {
+    "name": "PostalCode",
+    "kind": "string"
+   }
+  ],
+  "AddressType": [
+   {
+    "name": "AddressTypeID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   }
+  ],
+  "BusinessEntity": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   }
+  ],
+  "BusinessEntityAddress": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "AddressID",
+    "kind": "int"
+   },
+   {
+    "name": "AddressTypeID",
+    "kind": "int"
+   }
+  ],
+  "BusinessEntityContact": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "PersonID",
+    "kind": "int"
+   },
+   {
+    "name": "ContactTypeID",
+    "kind": "int"
+   }
+  ],
+  "ContactType": [
+   {
+    "name": "ContactTypeID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   }
+  ],
+  "CountryRegion": [
+   {
+    "name": "CountryRegionCode",
+    "kind": "string"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   }
+  ],
+  "EmailAddress": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "EmailAddressID",
+    "kind": "int"
+   },
+   {
+    "name": "EmailAddress",
+    "kind": "string"
+   }
+  ],
+  "Person": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "PersonType",
+    "kind": "string"
+   },
+   {
+    "name": "NameStyle",
+    "kind": "int"
+   },
+   {
+    "name": "Title",
+    "kind": "string"
+   },
+   {
+    "name": "FirstName",
+    "kind": "string"
+   },
+   {
+    "name": "MiddleName",
+    "kind": "string"
+   },
+   {
+    "name": "LastName",
+    "kind": "string"
+   },
+   {
+    "name": "Suffix",
+    "kind": "string"
+   },
+   {
+    "name": "EmailPromotion",
+    "kind": "int"
+   }
+  ],
+  "PersonPhone": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "PhoneNumber",
+    "kind": "string"
+   },
+   {
+    "name": "PhoneNumberTypeID",
+    "kind": "int"
+   }
+  ],
+  "PhoneNumberType": [
+   {
+    "name": "PhoneNumberTypeID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   }
+  ],
+  "StateProvince": [
+   {
+    "name": "StateProvinceID",
+    "kind": "int"
+   },
+   {
+    "name": "StateProvinceCode",
+    "kind": "string"
+   },
+   {
+    "name": "CountryRegionCode",
+    "kind": "string"
+   },
+   {
+    "name": "IsOnlyStateProvinceFlag",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   },
+   {
+    "name": "TerritoryID",
+    "kind": "int"
+   }
+  ],
+  "BillOfMaterials": [
+   {
+    "name": "BillOfMaterialsID",
+    "kind": "int"
+   },
+   {
+    "name": "ProductAssemblyID",
+    "kind": "float"
+   },
+   {
+    "name": "ComponentID",
+    "kind": "int"
+   },
+   {
+    "name": "StartDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "EndDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "UnitMeasureCode",
+    "kind": "string"
+   },
+   {
+    "name": "BOMLevel",
+    "kind": "int"
+   },
+   {
+    "name": "PerAssemblyQty",
+    "kind": "int"
+   }
+  ],
+  "Culture": [
+   {
+    "name": "CultureID",
+    "kind": "string"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   }
+  ],
+  "Location": [
+   {
+    "name": "LocationID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   },
+   {
+    "name": "CostRate",
+    "kind": "float"
+   },
+   {
+    "name": "Availability",
+    "kind": "int"
+   }
+  ],
+  "Product": [
+   {
+    "name": "ProductID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   },
+   {
+    "name": "ProductNumber",
+    "kind": "string"
+   },
+   {
+    "name": "MakeFlag",
+    "kind": "int"
+   },
+   {
+    "name": "FinishedGoodsFlag",
+    "kind": "int"
+   },
+   {
+    "name": "Color",
+    "kind": "string"
+   },
+   {
+    "name": "SafetyStockLevel",
+    "kind": "int"
+   },
+   {
+    "name": "ReorderPoint",
+    "kind": "int"
+   },
+   {
+    "name": "StandardCost",
+    "kind": "float"
+   },
+   {
+    "name": "ListPrice",
+    "kind": "float"
+   },
+   {
+    "name": "Size",
+    "kind": "string"
+   },
+   {
+    "name": "SizeUnitMeasureCode",
+    "kind": "string"
+   },
+   {
+    "name": "WeightUnitMeasureCode",
+    "kind": "string"
+   },
+   {
+    "name": "Weight",
+    "kind": "float"
+   },
+   {
+    "name": "DaysToManufacture",
+    "kind": "int"
+   },
+   {
+    "name": "ProductLine",
+    "kind": "string"
+   },
+   {
+    "name": "Class",
+    "kind": "string"
+   },
+   {
+    "name": "Style",
+    "kind": "string"
+   },
+   {
+    "name": "ProductSubcategoryID",
+    "kind": "float"
+   },
+   {
+    "name": "ProductModelID",
+    "kind": "float"
+   },
+   {
+    "name": "SellStartDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "SellEndDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "DiscontinuedDate",
+    "kind": "datetime"
+   }
+  ],
+  "ProductCategory": [
+   {
+    "name": "ProductCategoryID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   }
+  ],
+  "ProductCostHistory": [
+   {
+    "name": "ProductID",
+    "kind": "int"
+   },
+   {
+    "name": "StartDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "EndDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "StandardCost",
+    "kind": "float"
+   }
+  ],
+  "ProductDescription": [
+   {
+    "name": "ProductDescriptionID",
+    "kind": "int"
+   },
+   {
+    "name": "Description",
+    "kind": "string"
+   }
+  ],
+  "ProductInventory": [
+   {
+    "name": "ProductID",
+    "kind": "int"
+   },
+   {
+    "name": "LocationID",
+    "kind": "int"
+   },
+   {
+    "name": "Shelf",
+    "kind": "string"
+   },
+   {
+    "name": "Bin",
+    "kind": "int"
+   },
+   {
+    "name": "Quantity",
+    "kind": "int"
+   }
+  ],
+  "ProductListPriceHistory": [
+   {
+    "name": "ProductID",
+    "kind": "int"
+   },
+   {
+    "name": "StartDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "EndDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "ListPrice",
+    "kind": "float"
+   }
+  ],
+  "ProductModel": [
+   {
+    "name": "ProductModelID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   }
+  ],
+  "ProductModelProductDescriptionCulture": [
+   {
+    "name": "ProductModelID",
+    "kind": "int"
+   },
+   {
+    "name": "ProductDescriptionID",
+    "kind": "int"
+   },
+   {
+    "name": "CultureID",
+    "kind": "string"
+   }
+  ],
+  "ProductProductPhoto": [
+   {
+    "name": "ProductID",
+    "kind": "int"
+   },
+   {
+    "name": "ProductPhotoID",
+    "kind": "int"
+   },
+   {
+    "name": "Primary",
+    "kind": "int"
+   }
+  ],
+  "ProductReview": [
+   {
+    "name": "ProductReviewID",
+    "kind": "float"
+   },
+   {
+    "name": "ProductID",
+    "kind": "float"
+   },
+   {
+    "name": "ReviewerName",
+    "kind": "string"
+   },
+   {
+    "name": "ReviewDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "EmailAddress",
+    "kind": "string"
+   },
+   {
+    "name": "Rating",
+    "kind": "float"
+   },
+   {
+    "name": "Comments",
+    "kind": "string"
+   }
+  ],
+  "ProductSubcategory": [
+   {
+    "name": "ProductSubcategoryID",
+    "kind": "int"
+   },
+   {
+    "name": "ProductCategoryID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   }
+  ],
+  "ScrapReason": [
+   {
+    "name": "ScrapReasonID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   }
+  ],
+  "TransactionHistory": [
+   {
+    "name": "TransactionID",
+    "kind": "int"
+   },
+   {
+    "name": "ProductID",
+    "kind": "int"
+   },
+   {
+    "name": "ReferenceOrderID",
+    "kind": "int"
+   },
+   {
+    "name": "ReferenceOrderLineID",
+    "kind": "int"
+   },
+   {
+    "name": "TransactionDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "TransactionType",
+    "kind": "string"
+   },
+   {
+    "name": "Quantity",
+    "kind": "int"
+   },
+   {
+    "name": "ActualCost",
+    "kind": "float"
+   }
+  ],
+  "TransactionHistoryArchive": [
+   {
+    "name": "TransactionID",
+    "kind": "int"
+   },
+   {
+    "name": "ProductID",
+    "kind": "int"
+   },
+   {
+    "name": "ReferenceOrderID",
+    "kind": "int"
+   },
+   {
+    "name": "ReferenceOrderLineID",
+    "kind": "int"
+   },
+   {
+    "name": "TransactionDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "TransactionType",
+    "kind": "string"
+   },
+   {
+    "name": "Quantity",
+    "kind": "int"
+   },
+   {
+    "name": "ActualCost",
+    "kind": "float"
+   }
+  ],
+  "UnitMeasure": [
+   {
+    "name": "UnitMeasureCode",
+    "kind": "string"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   }
+  ],
+  "WorkOrder": [
+   {
+    "name": "WorkOrderID",
+    "kind": "int"
+   },
+   {
+    "name": "ProductID",
+    "kind": "int"
+   },
+   {
+    "name": "OrderQty",
+    "kind": "int"
+   },
+   {
+    "name": "StockedQty",
+    "kind": "string"
+   },
+   {
+    "name": "ScrappedQty",
+    "kind": "int"
+   },
+   {
+    "name": "StartDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "EndDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "DueDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "ScrapReasonID",
+    "kind": "float"
+   }
+  ],
+  "WorkOrderRouting": [
+   {
+    "name": "WorkOrderID",
+    "kind": "int"
+   },
+   {
+    "name": "ProductID",
+    "kind": "int"
+   },
+   {
+    "name": "OperationSequence",
+    "kind": "int"
+   },
+   {
+    "name": "LocationID",
+    "kind": "int"
+   },
+   {
+    "name": "ScheduledStartDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "ScheduledEndDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "ActualStartDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "ActualEndDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "ActualResourceHrs",
+    "kind": "float"
+   },
+   {
+    "name": "PlannedCost",
+    "kind": "float"
+   },
+   {
+    "name": "ActualCost",
+    "kind": "float"
+   }
+  ],
+  "ProductVendor": [
+   {
+    "name": "ProductID",
+    "kind": "int"
+   },
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "AverageLeadTime",
+    "kind": "int"
+   },
+   {
+    "name": "StandardPrice",
+    "kind": "float"
+   },
+   {
+    "name": "LastReceiptCost",
+    "kind": "float"
+   },
+   {
+    "name": "LastReceiptDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "MinOrderQty",
+    "kind": "int"
+   },
+   {
+    "name": "MaxOrderQty",
+    "kind": "int"
+   },
+   {
+    "name": "OnOrderQty",
+    "kind": "float"
+   },
+   {
+    "name": "UnitMeasureCode",
+    "kind": "string"
+   }
+  ],
+  "PurchaseOrderDetail": [
+   {
+    "name": "PurchaseOrderID",
+    "kind": "int"
+   },
+   {
+    "name": "PurchaseOrderDetailID",
+    "kind": "int"
+   },
+   {
+    "name": "DueDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "OrderQty",
+    "kind": "int"
+   },
+   {
+    "name": "ProductID",
+    "kind": "int"
+   },
+   {
+    "name": "UnitPrice",
+    "kind": "float"
+   },
+   {
+    "name": "LineTotal",
+    "kind": "string"
+   },
+   {
+    "name": "ReceivedQty",
+    "kind": "int"
+   },
+   {
+    "name": "RejectedQty",
+    "kind": "int"
+   },
+   {
+    "name": "StockedQty",
+    "kind": "string"
+   }
+  ],
+  "PurchaseOrderHeader": [
+   {
+    "name": "PurchaseOrderID",
+    "kind": "int"
+   },
+   {
+    "name": "RevisionNumber",
+    "kind": "int"
+   },
+   {
+    "name": "Status",
+    "kind": "int"
+   },
+   {
+    "name": "EmployeeID",
+    "kind": "int"
+   },
+   {
+    "name": "VendorID",
+    "kind": "int"
+   },
+   {
+    "name": "ShipMethodID",
+    "kind": "int"
+   },
+   {
+    "name": "OrderDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "ShipDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "SubTotal",
+    "kind": "float"
+   },
+   {
+    "name": "TaxAmt",
+    "kind": "float"
+   },
+   {
+    "name": "Freight",
+    "kind": "float"
+   },
+   {
+    "name": "TotalDue",
+    "kind": "string"
+   }
+  ],
+  "ShipMethod": [
+   {
+    "name": "ShipMethodID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   },
+   {
+    "name": "ShipBase",
+    "kind": "float"
+   },
+   {
+    "name": "ShipRate",
+    "kind": "float"
+   }
+  ],
+  "Vendor": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "AccountNumber",
+    "kind": "string"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   },
+   {
+    "name": "CreditRating",
+    "kind": "int"
+   },
+   {
+    "name": "PreferredVendorStatus",
+    "kind": "int"
+   },
+   {
+    "name": "ActiveFlag",
+    "kind": "int"
+   },
+   {
+    "name": "PurchasingWebServiceURL",
+    "kind": "string"
+   }
+  ],
+  "CountryRegionCurrency": [
+   {
+    "name": "CountryRegionCode",
+    "kind": "string"
+   },
+   {
+    "name": "CurrencyCode",
+    "kind": "string"
+   }
+  ],
+  "CreditCard": [
+   {
+    "name": "CreditCardID",
+    "kind": "int"
+   },
+   {
+    "name": "CardType",
+    "kind": "string"
+   },
+   {
+    "name": "CardNumber",
+    "kind": "string"
+   },
+   {
+    "name": "ExpMonth",
+    "kind": "int"
+   },
+   {
+    "name": "ExpYear",
+    "kind": "int"
+   }
+  ],
+  "Currency": [
+   {
+    "name": "CurrencyCode",
+    "kind": "string"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   }
+  ],
+  "CurrencyRate": [
+   {
+    "name": "CurrencyRateID",
+    "kind": "int"
+   },
+   {
+    "name": "CurrencyRateDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "FromCurrencyCode",
+    "kind": "string"
+   },
+   {
+    "name": "ToCurrencyCode",
+    "kind": "string"
+   },
+   {
+    "name": "AverageRate",
+    "kind": "float"
+   },
+   {
+    "name": "EndOfDayRate",
+    "kind": "float"
+   }
+  ],
+  "Customer": [
+   {
+    "name": "CustomerID",
+    "kind": "int"
+   },
+   {
+    "name": "PersonID",
+    "kind": "float"
+   },
+   {
+    "name": "StoreID",
+    "kind": "float"
+   },
+   {
+    "name": "TerritoryID",
+    "kind": "int"
+   },
+   {
+    "name": "AccountNumber",
+    "kind": "string"
+   }
+  ],
+  "PersonCreditCard": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "CreditCardID",
+    "kind": "int"
+   }
+  ],
+  "SalesOrderDetail": [
+   {
+    "name": "SalesOrderID",
+    "kind": "int"
+   },
+   {
+    "name": "SalesOrderDetailID",
+    "kind": "int"
+   },
+   {
+    "name": "CarrierTrackingNumber",
+    "kind": "string"
+   },
+   {
+    "name": "OrderQty",
+    "kind": "int"
+   },
+   {
+    "name": "ProductID",
+    "kind": "int"
+   },
+   {
+    "name": "SpecialOfferID",
+    "kind": "int"
+   },
+   {
+    "name": "UnitPrice",
+    "kind": "float"
+   },
+   {
+    "name": "UnitPriceDiscount",
+    "kind": "float"
+   },
+   {
+    "name": "LineTotal",
+    "kind": "string"
+   }
+  ],
+  "SalesOrderHeader": [
+   {
+    "name": "SalesOrderID",
+    "kind": "int"
+   },
+   {
+    "name": "RevisionNumber",
+    "kind": "int"
+   },
+   {
+    "name": "OrderDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "DueDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "ShipDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "Status",
+    "kind": "int"
+   },
+   {
+    "name": "OnlineOrderFlag",
+    "kind": "int"
+   },
+   {
+    "name": "SalesOrderNumber",
+    "kind": "string"
+   },
+   {
+    "name": "PurchaseOrderNumber",
+    "kind": "string"
+   },
+   {
+    "name": "AccountNumber",
+    "kind": "string"
+   },
+   {
+    "name": "CustomerID",
+    "kind": "int"
+   },
+   {
+    "name": "SalesPersonID",
+    "kind": "float"
+   },
+   {
+    "name": "TerritoryID",
+    "kind": "int"
+   },
+   {
+    "name": "BillToAddressID",
+    "kind": "int"
+   },
+   {
+    "name": "ShipToAddressID",
+    "kind": "int"
+   },
+   {
+    "name": "ShipMethodID",
+    "kind": "int"
+   },
+   {
+    "name": "CreditCardID",
+    "kind": "float"
+   },
+   {
+    "name": "CreditCardApprovalCode",
+    "kind": "string"
+   },
+   {
+    "name": "CurrencyRateID",
+    "kind": "float"
+   },
+   {
+    "name": "SubTotal",
+    "kind": "float"
+   },
+   {
+    "name": "TaxAmt",
+    "kind": "float"
+   },
+   {
+    "name": "Freight",
+    "kind": "float"
+   },
+   {
+    "name": "TotalDue",
+    "kind": "string"
+   },
+   {
+    "name": "Comment",
+    "kind": "string"
+   }
+  ],
+  "SalesOrderHeaderSalesReason": [
+   {
+    "name": "SalesOrderID",
+    "kind": "int"
+   },
+   {
+    "name": "SalesReasonID",
+    "kind": "int"
+   }
+  ],
+  "SalesPerson": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "TerritoryID",
+    "kind": "float"
+   },
+   {
+    "name": "SalesQuota",
+    "kind": "float"
+   },
+   {
+    "name": "Bonus",
+    "kind": "int"
+   },
+   {
+    "name": "CommissionPct",
+    "kind": "float"
+   },
+   {
+    "name": "SalesYTD",
+    "kind": "int"
+   },
+   {
+    "name": "SalesLastYear",
+    "kind": "int"
+   }
+  ],
+  "SalesPersonQuotaHistory": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "QuotaDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "SalesQuota",
+    "kind": "int"
+   }
+  ],
+  "SalesReason": [
+   {
+    "name": "SalesReasonID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   },
+   {
+    "name": "ReasonType",
+    "kind": "string"
+   }
+  ],
+  "SalesTaxRate": [
+   {
+    "name": "SalesTaxRateID",
+    "kind": "int"
+   },
+   {
+    "name": "StateProvinceID",
+    "kind": "int"
+   },
+   {
+    "name": "TaxType",
+    "kind": "int"
+   },
+   {
+    "name": "TaxRate",
+    "kind": "float"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   }
+  ],
+  "SalesTerritory": [
+   {
+    "name": "TerritoryID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   },
+   {
+    "name": "CountryRegionCode",
+    "kind": "string"
+   },
+   {
+    "name": "Group",
+    "kind": "string"
+   },
+   {
+    "name": "SalesYTD",
+    "kind": "int"
+   },
+   {
+    "name": "SalesLastYear",
+    "kind": "int"
+   },
+   {
+    "name": "CostYTD",
+    "kind": "int"
+   },
+   {
+    "name": "CostLastYear",
+    "kind": "int"
+   }
+  ],
+  "SalesTerritoryHistory": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "TerritoryID",
+    "kind": "int"
+   },
+   {
+    "name": "StartDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "EndDate",
+    "kind": "datetime"
+   }
+  ],
+  "ShoppingCartItem": [
+   {
+    "name": "ShoppingCartItemID",
+    "kind": "int"
+   },
+   {
+    "name": "ShoppingCartID",
+    "kind": "string"
+   },
+   {
+    "name": "Quantity",
+    "kind": "int"
+   },
+   {
+    "name": "ProductID",
+    "kind": "int"
+   },
+   {
+    "name": "DateCreated",
+    "kind": "datetime"
+   }
+  ],
+  "SpecialOffer": [
+   {
+    "name": "SpecialOfferID",
+    "kind": "int"
+   },
+   {
+    "name": "Description",
+    "kind": "string"
+   },
+   {
+    "name": "DiscountPct",
+    "kind": "float"
+   },
+   {
+    "name": "Type",
+    "kind": "string"
+   },
+   {
+    "name": "Category",
+    "kind": "string"
+   },
+   {
+    "name": "StartDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "EndDate",
+    "kind": "datetime"
+   },
+   {
+    "name": "MinQty",
+    "kind": "int"
+   },
+   {
+    "name": "MaxQty",
+    "kind": "float"
+   }
+  ],
+  "SpecialOfferProduct": [
+   {
+    "name": "SpecialOfferID",
+    "kind": "int"
+   },
+   {
+    "name": "ProductID",
+    "kind": "int"
+   }
+  ],
+  "Store": [
+   {
+    "name": "BusinessEntityID",
+    "kind": "int"
+   },
+   {
+    "name": "Name",
+    "kind": "string"
+   },
+   {
+    "name": "SalesPersonID",
+    "kind": "int"
+   }
+  ]
+ },
+ "rows": {
+  "Department": 16,
+  "Employee": 290,
+  "EmployeeDepartmentHistory": 296,
+  "EmployeePayHistory": 316,
+  "Shift": 3,
+  "Address": 19614,
+  "AddressType": 6,
+  "BusinessEntity": 20777,
+  "BusinessEntityAddress": 19614,
+  "BusinessEntityContact": 909,
+  "ContactType": 20,
+  "CountryRegion": 238,
+  "EmailAddress": 19972,
+  "Person": 19972,
+  "PersonPhone": 19972,
+  "PhoneNumberType": 3,
+  "StateProvince": 181,
+  "BillOfMaterials": 2679,
+  "Culture": 8,
+  "Location": 14,
+  "Product": 504,
+  "ProductCategory": 4,
+  "ProductCostHistory": 395,
+  "ProductDescription": 762,
+  "ProductInventory": 1069,
+  "ProductListPriceHistory": 395,
+  "ProductModel": 128,
+  "ProductModelProductDescriptionCulture": 762,
+  "ProductProductPhoto": 504,
+  "ProductReview": 31,
+  "ProductSubcategory": 37,
+  "ScrapReason": 16,
+  "TransactionHistory": 113443,
+  "TransactionHistoryArchive": 89253,
+  "UnitMeasure": 38,
+  "WorkOrder": 72591,
+  "WorkOrderRouting": 67131,
+  "ProductVendor": 460,
+  "PurchaseOrderDetail": 8845,
+  "PurchaseOrderHeader": 4012,
+  "ShipMethod": 5,
+  "Vendor": 104,
+  "CountryRegionCurrency": 109,
+  "CreditCard": 19118,
+  "Currency": 105,
+  "CurrencyRate": 13532,
+  "Customer": 19820,
+  "PersonCreditCard": 19118,
+  "SalesOrderDetail": 121317,
+  "SalesOrderHeader": 31465,
+  "SalesOrderHeaderSalesReason": 27647,
+  "SalesPerson": 17,
+  "SalesPersonQuotaHistory": 163,
+  "SalesReason": 10,
+  "SalesTaxRate": 29,
+  "SalesTerritory": 10,
+  "SalesTerritoryHistory": 17,
+  "ShoppingCartItem": 3,
+  "SpecialOffer": 16,
+  "SpecialOfferProduct": 538,
+  "Store": 701
+ },
+ "prepared_at": "2026-11-21T19:52:31"
+}

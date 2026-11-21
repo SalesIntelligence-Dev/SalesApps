@@ -16,6 +16,7 @@ import csv
 import hashlib
 import io
 import json
+import os
 import logging
 import threading
 import time
@@ -374,6 +375,21 @@ class Registry:
                            "schemas": sorted({t["schema"] for t in schema["tables"]})},
                     files=[AW_SCHEMA.name],
                 )
+            from . import connectors as cn
+            for ds_id in cn.available():                          # Datensätze v2 (graph_ml/connectors.py)
+                meta = cn.load_meta(ds_id)
+                if not meta.get("render", True) and os.environ.get("RENDER"):
+                    continue                                       # nicht-kommerzielle Daten nicht auf Render
+                npz = DATA_DIR / f"{ds_id}.npz"
+                rows = meta.get("rows", {})
+                self._datasets[ds_id] = Dataset(
+                    id=ds_id, name=meta["name"], kind="data", source=meta["source"], license=meta["license"],
+                    description=meta["description"], builtin=True,
+                    version=hashlib.sha256((meta.get("prepared_at", "") + str(npz.stat().st_size)).encode()).hexdigest()[:12],
+                    facts={"tables": len(meta["tables"]), "rows": sum(rows.values()), "rows_by_table": rows,
+                           "foreign_keys": len(meta.get("foreign_keys", [])), "synthetic": meta.get("synthetic"),
+                           "source_url": meta.get("source_url")},
+                    labels=meta.get("labels") or {}, files=[npz.name])
             self._mappings.clear()
             self._overviews.clear()
             self._profiles.clear()
@@ -392,7 +408,7 @@ class Registry:
         return self._datasets[ds_id]
 
     def list(self) -> list[dict]:
-        order = {"online_retail_ii": 0, "adventureworks": 1}
+        order = {"online_retail_ii": 0, "adventureworks_data": 1, "wwi": 2, "scania": 3, "cmapss": 4, "adventureworks": 5}
         ds = sorted(self._datasets.values(), key=lambda d: (order.get(d.id, 9), -d.created_at))
         return [d.card() for d in ds]
 
@@ -416,7 +432,28 @@ class Registry:
                     t0 = time.time()
                     ds.tables, self._orii_quality = build_online_retail_tables(self.raw_online_retail())
                     log.info("Relationales Schema abgeleitet in %.1f s", time.time() - t0)
+        elif ds.tables is None and ds.builtin:
+            from . import connectors as cn
+            with self._load_lock:
+                if ds.tables is None:
+                    # Speicher (Render ≈ 512 MB): nur ein Datensatz v2 gleichzeitig im Speicher
+                    for other in self._datasets.values():
+                        if other.id != ds_id and other.id in cn.SPECS and other.tables is not None:
+                            other.tables = None
+                    import gc
+                    gc.collect()
+                    t0 = time.time()
+                    ds.tables = cn.load_tables(ds_id)
+                    log.info("%s geladen: %d Tabellen in %.1f s", ds_id, len(ds.tables), time.time() - t0)
         return ds.tables or {}
+
+    def _connector_extra(self, ds_id: str) -> dict:
+        """Deklarierte Schlüssel, Schema-Gruppen und Beschriftungen aus der meta.json eines Datensatzes v2."""
+        from . import connectors as cn
+        meta = cn.load_meta(ds_id) or {}
+        pks = {t: v[0] for t, v in (meta.get("primary_keys") or {}).items() if v and len(v) == 1}
+        return {"declared_fks": meta.get("foreign_keys") or [], "schemas": meta.get("schemas") or {},
+                "labels": meta.get("labels") or {}, "declared_pks": pks}
 
     # Mapping -----------------------------------------------------------------
     def _artifact_path(self, kind: str, ds_id: str) -> Path:
@@ -464,7 +501,9 @@ class Registry:
             m = build_schema_mapping(ds.schema, dataset_id=ds_id)
         else:
             tables = self.tables(ds_id)
-            extra = self._online_retail_extra() if ds_id == "online_retail_ii" else {}
+            from . import connectors as cn
+            extra = self._online_retail_extra() if ds_id == "online_retail_ii" else \
+                self._connector_extra(ds_id) if ds_id in cn.SPECS else {}
             extra.setdefault("labels", ds.labels)
             m = build_mapping(tables, dataset_id=ds_id, extra=extra,
                               sample_note=None if ds.builtin else "Stichprobe")
