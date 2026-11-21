@@ -746,4 +746,4 @@ Aufgabe: Modul 6 „Aktivierung“, Monitoring, Report-Export und der Feinschlif
 - **Deployment (erst nach Freigabe):**
   1. `git push` → Render baut automatisch. `render.yaml` und `requirements.txt` bleiben unverändert (openpyxl ist schon enthalten).
   2. Danach prüfen: `https://salesapps.onrender.com/graph_ml`, `/graph_ml/api/system`, `/api/health`, `/graph_ml/report`.
-  3. RunPod (optional, für Live-GPU auf Render): `./runpod_graphml/build.sh <dockerhub-user> 2`, Image im Endpoint setzen. In Render `RUNPOD_GRAPHML_ENDPOINT_ID` eintragen (`RUNPOD_API_KEY` ist gesetzt), optional `KUMO_API_KEY`.
+  3. RunPod (optional, für Live-GPU auf Render): `./runpod_graphml/build.sh ghcr.io/salesintelligence-dev 1` (GitHub-Registry wie das Aurora-Image `aurora-runpod`). Das Dockerfile hält torch auf 2.4.1+cu124 des Basis-Images und installiert blinker mit `--ignore-installed`. Lokal geprüft: Selbsttest 7,6 TFLOP/s, GNN-Churn-Job ok. Image im Endpoint setzen. In Render `RUNPOD_GRAPHML_ENDPOINT_ID` eintragen (`RUNPOD_API_KEY` ist gesetzt), optional `KUMO_API_KEY`.

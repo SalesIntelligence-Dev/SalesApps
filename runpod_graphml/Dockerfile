@@ -8,8 +8,13 @@ FROM runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
 WORKDIR /app
 
 COPY requirements.txt .
+# blinker liegt im Basis-Image als distutils-Paket vor und lässt sich nicht deinstallieren (Flask braucht ≥ 1.9)
+# torch bleibt auf der Version des Basis-Images (CUDA 12.4) – sonst zieht pip ein neueres CUDA nach, das viele
+# RunPod-Treiber nicht können (der Worker liefe dann still auf CPU)
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir --ignore-installed blinker && \
+    pip freeze | grep -iE "^(torch|torchvision|torchaudio)==" > /tmp/constraints.txt && cat /tmp/constraints.txt && \
+    pip install --no-cache-dir -r requirements.txt -c /tmp/constraints.txt
 
 # TabPFN-v2-Gewichte schon beim Build laden (kein Download beim Kaltstart)
 RUN python -c "from tabpfn import TabPFNClassifier; import numpy as np; \
