@@ -10,12 +10,12 @@ from __future__ import annotations
 from .api import AuroraEngine, KumoRFMEngine
 from .cpu import (ItemKNNEngine, LGBMEngine, LGBMForecastEngine, LGBMGraphEngine, LGBMRankEngine,
                   NaiveForecastEngine, PopularityEngine, RecoRuleEngine, RuleEngine)
-from .gpu import GNNEngine, LightGCNEngine, TabPFNEngine
+from .gpu import GNNEngine, GNNRankEngine, LightGCNEngine, TabPFNEngine
 
 ENGINE_CLASSES = [RuleEngine, RecoRuleEngine, NaiveForecastEngine, PopularityEngine, LGBMEngine, LGBMGraphEngine,
-                  ItemKNNEngine, LGBMRankEngine, LGBMForecastEngine, TabPFNEngine, GNNEngine, LightGCNEngine,
+                  ItemKNNEngine, LGBMRankEngine, LGBMForecastEngine, TabPFNEngine, GNNEngine, GNNRankEngine, LightGCNEngine,
                   KumoRFMEngine, AuroraEngine]
-ENGINE_ORDER = ["rule", "popularity", "lgbm", "lgbm_graph", "itemknn", "lgbm_rank", "tabpfn", "gnn", "lightgcn",
+ENGINE_ORDER = ["rule", "popularity", "lgbm", "lgbm_graph", "itemknn", "lgbm_rank", "tabpfn", "gnn", "gnn_rank", "lightgcn",
                 "kumorfm", "aurora"]
 
 

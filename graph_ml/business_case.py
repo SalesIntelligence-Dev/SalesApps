@@ -55,6 +55,12 @@ PARAMS: dict[str, list[dict]] = {
         {"id": "value_loss", "label": "Wertverlust je Retoure (Anteil Warenwert)", "unit": "%", "default": 10, "min": 0, "max": 50, "step": 1, "role": "fixed"},
         {"id": "cost", "label": "Prüfkosten je markierter Position (automatisch)", "unit": "€", "default": 0.2, "min": 0, "max": 5, "step": 0.1, "role": "cost"},
         {"id": "periods", "label": "Zeiträume pro Jahr (Testfenster = 2 Monate)", "unit": "×", "default": 6, "min": 1, "max": 6, "step": 1, "role": "fixed"}],
+    "account_scoring": [
+        {"id": "list_share", "label": "Accounts in der Betreuungsliste (oberste %)", "unit": "%", "default": 10, "min": 5, "max": 30, "step": 1, "role": "fixed"},
+        {"id": "rate", "label": "zusätzlich gesicherter Anteil des Wachstums durch Key-Account-Betreuung", "unit": "%", "default": 15, "min": 5, "max": 50, "step": 1, "role": "rate"},
+        {"id": "cost", "label": "Kosten je betreutem Account und Quartal", "unit": "€", "default": 150, "min": 0, "max": 1000, "step": 10, "role": "cost"},
+        {"id": "margin", "label": "Ergebnisanteil", "unit": "%", "default": 100, "min": 10, "max": 100, "step": 5, "role": "fixed"},
+        {"id": "periods", "label": "Quartale pro Jahr", "unit": "×", "default": 4, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
     "demand_forecast": [
         {"id": "coverage_weeks", "label": "Reichweite des Bestands", "unit": "Wochen", "default": 8, "min": 2, "max": 26, "step": 1, "role": "fixed"},
         {"id": "safety_share", "label": "Anteil Sicherheitsbestand am Bestand", "unit": "%", "default": 30, "min": 5, "max": 60, "step": 1, "role": "rate"},
@@ -67,6 +73,7 @@ STEP_LABELS = {"churn": ("Umsatz der Abwanderer", "davon in der Liste", "gerette
                "cross_selling": ("Umsatz in neuen Gruppen", "davon in der Liste", "ausgelöst (Annahme)"),
                "recommendation": ("Umsatz mit empfohlenen Artikeln", "erreichte Kunden", "ausgelöst (Annahme)"),
                "returns_root_cause": ("Kosten aller Retouren", "davon erkannt", "vermieden (Annahme)"),
+               "account_scoring": ("Mehrumsatz wachsender Accounts", "davon in der Liste", "gesichert (Annahme)"),
                "demand_forecast": ("Sicherheitsbestand", "Fehlerreduktion", "Kostensenkung")}
 FUNNEL = [
     {"id": "scan", "name": "Light-Scan", "stage": 1, "price": "kostenlos – 2.500 €", "cost": 2_500,
@@ -174,7 +181,11 @@ def use_case_case(uc: str, variant: str = "v0", fx: float = FX_DEFAULT) -> dict 
     rec = res.get("recommendation", {}).get("engine") or model
     out = {"use_case": uc, "variant": variant, "whatif": w, "params": PARAMS[uc], "defaults": params,
            "model": model, "model_name": next((e["meta"]["name"] for e in res["engines"] if e["id"] == model), model),
-           "recommended": rec, "labels": STEP_LABELS[uc], "currency": w.get("currency"), "fx": fx}
+           "recommended": rec, "labels": STEP_LABELS[uc], "currency": w.get("currency"), "fx": fx,
+           "dataset": res.get("dataset", "online_retail_ii")}
+    if out["dataset"] == "wwi":
+        out["note"] = ("Gerechnet auf WideWorldImporters (künstliche Beispieldaten) – die Methode ist übertragbar, "
+                       "die Euro-Größenordnung nicht.")
     out["scenarios"] = {}
     for name, sc in SCENARIOS.items():
         m = compute(uc, w, params, model, fx, sc) if model else None
@@ -202,6 +213,8 @@ def next_step(cases: dict, vk: dict | None = None) -> dict:
     for uc, c in cases.items():
         if not c or c.get("euro", {}).get("status") in (None, "na"):
             continue
+        if c.get("dataset", "online_retail_ii") != "online_retail_ii":
+            continue                     # nächster Schritt je Datensatz – keine Werte aus anderen Daten mischen
         ranked.append((c["euro"].get("annual", 0) or 0, uc))
     ranked.sort(reverse=True)
     if not ranked or ranked[0][0] <= 0:
@@ -212,7 +225,7 @@ def next_step(cases: dict, vk: dict | None = None) -> dict:
     stage = "pilot" if roi >= 2 else "sprint"
     names = {"churn": "Churn & Retention", "lead_scoring": "Neukunden-Scoring", "cross_selling": "Cross-Selling",
              "recommendation": "Produkt-Empfehlung", "returns_root_cause": "Retouren-Root-Cause",
-             "demand_forecast": "Absatzprognose"}
+             "demand_forecast": "Absatzprognose", "account_scoring": "Account-Scoring"}
     step = "Pilot" if stage == "pilot" else "Readiness-Sprint"
     roi_txt = str(round(roi, 1)).replace(".", ",")
     return {"stage": stage, "use_case": top, "annual": round(top_val), "year1_cost": year1, "roi": round(roi, 1),

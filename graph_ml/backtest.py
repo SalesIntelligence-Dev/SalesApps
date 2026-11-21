@@ -14,7 +14,9 @@ Use Cases: churn · lead_scoring · cross_selling · returns_root_cause
 """
 from __future__ import annotations
 
+import threading
 import time
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -29,10 +31,36 @@ HISTORY = 365
 SEED = 7
 TOP_SHARE = 0.10
 
-BINARY_UCS = ("churn", "lead_scoring", "cross_selling", "returns_root_cause")
+BINARY_UCS = ("churn", "lead_scoring", "cross_selling", "returns_root_cause", "account_scoring")
+
+# Zeitachse je Datensatz: (Test-Stichtag, erster Trainings-Stichtag, Ende des SVD-Referenzfensters)
+DATASET_DATES = {"v0": ("2011-09-01", "2010-03-01", "2010-03-01"),
+                 "wwi": ("2016-02-01", "2014-01-01", "2014-01-01")}
+DATASET_OF = {"account_scoring": "wwi"}          # Use Cases, die auf einem anderen Datensatz gerechnet werden
+_TIME_LOCK = threading.RLock()
+
+
+@contextmanager
+def dataset_time(key: str):
+    """Stichtage eines Datensatzes für die Dauer eines Laufs setzen (Builder und Engines lesen sie global)."""
+    global T_TEST, TRAIN_START, SVD_REF_END
+    dates = DATASET_DATES.get(key) or DATASET_DATES["v0"]
+    with _TIME_LOCK:
+        old = (T_TEST, TRAIN_START, SVD_REF_END)
+        if key in DATASET_DATES and key != "v0":
+            T_TEST, TRAIN_START, SVD_REF_END = (pd.Timestamp(x) for x in dates)
+        try:
+            yield
+        finally:
+            T_TEST, TRAIN_START, SVD_REF_END = old
+
+
+def dataset_key(uc: str, key: str = "v0") -> str:
+    return DATASET_OF.get(uc, key) if key == "v0" else key
 # Churn: Hebel ist „Umsatz halten“ → umsatzgewichteter Recall der Top-10-%-Liste (Recall bleibt sichtbar)
 MAIN_METRIC = {"churn": "value_captured_at_10", "lead_scoring": "auprc", "cross_selling": "recall_at_10",
-               "returns_root_cause": "recall_at_10", "recommendation": "map_at_12", "demand_forecast": "wape"}
+               "returns_root_cause": "recall_at_10", "recommendation": "map_at_12", "demand_forecast": "wape",
+               "account_scoring": "auprc"}
 LOWER_IS_BETTER = {"wape", "mase"}
 
 FEATURE_LABELS = {
@@ -58,6 +86,12 @@ FEATURE_LABELS = {
     "basket_lines": "Positionen im Beleg", "new_for_customer": "Artikel neu für Kunden", "new_product": "Neuer Artikel",
     "prod_sales": "Verkäufe des Artikels (log)", "cust_orders": "Belege des Kunden",
 }
+FEATURE_LABELS.update({
+    "g_peer_group_growth": "Graph: Wachstum der Einkaufsgemeinschaft (Peers)",
+    "g_peer_category_growth": "Graph: Wachstum der Kundenkategorie (Peers)",
+    "g_peer_region_growth": "Graph: Wachstum der Region (Peers)",
+    "buying_group": "Einkaufsgemeinschaft", "customer_category": "Kundenkategorie", "credit_limit": "Kreditlimit",
+})
 for i in range(8):
     FEATURE_LABELS[f"g_svd_{i}"] = f"Graph: Co-Kauf-Einbettung {i + 1}"
 
@@ -80,6 +114,7 @@ class Base:
     group_names: list = field(default_factory=list)
     currency: str = "GBP"
     groups_provisional: bool = True
+    cust_attrs: pd.DataFrame | None = None     # optionale Kundenattribute (z. B. Einkaufsgemeinschaft, Kategorie)
 
 
 _BASES: dict[str, Base] = {}
@@ -101,7 +136,13 @@ def base_of(task) -> "Base":
 def get_base(key: str = "v0") -> Base:
     if key not in _BASES:
         from .data_loader import get_registry
-        raw = get_registry().raw_online_retail() if key == "v0" else _VARIANTS[key]
+        if key == "v0":
+            raw = get_registry().raw_online_retail()
+        elif key == "wwi" and key not in _VARIANTS:
+            from .connectors import wwi_as_retail
+            raw = wwi_as_retail()
+        else:
+            raw = _VARIANTS[key]
         _BASES[key] = _build_base(raw, key)
     return _BASES[key]
 
@@ -154,7 +195,13 @@ def _build_base(raw: pd.DataFrame, key: str) -> Base:
                     prod_names=np.asarray(desc.reindex(stock_cats).fillna("").to_numpy()),
                     country_names=np.asarray(raw["country"].cat.categories), tmax=pd.Timestamp(t.max()),
                     key=key, group_names=group_names, currency=currency, groups_provisional=provisional)
-        base.svd_items = _fit_reference_svd(base)
+        extra_cols = [c for c in ("buying_group", "customer_category", "credit_limit") if c in raw.columns]
+        if extra_cols:
+            ca = raw.loc[has_c, ["customer_id"] + extra_cols].drop_duplicates("customer_id")
+            ca = ca.set_index(ca["customer_id"].astype(np.int64)).drop(columns="customer_id")
+            base.cust_attrs = ca
+        with dataset_time(key):
+            base.svd_items = _fit_reference_svd(base)
     return base
 
 
@@ -542,6 +589,62 @@ def build_returns(b: Base) -> Task:
     return task
 
 
+def _peer_growth(f: pd.DataFrame, key: pd.Series) -> np.ndarray:
+    """Ø Umsatzwachstum der anderen Kunden derselben Gruppe (ohne den Kunden selbst) – Peer-Signal über den Graphen."""
+    g = np.log1p(f["monetary_90"]) - np.log1p(f["prev_rev90"])
+    k = key.reindex(f.index).astype(str).to_numpy()
+    df = pd.DataFrame({"k": k, "g": g.to_numpy()})
+    s, n = df.groupby("k")["g"].transform("sum"), df.groupby("k")["g"].transform("size")
+    return np.where(n > 1, (s - df["g"]) / np.maximum(n - 1, 1), np.nan)
+
+
+def build_account(b: Base) -> Task:
+    """Account-Scoring (WideWorldImporters): wächst der Kunde im nächsten Quartal um ≥ 20 %?
+
+    Graph-Signal: Wachstum der Peers in derselben Einkaufsgemeinschaft, Kundenkategorie und Region
+    sowie die Kunde–Artikel-Nachbarschaft (alles nur aus Ereignissen vor dem Stichtag).
+    """
+    task = Task(uc="account_scoring", kind="binary")
+    snaps = snapshots()
+    attrs = b.cust_attrs if b.cust_attrs is not None else pd.DataFrame()
+    frames = []
+    for T in snaps + [T_TEST]:
+        f = customer_features(b, T, task.audit, "account")
+        f = f[f["recency"] <= 180]                                    # aktive Accounts
+        inv = b.inv[(b.inv["time"] < T) & (b.inv["time"] >= T - pd.Timedelta(days=180))]
+        prev = inv[inv["time"] < T - pd.Timedelta(days=90)]
+        f["prev_rev90"] = prev.groupby("cust")["value"].sum().reindex(f.index).fillna(0.0)
+        g = graph_customer_features(b, T, f, task.audit, "account")
+        for col, name in (("buying_group", "g_peer_group_growth"), ("customer_category", "g_peer_category_growth")):
+            if col in attrs:
+                g[name] = _peer_growth(f, attrs[col])
+        g["g_peer_region_growth"] = _peer_growth(f, f["country"])
+        for col in ("buying_group", "customer_category"):
+            if col in attrs:
+                f[col] = attrs[col].reindex(f.index).astype("category").cat.codes.to_numpy()
+        if "credit_limit" in attrs:
+            f["credit_limit"] = attrs["credit_limit"].reindex(f.index).to_numpy()
+        fut = b.inv[(b.inv["time"] >= T) & (b.inv["time"] < T + pd.Timedelta(days=HORIZON))]
+        task.audit.check("account:label", T, None, T + pd.Timedelta(days=HORIZON))
+        nxt = fut.groupby("cust")["value"].sum().reindex(f.index).fillna(0.0)
+        y = (nxt >= 1.2 * f["monetary_90"].clip(lower=1)).astype(int).to_numpy()
+        gain = np.clip(nxt.to_numpy() - f["monetary_90"].to_numpy(), 0, None)
+        d = pd.concat([f, g], axis=1).assign(y=y, cutoff=T, rule=f["trend_revenue"].to_numpy(), value=gain)
+        frames.append(d.reset_index().rename(columns={"index": "cust"}))
+    data = pd.concat(frames, ignore_index=True)
+    task.train, task.test = data[data["cutoff"] < T_TEST], data[data["cutoff"] == T_TEST]
+    task.graph_features = [c for c in data.columns if c.startswith("g_")]
+    cats = [c for c in ("buying_group", "customer_category") if c in data.columns]
+    task.features = ["recency", "freq_90", "freq_365", "monetary_90", "monetary_365", "avg_basket", "tenure",
+                     "n_products", "trend_orders", "trend_revenue", "gap_mean", "overdue", "country"] + \
+        [c for c in ("credit_limit",) if c in data.columns] + cats + task.graph_features
+    task.cat_features = ["country"] + cats
+    task.snapshots, task.val_cutoff = snaps, snaps[-1]
+    task.timeline = _timeline(snaps, T_TEST, HORIZON, "Quartalsumsatz wächst um ≥ 20 %")
+    task.extra["rule_text"] = "Umsatztrend des letzten Quartals – Accounts mit steigendem Umsatz zuerst"
+    return task
+
+
 def build_recommendation(b: Base) -> Task:
     task = Task(uc="recommendation", kind="ranking")
     snaps = [pd.Timestamp("2011-03-01"), pd.Timestamp("2011-06-01")]
@@ -607,16 +710,18 @@ def build_forecast(b: Base, n_series: int = 100) -> Task:
 
 
 BUILDERS = {"churn": build_churn, "lead_scoring": build_lead, "cross_selling": build_cross_selling,
-            "returns_root_cause": build_returns, "recommendation": build_recommendation,
+            "returns_root_cause": build_returns, "recommendation": build_recommendation, "account_scoring": build_account,
             "demand_forecast": build_forecast}
 _TASKS: dict[tuple, Task] = {}
 
 
 def get_task(uc: str, key: str = "v0") -> Task:
+    key = dataset_key(uc, key)
     if (uc, key) not in _TASKS:
         t0 = time.time()
         b = get_base(key)
-        task = BUILDERS[uc](b)
+        with dataset_time(key):
+            task = BUILDERS[uc](b)
         task.extra["base_key"] = key
         task.extra["currency"] = b.currency
         task.extra["build_seconds"] = round(time.time() - t0, 1)

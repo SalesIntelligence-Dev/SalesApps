@@ -1235,6 +1235,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
         <div>
           <div class="font-semibold" x-text="'Was wäre wenn – '+ucName(bcUc)"></div>
+          <div class="text-[11.5px] text-amber-200/90" x-show="bcCase()?.note" x-text="bcCase()?.note"></div>
           <div class="text-[12px] sub" x-text="'Rückblick-Rechnung mit echten Zahlen aus dem Testfenster ('+(bcCase()?.whatif?.period_days||'')+' Tage) · '+bcCase()?.model_name+' vs. Regel'"></div>
         </div>
         <div class="flex flex-wrap gap-1.5">
@@ -1815,6 +1816,19 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
               </template>
             </div>
             <div class="text-[12px] sub mt-2"><b class="text-[#e7e9f3]">Was ein flaches Modell schon sieht:</b> <span x-text="ucMeta()?.story?.tabular"></span></div>
+            <template x-if="ucOpen==='recommendation' && recoPaths?.customers?.length">
+              <div class="mt-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="kpi-label">So fließen andere Kunden ein – Beispiel zum Stichtag</div>
+                  <select class="select !w-auto !py-1 !text-[12px]" x-model.number="recoPathCust" @change="drawRecoPath()" aria-label="Beispielkunde">
+                    <template x-for="c in recoPaths.customers" :key="'rp'+c.cust"><option :value="c.cust" x-text="'Kunde '+c.cust+' · '+c.n_own+' Artikel'"></option></template>
+                  </select>
+                </div>
+                <div id="cyPath" class="cy h-[260px] mt-2"></div>
+                <div class="text-[11.5px] sub mt-1.5" x-text="recoPathText()"></div>
+                <div class="text-[11px] muted mt-0.5" x-text="recoPaths.note"></div>
+              </div>
+            </template>
             <template x-if="ucClassRows().length">
               <div class="mt-3">
                 <div class="kpi-label mb-1" x-text="'Gemessen im Rückblick · '+(ucBt?.main_metric_label||'')"></div>
@@ -2167,7 +2181,7 @@ function graphReady() {
     timeline: TIMELINE, tourSteps: TOUR, TIMELINE_SOURCES,
     bc: null, bcVariant: 'v0', bcUc: 'churn', bcParams: {}, bcScenario: 'realistisch', bcThr: { green: 100000, yellow: 25000 },
     bt: null, btUc: 'churn', btRes: null, btLoading: false, btErr: '', btJob: null, btSeries: 0,
-    ucBt: null, stageAuto: false, checks: null, checksLoading: false, checksSeq: 0, ucOpen: null, ucFocusDim: null, colTable3: null,
+    ucBt: null, recoPaths: null, recoPathCust: null, stageAuto: false, checks: null, checksLoading: false, checksSeq: 0, ucOpen: null, ucFocusDim: null, colTable3: null,
     playbooks: { 'PB-01': 'Fehlende Kundennummern', 'PB-02': 'Stornos ohne Originalbezug', 'PB-03': 'Nicht-Artikel-Codes',
                  'PB-04': 'Artikelstamm konsolidieren', 'PB-05': 'Freitext → Kategorien', 'PB-06': 'Dubletten entfernen',
                  'PB-07': 'Preis 0 / negative Mengen', 'PB-08': 'Währung umrechnen', 'PB-09': 'Governance-Checkliste',
@@ -2671,7 +2685,9 @@ function graphReady() {
       });
     },
     nextStep() {
-      const ranked = (this.usecases || []).filter(u => this.bcCase(u.id)).map(u => ({ id: u.id, a: this.bcNow(u.id)?.model?.annual || 0 }))
+      const home = this.dsId === 'wwi' ? 'wwi' : 'online_retail_ii';        // nächster Schritt je Datensatz
+      const ranked = (this.usecases || []).filter(u => this.bcCase(u.id) && (this.bc.cases[u.id].dataset || 'online_retail_ii') === home)
+        .map(u => ({ id: u.id, a: this.bcNow(u.id)?.model?.annual || 0 }))
         .sort((a, b) => b.a - a.a);
       if (!ranked.length || ranked[0].a <= 0) return { stage: 'scan', text: 'Light-Scan: zuerst Datenreife herstellen – noch kein positiver Hebel.' };
       const year1 = 14000 + 42500 + 33000, roi = ranked[0].a / year1, stage = roi >= 2 ? 'pilot' : 'sprint';
@@ -2899,8 +2915,9 @@ function graphReady() {
       const ref = by.tree || by.rule, refName = by.tree ? 'der Baum-Baseline (LightGBM)' : 'der Regel';
       const parts = [];
       if (by.gnn) {
-        const d = rel(by.gnn, ref);
-        parts.push(d > 0.02 ? `Gelerntes Graph-Modell (${by.gnn.name}) ${pct(d)} gegenüber ${refName} – relationales Lernen hilft messbar.`
+        const d = rel(by.gnn, ref), behind = by.light && rel(by.light, by.gnn) > 0.02;
+        parts.push(d > 0.02 ? `Gelerntes Graph-Modell (${by.gnn.name}) ${pct(d)} gegenüber ${refName}` +
+                              (behind ? ` – aber ${pct(-rel(by.light, by.gnn))} hinter den Graph-Merkmalen im einfacheren Modell.` : ' – relationales Lernen hilft messbar.')
                             : `Gelerntes Graph-Modell (${by.gnn.name}) ${pct(d)} gegenüber ${refName} – bringt hier keinen belastbaren Vorteil.`);
       } else parts.push('Ein gelerntes Graph-Modell (GNN) wurde für diesen Use Case noch nicht gerechnet.');
       if (by.light) {
@@ -2939,9 +2956,53 @@ function graphReady() {
     openUc(id, dim = null) {
       this.ucOpen = id; this.ucFocusDim = dim;           // Zeichnen übernimmt $watch('ucOpen')
       this.loadUcBt(id);
+      if (id === 'recommendation') this.loadRecoPaths();
       if (dim) setTimeout(() => document.getElementById('chk-' + dim)?.scrollIntoView({ block: 'center' }), 350);
     },
-    closeUc() { this.ucOpen = null; this.ucFocusDim = null; if (CY.uc) { CY.uc.destroy(); CY.uc = null; } },
+    closeUc() { this.ucOpen = null; this.ucFocusDim = null; if (CY.uc) { CY.uc.destroy(); CY.uc = null; } if (CY.path) { CY.path.destroy(); CY.path = null; } },
+    async loadRecoPaths() {
+      try {
+        if (!this.recoPaths) this.recoPaths = await this.api('/usecases/recommendation/paths');
+        if (!this.recoPathCust && this.recoPaths.customers.length) this.recoPathCust = this.recoPaths.customers[0].cust;
+        setTimeout(() => this.drawRecoPath(), 400);
+      } catch (_) { /* optional */ }
+    },
+    recoPathData() { return this.recoPaths?.customers?.find(c => c.cust === this.recoPathCust) || null; },
+    recoPathText() {
+      const c = this.recoPathData(); if (!c) return '';
+      const nb = c.neighbors.length, best = c.recs.reduce((a, r) => r.neighbor_share > a.neighbor_share ? r : a, c.recs[0]);
+      const rep = c.recs.filter(r => r.own).length;
+      return `Kunde ${c.cust} hat ${c.n_own} Artikel gekauft; seine ${nb} nächsten Nachbarn teilen bis zu ${c.neighbors[0]?.shared || 0} davon. ` +
+        `„${best.name}“ kaufen ${Math.round(best.neighbor_share * 100)} % dieser Nachbarn` + (rep ? ` · ${rep} der 3 Empfehlungen sind Wiederkäufe eigener Artikel.` : '.');
+    },
+    drawRecoPath() {
+      const c = this.recoPathData(), el = document.getElementById('cyPath');
+      if (!c || !el) return;
+      if (CY.path) CY.path.destroy();
+      const nodes = [], edges = [], W = el.clientWidth || 700, col = x => x * W / 4 + W / 8;
+      const place = (arr, x) => arr.forEach((n, i) => { n.position = { x: col(x), y: 30 + (i + 0.5) * 200 / Math.max(arr.length, 1) }; nodes.push(n); });
+      const own = c.own.map(o => ({ data: { id: 'o' + o.prod, label: o.name.slice(0, 22), kind: 'own' } }));
+      place(own, 0);
+      nodes.push({ data: { id: 'c', label: 'Kunde ' + c.cust, kind: 'cust' }, position: { x: col(1), y: 130 } });
+      place(c.neighbors.map(n => ({ data: { id: 'n' + n.cust, label: 'Kunde ' + n.cust, kind: 'nb' } })), 2);
+      place(c.recs.map(r => ({ data: { id: 'r' + r.prod, label: r.name.slice(0, 22), kind: 'rec' } })), 3);
+      own.forEach(o => edges.push({ data: { id: 'e' + o.data.id, source: 'c', target: o.data.id, kind: 'own' } }));
+      c.neighbors.forEach(n => edges.push({ data: { id: 'en' + n.cust, source: 'c', target: 'n' + n.cust, kind: 'nb', label: n.shared + ' gemeinsam' } }));
+      c.recs.forEach(r => r.neighbors.forEach(nc => edges.push({ data: { id: 'er' + r.prod + '_' + nc, source: 'n' + nc, target: 'r' + r.prod, kind: 'buy' } })));
+      const color = { own: '#8b7cf6', cust: '#f59e0b', nb: '#22d3ee', rec: '#34d399' };
+      CY.path = cytoscape({ container: el, elements: [...nodes, ...edges], layout: { name: 'preset', padding: 12 },
+        userZoomingEnabled: false, userPanningEnabled: false, boxSelectionEnabled: false, autoungrabify: true,
+        style: [
+          { selector: 'node', style: { 'shape': 'round-rectangle', 'label': 'data(label)', 'font-size': 9.5, 'font-family': 'Inter', 'color': '#07071a',
+            'font-weight': 700, 'text-valign': 'center', 'text-halign': 'center', 'width': 'label', 'height': 18, 'padding': '6px',
+            'background-color': ele => color[ele.data('kind')] } },
+          { selector: 'edge', style: { 'width': 1.2, 'line-color': '#5b6488', 'curve-style': 'bezier', 'opacity': .7 } },
+          { selector: 'edge[kind = "nb"]', style: { 'line-color': '#22d3ee', 'label': 'data(label)', 'font-size': 8.5, 'color': '#a5f3fc',
+            'text-background-color': '#0a0a1f', 'text-background-opacity': 1, 'text-background-padding': '2px' } },
+          { selector: 'edge[kind = "buy"]', style: { 'line-color': '#34d399', 'target-arrow-shape': 'triangle', 'target-arrow-color': '#34d399', 'arrow-scale': .6 } },
+        ] });
+      CY.path.fit(undefined, 12);
+    },
     fmtDateTime(iso) { if (!iso) return '–'; const d = new Date(iso); return d.toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' }); },
 
     drawUcGraph(attempt = 0) {

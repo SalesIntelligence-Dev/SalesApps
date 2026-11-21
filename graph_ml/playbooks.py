@@ -429,7 +429,7 @@ def run_variant(steps: list[dict], fx: float = DEFAULT_FX, governance: dict | No
         from . import evaluation as ev
         bt.register_variant(vid, df)
         result["backtest"] = {}
-        for i, uc in enumerate(ev.UC_ORDER):
+        for i, uc in enumerate([u for u in ev.UC_ORDER if u not in bt.DATASET_OF]):
             if ctx:
                 ctx.progress(50 + int(45 * i / len(ev.UC_ORDER)), f"Rückblick {uc} auf {vid} …")
             r = ev.load(uc, vid) if reuse_backtest else None

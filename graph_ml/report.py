@@ -137,6 +137,8 @@ def collect(variant: str = "v0") -> dict:
         if not c or c.get("euro", {}).get("status") in (None, "na"):
             continue
         sc = c.get("scenarios") or {}
+        if c.get("dataset", "online_retail_ii") != "online_retail_ii":
+            continue                     # Report gilt für Online Retail II; andere Datensätze bekommen eigene Reports
         cases.append({"uc": uc, "name": next((u["name"] for u in checks["use_cases"] if u["id"] == uc), uc),
                       "model": c.get("model_name"), "euro": c["euro"],
                       "konservativ": ((sc.get("konservativ") or {}).get("model") or {}).get("annual"),
@@ -152,7 +154,8 @@ def collect(variant: str = "v0") -> dict:
     a = act.summary()
     m = act.load_monitoring()
     counts = {s: sum(1 for x in ampel if x["gesamt"].get("status") == s) for s in ("ok", "warn", "bad")}
-    best = max(cases, key=lambda x: x["euro"].get("annual") or 0) if cases else None
+    home = [c for c in cases if (bc0["cases"].get(c["uc"]) or {}).get("dataset", "online_retail_ii") == "online_retail_ii"]
+    best = max(home, key=lambda x: x["euro"].get("annual") or 0) if home else None
     return {
         "date": pd.Timestamp.now().strftime("%Y-%m-%d"), "date_de": pd.Timestamp.now().strftime("%d.%m.%Y"),
         "variant": variant, "recommended_variant": rec,

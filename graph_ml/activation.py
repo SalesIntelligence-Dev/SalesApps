@@ -1290,3 +1290,65 @@ def push_preview(crm: str, records: list[dict], n: int = 3) -> dict:
     return {"method": "POST (je Datensatz bzw. als $batch)", "endpoint": "/api/data/v9.2/tasks", "body": body,
             "auth": "Microsoft Entra ID (App-Registrierung) – im Pilot einzurichten",
             "note": "Verknüpfung über den Alternativschlüssel accountnumber"}
+
+
+# ── Nachbarschafts-Pfade der Produktempfehlung (Detailseite, Abschnitt 3) ─────
+
+def build_reco_paths(n_customers: int = 40, n_neighbors: int = 5, log=print) -> dict:
+    """Je Kunde: eigene Artikel → Nachbarkunden (meiste gemeinsame Artikel, 365 Tage vor dem Stichtag) →
+    empfohlene Artikel und welche Nachbarn sie gekauft haben. Macht sichtbar, dass andere Kunden einfließen."""
+    from scipy import sparse
+    art = load()
+    vid = art["variant"]
+    _ensure_variant(vid)
+    b = bt.get_base(vid)
+    hist = b.lines[(b.lines["time"] < T_NOW) & (b.lines["time"] >= T_NOW - pd.Timedelta(days=bt.HISTORY))
+                   & (b.lines["cust"] > 0)]
+    cu = pd.Index(np.sort(hist["cust"].unique()))
+    M = sparse.csr_matrix((np.ones(len(hist)), (cu.get_indexer(hist["cust"]), hist["prod"].to_numpy())),
+                          shape=(len(cu), b.n_prod))
+    M.data[:] = 1
+    M.sum_duplicates()
+    M.data[:] = 1
+    cnt = hist.groupby(["cust", "prod"]).size()
+    rr = art["reco"]["rows"]
+    order = np.argsort(-np.asarray(rr["ev"]))
+    out = []
+    for i in order:
+        if len(out) >= n_customers:
+            break
+        c = rr["cust"][i]
+        ci = cu.get_loc(c) if c in cu else None
+        if ci is None:
+            continue
+        own = M.getrow(ci).indices
+        if len(own) < 8:                         # anschauliche Beispiele: Kunden mit Kaufhistorie
+            continue
+        overlap = np.asarray((M @ M.getrow(ci).T).todense()).ravel()
+        overlap[ci] = 0
+        nb = np.argsort(-overlap)[:n_neighbors]
+        nb = nb[overlap[nb] > 0]
+        top_own = cnt.loc[c].sort_values(ascending=False).index[:5] if c in cnt.index.get_level_values(0) else []
+        recs = []
+        for p, pr in zip(rr["items"][i], rr["p"][i]):
+            buyers = [int(cu[j]) for j in nb if M[j, p]]
+            recs.append({"prod": int(p), "name": str(b.prod_names[p])[:40].title(), "p": pr,
+                         "own": bool(M[ci, p]), "neighbors": buyers,
+                         "neighbor_share": round(len(buyers) / max(len(nb), 1), 3),
+                         "buyers_total": int(M[:, p].sum())})
+        out.append({"cust": int(c), "n_own": int(len(own)), "own": [{"prod": int(p), "name": str(b.prod_names[p])[:40].title()}
+                                                                    for p in top_own],
+                    "neighbors": [{"cust": int(cu[j]), "shared": int(overlap[j])} for j in nb],
+                    "recs": recs})
+    res = {"t_now": T_NOW.date().isoformat(), "variant": vid, "customers": out,
+           "note": ("Nachbarn = Kunden mit den meisten gemeinsamen Artikeln in den 365 Tagen vor dem Stichtag. "
+                    "Die Empfehlung kommt aus dem Ranker; der Pfad zeigt, welche Nachbarn den Artikel bereits kaufen.")}
+    (ARTIFACTS / "reco_paths.json").write_text(json.dumps(res, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    share = np.mean([r["neighbor_share"] for c in out for r in c["recs"]]) if out else 0
+    log(f"[aktivierung] Empfehlungs-Pfade: {len(out)} Kunden · Ø {share:.0%} der Nachbarn kaufen den empfohlenen Artikel")
+    return res
+
+
+def load_reco_paths() -> dict | None:
+    p = ARTIFACTS / "reco_paths.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None

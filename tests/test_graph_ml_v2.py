@@ -80,5 +80,44 @@ class ConnectorTest(unittest.TestCase):
             self.assertTrue(meta["license"] and meta["source"])
 
 
+class SalesCoreTest(unittest.TestCase):
+    """Prompt 3: Account-Scoring (WWI), GNN für Cross-Selling und Empfehlung, Datensatz-Trennung."""
+
+    def test_peer_growth_excludes_self(self):
+        import numpy as np
+        import pandas as pd
+
+        from graph_ml.backtest import _peer_growth
+        f = pd.DataFrame({"monetary_90": [200.0, 100.0, 100.0], "prev_rev90": [100.0, 100.0, 100.0]}, index=[1, 2, 3])
+        g = _peer_growth(f, pd.Series(["A", "A", "B"], index=[1, 2, 3]))
+        self.assertAlmostEqual(g[0], 0.0)                         # Peer von 1 ist 2 (kein Wachstum)
+        self.assertAlmostEqual(g[1], np.log1p(200) - np.log1p(100), places=6)
+        self.assertTrue(np.isnan(g[2]))                           # allein in der Gruppe → kein Peer-Signal
+
+    def test_account_task_no_leakage_and_dates(self):
+        import pandas as pd
+
+        from graph_ml import backtest as bt
+        task = bt.get_task("account_scoring")
+        self.assertEqual(task.timeline["test"], "2016-02-01")
+        self.assertEqual(bt.T_TEST, pd.Timestamp("2011-09-01"))     # Zeitachse danach wieder Online Retail II
+        for r in task.audit.rows:
+            if r["max_feature_time"]:
+                self.assertLess(pd.Timestamp(r["max_feature_time"]), pd.Timestamp(r["cutoff"]))
+        self.assertTrue({"g_peer_group_growth", "g_peer_category_growth"} <= set(task.graph_features))
+
+    def test_artifacts_compare_graph_models(self):
+        from graph_ml import business_case as bc
+        from graph_ml import evaluation as ev
+        ids = lambda uc: {e["id"]: e["status"] for e in ev.load(uc)["engines"]}  # noqa: E731
+        self.assertEqual(ids("cross_selling").get("gnn"), "ok")
+        self.assertEqual(ids("recommendation").get("gnn_rank"), "ok")
+        acc = ev.load("account_scoring")
+        self.assertEqual(acc["dataset"], "wwi")
+        ov = bc.overview()
+        self.assertEqual(ov["cases"]["account_scoring"]["dataset"], "wwi")
+        self.assertNotEqual(ov["next_step"].get("use_case"), "account_scoring")   # keine Werte aus anderen Daten
+
+
 if __name__ == "__main__":
     unittest.main()

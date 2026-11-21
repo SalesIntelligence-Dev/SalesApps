@@ -792,8 +792,8 @@ class Registry:
         res["dataset_kind"] = ds.kind
         res["max_stage_dataset"] = self.max_stage(ds_id)
         self._checks[key] = res
-        if stage == 3 and ds_id == "online_retail_ii":
-            res = _merge_backtest(res)
+        if stage == 3 and ds_id in ("online_retail_ii", "wwi"):
+            res = _merge_backtest(res, ds_id)
         return res
 
     def delete(self, ds_id: str) -> bool:
@@ -965,15 +965,20 @@ class Registry:
         return out
 
 
-def _merge_backtest(res: dict) -> dict:
-    """Stufe 3: Ampel-Dimension „Vorhersagekraft“ aus dem Rückblick; Gesamt = schwächste belastbare Dimension."""
+def _merge_backtest(res: dict, ds_id: str = "online_retail_ii") -> dict:
+    """Stufe 3: Ampel-Dimension „Vorhersagekraft“ aus dem Rückblick; Gesamt = schwächste belastbare Dimension.
+    Nur Rückblicke, die auf genau diesem Datensatz gerechnet wurden (Account-Scoring → WideWorldImporters)."""
     import copy
 
+    from .backtest import DATASET_OF
     from .evaluation import summary
     res = copy.deepcopy(res)
     summ = summary()
     rank = {"ok": 0, "warn": 1, "bad": 2}
     for u in res["use_cases"]:
+        home = {"wwi": "wwi"}.get(DATASET_OF.get(u["id"], ""), "online_retail_ii")
+        if home != ds_id:
+            continue
         s = summ.get(u["id"]) or {}
         vk = s.get("vorhersagekraft")
         if s.get("status") == "pending" or not vk:
@@ -985,7 +990,7 @@ def _merge_backtest(res: dict) -> dict:
     from .business_case import merge_ampel, overview
     cases = overview()["cases"]
     for u in res["use_cases"]:
-        if u["ampel"]["vorhersagekraft"].get("status") != "pending":
+        if u["ampel"]["vorhersagekraft"].get("status") not in ("pending", None):
             merge_ampel(u, cases.get(u["id"]))
     res["backtest_merged"] = True
     return res

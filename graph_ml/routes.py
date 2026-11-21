@@ -496,3 +496,10 @@ def graph_ml_report_xlsx():
     data = report.collect(request.args.get("variant", "v0"))
     return Response(report.to_xlsx(data), mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     headers={"Content-Disposition": f'attachment; filename="graphready_readiness_report_{data["date"]}.xlsx"'})
+
+
+@graph_bp.route("/graph_ml/api/usecases/recommendation/paths")
+def api_reco_paths():
+    from . import activation as act
+    r = act.load_reco_paths()
+    return jsonify(r or {"customers": [], "note": _ACT_HINT})

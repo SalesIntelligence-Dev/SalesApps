@@ -439,3 +439,39 @@ def main(argv=None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+# ── Adapter: WideWorldImporters im Positionsformat von Online Retail II ───────
+# So laufen Merkmale, Leakage-Guard, Graph-Merkmale und alle Engines aus backtest.py unverändert auf WWI.
+
+WWI_USD_EUR = 0.92
+
+
+def wwi_as_retail() -> pd.DataFrame:
+    t = load_tables("wwi")
+    inv, ln, cu = t["Invoices"], t["InvoiceLines"], t["Customers"]
+    city = t["Cities"].set_index("CityID")["StateProvinceID"]
+    state = t["StateProvinces"].set_index("StateProvinceID")["StateProvinceName"].astype(str)
+    bg = t["BuyingGroups"].set_index("BuyingGroupID")["BuyingGroupName"].astype(str)
+    cat = t["CustomerCategories"].set_index("CustomerCategoryID")["CustomerCategoryName"].astype(str)
+    sg = t["StockItemStockGroups"].sort_values("StockGroupID").drop_duplicates("StockItemID").set_index("StockItemID")["StockGroupID"]
+    sgn = t["StockGroups"].set_index("StockGroupID")["StockGroupName"].astype(str)
+    c = cu.set_index("CustomerID")
+    df = ln.merge(inv[["InvoiceID", "CustomerID", "InvoiceDate"]], on="InvoiceID", how="left")
+    cid = df["CustomerID"].astype(int)
+    out = pd.DataFrame({
+        "invoice": df["InvoiceID"].astype(int).astype(str).astype("category"),
+        "stock_code": df["StockItemID"].astype(int).astype(str).astype("category"),
+        "description": df["Description"].astype(str).astype("category"),
+        "quantity": df["Quantity"].astype(np.int32),
+        "invoice_date": pd.to_datetime(df["InvoiceDate"]),
+        "price_eur": (df["UnitPrice"].astype(float) * WWI_USD_EUR).astype(np.float32),
+        "customer_id": cid.astype("Int32"),
+        "country": cid.map(c["DeliveryCityID"]).map(city).map(state).fillna("unbekannt").astype("category"),
+        "pb05_group": df["StockItemID"].map(sg).map(sgn).fillna("Sonstiges").astype("category"),
+        "buying_group": cid.map(c["BuyingGroupID"]).map(bg).fillna("unabhängig").astype("category"),
+        "customer_category": cid.map(c["CustomerCategoryID"]).map(cat).fillna("unbekannt").astype("category"),
+        "credit_limit": cid.map(c["CreditLimit"]).astype(float).astype(np.float32),
+    })
+    out["price_gbp"] = out["price_eur"]                  # Spaltenname der Rohdaten; Währung steht in price_eur (EUR)
+    return out.sort_values("invoice_date", kind="stable").reset_index(drop=True)

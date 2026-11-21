@@ -62,6 +62,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.activation or args.only_activation:
         from . import activation as act
         art = act.build(log=lambda m: print(m, flush=True))
+        act.build_reco_paths(log=lambda m: print(m, flush=True))
         for uc, L in art["lists"].items():
             print(f"    {uc:20s} {L['engine']['name']:28s} Liste {L['summary']['in_list']:5d} · "
                   f"Wert {L['summary']['ev_list']:>12,.0f} € · ECE {L['calibration']['ece_before']} → "

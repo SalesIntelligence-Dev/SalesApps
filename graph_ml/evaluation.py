@@ -27,7 +27,8 @@ from .engines.base import Unavailable
 log = logging.getLogger("graph_ml.evaluation")
 ARTIFACTS = Path(__file__).parent / "artifacts"
 RESULT_VERSION = 1
-UC_ORDER = ["churn", "lead_scoring", "cross_selling", "recommendation", "returns_root_cause", "demand_forecast"]
+UC_ORDER = ["churn", "lead_scoring", "cross_selling", "recommendation", "returns_root_cause", "demand_forecast",
+            "account_scoring"]
 NOT_MEASURABLE = {
     "next_best_action": "Keine Reaktionsdaten – Vorhersagekraft nicht messbar (Regelwerk über die anderen Scores).",
     "margin": "Einstandspreis fehlt – kein Label, Vorhersagekraft nicht messbar.",
@@ -128,6 +129,9 @@ def _whatif(task, results: list[dict]) -> dict | None:
             fut = b.inv[(b.inv["time"] >= bt.T_TEST) & (b.inv["time"] < bt.T_TEST + pd.Timedelta(days=bt.HORIZON))]
             v = te["cust"].map(fut.groupby("cust")["value"].sum()).fillna(0).to_numpy()
             unit, period = "Umsatz der Wiederkäufer in 90 Tagen", 90
+        elif task.uc == "account_scoring":
+            v = te["value"].to_numpy()
+            unit, period = "Mehrumsatz der wachsenden Accounts im Quartal", 90
         elif task.uc == "cross_selling":
             fut = b.lines[(b.lines["time"] >= bt.T_TEST) & (b.lines["time"] < bt.T_TEST + pd.Timedelta(days=bt.HORIZON))]
             gv = fut.groupby(["cust", "group"])["value"].sum()
@@ -262,6 +266,16 @@ def recommend(uc: str, engines: list[dict], best: dict | None, profile_engine: d
 
 def run_use_case(uc: str, engine_ids: list[str] | None = None, ctx=None, previous: dict | None = None,
                  variant: str = "v0") -> dict:
+    """Ein Use Case komplett – auf der Zeitachse seines Datensatzes (z. B. Account-Scoring auf WideWorldImporters)."""
+    if variant != "v0" and uc in bt.DATASET_OF:
+        raise ValueError(f"{uc} wird auf {bt.DATASET_OF[uc]} gerechnet – Pipeline-Varianten gelten für Online Retail II")
+    with bt.dataset_time(bt.dataset_key(uc, variant)):
+        res = _run_use_case(uc, engine_ids, ctx, previous, variant)
+    res["dataset"] = bt.dataset_key(uc, variant) if uc in bt.DATASET_OF else "online_retail_ii"
+    return res
+
+
+def _run_use_case(uc: str, engine_ids, ctx, previous, variant) -> dict:
     t0 = time.time()
     if ctx:
         ctx.progress(3, f"Baue zeitlichen Split für {uc} …")
@@ -321,7 +335,8 @@ def assemble(uc: str, task: bt.Task, results: list[dict], seconds: float) -> dic
     profile_engine = _profile_engine(uc)
     out = {
         "result_version": RESULT_VERSION, "use_case": uc, "kind": task.kind,
-        "variant": task.extra.get("base_key", "v0"), "currency": task.extra.get("currency", "GBP"),
+        "variant": "v0" if bt.DATASET_OF.get(uc) == task.extra.get("base_key") else task.extra.get("base_key", "v0"),
+        "currency": task.extra.get("currency", "GBP"),
         "generated_at": pd.Timestamp.now().isoformat(timespec="seconds"),
         "host": platform.node(), "compute_seconds": round(seconds, 1),
         "main_metric": m, "main_metric_label": MAIN_LABEL.get(m, m), "lower_is_better": lower,
@@ -386,6 +401,7 @@ def _top_list(task, best) -> list[dict]:
         order = s * np.clip(task.test[task.value_col].to_numpy(), 0, None) if task.extra.get("rank_by_value") else s
         te = task.test.assign(_s=s, _o=order).sort_values("_o", ascending=False).head(15)
         cols = {"churn": ["recency", "freq_365", "monetary_365"], "lead_scoring": ["first_value", "first_products"],
+                "account_scoring": ["monetary_90", "trend_revenue", "freq_90"],
                 "cross_selling": ["group", "group_pop"], "returns_root_cause": ["prod", "qty", "price"]}[task.uc]
         out = []
         b = bt.base_of(task)

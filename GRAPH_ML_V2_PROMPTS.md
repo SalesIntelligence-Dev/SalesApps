@@ -183,3 +183,29 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
   gespeichert. Spitze beim Durchklicken aller Datensätze + Report + Export: 329 MB.
 - **UI:** Datensatz-Karten mit Symbol, Tabellen/Zeilen/FKs, Chip „künstlich“ bei Beispieldaten.
 - **Offen:** Olist (Kaggle-Login nötig), SAP SALT (Freigabe auf Hugging Face mit eigenem Konto nötig), Odoo-Schema.
+
+## Umsetzungsnotizen nach Prompt 3
+
+- **Abwanderung (Churn):** unverändert aus v1 – GNN +15,1 % ggü. LightGBM, Detailseite vollständig.
+- **Cross-Selling:** Hetero-GraphSAGE jetzt auch für Paare Kunde × Artikelgruppe (Kunden-Einbettung + Gruppen-Einbettung +
+  Paar-Merkmale). Ergebnis Recall@Top-10 %: Regel 0,113 · **LightGBM 0,267** · TabPFN 0,252 · LightGBM + Graph 0,251 ·
+  GNN 0,204 → LightGBM genügt, das GNN verliert.
+- **Produktempfehlung:** neuer **GNN-Ranker** (`gnn_rank`): Kunden- und Artikel-Einbettungen aus dem Kaufgraphen bewerten
+  dieselben Kandidaten wie der LightGBM-Ranker. MAP@12: Regel 0,223 · ItemKNN 0,203 · **LightGBM-Ranker 0,257** ·
+  GNN-Ranker 0,247 · LightGCN 0,138. Antwort auf die Frage aus der Anfrage: Andere Kunden fließen ein; das gelernte
+  Graph-Modell holt fast auf (+11 % ggü. Regel), die Graph-Merkmale im einfacheren Ranker bleiben vorn.
+  Neu auf der Detailseite: Nachbarschafts-Pfad (Kunde → eigene Artikel → 5 Nachbarn mit den meisten gemeinsamen Artikeln →
+  empfohlene Artikel, die diese Nachbarn kaufen), `activation.build_reco_paths()` → `artifacts/reco_paths.json`
+  (40 Beispielkunden, Ø 89 % der Nachbarn kaufen den empfohlenen Artikel).
+- **Lead- und Account-Scoring:** Neukunden-Scoring unverändert (Online Retail II). Neu: **Account-Scoring auf
+  WideWorldImporters** – „Quartalsumsatz wächst um ≥ 20 %“, monatliche Stichtage 01/2014–01/2016, Test 01.02.2016.
+  WWI wird über `connectors.wwi_as_retail()` ins Positionsformat gebracht; `backtest.dataset_time()` setzt die Zeitachse
+  je Datensatz (`DATASET_OF = {"account_scoring": "wwi"}`). Graph-Signal: Wachstum der Peers in Einkaufsgemeinschaft,
+  Kundenkategorie und Region (ohne den Account selbst) + Kunde–Artikel-Nachbarschaft.
+  AUPRC: Regel (Trend) 0,307 – unter Zufall (42 % Positivrate, Rückkehr zum Mittelwert) · LightGBM 0,798 ·
+  LightGBM + Graph 0,784 · GNN 0,823 · **TabPFN 0,826**.
+- **Euro:** Account-Scoring 491.144 €/Jahr – auf künstlichen Daten, deshalb als WWI gekennzeichnet und aus „nächster Schritt“
+  und Report für Online Retail II ausgenommen (je Datensatz getrennt).
+- **Ampel:** Rückblick-Ergebnisse fließen nur in die Matrix des Datensatzes, auf dem sie gerechnet wurden (Stufe 3 für WWI neu).
+- **Tests:** 53 grün (u. a. Peer-Signal ohne Selbstbezug, Leakage des Account-Tasks, Zeitachse zurückgesetzt, GNN-Ergebnisse
+  vorhanden, keine Datensatz-Vermischung).

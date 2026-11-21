@@ -100,6 +100,13 @@ FIELDS: dict[str, dict] = {
         "contains": ["country", "region"],
         "kinds": "any",
     },
+    "account_group": {
+        "label": "Einkaufsgemeinschaft / Konzern / Kundengruppe",
+        "syn": ["buyinggroupid", "buyinggroup", "einkaufsgemeinschaft", "konzern", "konzernid", "parentaccountid",
+                "customercategoryid", "kundengruppe", "kdgrp", "verband", "billtocustomerid"],
+        "contains": ["buyinggroup", "einkaufsgem", "konzern", "kundengruppe", "customercategory"],
+        "kinds": "any",
+    },
     "doc_type": {
         "label": "Belegart / Status (Storno, Retoure)",
         "syn": ["belegtyp", "doctype", "belegart", "auart", "fkart", "orderstatus", "status", "documenttype"],
@@ -230,6 +237,19 @@ USE_CASES: list[dict] = [
                   ("order_key", "pflicht", None, None), ("product_key", "optional", None, None),
                   ("price", "optional", None, None), ("country", "optional", None, None)],
      "links": [("customer_key", "event_time")], "learnable": True, "max_stage": 3, "note": "Cold-Start-Check"},
+    {"id": "account_scoring", "name": "Account-Scoring (Wachstum)", "area": "Sales", "lighthouse": False,
+     "app_route": "/lead-scoring", "app_name": "Lead Scoring",
+     "label": "Bestandskunde steigert seinen Quartalsumsatz um mindestens 20 %",
+     "label_detail": "Aktiv = Kauf in den 180 Tagen vor dem Stichtag. Positiv = Umsatz der nächsten 90 Tage ≥ 120 % der letzten 90 Tage.",
+     "window_days": 90, "min_positives": 100, "entity": "customer",
+     "baseline": "Umsatztrend des letzten Quartals", "lever": "Umsatz, Key-Account-Fokus",
+     "blockers": ["Konzern- und Einkaufsverbund-Strukturen fehlen im CRM", "Kundendubletten"],
+     "requires": [("customer_key", "pflicht", None, None), ("event_time", "pflicht", None, None),
+                  ("order_key", "pflicht", None, None), ("account_group", "optional", None, None),
+                  ("price", "optional", None, None), ("quantity", "optional", None, None),
+                  ("country", "optional", None, None)],
+     "links": [("customer_key", "event_time")], "learnable": True, "max_stage": 3,
+     "note": "gerechnet auf WideWorldImporters (Einkaufsgemeinschaften)"},
     {"id": "next_best_action", "name": "Next Best Action", "area": "Sales", "lighthouse": False,
      "app_route": "/next-action", "app_name": "Next Best Action",
      "label": "Reaktion auf die empfohlene Aktion",
@@ -352,6 +372,14 @@ STORY: dict[str, dict] = {
         "tabular": "Wert, Breite und Ø Preis des ersten Warenkorbs, Land",
         "unit": "je Erstkäufer der letzten 90 Tage: Wiederkauf in 90 Tagen",
         "euro": "Umsatz der Wiederkäufer in der Liste × Mehrumsatz durch Betreuung − Kontakte × Kosten"},
+    "account_scoring": {
+        "v2": "Lead- und Account-Scoring", "effect": "Lead-ROI +77 % (ältere Umfrage)", "fit": "mittel",
+        "graph": "Accounts derselben Einkaufsgemeinschaft, Kundenkategorie und Region wachsen gemeinsam – deren Wachstum "
+                 "(ohne den Account selbst) ist ein Peer-Signal über den Graphen, dazu die Kunde–Artikel-Nachbarschaft.",
+        "path": ["Account", "Einkaufsgemeinschaft", "Peer-Accounts", "Wachstum"],
+        "tabular": "Umsatz, Frequenz und Trend des Accounts, Kreditlimit, Kategorie",
+        "unit": "je aktivem Account: Quartalsumsatz wächst um ≥ 20 %",
+        "euro": "Mehrumsatz wachsender Accounts in der Liste × zusätzlich gesicherter Anteil − Accounts × Betreuungskosten, × 4 Quartale"},
     "next_best_action": {
         "v2": "Next Best Action im Vertrieb", "effect": "Umsatz +5–8 %, Betreuungskosten −20–30 %", "fit": "hoch",
         "graph": "Kombiniert die Graph-Scores aus Churn, Cross-Selling, Empfehlung und Neukunden je Kunde. Ein lernendes "
