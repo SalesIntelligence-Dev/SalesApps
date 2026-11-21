@@ -75,12 +75,11 @@ def run_remote(use_case: str, engine_id: str, ctx=None) -> dict:
     import numpy as np
     priv = res.pop("private", {}) or {}
     for k, v in priv.items():
-        if k.endswith("_shape") or k == "_recs":
+        if k.endswith("_shape") or k in ("_recs", "_hit_stats"):
+            res[k] = v
             continue
         arr = np.asarray(v, dtype=float)
         if f"{k}_shape" in priv:
             arr = arr.reshape(priv[f"{k}_shape"])
         res[k] = arr
-    if "_recs" in priv:
-        res["_recs"] = priv["_recs"]
     return res

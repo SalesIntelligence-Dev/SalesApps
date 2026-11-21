@@ -158,6 +158,10 @@ def build_online_retail_tables(df: pd.DataFrame) -> tuple[dict[str, pd.DataFrame
     })
     invoices["invoice"] = invoices["invoice"].astype(df["invoice"].dtype)
     invoices["country"] = invoices["country"].astype(df["country"].dtype)
+    if "orig_invoice" in df.columns:          # PB-02: Storno → Originalrechnung (heuristisch zugeordnet)
+        oi = df.loc[df["orig_invoice"].notna(), ["invoice", "orig_invoice"]].drop_duplicates("invoice")
+        invoices["original_invoice"] = invoices["invoice"].astype(str).map(
+            oi.set_index(oi["invoice"].astype(str))["orig_invoice"]).astype("category")
 
     # Konsistenz: Rechnungen mit mehreren Kunden / Kunden mit mehreren Ländern
     ok = ~np.isnan(cust)
@@ -166,12 +170,13 @@ def build_online_retail_tables(df: pd.DataFrame) -> tuple[dict[str, pd.DataFrame
     cc = np.unique(np.c_[cust[ok].astype(np.int64), _codes(df["country"])[ok]], axis=0)
     multi_country = int((np.unique(cc[:, 0], return_counts=True)[1] > 1).sum())
 
+    price_col = "price_eur" if "price_eur" in df.columns else "price_gbp"     # PB-08: Währung
     lines = pd.DataFrame({
         "line_id":    np.arange(1, len(df) + 1, dtype=np.int32),
         "invoice":    df["invoice"].array,
         "stock_code": df["stock_code"].array,
         "quantity":   df["quantity"].to_numpy(),
-        "price_gbp":  df["price_gbp"].to_numpy(),
+        price_col:    df[price_col].to_numpy(),
     })
 
     stock_cats = df["stock_code"].cat.categories
@@ -188,6 +193,12 @@ def build_online_retail_tables(df: pd.DataFrame) -> tuple[dict[str, pd.DataFrame
         "description":      pd.Categorical.from_codes(desc_codes[used], categories=desc_cats),
         "n_beschreibungen": n_desc_all[used],
     })
+    if "pb05_group" in df.columns:            # PB-05: Artikelgruppe aus Freitext
+        gcat = df["pb05_group"].astype("category")
+        gk, gv, _ = _mode_codes(_codes(df["stock_code"]), _codes(gcat), len(gcat.cat.categories))
+        gc = np.full(len(stock_cats), -1, dtype=np.int64)
+        gc[gk] = gv
+        products["product_group"] = pd.Categorical.from_codes(gc[used], categories=gcat.cat.categories)
 
     cust_ids = np.unique(cust[ok]).astype(np.int64)
     ck, cv, _ = _mode_codes(np.searchsorted(cust_ids, cust[ok].astype(np.int64)),
@@ -462,9 +473,29 @@ class Registry:
         self._save_artifact("mapping", ds, m)
         return m
 
-    def _online_retail_extra(self) -> dict:
-        f = self.get("online_retail_ii").facts
-        q = self._orii_quality
+    def _online_retail_extra(self, facts: dict | None = None, quality: dict | None = None,
+                             flags: set | None = None) -> dict:
+        """Befunde und Hinweise für Online Retail II – aus den Kennzahlen des jeweiligen Datenstands."""
+        f = facts or self.get("online_retail_ii").facts
+        q = quality if quality is not None else self._orii_quality
+        flags = flags or set()
+        extra = self._orii_extra_raw(f, q)
+        drop = {"PB-02"} if "PB-02" in flags else set()
+        for key, cnt in (("PB-06", f["duplicate_rows"]), ("PB-03", f["non_article_rows"]),
+                         ("PB-04", q.get("products_multi_description", 0)),
+                         ("PB-07", f["price_zero_rows"] + f["negative_qty_without_storno"])):
+            if not cnt:
+                drop.add(key)
+        extra["findings"] = [x for x in extra["findings"] if x.get("playbook") not in drop]
+        if "PB-02" in flags:
+            extra["missing_relations"] = []
+        if "PB-01" in flags or not f.get("rows_without_customer"):
+            extra["insight_hints"] = []
+        if "PB-04" in flags:
+            extra["derived_columns"] = [d for d in extra["derived_columns"] if d["column"] != "products.n_beschreibungen"]
+        return extra
+
+    def _orii_extra_raw(self, f: dict, q: dict) -> dict:
         share_storno = f["storno_invoices"] / max(f["invoices"], 1)
         return {
             "labels": TABLE_LABELS_ORII,
@@ -910,10 +941,13 @@ def _merge_backtest(res: dict) -> dict:
             continue
         u["ampel"]["vorhersagekraft"] = {**vk, "best": s.get("best_name"), "metric": s.get("main_metric_label"),
                                          "value": s.get("best_value")}
-        dims = [d["status"] for d in (u["ampel"]["datenreife"], u["ampel"]["vorhersagekraft"]) if d["status"] in rank]
-        worst = max(dims, key=lambda x: rank[x]) if dims else "na"
-        u["ampel"]["gesamt"] = {"status": worst, "provisional": True,
-                                "note": "Vorläufig: Datenreife und Vorhersagekraft belastbar, Euro-Potenzial folgt"}
+        u["ampel"]["gesamt"] = {"status": "pending"}
+    # Euro-Potenzial (Was-wäre-wenn, realistisch) → Gesamt = schwächste der drei Dimensionen
+    from .business_case import merge_ampel, overview
+    cases = overview()["cases"]
+    for u in res["use_cases"]:
+        if u["ampel"]["vorhersagekraft"].get("status") != "pending":
+            merge_ampel(u, cases.get(u["id"]))
     res["backtest_merged"] = True
     return res
 

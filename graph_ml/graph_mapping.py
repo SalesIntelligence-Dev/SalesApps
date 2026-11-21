@@ -25,7 +25,7 @@ from collections import deque
 import numpy as np
 import pandas as pd
 
-ARTIFACT_VERSION = 4
+ARTIFACT_VERSION = 6
 
 ID_SUFFIXES = ("id", "nr", "no", "nummer", "number", "code", "key", "schluessel")
 TIME_HINTS  = ("date", "datum", "time", "zeit", "timestamp", "created", "modified")
@@ -253,7 +253,7 @@ def build_mapping(tables: dict[str, pd.DataFrame], *, dataset_id: str, extra: di
                 continue
             best = None
             for b, pkb in pks.items():
-                if b == a or not pkb:
+                if not pkb or (b == a and col == pkb):
                     continue
                 score = name_match(col, pkb, b)
                 if score < 0.6:
@@ -324,6 +324,12 @@ def _measure_relation(a, col, b, pkb, tables, score, incl, sample_note) -> dict:
     linked = int(found.sum())
     m = len(vals)
     rate = linked / m if m else 0.0
+    note = None
+    if a == b:
+        # Selbstbezug (z. B. Storno → Originalrechnung): nur ein Teil der Zeilen trägt ihn – Quote über befüllte Zeilen
+        filled = m - null_rows
+        note = f"nur {_pct(filled / m if m else 0)} der Zeilen tragen den Bezug (z. B. Storno-Belege)"
+        rate = linked / filled if filled else 0.0
     return {
         "id": f"{a}.{col}->{b}.{pkb}",
         "kind": "fk",
@@ -335,6 +341,7 @@ def _measure_relation(a, col, b, pkb, tables, score, incl, sample_note) -> dict:
         "linkage_rate": round(rate, 4),
         "status": "ok" if rate >= LINK_OK else "warn" if rate >= LINK_WARN else "bad",
         "sampled": n > MAX_FK_SAMPLE and bool(sample_note),
+        **({"note": note, "self": True} if note else {}),
     }
 
 
@@ -427,7 +434,7 @@ def _findings(m: dict) -> list[dict]:
     out = []
     labels = {t["name"]: t.get("label", t["name"]) for t in m["tables"]}
     for r in m["relations"]:
-        if r["kind"] != "fk" or r["status"] == "ok":
+        if r["kind"] != "fk" or r["status"] == "ok" or r.get("self"):
             continue
         miss = 1 - r["linkage_rate"]
         out.append({

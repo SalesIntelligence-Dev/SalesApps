@@ -32,7 +32,7 @@ class KumoRFMEngine(Engine):
     def fit(self, task):
         import kumoai.experimental.rfm as rfm          # noqa: WPS433 – nur mit Key
         rfm.init(api_key=os.environ["KUMO_API_KEY"])
-        b = bt.get_base()
+        b = bt.base_of(task)
         hist = b.inv[b.inv["time"] < bt.T_TEST]
         task.audit.check("kumorfm:belege", bt.T_TEST, hist["time"].max())
         customers = pd.DataFrame({"customer_id": np.sort(hist["cust"].unique())})
@@ -74,7 +74,7 @@ class AuroraEngine(Engine):
 
     def predict(self, task):
         """Tagesreihen (≥ 528 Tage Historie) zero-shot prognostizieren und auf 13 Wochen summieren."""
-        b = bt.get_base()
+        b = bt.base_of(task)
         origin = task.extra["origin_test"]
         H = task.extra["horizon"]
         days = pd.date_range(origin - pd.Timedelta(days=self.LOOKBACK), periods=self.LOOKBACK, freq="D")

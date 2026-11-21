@@ -149,7 +149,7 @@ class GNNEngine(_GPUEngine):
         from torch_geometric.nn import HeteroConv, SAGEConv
         dev = self._device()
         torch.manual_seed(bt.SEED)
-        b = bt.get_base()
+        b = bt.base_of(task)
         audit = bt.Audit()
         snaps = task.snapshots[-9:]                      # letzte 9 Trainings-Stichtage + Test
         graphs = [_snapshot_graph(b, T, task, audit) for T in snaps + [bt.T_TEST]]
@@ -235,7 +235,7 @@ class LightGCNEngine(_GPUEngine):
         import torch
         dev = self._device()
         torch.manual_seed(bt.SEED)
-        b = bt.get_base()
+        b = bt.base_of(task)
         T = bt.T_TEST
         hist = b.lines[(b.lines["time"] < T) & (b.lines["time"] >= T - pd.Timedelta(days=bt.HISTORY))]
         task.audit.check("lightgcn:kanten", T, hist["time"].max())
@@ -285,7 +285,7 @@ class LightGCNEngine(_GPUEngine):
 
     def predict(self, task):
         import torch
-        snap = bt.reco_snapshot(bt.get_base(), bt.T_TEST)
+        snap = bt.reco_snapshot(bt.base_of(task), bt.T_TEST)
         rows = self.uidx.get_indexer(snap["users"])
         with torch.no_grad():
             U = self.X[torch.tensor(rows, device=self.X.device)]

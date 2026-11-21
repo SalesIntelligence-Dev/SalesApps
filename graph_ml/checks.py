@@ -586,8 +586,17 @@ def check_governance(uc: dict, ctx: Ctx) -> dict:
                        "nicht in den Export übernehmen")
     if personal:
         metrics.append(_m("Beispiele", ", ".join(p.split(".")[-1] for p in personal[:4])))
-    reasons.append("Rückspielweg ins CRM noch nicht eingerichtet")
-    metrics.append(_m("Rückspielweg", "nicht vorhanden"))
+    gov = (ctx.profile or {}).get("governance") or {}
+    done = [i for i in CHECKLIST if gov.get(i)]
+    if done:
+        score = min(90, score + 6 * len(done))
+        metrics.append(_m("Checkliste (PB-09)", f"{len(done)} von {len(CHECKLIST)} erledigt"))
+    if gov.get("Schreibrechte für den Rückspielweg ins CRM/ERP"):
+        reasons.append("Rückspielweg ins CRM geklärt")
+        metrics.append(_m("Rückspielweg", "geklärt"))
+    else:
+        reasons.append("Rückspielweg ins CRM noch nicht eingerichtet")
+        metrics.append(_m("Rückspielweg", "nicht vorhanden"))
     text = "; ".join(reasons)
     return _res("governance", _status(score), score, text[:1].upper() + text[1:] + ".", metrics,
                 [_a("Freigabe-Checkliste abarbeiten", "PB-09")], provisional=ctx.provisional, checklist=CHECKLIST)

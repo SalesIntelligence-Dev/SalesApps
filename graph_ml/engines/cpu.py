@@ -134,7 +134,7 @@ class RecoRuleEngine(Engine):
         return self
 
     def predict(self, task):
-        snap = bt.reco_snapshot(bt.get_base(), bt.T_TEST)
+        snap = bt.reco_snapshot(bt.base_of(task), bt.T_TEST)
         return _rule_recs(snap), snap["truth"]
 
 
@@ -145,7 +145,7 @@ class PopularityEngine(Engine):
         return self
 
     def predict(self, task):
-        snap = bt.reco_snapshot(bt.get_base(), bt.T_TEST)
+        snap = bt.reco_snapshot(bt.base_of(task), bt.T_TEST)
         pop = _top_pop(snap, 12)
         return [pop for _ in range(len(snap["users"]))], snap["truth"]
 
@@ -167,14 +167,13 @@ class ItemKNNEngine(Engine):
         return self
 
     def predict(self, task):
-        snap = bt.reco_snapshot(bt.get_base(), bt.T_TEST)
+        snap = bt.reco_snapshot(bt.base_of(task), bt.T_TEST)
         sc = _itemknn_scores(snap)
         recs = np.argsort(-sc, axis=1)[:, :12]
         return [list(r) for r in recs], snap["truth"]
 
 
-def _rank_pairs(snap, with_label: bool):
-    b = bt.get_base()
+def _rank_pairs(snap, with_label: bool, b):
     sc = _itemknn_scores(snap)
     R = snap["R"].tocsr()
     pop30, pop90 = snap["pop30"], snap["pop90"]
@@ -214,9 +213,9 @@ class LGBMRankEngine(Engine):
 
     def fit(self, task):
         lgb = _lgb()
-        b = bt.get_base()
-        tr = _rank_pairs(bt.reco_snapshot(b, task.snapshots[0]), True)
-        va = _rank_pairs(bt.reco_snapshot(b, task.snapshots[1]), True)
+        b = bt.base_of(task)
+        tr = _rank_pairs(bt.reco_snapshot(b, task.snapshots[0]), True, b)
+        va = _rank_pairs(bt.reco_snapshot(b, task.snapshots[1]), True, b)
         p = dict(LGB_PARAMS, objective="binary")
         self.model = lgb.train(p, lgb.Dataset(tr[RANK_FEATS], tr["y"]), 800,
                                valid_sets=[lgb.Dataset(va[RANK_FEATS], va["y"])],
@@ -227,8 +226,8 @@ class LGBMRankEngine(Engine):
         return self
 
     def predict(self, task):
-        snap = bt.reco_snapshot(bt.get_base(), bt.T_TEST)
-        te = _rank_pairs(snap, False)
+        snap = bt.reco_snapshot(bt.base_of(task), bt.T_TEST)
+        te = _rank_pairs(snap, False, bt.base_of(task))
         te["s"] = self.model.predict(te[RANK_FEATS], num_iteration=self.model.best_iteration)
         top = te.sort_values(["u", "s"], ascending=[True, False]).groupby("u").head(12)
         recs = top.groupby("u")["p"].apply(list).reindex(range(len(snap["users"]))).tolist()

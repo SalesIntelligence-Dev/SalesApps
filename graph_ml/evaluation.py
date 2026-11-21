@@ -84,6 +84,7 @@ def run_engine(task: bt.Task, engine, rule_scores=None) -> dict:
         res["ci"] = {"metric_ci": bt.metric_ci(m["_ap"])}
         res["_ap"] = m["_ap"]
         res["_recs"] = recs[:20]
+        res["_hit_stats"] = _reco_hits(task, recs, truth)
     else:
         yhat, ytrue, scale = pred
         res["metrics"] = bt.forecast_metrics(ytrue, yhat, scale)
@@ -96,6 +97,77 @@ def run_engine(task: bt.Task, engine, rule_scores=None) -> dict:
         res["explain"] = None
         log.warning("Erklärung %s/%s: %s", task.uc, engine.id, exc)
     return res
+
+
+def _reco_hits(task, recs, truth) -> dict:
+    """Treffer der Empfehlungen und deren Umsatz im 90-Tage-Fenster (für das Euro-Potenzial)."""
+    b = bt.base_of(task)
+    snap_users = bt.reco_snapshot(b, bt.T_TEST)["users"]
+    fut = b.lines[(b.lines["time"] >= bt.T_TEST) & (b.lines["time"] < bt.T_TEST + pd.Timedelta(days=bt.HORIZON))]
+    val = fut.groupby(["cust", "prod"])["value"].sum()
+    hits = hit_value = 0.0
+    for u, (r, t) in enumerate(zip(recs, truth)):
+        h = [p for p in r[:12] if p in t]
+        hits += len(h)
+        hit_value += float(sum(val.get((snap_users[u], p), 0.0) for p in h))
+    return {"hits": hits, "hit_value": hit_value, "customers": len(recs)}
+
+
+def _whatif(task, results: list[dict]) -> dict | None:
+    """Rohdaten für die Was-wäre-wenn-Rechnung: je Engine und Listengröße erkannte Fälle und deren Wert."""
+    b = bt.base_of(task)
+    ok = [r for r in results if r.get("status") == "ok"]
+    cur = b.currency
+    if task.kind == "binary":
+        te = task.test
+        y = te[task.label].to_numpy().astype(bool)
+        if task.uc == "churn":
+            v = te["monetary_365"].to_numpy() / 4          # Umsatz, der im 90-Tage-Fenster ausbleibt
+            unit, period = "Umsatz der Abwanderer im Quartal (Ø Quartalsumsatz)", 90
+        elif task.uc == "lead_scoring":
+            fut = b.inv[(b.inv["time"] >= bt.T_TEST) & (b.inv["time"] < bt.T_TEST + pd.Timedelta(days=bt.HORIZON))]
+            v = te["cust"].map(fut.groupby("cust")["value"].sum()).fillna(0).to_numpy()
+            unit, period = "Umsatz der Wiederkäufer in 90 Tagen", 90
+        elif task.uc == "cross_selling":
+            fut = b.lines[(b.lines["time"] >= bt.T_TEST) & (b.lines["time"] < bt.T_TEST + pd.Timedelta(days=bt.HORIZON))]
+            gv = fut.groupby(["cust", "group"])["value"].sum()
+            v = np.array([gv.get((c, g), 0.0) for c, g in zip(te["cust"], te["group"])])
+            unit, period = "Umsatz in der neuen Gruppe in 90 Tagen", 90
+        else:
+            v = te["value"].to_numpy()
+            unit, period = "Warenwert der stornierten Positionen", 61
+        N = len(te)
+        ks = list(range(1, 31))
+        engines = {}
+        for r in ok:
+            s = r.get("_scores")
+            if s is None:
+                continue
+            proba = r["id"] not in ("rule",) and r["meta"].get("klass") != "Regel"
+            order_s = s * np.clip(te[task.value_col].to_numpy(), 0, None) if task.extra.get("rank_by_value") and proba else s
+            order = np.argsort(-order_s, kind="stable")
+            yy, vv = y[order], (v * y)[order]
+            cy, cv = np.cumsum(yy), np.cumsum(vv)
+            ns = [max(1, int(round(N * k / 100))) for k in ks]
+            engines[r["id"]] = {"tp": [int(cy[n - 1]) for n in ns], "value": [round(float(cv[n - 1]), 2) for n in ns]}
+        return {"kind": "list", "k": ks, "n": [max(1, int(round(N * k / 100))) for k in ks], "N": N,
+                "positives": int(y.sum()), "value_total": round(float((v * y).sum()), 2), "unit": unit,
+                "period_days": period, "currency": cur, "engines": engines}
+    if task.kind == "ranking":
+        return {"kind": "reco", "period_days": 90, "currency": cur,
+                "engines": {r["id"]: r["_hit_stats"] for r in ok if r.get("_hit_stats")}}
+    if task.kind == "forecast":
+        prods = task.extra["prods"]
+        price = b.lines[b.lines["time"] < bt.T_TEST].groupby("prod")["price"].median().reindex(prods).fillna(0).to_numpy()
+        eng = {}
+        for r in ok:
+            yt, yh = r["_ytrue"], r["_yhat"]
+            eng[r["id"]] = {"wape": float(np.abs(yt - yh).sum() / max(yt.sum(), 1e-9))}
+        yt = ok[0]["_ytrue"] if ok else None
+        return {"kind": "forecast", "period_days": 91, "currency": cur, "engines": eng,
+                "demand_value": round(float((yt * price[:, None]).sum()), 2) if yt is not None else None,
+                "series": len(prods)}
+    return None
 
 
 def _paired_lift(task, best: dict, rule: dict, n: int = 200) -> dict:
@@ -188,12 +260,12 @@ def recommend(uc: str, engines: list[dict], best: dict | None, profile_engine: d
 
 # ── ein Use Case komplett ─────────────────────────────────────────────────────
 
-def run_use_case(uc: str, engine_ids: list[str] | None = None, ctx=None, previous: dict | None = None) -> dict:
-    from .engines.base import Engine  # noqa: F401
+def run_use_case(uc: str, engine_ids: list[str] | None = None, ctx=None, previous: dict | None = None,
+                 variant: str = "v0") -> dict:
     t0 = time.time()
     if ctx:
         ctx.progress(3, f"Baue zeitlichen Split für {uc} …")
-    task = bt.get_task(uc)
+    task = bt.get_task(uc, variant)
     engines = make_engines(task)
     if engine_ids:
         engines = [e for e in engines if e.id in engine_ids or e.id == "rule"]
@@ -211,7 +283,7 @@ def run_use_case(uc: str, engine_ids: list[str] | None = None, ctx=None, previou
                 results.append({"id": eng.id, "status": "unavailable", "reason": why, "meta": eng.meta()})
             continue
         try:
-            if getattr(eng, "remote", False):
+            if getattr(eng, "remote", False) and variant == "v0":
                 from .engines.runtime import run_remote
                 r = run_remote(uc, eng.id, ctx)
             else:
@@ -249,6 +321,7 @@ def assemble(uc: str, task: bt.Task, results: list[dict], seconds: float) -> dic
     profile_engine = _profile_engine(uc)
     out = {
         "result_version": RESULT_VERSION, "use_case": uc, "kind": task.kind,
+        "variant": task.extra.get("base_key", "v0"), "currency": task.extra.get("currency", "GBP"),
         "generated_at": pd.Timestamp.now().isoformat(timespec="seconds"),
         "host": platform.node(), "compute_seconds": round(seconds, 1),
         "main_metric": m, "main_metric_label": MAIN_LABEL.get(m, m), "lower_is_better": lower,
@@ -262,6 +335,7 @@ def assemble(uc: str, task: bt.Task, results: list[dict], seconds: float) -> dic
         "notes": _notes(task),
     }
     out["top_list"] = _top_list(task, best) if best else []
+    out["whatif"] = _whatif(task, results)
     if task.kind == "forecast" and best:
         out["series_examples"] = _series_examples(task, best, rule)
     if uc == "returns_root_cause" and best:
@@ -314,21 +388,20 @@ def _top_list(task, best) -> list[dict]:
         cols = {"churn": ["recency", "freq_365", "monetary_365"], "lead_scoring": ["first_value", "first_products"],
                 "cross_selling": ["group", "group_pop"], "returns_root_cause": ["prod", "qty", "price"]}[task.uc]
         out = []
-        b = bt.get_base()
+        b = bt.base_of(task)
         for _, r in te.iterrows():
             d = {"id": str(r[task.id_col]) if task.id_col in r else str(r.get("cust")), "score": _r(r["_s"]),
                  "label": int(r[task.label]), "cust": int(r["cust"]) if "cust" in r else None}
             for c in cols:
                 d[c] = _r(r[c], 2) if c not in ("group", "prod") else int(r[c])
             if "group" in d:
-                from .product_groups import GROUPS
-                d["group_name"] = GROUPS[d["group"]]
+                d["group_name"] = b.group_names[d["group"]]
             if "prod" in d:
                 d["product_name"] = str(b.prod_names[d["prod"]])[:40]
             out.append(d)
         return out
     if task.kind == "ranking":
-        b = bt.get_base()
+        b = bt.base_of(task)
         snap_users = bt.reco_snapshot(b, bt.T_TEST)["users"]
         return [{"cust": int(snap_users[u]), "items": [str(b.prod_names[p])[:32] for p in recs[:5]]}
                 for u, recs in enumerate(best.get("_recs", [])[:8])]
@@ -353,8 +426,8 @@ def _series_examples(task, best, rule) -> list[dict]:
 
 def _cohorts(task, best) -> list[dict]:
     """Root Cause: Kohorten (Artikelgruppe × Land) mit erhöhtem vorhergesagtem und tatsächlichem Risiko."""
-    from .product_groups import GROUPS
-    b = bt.get_base()
+    b = bt.base_of(task)
+    GROUPS = b.group_names
     te = task.test.assign(_s=best["_scores"])
     base = te[task.label].mean()
     g = te.groupby(["group", "country"]).agg(n=("y", "size"), rate=("y", "mean"), pred=("_s", "mean"))
@@ -365,18 +438,18 @@ def _cohorts(task, best) -> list[dict]:
 
 # ── Artefakte ─────────────────────────────────────────────────────────────────
 
-def artifact_path(uc: str) -> Path:
-    return ARTIFACTS / f"backtest_{uc}.json"
+def artifact_path(uc: str, variant: str = "v0") -> Path:
+    return ARTIFACTS / (f"backtest_{uc}.json" if variant == "v0" else f"backtest_{uc}~{variant}.json")
 
 
 def save(res: dict) -> None:
     ARTIFACTS.mkdir(exist_ok=True)
-    artifact_path(res["use_case"]).write_text(json.dumps(res, ensure_ascii=False, separators=(",", ":")),
-                                              encoding="utf-8")
+    artifact_path(res["use_case"], res.get("variant", "v0")).write_text(
+        json.dumps(res, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
 
-def load(uc: str) -> dict | None:
-    p = artifact_path(uc)
+def load(uc: str, variant: str = "v0") -> dict | None:
+    p = artifact_path(uc, variant)
     if not p.exists():
         return None
     try:
@@ -385,11 +458,11 @@ def load(uc: str) -> dict | None:
         return None
 
 
-def summary() -> dict:
+def summary(variant: str = "v0") -> dict:
     """Übersicht für Schritt 4 und die Ampel: je Use Case Sieger, Lift, Vorhersagekraft."""
     out = {}
     for uc in UC_ORDER:
-        r = load(uc)
+        r = load(uc, variant)
         if not r:
             out[uc] = {"status": "pending"}
             continue

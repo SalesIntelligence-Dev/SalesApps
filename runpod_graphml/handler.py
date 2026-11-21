@@ -9,6 +9,7 @@ job_type
   graphml_selftest   GPU-Benchmark                         → {"gpu", "gflops"}
   graphml_engine     eine Engine für einen Use Case rechnen → {"engine_result", "gpu"}
   graphml_backtest   kompletten Rückblick eines Use Case    → {"result", "gpu"}
+  graphml_pipeline   Playbooks anwenden + Checks neu (+ Rückblick) → {"result", "gpu"}
   graphml_gnn_train / graphml_lightgcn / graphml_tabpfn – Kurzformen für graphml_engine
 """
 from __future__ import annotations
@@ -60,6 +61,8 @@ def _private(r: dict) -> dict:
                 out[k + "_shape"] = list(r[k].shape)
     if "_recs" in r:
         out["_recs"] = [[int(p) for p in rec] for rec in r["_recs"]]
+    if "_hit_stats" in r:
+        out["_hit_stats"] = r["_hit_stats"]
     return out
 
 
@@ -91,11 +94,16 @@ def handler(job):
         if jt == "graphml_engine" or jt in ALIASES:
             engine_id = inp.get("engine") or ALIASES[jt]
             return {"engine_result": run_engine(inp["use_case"], engine_id), "gpu": _gpu_name()}
+        if jt == "graphml_pipeline":
+            from graph_ml import playbooks as pb
+            res = pb.run_variant(inp.get("steps") or [], fx=float(inp.get("fx") or pb.DEFAULT_FX),
+                                 governance=inp.get("governance") or {}, backtest=bool(inp.get("backtest")))
+            return {"result": res, "gpu": _gpu_name()}
         if jt == "graphml_backtest":
             from graph_ml import evaluation as ev
             return {"result": ev.run_use_case(inp["use_case"]), "gpu": _gpu_name()}
         return {"error": f"Unbekannter job_type '{jt}'. Unterstützt: graphml_selftest, graphml_engine, "
-                         "graphml_backtest, graphml_gnn_train, graphml_lightgcn, graphml_tabpfn"}
+                         "graphml_backtest, graphml_pipeline, graphml_gnn_train, graphml_lightgcn, graphml_tabpfn"}
     except Exception as exc:
         log.error("%s\n%s", exc, traceback.format_exc())
         return {"error": str(exc)[:500]}

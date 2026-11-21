@@ -141,6 +141,16 @@ body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-ser
 .tl-lbl{position:absolute;top:38px;font-size:10px;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
 .lb-best td{background:rgba(139,124,246,.08)}
 .eng-dot{width:9px;height:9px;border-radius:3px;display:inline-block;flex:none}
+/* Grid-Kinder dürfen schmaler als ihr Inhalt werden (Charts/Tabellen sprengen sonst auf 375 px das Layout) */
+.grid>*{min-width:0}
+.pb-card{border:1px solid var(--border);border-radius:14px;padding:14px;background:rgba(255,255,255,.02);transition:all .15s}
+.pb-card.on{border-color:rgba(52,211,153,.55);background:linear-gradient(180deg,rgba(52,211,153,.08),rgba(52,211,153,.01))}
+.delta-up{color:#6ee7b7}.delta-down{color:#fca5a5}
+input[type=range].rng{width:100%;accent-color:#8b7cf6}
+.mini-amp{display:inline-flex;flex-direction:column;align-items:center;gap:3px;min-width:58px}
+.mini-amp .lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.funnel-step{border:1px solid var(--border);border-radius:12px;padding:12px;background:rgba(255,255,255,.02)}
+.funnel-step.rec{border-color:rgba(245,158,11,.6);background:linear-gradient(180deg,rgba(245,158,11,.12),rgba(245,158,11,.02))}
 .banner-3{border-color:rgba(139,124,246,.4);background:linear-gradient(90deg,rgba(139,124,246,.12),rgba(139,124,246,.02))}
 .amp-pending .ring{width:9px;height:9px;border-radius:999px;border:1.5px solid var(--off);flex:none}
 .cy{width:100%;border-radius:12px;background:radial-gradient(600px 300px at 50% 40%,rgba(139,124,246,.07),transparent 70%),#0a0a1f;
@@ -1048,7 +1058,264 @@ body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-ser
     </template>
   </section>
 
-  <!-- ═════════════════════════ SCHRITTE 5–6 · PLATZHALTER ═════════════════════════ -->
+  <!-- ═════════════════════════ SCHRITT 5 · FIX-PLAYBOOKS & BUSINESS CASE ═════════════════════════ -->
+  <section x-show="step===5" x-cloak class="fade-in space-y-5">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
+      <div>
+        <div class="eyebrow">Schritt 5 · Fix-Playbooks &amp; Business Case</div>
+        <h2 class="text-[22px] font-bold mt-1">Lücken schließen, bis der Use Case trägt – und was es bringt</h2>
+        <p class="sub text-[13.5px] mt-1 max-w-[880px]">Jedes Playbook ist ein reproduzierbarer Schritt auf einer Kopie der Rohdaten
+          (Pipeline v0 → v1). Danach laufen die Checks neu – auf Wunsch auch der Rückblick – bis die Ampel trägt.</p>
+      </div>
+      <div class="flex flex-wrap gap-2 items-center">
+        <span class="chip"><span class="dot dot-ok"></span>Rohdaten v0 bleiben unverändert</span>
+      </div>
+    </div>
+
+    <!-- Playbook-Karten -->
+    <div class="panel p-4 sm:p-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+        <div>
+          <div class="font-semibold">Playbooks</div>
+          <div class="text-[12px] sub">Wirkung einzeln vorberechnet (Datenreife je Use Case) · Reihenfolge fest: <span class="mono" x-text="(pb?.order||[]).join(' → ')"></span></div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button class="btn btn-ghost text-[12.5px]" @click="pbSelectRecommended()">Empfohlenes Paket wählen</button>
+          <button class="btn btn-ghost text-[12.5px]" @click="pbSelectNone()">Keins</button>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
+        <template x-for="c in (pb?.catalog||[])" :key="'pb'+c.id">
+          <div class="pb-card min-w-0" :class="{on: c.kind==='data' && pbSel[c.id]?.on}">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="pb" x-text="c.id"></span>
+                <span class="font-semibold text-[13.5px] leading-tight" x-text="c.title"></span>
+              </div>
+              <template x-if="c.kind==='data' && pbSel[c.id]">
+                <label class="flex items-center gap-1.5 text-[12px] cursor-pointer flex-none">
+                  <input type="checkbox" class="accent-[#34d399] w-4 h-4" x-model="pbSel[c.id].on"> anwenden
+                </label>
+              </template>
+            </div>
+            <div class="text-[12px] sub mt-1.5" x-text="c.problem"></div>
+            <template x-if="c.options && c.options.length > 1">
+              <div class="mt-2 space-y-1">
+                <template x-for="o in c.options" :key="c.id+o.id">
+                  <label class="flex items-start gap-2 text-[12px] cursor-pointer">
+                    <input type="radio" class="mt-0.5 accent-[#8b7cf6]" :name="'opt'+c.id" :value="o.id" x-model="pbSel[c.id].option">
+                    <span><span class="font-medium" x-text="o.label"></span><span class="block text-[11px] muted" x-text="'+ '+o.pro+' · − '+o.con"></span></span>
+                  </label>
+                </template>
+              </div>
+            </template>
+            <template x-if="c.options && c.options.length === 1">
+              <div class="mt-2 text-[12px]"><span class="font-medium" x-text="c.options[0].label"></span>
+                <span class="block text-[11px] muted" x-text="'+ '+c.options[0].pro+' · − '+c.options[0].con"></span></div>
+            </template>
+            <div class="text-[11px] text-amber-200/90 mt-1.5" x-show="c.note" x-text="c.note"></div>
+            <!-- Vorschau der Wirkung -->
+            <template x-if="c.kind==='data' && pb?.effects?.[c.id]">
+              <div class="mt-2.5 pt-2.5 border-t border-[#22224a] text-[11.5px]">
+                <div class="flex flex-wrap gap-x-3 gap-y-0.5 sub">
+                  <span x-text="fmtInt(pb.effects[c.id].effect.rows_removed)+' Zeilen entfernt'"></span>
+                  <span x-show="pb.effects[c.id].effect.match_rate" x-text="'Zuordnung '+fmtPct(pb.effects[c.id].effect.match_rate)"></span>
+                  <span x-show="(pb.effects[c.id].effect.groups||[]).length" x-text="(pb.effects[c.id].effect.groups||[]).length+' Gruppen'"></span>
+                  <span x-show="pb.effects[c.id].effect.revenue_change_gbp" x-text="'Umsatz '+fmtSignedEur(pb.effects[c.id].effect.revenue_change_gbp*1.15)"></span>
+                </div>
+                <div class="flex flex-wrap gap-1 mt-1.5">
+                  <template x-for="d in pb.effects[c.id].comparison.filter(x => x.delta !== 0)" :key="c.id+d.id">
+                    <span class="chip !py-0 !text-[10.5px]" :class="d.delta > 0 ? 'delta-up' : 'delta-down'" x-text="ucShort(d.id)+' '+(d.delta > 0 ? '+' : '')+d.delta"></span>
+                  </template>
+                  <template x-if="!pb.effects[c.id].comparison.some(x => x.delta !== 0)">
+                    <span class="text-[11px] muted" x-text="pbChangedText(pb.effects[c.id].comparison)"></span>
+                  </template>
+                </div>
+              </div>
+            </template>
+            <template x-if="c.id==='PB-05' && pb?.effects?.['PB-05']">
+              <details class="mt-2 text-[11.5px]"><summary class="cursor-pointer text-[#a5b4fc]">Gruppen ansehen</summary>
+                <div class="flex flex-wrap gap-1 mt-1.5"><template x-for="g in pb.effects['PB-05'].effect.groups" :key="g.name">
+                  <span class="chip !py-0 !text-[10.5px]" :title="g.terms.join(', ')" x-text="g.name+' · '+g.products"></span></template></div></details>
+            </template>
+            <!-- Checkliste -->
+            <template x-if="c.kind==='checklist'">
+              <div class="mt-2 space-y-1">
+                <template x-for="it in c.items" :key="it"><label class="flex items-center gap-2 text-[12px] cursor-pointer">
+                  <input type="checkbox" class="accent-[#34d399] w-4 h-4" x-model="pbGov[it]"><span x-text="it"></span></label></template>
+              </div>
+            </template>
+            <!-- Datenanforderung -->
+            <template x-if="c.kind==='request'">
+              <div class="mt-2">
+                <template x-for="sct in (pb?.data_request?.sections||[])" :key="'dr'+sct.use_case">
+                  <div class="text-[12px] mt-1"><span class="font-medium" x-text="sct.name+':'"></span>
+                    <span class="sub" x-text="sct.fields.map(f => f.label).join(', ')"></span></div>
+                </template>
+                <div class="flex flex-wrap gap-2 mt-2.5">
+                  <a class="btn btn-ghost !py-1.5 text-[12px]" href="/graph_ml/api/playbooks/datarequest.md">⬇ Anforderung (.md)</a>
+                  <a class="btn btn-ghost !py-1.5 text-[12px]" href="/graph_ml/api/playbooks/datarequest.csv">⬇ Mapping-Vorlage (.csv)</a>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+      <div class="flex flex-col md:flex-row md:items-center gap-3 mt-4 pt-4 border-t border-[#22224a]">
+        <label class="flex items-center gap-2 text-[12.5px] cursor-pointer"><input type="checkbox" class="accent-[#8b7cf6] w-4 h-4" x-model="pbBacktest">
+          auch Rückblick neu rechnen (Stufe 3, Job)</label>
+        <span class="text-[11.5px] muted md:ml-2" x-text="pbHint()"></span>
+        <button class="btn btn-primary md:ml-auto" @click="applyPlaybooks()" :disabled="pbJob && (pbJob.status==='running' || pbJob.status==='queued')">Anwenden &amp; neu prüfen</button>
+      </div>
+      <template x-if="pbJob && pbJob.status !== 'completed'">
+        <div class="mt-3"><div class="bar"><span :style="'width:'+pbJob.progress+'%;background:linear-gradient(90deg,#34d399,#22d3ee)'"></span></div>
+          <div class="text-[11px] sub mt-1" x-text="pbJob.message || pbJob.status"></div></div>
+      </template>
+    </div>
+
+    <!-- Vorher / Nachher -->
+    <div class="panel p-4 sm:p-5" x-show="pbResult">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-3">
+        <div>
+          <div class="font-semibold">Vorher / Nachher</div>
+          <div class="text-[12px] sub" x-text="'Pipeline '+(pbResult?.variant||'')+' · '+(pbResult?.steps||[]).map(s => s.id+(s.option!=='A' ? ' '+s.option : '')).join(' → ')"></div>
+        </div>
+        <div class="flex flex-wrap gap-2 text-[12px]">
+          <span class="chip" x-text="'vorher: '+(pbResult?.before_counts?.ok||0)+' grün · '+(pbResult?.before_counts?.warn||0)+' gelb · '+(pbResult?.before_counts?.bad||0)+' rot'"></span>
+          <span class="chip" style="border-color:rgba(52,211,153,.5)" x-text="'nachher: '+(pbResult?.after_counts?.ok||0)+' grün · '+(pbResult?.after_counts?.warn||0)+' gelb · '+(pbResult?.after_counts?.bad||0)+' rot'"></span>
+        </div>
+      </div>
+      <div class="rounded-xl border border-[#22224a] overflow-hidden"><div class="scroll-x scroll-thin">
+        <table class="tbl min-w-[860px]">
+          <thead><tr><th>Use Case</th><th>Datenreife vorher</th><th>nachher</th><th>Δ</th><th>Vorhersagekraft nachher</th><th>Geänderte Prüfungen</th></tr></thead>
+          <tbody><template x-for="c in (pbResult?.comparison||[])" :key="'cmp'+c.id"><tr>
+            <td class="font-semibold whitespace-nowrap" x-text="c.name"></td>
+            <td><span class="amp" :class="'amp-'+c.before.status"><span class="amp-ic" x-text="ampIcon(c.before.status)"></span><span x-text="c.before.score"></span></span></td>
+            <td><span class="amp" :class="'amp-'+c.after.status"><span class="amp-ic" x-text="ampIcon(c.after.status)"></span><span x-text="c.after.score"></span></span></td>
+            <td class="font-bold tabular-nums" :class="c.delta > 0 ? 'delta-up' : c.delta < 0 ? 'delta-down' : 'muted'" x-text="(c.delta > 0 ? '▲ +' : c.delta < 0 ? '▼ ' : '')+c.delta"></td>
+            <td class="whitespace-nowrap">
+              <template x-if="pbResult?.backtest?.[c.id]"><span class="amp" :class="'amp-'+pbResult.backtest[c.id].vorhersagekraft.status">
+                <span class="amp-ic" x-text="ampIcon(pbResult.backtest[c.id].vorhersagekraft.status)"></span><span x-text="fmtLift(pbResult.backtest[c.id].vorhersagekraft.lift)"></span></span></template>
+              <span x-show="!pbResult?.backtest?.[c.id]" class="muted text-[11.5px]">–</span>
+            </td>
+            <td class="text-[11.5px] sub min-w-[280px]">
+              <template x-for="d in c.changed.slice(0, 4)" :key="c.id+d.dim"><span class="inline-block mr-2" :class="d.after > d.before ? 'delta-up' : 'delta-down'"
+                x-text="dimName(d.dim)+' '+(d.before ?? '–')+'→'+(d.after ?? '–')"></span></template>
+            </td></tr></template></tbody>
+        </table></div></div>
+    </div>
+
+    <!-- Ampel-Dashboard -->
+    <div class="panel p-4 sm:p-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+        <div>
+          <div class="font-semibold">Ampel aus drei Dimensionen</div>
+          <div class="text-[12px] sub">Gesamt = schwächste belastbare Dimension · Euro-Potenzial mit den aktuellen Annahmen (12 Monate, netto)</div>
+        </div>
+        <div class="flex gap-1.5">
+          <template x-for="v in (bc?.available_variants||['v0'])" :key="'var'+v">
+            <button class="tab focusable" :class="{active: bcVariant===v}" @click="loadBC(v)" x-text="v==='v0' ? 'Datenstand v0 (roh)' : 'v1 nach Playbooks'"></button>
+          </template>
+        </div>
+      </div>
+      <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        <template x-for="u in dashCards()" :key="'dc'+u.id">
+          <button class="uc-card focusable" :class="{active: bcUc===u.id}" @click="u.measurable && (bcUc=u.id)">
+            <div class="flex items-start justify-between gap-2">
+              <span class="font-semibold text-[13px]" x-text="u.name"></span>
+              <span class="amp" :class="'amp-'+u.gesamt"><span class="amp-ic" x-text="ampIcon(u.gesamt)"></span><span x-text="ampText(u.gesamt)"></span></span>
+            </div>
+            <div class="flex gap-2 mt-3">
+              <template x-for="d in u.dims" :key="u.id+d.l"><div class="mini-amp">
+                <span class="amp !px-1.5" :class="'amp-'+d.s"><span class="amp-ic" x-text="ampIcon(d.s)"></span></span><span class="lbl" x-text="d.l"></span></div></template>
+            </div>
+            <div class="mt-2 text-[12px]" x-show="u.measurable">
+              <span class="font-bold tabular-nums" x-text="fmtEur(u.annual)"></span><span class="sub"> / Jahr</span>
+              <span class="block text-[11px] sub" x-text="'davon Mehrwert ggü. Regel: '+fmtSignedEur(u.added)"></span>
+            </div>
+            <div class="mt-2 text-[11px] muted" x-show="!u.measurable" x-text="u.why"></div>
+          </button>
+        </template>
+      </div>
+    </div>
+
+    <!-- Was-wäre-wenn -->
+    <div class="panel p-4 sm:p-5" x-show="bcCase()">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
+        <div>
+          <div class="font-semibold" x-text="'Was wäre wenn – '+ucName(bcUc)"></div>
+          <div class="text-[12px] sub" x-text="'Rückblick-Rechnung mit echten Zahlen aus dem Testfenster ('+(bcCase()?.whatif?.period_days||'')+' Tage) · '+bcCase()?.model_name+' vs. Regel'"></div>
+        </div>
+        <div class="flex flex-wrap gap-1.5">
+          <template x-for="sc in ['konservativ','realistisch','optimistisch']" :key="'sc'+sc">
+            <button class="tab focusable" :class="{active: bcScenario===sc}" @click="bcScenario=sc" x-text="sc"></button>
+          </template>
+        </div>
+      </div>
+      <div class="grid lg:grid-cols-12 gap-5">
+        <div class="lg:col-span-4 space-y-3.5">
+          <template x-for="p in (bcCase()?.params||[])" :key="bcUc+p.id">
+            <div>
+              <div class="flex justify-between text-[12px]"><span class="sub" x-text="p.label"></span>
+                <span class="font-semibold tabular-nums" x-text="fmtParam(bcParams[bcUc]?.[p.id], p.unit)"></span></div>
+              <input type="range" class="rng" :min="p.min" :max="p.max" :step="p.step" x-model.number="bcParams[bcUc][p.id]">
+            </div>
+          </template>
+          <div class="text-[11px] muted" x-show="bcCase()?.currency==='GBP'">Werte in £ werden mit 1,15 €/£ umgerechnet (PB-08).</div>
+          <div class="panel-flat p-3">
+            <div class="text-[11px] muted uppercase tracking-wide font-bold mb-1.5">Schwellen Euro-Ampel</div>
+            <div class="grid grid-cols-2 gap-2 text-[12px]">
+              <label>Grün ab <input type="number" class="select !py-1 mt-1" step="5000" x-model.number="bcThr.green"></label>
+              <label>Gelb ab <input type="number" class="select !py-1 mt-1" step="5000" x-model.number="bcThr.yellow"></label>
+            </div>
+          </div>
+        </div>
+        <div class="lg:col-span-8 space-y-4">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="kpi"><div class="kpi-label" x-text="bcCase()?.labels?.[0]"></div><div class="kpi-value !text-[18px]" x-text="fmtEur(bcNow()?.model?.base)"></div><div class="kpi-sub">im Testfenster</div></div>
+            <div class="kpi"><div class="kpi-label" x-text="bcCase()?.labels?.[1]"></div><div class="kpi-value !text-[18px]" x-text="fmtEur(bcNow()?.model?.caught)"></div>
+              <div class="kpi-sub" x-text="bcNow()?.model?.n_list ? fmtInt(bcNow().model.n_list)+' auf der Liste · '+fmtInt(bcNow().model.tp)+' Treffer' : ''"></div></div>
+            <div class="kpi"><div class="kpi-label">netto je Zeitraum</div><div class="kpi-value !text-[18px]" x-text="fmtEur(bcNow()?.model?.net)"></div><div class="kpi-sub" x-text="'Kosten '+fmtEur(bcNow()?.model?.cost)"></div></div>
+            <div class="kpi" :class="bcEuro().status==='ok' ? '' : 'kpi-warn'"><div class="kpi-label">Potenzial 12 Monate</div><div class="kpi-value !text-[18px]" x-text="fmtEur(bcNow()?.model?.annual)"></div>
+              <div class="kpi-sub"><span class="amp !py-0" :class="'amp-'+bcEuro().status"><span class="amp-ic" x-text="ampIcon(bcEuro().status)"></span><span x-text="ampText(bcEuro().status)"></span></span></div></div>
+          </div>
+          <div class="banner banner-2 !py-2.5">
+            <span class="text-[18px] leading-none">📈</span>
+            <div class="text-[12.5px]"><b x-text="'Mehrwert gegenüber der Regel: '+fmtSignedEur(bcNow()?.added)+' pro Jahr'"></b>
+              <span class="sub" x-text="' – Regel allein: '+fmtEur(bcNow()?.rule?.annual)+', '+bcCase()?.model_name+': '+fmtEur(bcNow()?.model?.annual)"></span></div>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div><div class="text-[12.5px] font-semibold mb-1">Vom Hebel zum Netto-Effekt</div><div class="relative h-[240px]"><canvas id="bcWaterfall"></canvas></div></div>
+            <div><div class="text-[12.5px] font-semibold mb-1">Sensitivität (Annahme ±50 %)</div><div class="relative h-[240px]"><canvas id="bcTornado"></canvas></div></div>
+          </div>
+          <div class="banner banner-1 !py-2.5">
+            <span class="text-[18px] leading-none">⚖️</span>
+            <div class="text-[12.5px]"><b>Gemessen: wie gut die Vorhersage gewesen wäre.</b> <span class="sub">Nicht gemessen: ob der Vertrieb reagiert hätte.
+              Den echten Effekt belegt erst der Pilot mit Kontrollgruppe. Der Rückblick ist streng nach Datum getrennt (kein Leakage).</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trichter -->
+    <div class="panel p-4 sm:p-5" x-show="bc">
+      <div class="font-semibold">Vom Light-Scan zur Lizenz</div>
+      <div class="text-[12px] sub mb-3">Preise sind Annahmen aus dem Geschäftsmodell · Empfehlung aus dem größten belastbaren Hebel</div>
+      <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        <template x-for="f in (bc?.funnel||[])" :key="'fn'+f.id">
+          <div class="funnel-step" :class="{rec: nextStep().stage===f.id}">
+            <div class="flex items-center justify-between"><span class="font-semibold text-[13px]" x-text="f.name"></span>
+              <span x-show="nextStep().stage===f.id" class="chip !py-0 !text-[10px]" style="color:#fcd34d">nächster Schritt</span></div>
+            <div class="text-[12px] text-[#c4b5fd] font-semibold mt-1" x-text="f.price"></div>
+            <div class="text-[11.5px] sub mt-1" x-text="f.what"></div>
+          </div>
+        </template>
+      </div>
+      <div class="mt-3 text-[13px]"><b x-text="nextStep().text"></b></div>
+    </div>
+  </section>
+
+  <!-- ═════════════════════════ SCHRITT 6 · PLATZHALTER ═════════════════════════ -->
   <template x-for="s in steps.filter(s => !s.ready)" :key="'ph'+s.n">
     <section x-show="step===s.n" x-cloak class="fade-in">
       <div class="eyebrow" x-text="'Schritt '+s.n+' · '+s.name"></div>
@@ -1137,11 +1404,17 @@ body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-ser
                   </template>
                   <template x-if="!vkOf(u.id)"><span class="amp amp-pending" title="Rückblick – in Stufe 3 sichtbar"><span class="ring"></span>Stufe 3</span></template>
                 </td>
-                <td><span class="amp amp-pending" title="Was-wäre-wenn – folgt mit den Fix-Playbooks"><span class="ring"></span>offen</span></td>
+                <td>
+                  <template x-if="euroOf(u.id)">
+                    <button class="amp focusable" :class="'amp-'+euroOf(u.id).status" @click="step=5; bcUc=u.id" :title="euroOf(u.id).reason">
+                      <span class="amp-ic" x-text="ampIcon(euroOf(u.id).status)"></span><span x-text="euroOf(u.id).status==='na' ? 'nicht messbar' : fmtEur(euroOf(u.id).annual)"></span></button>
+                  </template>
+                  <template x-if="!euroOf(u.id)"><span class="amp amp-pending" title="Was-wäre-wenn – in Stufe 3 sichtbar"><span class="ring"></span>Stufe 3</span></template>
+                </td>
                 <td>
                   <template x-if="ucCheck(u.id)">
-                    <span class="amp amp-prov" :class="'amp-'+ucCheck(u.id).ampel.gesamt.status" :title="ucCheck(u.id).ampel.gesamt.note">
-                      <span class="amp-ic" x-text="ampIcon(ucCheck(u.id).ampel.gesamt.status)"></span><span>vorläufig</span>
+                    <span class="amp" :class="'amp-'+gesamtOf(u.id).status+(gesamtOf(u.id).provisional ? ' amp-prov' : '')" :title="gesamtOf(u.id).note">
+                      <span class="amp-ic" x-text="ampIcon(gesamtOf(u.id).status)"></span><span x-text="gesamtOf(u.id).provisional ? 'vorläufig' : ampText(gesamtOf(u.id).status)"></span>
                     </span>
                   </template>
                   <template x-if="!ucCheck(u.id)"><span class="amp amp-pending"><span class="ring"></span>offen</span></template>
@@ -1195,9 +1468,13 @@ body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-ser
             <template x-if="vkOf(ucDetail().id)"><span class="amp" :class="'amp-'+vkOf(ucDetail().id).status" :title="vkOf(ucDetail().id).reason">
               <span class="amp-ic" x-text="ampIcon(vkOf(ucDetail().id).status)"></span><span x-text="vkOf(ucDetail().id).status==='na' ? 'n. m.' : fmtLift(vkOf(ucDetail().id).lift)"></span></span></template>
             <template x-if="!vkOf(ucDetail().id)"><span class="amp amp-pending"><span class="ring"></span>Stufe 3</span></template></div></div>
-          <div class="panel-flat p-3"><div class="kpi-label">Euro-Potenzial</div><div class="mt-1.5"><span class="amp amp-pending"><span class="ring"></span>offen</span></div></div>
+          <div class="panel-flat p-3"><div class="kpi-label">Euro-Potenzial</div><div class="mt-1.5">
+            <template x-if="euroOf(ucDetail().id)"><span class="amp" :class="'amp-'+euroOf(ucDetail().id).status"><span class="amp-ic" x-text="ampIcon(euroOf(ucDetail().id).status)"></span>
+              <span x-text="euroOf(ucDetail().id).status==='na' ? 'n. m.' : fmtEur(euroOf(ucDetail().id).annual)"></span></span></template>
+            <template x-if="!euroOf(ucDetail().id)"><span class="amp amp-pending"><span class="ring"></span>Stufe 3</span></template></div></div>
           <div class="panel-flat p-3"><div class="kpi-label">Gesamt</div>
-            <div class="mt-1.5"><span class="amp amp-prov" :class="'amp-'+ucDetail().ampel.gesamt.status"><span class="amp-ic" x-text="ampIcon(ucDetail().ampel.gesamt.status)"></span>vorläufig</span></div></div>
+            <div class="mt-1.5"><span class="amp" :class="'amp-'+gesamtOf(ucDetail().id).status+(gesamtOf(ucDetail().id).provisional ? ' amp-prov' : '')" :title="gesamtOf(ucDetail().id).note">
+              <span class="amp-ic" x-text="ampIcon(gesamtOf(ucDetail().id).status)"></span><span x-text="gesamtOf(ucDetail().id).provisional ? 'vorläufig' : ampText(gesamtOf(ucDetail().id).status)"></span></span></div></div>
         </div>
 
         <!-- Label -->
@@ -1460,7 +1737,7 @@ function graphReady() {
         title: 'Welche Modellklasse gewinnt – und schlägt sie die Regel?',
         desc: 'Zeitlich strikt getrennter Rückblick (Stufe 3): Regel-Baseline gegen LightGBM, TabPFN, Graph Neural Network, KumoRFM und Aurora – auf CPU, lokaler GPU oder RunPod.',
         bullets: ['RelBench-artige Snapshots mit 90-Tage-Labels, Leakage-Guard', 'Leaderboard mit Konfidenzintervallen, Kalibrierung und Laufzeit je Gerät', 'Empfohlene Engine je Use Case nach „Beyond IID“', 'GPU-Jobs über eigenen RunPod-Worker'] },
-      { n: 5, name: 'Fix-Playbooks', sub: 'Bereinigen · neu prüfen', ready: false, prompt: 4, icon: '🛠️',
+      { n: 5, name: 'Fix-Playbooks', sub: 'Bereinigen · neu prüfen', ready: true, prompt: 4, icon: '🛠️',
         title: 'Lücken schließen, bis der Use Case trägt',
         desc: 'Reproduzierbare Reparaturschritte mit Vorher/Nachher-Ampel – und die Was-wäre-wenn-Rechnung mit Euro-Potenzial unter klar benannten Annahmen.',
         bullets: ['PB-01 fehlende Kundennummern · PB-02 Storno-Matching · PB-05 Artikelgruppen aus Freitext …', 'Ampel aus Datenreife, Vorhersagekraft und Euro-Potenzial', 'Was-wäre-wenn mit Schiebereglern: Listengröße, Rettungsquote, Kosten', 'Trichter vom Light-Scan bis zur Lizenz'] },
@@ -1477,6 +1754,8 @@ function graphReady() {
     customers: [], customerId: null, subgraph: null, subLoadedFor: null,
     cySelection: '', subSelection: '',
     loading: { ds: true, sub: false },
+    pb: null, pbSel: {}, pbGov: {}, pbBacktest: false, pbResult: null, pbJob: null,
+    bc: null, bcVariant: 'v0', bcUc: 'churn', bcParams: {}, bcScenario: 'realistisch', bcThr: { green: 100000, yellow: 25000 },
     bt: null, btUc: 'churn', btRes: null, btLoading: false, btErr: '', btJob: null, btSeries: 0,
     stageAuto: false, checks: null, checksLoading: false, checksSeq: 0, ucOpen: null, ucFocusDim: null, colTable3: null,
     playbooks: { 'PB-01': 'Fehlende Kundennummern', 'PB-02': 'Stornos ohne Originalbezug', 'PB-03': 'Nicht-Artikel-Codes',
@@ -1509,6 +1788,11 @@ function graphReady() {
       this.$watch('ucOpen', v => { if (v) afterRender(() => this.drawUcGraph()); });
       this.$watch('btRes', r => { if (r) afterRender(() => this.drawBtCharts()); });
       this.loadBacktest();
+      this.loadPlaybooks();
+      this.loadBC('v0');
+      this.$watch('bcParams', () => afterRender(() => this.drawBcCharts()), { deep: true });
+      this.$watch('bcUc', () => afterRender(() => this.drawBcCharts()));
+      this.$watch('bcScenario', () => afterRender(() => this.drawBcCharts()));
       this.$watch('dsId', () => this.loadChecks());
       window.addEventListener('hashchange', () => { const h = location.hash.match(/s(\d)/); if (h) this.step = Math.min(6, Math.max(1, +h[1])); });
       this.loadSystem();
@@ -1601,6 +1885,7 @@ function graphReady() {
     renderStep() {
       if (this.step === 1) this.drawMonthly();
       if (this.step === 4 && this.btRes) this.drawBtCharts();
+      if (this.step === 5) this.drawBcCharts();
       if (this.step === 2) {
         this.drawSchema();
         if (this.dsId === 'online_retail_ii' && this.subLoadedFor !== this.customerId) this.loadSubgraph();
@@ -1622,6 +1907,189 @@ function graphReady() {
     tblLabel(name) { return this.mapping?.tables.find(t => t.name === name)?.label || name; },
     statusColor(s) { return STATUS_COLORS[s] || STATUS_COLORS.unknown; },
     roleClass(r) { return { PK: 'role-PK', FK: 'role-FK', Zeit: 'role-Zeit', Freitext: 'role-Freitext', 'Hohe Kardinalität': 'role-HK' }[r] || 'role-other'; },
+
+    // ── Fix-Playbooks ──
+    async loadPlaybooks() {
+      try {
+        const pb = await this.api('/playbooks');
+        const sel = {};                                   // Auswahl vor dem Katalog setzen – sonst rendert x-model ins Leere
+        pb.catalog.filter(c => c.kind === 'data').forEach(c => { sel[c.id] = { on: false, option: c.default || 'A' }; });
+        this.pbSel = sel;
+        const gov = {}; pb.governance_items.forEach(i => { gov[i] = false; }); this.pbGov = gov;
+        this.pb = pb;
+        if (this.pb.recommended?.variant && this.pb.recommended.comparison) {
+          this.pbSelectRecommended();
+          this.pbResult = await this.api('/playbooks/result/' + this.pb.recommended.variant).catch(() => null);
+        }
+      } catch (e) { /* Playbooks optional */ }
+    },
+    pbChangedText(cmp) {
+      const ch = cmp.flatMap(x => x.changed.map(d => `${this.ucShort(x.id)}: ${this.dimName(d.dim)} ${d.before}→${d.after}`));
+      return ch.length ? 'Datenreife gerundet gleich – ' + ch.slice(0, 2).join(' · ') : 'allein keine Änderung der Prüfungen';
+    },
+    pbSelectRecommended() { (this.pb?.recommended?.steps || []).forEach(s => { if (this.pbSel[s.id]) { this.pbSel[s.id].on = true; this.pbSel[s.id].option = s.option; } }); },
+    pbSelectNone() { Object.values(this.pbSel).forEach(v => { v.on = false; }); },
+    pbSteps() { return Object.entries(this.pbSel).filter(([, v]) => v.on).map(([id, v]) => ({ id, option: v.option })); },
+    pbHint() {
+      const n = this.pbSteps().length, g = Object.values(this.pbGov).filter(Boolean).length;
+      const live = this.pb?.live?.mode;
+      return `${n} Playbooks, ${g} Checklisten-Punkte · vorberechnete Kombinationen sofort, andere ` +
+        (live === 'off' ? 'nur lokal oder über den GPU-Worker' : live === 'runpod' ? 'über den GPU-Worker' : 'als Job lokal');
+    },
+    async applyPlaybooks() {
+      try {
+        const body = { steps: this.pbSteps(), governance: this.pbGov, backtest: this.pbBacktest };
+        let r = await this.api('/playbooks/apply', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (r.cached) { this.pbResult = r; this.pbJob = null; this.notify('Neu geprüft (vorberechnet)'); return; }
+        let job = r.job; this.pbJob = job;
+        while (job.status === 'queued' || job.status === 'running') {
+          await new Promise(res => setTimeout(res, 1500));
+          job = await this.api('/jobs/' + job.id); this.pbJob = job;
+        }
+        if (job.status === 'failed') { this.notify('Playbooks: ' + job.error, 'bad'); return; }
+        r = await this.api('/playbooks/apply', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        this.pbResult = r; this.notify('Playbooks angewendet und neu geprüft');
+        this.loadBC(this.bcVariant);
+      } catch (e) { this.notify(e.message, 'bad'); }
+    },
+    ucShort(id) { return { churn: 'Churn', cross_selling: 'Cross', recommendation: 'Empf.', lead_scoring: 'Lead', next_best_action: 'NBA',
+                           demand_forecast: 'Prognose', margin: 'Marge', returns_root_cause: 'Retouren', warranty_root_cause: 'Warranty' }[id] || id; },
+
+    // ── Business Case / Was-wäre-wenn ──
+    async loadBC(variant) {
+      try {
+        const r = await this.api('/business_case?variant=' + encodeURIComponent(variant));
+        this.bc = r; this.bcVariant = r.variant === 'v0' ? 'v0' : r.variant;
+        if (!this.bc.available_variants.includes(this.bcVariant)) this.bc.available_variants.push(this.bcVariant);
+        const prm = {};
+        Object.entries(r.cases).forEach(([uc, c]) => { if (c?.params) prm[uc] = { ...(this.bcParams[uc] || c.defaults) }; });
+        this.bcParams = prm;
+        this.bcThr = { ...r.thresholds, ...this.bcThr };
+        afterRender(() => this.drawBcCharts());
+      } catch (e) { /* optional */ }
+    },
+    bcCase(uc) { const c = this.bc?.cases?.[uc || this.bcUc]; return c?.whatif ? c : null; },
+    bcCompute(uc, w, params, engine, fx, scen) {
+      if (!w || !w.engines || !w.engines[engine]) return null;
+      scen = scen || { rate: 1, cost: 1 };
+      fx = (w.currency || 'GBP') === 'GBP' ? fx : 1;
+      const e = w.engines[engine];
+      const p = (k, d = 0) => Number(params[k] ?? d);
+      const r = k => p(k) / 100 * scen.rate, c = k => p(k) * scen.cost;
+      if (w.kind === 'list') {
+        const i = Math.max(0, Math.min(w.k.length - 1, Math.round(p('list_share', 10)) - 1));
+        const n = w.n[i], tp = e.tp[i], val = e.value[i] * fx, total = w.value_total * fx;
+        if (uc === 'returns_root_cause') {
+          const per = p('cost_return'), vl = p('value_loss') / 100;
+          const gain = tp * r('rate') * per + val * r('rate') * vl, cost = n * c('cost'), net = gain - cost;
+          return { base: w.positives * per + total * vl, caught: tp * per + val * vl, gain, cost, net, annual: net * p('periods', 6), n_list: n, tp };
+        }
+        const gain = val * r('rate') * p('margin', 100) / 100, cost = n * c('cost'), net = gain - cost;
+        return { base: total, caught: val, gain, cost, net, annual: net * p('periods', 4), n_list: n, tp };
+      }
+      if (w.kind === 'reco') {
+        const cov = p('coverage', 100) / 100, val = e.hit_value * fx * cov, n = Math.floor(e.customers * cov);
+        const gain = val * r('rate') * p('margin', 100) / 100, cost = n * c('cost'), net = gain - cost;
+        return { base: e.hit_value * fx, caught: val, gain, cost, net, annual: net * p('periods', 4), n_list: n, tp: e.hits };
+      }
+      if (w.kind === 'forecast') {
+        const rule = w.engines.rule?.wape; if (rule == null) return null;
+        const annual = (w.demand_value || 0) * fx * 4;
+        const safety = annual * p('coverage_weeks', 8) / 52 * r('safety_share');
+        const red = Math.max(0, (rule - e.wape) / rule);
+        const gain = safety * red * r('holding_rate');
+        return { base: safety, caught: safety * red, gain, cost: 0, net: gain, annual: gain, reduction: red };
+      }
+      return null;
+    },
+    bcScen() { return { konservativ: { rate: .5, cost: 1.5 }, realistisch: { rate: 1, cost: 1 }, optimistisch: { rate: 1.5, cost: .75 } }[this.bcScenario]; },
+    bcNow(uc) {
+      uc = uc || this.bcUc; const c = this.bcCase(uc); if (!c) return null;
+      const prm = this.bcParams[uc] || c.defaults, fx = this.bc.fx || 1.15, sc = this.bcScen();
+      const model = this.bcCompute(uc, c.whatif, prm, c.model, fx, sc), rule = this.bcCompute(uc, c.whatif, prm, 'rule', fx, sc);
+      return { model, rule, added: model && rule ? model.annual - rule.annual : null };
+    },
+    bcEuro(uc) {
+      const n = this.bcNow(uc); const a = n?.model?.annual;
+      if (a == null) return { status: 'na' };
+      return { status: a >= this.bcThr.green ? 'ok' : a >= this.bcThr.yellow ? 'warn' : 'bad', annual: a };
+    },
+    gesamtOf(id) {
+      // Schwächste belastbare Dimension – mit den Live-Annahmen aus Schritt 5
+      const u = this.ucCheck(id); if (!u) return { status: 'na', provisional: true, note: '' };
+      const rank = { ok: 0, warn: 1, bad: 2 }, names = ['Datenreife', 'Vorhersagekraft', 'Euro-Potenzial'];
+      const vk = this.vkOf(id), eu = this.euroOf(id);
+      const dims = [u.readiness.status, vk ? vk.status : 'pending', eu ? eu.status : 'pending'];
+      const real = dims.filter(d => d in rank);
+      const worst = real.length ? real.reduce((a, b) => rank[b] > rank[a] ? b : a) : 'na';
+      const provisional = dims.some(d => d === 'pending') || u.readiness.provisional;
+      return { status: worst, provisional, note: provisional ? 'Vorläufig: nicht alle Dimensionen belastbar (Stufe 3 wählen)'
+        : 'Schwächste Dimension: ' + dims.map((d, i) => d === worst ? names[i] : null).filter(Boolean).join(', ') };
+    },
+    euroOf(id) {
+      const a = this.ucCheck(id)?.ampel?.euro;
+      if (!a || a.status === 'pending') return null;
+      if (this.bcCase(id)) { const e = this.bcEuro(id); return { ...a, ...e, reason: 'mit den aktuellen Annahmen (Schritt 5)' }; }
+      return a;
+    },
+    dashCards() {
+      const uc = this.usecases || [];
+      const sum = this.bcVariant === 'v0' ? this.bt?.summary : null;
+      return uc.map(u => {
+        const chk = this.ucCheck(u.id);
+        const cmp = this.bcVariant !== 'v0' ? (this.pbResult?.comparison || []).find(x => x.id === u.id) : null;
+        const reife = cmp ? cmp.after.status : chk?.readiness?.status || 'na';
+        let vk = this.bcVariant !== 'v0' ? this.pbResult?.backtest?.[u.id]?.vorhersagekraft?.status : sum?.[u.id]?.vorhersagekraft?.status;
+        vk = vk || (this.bt?.not_measurable?.[u.id] ? 'na' : 'pending');
+        const measurable = !!this.bcCase(u.id);
+        const euro = measurable ? this.bcEuro(u.id).status : 'na';
+        const rank = { ok: 0, warn: 1, bad: 2 };
+        const real = [reife, vk, euro].filter(x => x in rank);
+        const gesamt = real.length ? real.reduce((a, b) => rank[b] > rank[a] ? b : a) : 'na';
+        const now = this.bcNow(u.id);
+        return { id: u.id, name: u.name, measurable, gesamt, annual: now?.model?.annual, added: now?.added,
+                 why: this.bt?.not_measurable?.[u.id] || '',
+                 dims: [{ l: 'Reife', s: reife }, { l: 'Vorhers.', s: vk === 'pending' ? 'na' : vk }, { l: 'Euro', s: euro }] };
+      });
+    },
+    nextStep() {
+      const ranked = (this.usecases || []).filter(u => this.bcCase(u.id)).map(u => ({ id: u.id, a: this.bcNow(u.id)?.model?.annual || 0 }))
+        .sort((a, b) => b.a - a.a);
+      if (!ranked.length || ranked[0].a <= 0) return { stage: 'scan', text: 'Light-Scan: zuerst Datenreife herstellen – noch kein positiver Hebel.' };
+      const year1 = 14000 + 42500 + 33000, roi = ranked[0].a / year1, stage = roi >= 2 ? 'pilot' : 'sprint';
+      return { stage, text: `${stage === 'pilot' ? 'Pilot' : 'Readiness-Sprint'} für ${this.ucName(ranked[0].id)}: Potenzial ${this.fmtEur(ranked[0].a)} pro Jahr gegenüber ${this.fmtEur(year1)} Kosten im ersten Jahr (Sprint + Pilot + Lizenz) – ROI-Indikator ${roi.toLocaleString('de-DE', { maximumFractionDigits: 1 })}×.` };
+    },
+    fmtEur(x) { return x == null ? '–' : Math.round(x).toLocaleString('de-DE') + ' €'; },
+    fmtSignedEur(x) { return x == null ? '–' : (x > 0 ? '+' : '') + Math.round(x).toLocaleString('de-DE') + ' €'; },
+    fmtParam(v, unit) { if (v == null) return '–'; return unit === '€' ? Number(v).toLocaleString('de-DE', { maximumFractionDigits: 2 }) + ' €' : unit === '%' ? v + ' %' : unit === '×' ? v + '×' : v + ' ' + unit; },
+    drawBcCharts() {
+      if (this.step !== 5) return;
+      const c = this.bcCase(); const now = this.bcNow(); if (!c || !now?.model) return;
+      const m = now.model, labels = [c.labels[0], c.labels[1], c.labels[2], 'Kosten', 'netto'];
+      const vals = [[0, m.base], [0, m.caught], [0, m.gain], [m.gain - m.cost, m.gain], [0, m.net]];
+      const colors = ['#64748b', '#8b7cf6', '#34d399', '#f87171', m.net >= 0 ? '#22d3ee' : '#f87171'];
+      const base = { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: x => ' ' + this.fmtEur(Array.isArray(x.raw) ? x.raw[1] - x.raw[0] : x.raw) } } },
+        scales: { x: { ticks: { color: '#6f7894', font: { size: 10 } }, grid: { display: false } },
+                  y: { ticks: { color: '#6f7894', font: { size: 10 }, callback: v => (v / 1000).toLocaleString('de-DE') + ' T€' }, grid: { color: 'rgba(255,255,255,.05)' } } } };
+      const mk = (id, cfg) => { const el = document.getElementById(id); if (!el) return; if (CHARTS[id]) CHARTS[id].destroy(); CHARTS[id] = new Chart(el, cfg); };
+      mk('bcWaterfall', { type: 'bar', data: { labels, datasets: [{ data: vals, backgroundColor: colors, borderRadius: 4 }] }, options: base });
+      const prm = this.bcParams[this.bcUc] || c.defaults, fx = this.bc.fx || 1.15, sc = this.bcScen();
+      const annual = m.annual;
+      const rows = c.params.map(p => {
+        const lo = { ...prm, [p.id]: Math.max(p.min, prm[p.id] * 0.5) }, hi = { ...prm, [p.id]: Math.min(p.max, prm[p.id] * 1.5) };
+        const a = this.bcCompute(this.bcUc, c.whatif, lo, c.model, fx, sc)?.annual ?? annual;
+        const b = this.bcCompute(this.bcUc, c.whatif, hi, c.model, fx, sc)?.annual ?? annual;
+        const short = p.label.replace(/\s*\(.*?\)\s*/g, ' ').trim();
+        return { l: short.length > 22 ? short.slice(0, 21) + '…' : short, lo: a - annual, hi: b - annual };
+      }).sort((x, y) => Math.abs(y.hi - y.lo) - Math.abs(x.hi - x.lo));
+      mk('bcTornado', { type: 'bar', data: { labels: rows.map(r => r.l), datasets: [
+        { label: '−50 %', data: rows.map(r => r.lo), backgroundColor: 'rgba(248,113,113,.75)', borderRadius: 3 },
+        { label: '+50 %', data: rows.map(r => r.hi), backgroundColor: 'rgba(52,211,153,.75)', borderRadius: 3 } ] },
+        options: { ...base, indexAxis: 'y', plugins: { ...base.plugins, legend: { display: true, labels: { color: '#a0a8bf', boxWidth: 10, font: { size: 10 } } } },
+          scales: { x: { stacked: true, ticks: { color: '#6f7894', font: { size: 10 }, callback: v => (v / 1000).toLocaleString('de-DE') + ' T€' }, grid: { color: 'rgba(255,255,255,.05)' } },
+                    y: { stacked: true, ticks: { color: '#a0a8bf', font: { size: 10 } }, grid: { display: false } } } } });
+    },
 
     // ── Rückblick / Baseline-Vergleich ──
     async loadBacktest() {

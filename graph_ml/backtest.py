@@ -76,17 +76,40 @@ class Base:
     country_names: np.ndarray
     tmax: pd.Timestamp
     svd_items: np.ndarray | None = None
+    key: str = "v0"
+    group_names: list = field(default_factory=list)
+    currency: str = "GBP"
+    groups_provisional: bool = True
 
 
-_BASE: Base | None = None
+_BASES: dict[str, Base] = {}
+_VARIANTS: dict[str, pd.DataFrame] = {}
 
 
-def get_base() -> Base:
-    global _BASE
-    if _BASE is None:
-        from .data_loader import cat_startswith, get_registry, product_descriptions
-        from .product_groups import product_group_codes
-        raw = get_registry().raw_online_retail()
+def register_variant(key: str, raw: pd.DataFrame) -> None:
+    """Bereinigten Datenstand (Pipeline-Version) für Backtests bereitstellen. Rohdaten bleiben unverändert."""
+    _VARIANTS[key] = raw
+    _BASES.pop(key, None)
+    for k in [k for k in _TASKS if k[1] == key]:
+        _TASKS.pop(k)
+
+
+def base_of(task) -> "Base":
+    return get_base(task.extra.get("base_key", "v0"))
+
+
+def get_base(key: str = "v0") -> Base:
+    if key not in _BASES:
+        from .data_loader import get_registry
+        raw = get_registry().raw_online_retail() if key == "v0" else _VARIANTS[key]
+        _BASES[key] = _build_base(raw, key)
+    return _BASES[key]
+
+
+def _build_base(raw: pd.DataFrame, key: str) -> Base:
+    if True:
+        from .data_loader import cat_startswith, product_descriptions
+        from .product_groups import GROUPS, NON_ARTICLE, product_group_codes
         storno = cat_startswith(raw["invoice"], "C")
         cust = raw["customer_id"].to_numpy(dtype="float64", na_value=np.nan)
         has_c = ~np.isnan(cust)
@@ -94,28 +117,45 @@ def get_base() -> Base:
         ctry = raw["country"].cat.codes.to_numpy().astype(np.int16)
         inv = raw["invoice"].cat.codes.to_numpy().astype(np.int32)
         qty = raw["quantity"].to_numpy().astype(np.float64)
-        price = raw["price_gbp"].to_numpy().astype(np.float64)
+        currency = "EUR" if "price_eur" in raw.columns else "GBP"
+        price = raw["price_eur" if currency == "EUR" else "price_gbp"].to_numpy().astype(np.float64)
         t = raw["invoice_date"].to_numpy()
         stock_cats = raw["stock_code"].cat.categories
         desc = product_descriptions(raw)
-        groups = product_group_codes(stock_cats, desc)
+        if "pb05_group" in raw.columns:
+            # Gruppen aus Playbook PB-05 (Freitext → Kategorien) statt der vorläufigen Schlüsselwort-Regeln
+            gcat = raw["pb05_group"].astype("category")
+            group_names = list(gcat.cat.categories)
+            if NON_ARTICLE not in group_names:
+                group_names.append(NON_ARTICLE)
+            from .data_loader import _mode_codes
+            k, v, _ = _mode_codes(raw["stock_code"].cat.codes.to_numpy().astype(np.int64),
+                                  gcat.cat.codes.to_numpy().astype(np.int64), len(gcat.cat.categories))
+            groups = np.full(len(stock_cats), group_names.index(NON_ARTICLE), dtype=np.int16)
+            groups[k] = v
+            provisional = False
+        else:
+            groups = product_group_codes(stock_cats, desc)
+            group_names, provisional = list(GROUPS), True
         m = has_c & ~storno & (qty > 0)
         lines = pd.DataFrame({"cust": cust[m].astype(np.int64), "inv": inv[m], "time": t[m], "prod": prod[m],
                               "qty": qty[m], "price": price[m], "value": qty[m] * price[m], "country": ctry[m]})
         lines["group"] = groups[lines["prod"].to_numpy()]
         lines = lines.sort_values("time", kind="stable").reset_index(drop=True)
-        g = lines.groupby(["cust", "inv"], sort=False)
+        # Gast-Kunden (PB-01 B, negative IDs) nur für Warenkorb/Empfehlung/Prognose – nicht als Kunden
+        g = lines[lines["cust"] > 0].groupby(["cust", "inv"], sort=False)
         invt = g.agg(time=("time", "min"), value=("value", "sum"), n_lines=("prod", "size")).reset_index()
         invt = invt.sort_values("time", kind="stable").reset_index(drop=True)
         ms = has_c & storno
         st = pd.DataFrame({"cust": cust[ms].astype(np.int64), "time": t[ms], "prod": prod[ms],
                            "value": np.abs(qty[ms] * price[ms])}).sort_values("time").reset_index(drop=True)
-        _BASE = Base(lines=lines, inv=invt, storno=st, n_prod=len(stock_cats),
-                     n_country=len(raw["country"].cat.categories), prod_group=groups,
-                     prod_names=np.asarray(desc.reindex(stock_cats).fillna("").to_numpy()),
-                     country_names=np.asarray(raw["country"].cat.categories), tmax=pd.Timestamp(t.max()))
-        _BASE.svd_items = _fit_reference_svd(_BASE)
-    return _BASE
+        base = Base(lines=lines, inv=invt, storno=st, n_prod=len(stock_cats),
+                    n_country=len(raw["country"].cat.categories), prod_group=groups,
+                    prod_names=np.asarray(desc.reindex(stock_cats).fillna("").to_numpy()),
+                    country_names=np.asarray(raw["country"].cat.categories), tmax=pd.Timestamp(t.max()),
+                    key=key, group_names=group_names, currency=currency, groups_provisional=provisional)
+        base.svd_items = _fit_reference_svd(base)
+    return base
 
 
 def _fit_reference_svd(b: Base, k: int = 8) -> np.ndarray:
@@ -384,7 +424,8 @@ def build_lead(b: Base) -> Task:
 
 
 def build_cross_selling(b: Base) -> Task:
-    from .product_groups import GROUPS, NON_ARTICLE
+    from .product_groups import NON_ARTICLE
+    GROUPS = b.group_names
     task = Task(uc="cross_selling", kind="binary", id_col="pair")
     snaps = snapshots(step_months=2)
     groups = [i for i, g in enumerate(GROUPS) if g != NON_ARTICLE]
@@ -433,7 +474,7 @@ def build_cross_selling(b: Base) -> Task:
     task.snapshots, task.val_cutoff = snaps, snaps[-1]
     task.timeline = _timeline(snaps, T_TEST, HORIZON, "Erstkauf einer neuen Artikelgruppe in 90 Tagen")
     task.extra["rule_text"] = "meistverkaufte noch nicht gekaufte Gruppe (Beliebtheit 90 Tage)"
-    task.extra["groups_provisional"] = True
+    task.extra["groups_provisional"] = b.groups_provisional
     task.extra["groups"] = GROUPS
     return task
 
@@ -449,7 +490,7 @@ def build_returns(b: Base) -> Task:
     frames = []
     for M in months + tests:
         end = M + pd.DateOffset(months=1)
-        cur = L[(L["time"] >= M) & (L["time"] < end)].copy()
+        cur = L[(L["time"] >= M) & (L["time"] < end) & (L["cust"] > 0)].copy()
         if M in months and len(cur) > 25_000:
             cur = cur.iloc[np.sort(rng.choice(len(cur), 25_000, replace=False))]
         hist = L[L["time"] < M]
@@ -565,15 +606,19 @@ def build_forecast(b: Base, n_series: int = 100) -> Task:
 BUILDERS = {"churn": build_churn, "lead_scoring": build_lead, "cross_selling": build_cross_selling,
             "returns_root_cause": build_returns, "recommendation": build_recommendation,
             "demand_forecast": build_forecast}
-_TASKS: dict[str, Task] = {}
+_TASKS: dict[tuple, Task] = {}
 
 
-def get_task(uc: str) -> Task:
-    if uc not in _TASKS:
+def get_task(uc: str, key: str = "v0") -> Task:
+    if (uc, key) not in _TASKS:
         t0 = time.time()
-        _TASKS[uc] = BUILDERS[uc](get_base())
-        _TASKS[uc].extra["build_seconds"] = round(time.time() - t0, 1)
-    return _TASKS[uc]
+        b = get_base(key)
+        task = BUILDERS[uc](b)
+        task.extra["base_key"] = key
+        task.extra["currency"] = b.currency
+        task.extra["build_seconds"] = round(time.time() - t0, 1)
+        _TASKS[(uc, key)] = task
+    return _TASKS[(uc, key)]
 
 
 # ── Metriken ──────────────────────────────────────────────────────────────────

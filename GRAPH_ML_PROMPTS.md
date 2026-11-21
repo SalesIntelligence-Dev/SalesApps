@@ -619,3 +619,80 @@ Aufgabe: Modul 6 „Aktivierung“, Monitoring, Report-Export und der Feinschlif
   3. Render-Dashboard → Environment: `RUNPOD_GRAPHML_ENDPOINT_ID=<Endpoint-ID>` (`RUNPOD_API_KEY` ist schon gesetzt)
   4. Prüfen: System-Panel → Selbsttest. Lokal getestet: `graphml_selftest` mit 7,5 TFLOP/s auf der RTX 3060; `graphml_gnn_train` liefert eine Antwort von 7 KB.
 
+
+---
+
+## Umsetzungsnotizen nach Prompt 4 (für Prompt 5)
+
+- **Bausteine:**
+  - `playbooks.py`: Katalog PB-01 … PB-10, Pipeline, Varianten, erneute Prüfung, Vorher/Nachher, Datenanforderung
+  - `business_case.py`: Potenzialrechnung, Szenarien, Tornado, Euro-Ampel, Gesamt-Ampel, Trichter mit nächstem Schritt
+  - `backtest.py` und `evaluation.py` rechnen auf Varianten (`register_variant`, `run_use_case(..., variant=vid)`); Artefakte `backtest_<uc>~<vid>.json` und `pipeline_<vid>.json`
+  - `precompute.py --playbooks` (alles) bzw. `--only-playbooks` (Rückblicke v0 wiederverwenden)
+  - Worker-Job `graphml_pipeline` in `runpod_graphml/handler.py`
+- **Pipeline:**
+  - Rohdaten v0 werden nie verändert; jedes Playbook arbeitet auf einer Kopie.
+  - Feste Reihenfolge `PB-04 → PB-06 → PB-03 → PB-07 → PB-02 → PB-01 → PB-05 → PB-08`. PB-04 steht vorn, sonst ist die Pipeline nicht idempotent (Dubletten entstehen erst durch vereinheitlichte Artikelnummern).
+  - Variante = `"p" + sha1(Schritte, Optionen, Kurs)[:8]`, unabhängig von der Klickreihenfolge. Empfohlenes Paket: `p2b5639ce` (`pipeline_recommended.json`).
+  - PB-09 (Governance) und PB-10 (Datenanforderung) ändern keine Daten. Jeder abgehakte Governance-Punkt gibt +6 auf die Dimension Governance (max. 90); „Rückspielweg ins CRM“ gilt danach als geklärt.
+- **Playbooks im Detail:**
+  - PB-01 Option A schließt Positionen ohne Kunde aus. Option B legt Gast-Pseudokunden an, die nur für Warenkorb und Empfehlung zählen. Zielkonflikt: A hebt die Kunden-Use-Cases, kostet aber die Absatzprognose (−2, Abdeckung sinkt).
+  - PB-02 ordnet Stornos heuristisch zu: gleicher Kunde und Artikel, Kauf höchstens 90 Tage davor, Kaufmenge ≥ 50 % der Stornomenge. Trefferquote 80–82 %.
+  - PB-05: TF-IDF + KMeans (24 Gruppen, fester Seed) mit deutschen Namen, lokal ohne externen Dienst.
+  - PB-07 Option B schließt aus, Option A markiert nur.
+  - PB-08: fester Kurs 1,15 €/£ → Spalte `price_eur`.
+- **Wirkung einzeln** (`playbook_effects.json`, Datenreife je Use Case):
+
+  | Playbook | Effekt | Datenreife |
+  |---|---|---|
+  | PB-06 Dubletten | −34.335 Zeilen | +1 bei 6 Use Cases |
+  | PB-03 Nicht-Artikel | −5.982 Zeilen, −810 T€ Umsatz | gerundet gleich |
+  | PB-07 Ausreißer | −6.215 Zeilen | Cross +1, Empf. +1 |
+  | PB-01 A Gäste | −243.007 Zeilen | Churn/Empf./Lead +4, Cross +3, NBA +2, Prognose −2 |
+  | PB-05 Gruppen | 24 Gruppen | Cross +9, Empf. +1, Marge −1 |
+
+- **Paket v1 (`p2b5639ce`, 11,7 s lokal):**
+  - Datenreife: Churn 81 → 86, Cross 70 → 85 (Gelb → Grün), Empf. 77 → 85, Lead 77 → 82, NBA 71 → 74, Prognose 86 → 85, Marge 64 → 66, Retouren 84 → 86, Warranty 54 → 56.
+  - Rückblick v1: Churn GNN +15,9 %, Lead +14,9 % (nicht signifikant), Cross TabPFN +108 %, Empf. +14,0 %, Retouren +23,3 %, Prognose +35,6 %.
+- **Business Case** (Formeln in Python und JS identisch, Parität für alle 6 Use Cases × 3 Szenarien geprüft):
+  - Listen-Use-Cases: `(Umsatz der Treffer in der Top-x-%-Liste × Quote × Ergebnisanteil − Kontakte × Kosten) × Kampagnen pro Jahr`. Das PDF-Beispiel ergibt exakt 300.000 € (`tests/test_graph_ml_business.py`).
+  - Empfehlung: gleiche Formel, mit dem Umsatz der getroffenen Empfehlungen × Abdeckung als Listenwert.
+  - Retouren: vermiedene Bearbeitungskosten + vermiedener Wertverlust der erkannten Fälle − Prüfkosten, 6 Zeiträume pro Jahr.
+  - Prognose: Sicherheitsbestand (Jahresabsatz × Reichweite / 52 × Anteil) × relative WAPE-Verbesserung gegenüber der Regel × Lagerkostensatz.
+  - Annahmen (Standard):
+    - Churn: Liste 10 %, Quote 25 %, 50 € je Kontakt
+    - Lead: 20 %, 20 %, 30 €
+    - Cross: 10 %, 20 %, 1 €
+    - Retouren: 10 %, 30 %, 15 € Bearbeitung + 10 % Wertverlust, 0,2 € je Prüfung
+  - Szenarien: konservativ = Quote × 0,5 und Kosten × 1,5; optimistisch = 1,5 und 0,75.
+  - Euro-Ampel: Grün ab 100.000 €, Gelb ab 25.000 € (im UI änderbar). **Gesamt = schwächste messbare Dimension** (`merge_ampel`).
+  - Nächster Schritt: größter positiver Hebel gegen die Kosten im ersten Jahr (89.500 € = Sprint + Pilot + Lizenz). Pilot ab ROI-Indikator 2, sonst Readiness-Sprint; ohne positiven Hebel zuerst Light-Scan.
+- **Euro-Potenzial realistisch** (12 Monate, netto):
+
+  | Use Case | v0 | v1 | Ampel v0 |
+  |---|---|---|---|
+  | Empfehlung | 244.099 € | 227.635 € | Grün |
+  | Churn | 121.384 € | 80.140 € | Grün (v1 Gelb) |
+  | Cross-Selling | 39.770 € | 37.829 € | Gelb |
+  | Retouren | 19.103 € | 16.333 € | Rot |
+  | Lead | 10.664 € | 10.251 € | Rot |
+  | Prognose | 8.608 € | 9.352 € | Rot |
+
+  - v1 ist bei Churn niedriger, weil Dubletten, Gebühren und Ausreißer nicht mehr als Umsatz zählen: Abwanderer-Umsatz 525 T€ → 471 T€, davon in der Liste 208 T€ → 167 T€. Die festen Kontaktkosten (21,6 T€ je Kampagne) verstärken das im Netto. Das ist die ehrlichere Zahl.
+  - Nächster Schritt v0: Pilot Produkt-Empfehlung, ROI-Indikator 2,7×.
+- **Nichtdeterminismus:** GNN-Ergebnisse schwanken auf CUDA zwischen Läufen (Churn +9,4 % in Prompt 3, +15,0 % nach der Neuberechnung in Prompt 4). Für den Report ein festes Artefakt verwenden und die Schwankung als Hinweis nennen.
+- **Routen:**
+  - `GET /graph_ml/api/playbooks`
+  - `POST /graph_ml/api/playbooks/apply` – vorberechnete Variante oder nur Governance → sofort; sonst Job lokal bzw. über den Worker, auf Render ohne Worker 409
+  - `GET /graph_ml/api/playbooks/result/<vid>`
+  - `GET /graph_ml/api/playbooks/datarequest.md` und `.csv`
+  - `GET /graph_ml/api/business_case?variant=v0|recommended|<vid>`
+- **UI Schritt 5:**
+  - Playbook-Karten mit Optionen und Wirkung, Checkliste, Downloads der Datenanforderung, Anwenden mit optionalem Rückblick, Vorher/Nachher-Tabelle
+  - Ampel-Dashboard v0/v1, Was-wäre-wenn mit Live-Slidern (JS-Port von `compute`), Wasserfall, Tornado, Pflicht-Hinweis, Trichter
+  - Die Ampel-Matrix unten zeigt ab Stufe 3 Euro und Gesamt.
+  - `.grid>*{min-width:0}` verhindert, dass Charts und Tabellen das Layout bei 375 px sprengen. Gilt seitenweit.
+- **Für Prompt 5:**
+  - Das Worker-Image muss für `graphml_pipeline` neu gebaut werden, weil sich der Handler geändert hat: `./runpod_graphml/build.sh <dockerhub-user> 2`, danach das Image im RunPod-Endpoint tauschen.
+  - Für den Report liefern `business_case.overview(variant)` und `playbooks.load_variant(vid)` alle Zahlen.
+  - Der Push auf `main` löst das Render-Deploy aus und braucht die Zustimmung des Nutzers.

@@ -116,10 +116,15 @@ def events_from_online_retail(raw: pd.DataFrame) -> pd.DataFrame:
     ev = pd.DataFrame({
         "customer": raw["customer_id"].to_numpy(dtype="float64", na_value=np.nan),
         "order": raw["invoice"], "time": raw["invoice_date"], "product": raw["stock_code"],
-        "qty": raw["quantity"].astype("float64"), "price": raw["price_gbp"].astype("float64"),
+        "qty": raw["quantity"].astype("float64"),
+        "price": raw["price_eur" if "price_eur" in raw.columns else "price_gbp"].astype("float64"),
         "text": raw["description"], "country": raw["country"],
     })
     ev["storno"] = cat_startswith(raw["invoice"], "C")
+    if "pb05_group" in raw.columns:           # PB-05: Artikelgruppen → Cross-Selling-Label exakt
+        ev["group"] = raw["pb05_group"]
+    if "is_guest" in raw.columns:             # PB-01 B: Gast-Kunden zählen nicht als echte Kunden
+        ev.loc[raw["is_guest"].to_numpy(), "customer"] = np.nan
     return ev
 
 
@@ -430,6 +435,7 @@ def build_profile(*, dataset_name: str, mapping: dict, tables: dict[str, pd.Data
         "bindings": bindings,
         "derived_columns": list(mapping.get("derived_columns", [])),
         "events": ev_stats,
+        "governance": {},
     }
 
 
