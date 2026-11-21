@@ -722,6 +722,8 @@ class Registry:
         res["dataset_kind"] = ds.kind
         res["max_stage_dataset"] = self.max_stage(ds_id)
         self._checks[key] = res
+        if stage == 3 and ds_id == "online_retail_ii":
+            res = _merge_backtest(res)
         return res
 
     def delete(self, ds_id: str) -> bool:
@@ -891,6 +893,29 @@ class Registry:
         ds = self._datasets.get("online_retail_ii")
         out["tables"] = round(sum(df_mb(t) for t in ds.tables.values()), 1) if ds and ds.tables else 0.0
         return out
+
+
+def _merge_backtest(res: dict) -> dict:
+    """Stufe 3: Ampel-Dimension „Vorhersagekraft“ aus dem Rückblick; Gesamt = schwächste belastbare Dimension."""
+    import copy
+
+    from .evaluation import summary
+    res = copy.deepcopy(res)
+    summ = summary()
+    rank = {"ok": 0, "warn": 1, "bad": 2}
+    for u in res["use_cases"]:
+        s = summ.get(u["id"]) or {}
+        vk = s.get("vorhersagekraft")
+        if s.get("status") == "pending" or not vk:
+            continue
+        u["ampel"]["vorhersagekraft"] = {**vk, "best": s.get("best_name"), "metric": s.get("main_metric_label"),
+                                         "value": s.get("best_value")}
+        dims = [d["status"] for d in (u["ampel"]["datenreife"], u["ampel"]["vorhersagekraft"]) if d["status"] in rank]
+        worst = max(dims, key=lambda x: rank[x]) if dims else "na"
+        u["ampel"]["gesamt"] = {"status": worst, "provisional": True,
+                                "note": "Vorläufig: Datenreife und Vorhersagekraft belastbar, Euro-Potenzial folgt"}
+    res["backtest_merged"] = True
+    return res
 
 
 def _n(x) -> str:

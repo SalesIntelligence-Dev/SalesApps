@@ -203,3 +203,69 @@ def api_profile(ds_id: str):
     return Response(json.dumps(prof, ensure_ascii=False, indent=1), mimetype="application/json",
                     headers={"Content-Disposition": f'attachment; filename="{name}"'})
 
+
+# ── Rückblick & Baseline-Vergleich (Modul 4) ──────────────────────────────────
+
+def _live_mode() -> dict:
+    """Wo „Live neu berechnen“ rechnet: lokal im Prozess oder (auf Render) nur über den GPU-Worker."""
+    from .engines.base import on_render
+    from .engines.runtime import runpod_ready
+    if on_render():
+        return {"mode": "runpod" if runpod_ready() else "off",
+                "note": ("Live-Rechnung über den Graph-ML-Worker auf RunPod" if runpod_ready() else
+                         "Auf Render nur über den GPU-Worker (RUNPOD_GRAPHML_ENDPOINT_ID) – angezeigt wird die "
+                         "Vorberechnung")}
+    return {"mode": "local", "note": "Live-Rechnung lokal; GPU-Engines nur mit CUDA-Umgebung (.venv)"}
+
+
+@graph_bp.route("/graph_ml/api/backtest")
+def api_backtest_summary():
+    from . import evaluation as ev
+    from .engines import engine_catalog
+    return jsonify({"summary": ev.summary(), "engines": engine_catalog(), "live": _live_mode(),
+                    "use_cases": ev.UC_ORDER, "not_measurable": ev.NOT_MEASURABLE})
+
+
+@graph_bp.route("/graph_ml/api/backtest/<uc>")
+def api_backtest(uc: str):
+    from . import evaluation as ev
+    if uc not in ev.UC_ORDER:
+        return _err("Für diesen Use Case gibt es keinen Rückblick", 404)
+    res = ev.load(uc)
+    if not res:
+        return _err("Noch nicht vorberechnet – python -m graph_ml.precompute ausführen", 404)
+    return jsonify(res)
+
+
+def _run_backtest_job(ctx, uc: str):
+    from . import evaluation as ev
+    mode = _live_mode()["mode"]
+    if mode == "runpod":
+        from .jobs import RunPodClient
+        client = RunPodClient()
+        ctx.set_device("RunPod")
+        job_id = client.submit({"job_type": "graphml_backtest", "use_case": uc})
+        ctx.log(f"RunPod-Job {job_id} gestartet")
+        out = client.wait(job_id, ctx)
+        res = out["result"]
+        res["host"] = f"RunPod · {out.get('gpu', 'GPU')}"
+    else:
+        ctx.set_device("Lokal")
+        res = ev.run_use_case(uc, ctx=ctx, previous=ev.load(uc))
+    res["live"] = True
+    ev.save(res)
+    get_registry()._checks.clear()
+    return {"use_case": uc, "best": res.get("best"), "vorhersagekraft": res.get("vorhersagekraft")}
+
+
+@graph_bp.route("/graph_ml/api/backtest/<uc>/run", methods=["POST"])
+def api_backtest_run(uc: str):
+    from . import evaluation as ev
+    if uc not in ev.UC_ORDER:
+        return _err("Für diesen Use Case gibt es keinen Rückblick", 404)
+    live = _live_mode()
+    if live["mode"] == "off":
+        return _err(live["note"], 409)
+    job = store.submit("backtest", f"Rückblick {uc}", _run_backtest_job, uc=uc)
+    return jsonify(job.to_dict()), 202
+

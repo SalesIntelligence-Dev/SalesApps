@@ -566,3 +566,56 @@ Aufgabe: Modul 6 „Aktivierung“, Monitoring, Report-Export und der Feinschlif
 - **Engine-Empfehlung** liegt je Use Case in `engine` (`primary`, `challengers`, `baseline`, `reason`). Prompt 3 soll sie mit dem Backtest bestätigen oder korrigieren.
 - **Frontend:** Der Drawer-Graph wird über `$watch('ucOpen')` gezeichnet und wiederholt den Versuch, bis der Container sichtbar ist. Die Checks laden bei Änderung von `stage` oder `dsId` neu; `checksSeq` verwirft veraltete Antworten.
 
+---
+
+## Umsetzungsnotizen nach Prompt 3 (für die folgenden Prompts)
+
+- **Bausteine:**
+  - `backtest.py`: Basisdaten, Stichtage, Leakage-Guard (`Audit`), Aufgaben je Use Case, Metriken
+  - `evaluation.py`: Runner, Lift, Ampel „Vorhersagekraft“, Empfehlung, Artefakte
+  - `engines/`: `cpu.py`, `gpu.py`, `api.py`, `runtime.py` für die Geräte-Wahl lokal → RunPod
+  - `precompute.py`: Vorberechnung
+  - `product_groups.py`: vorläufige Artikelgruppen per Schlüsselwort-Regeln; PB-05 in Prompt 4 ersetzt sie
+- **Split:** Test-Stichtag 2011-09-01. Training monatlich ab 2010-03-01, letzter Stichtag 2011-06-01 (= Validierung). Cross-Selling nimmt jeden 2. Monat, Retouren nutzen Monatsfenster von Positionen.
+- **Leakage-Test:** Merkmale zu T bleiben identisch, wenn alle Ereignisse ab T gelöscht werden (`tests/test_graph_ml_backtest.py`).
+- **Hauptmetriken:**
+
+  | Use Case | Hauptmetrik | Hinweis |
+  |---|---|---|
+  | Churn | Umsatz-Recall@Top-10 % | Modelle sortieren nach Wahrscheinlichkeit × Umsatz; die Regel wie im Vertrieb: „seit ≥ 60 Tagen inaktiv, nach Umsatz sortiert“ |
+  | Neukunden | AUPRC | nur 219 Testfälle |
+  | Cross-Selling, Retouren | Recall@Top-10 % | |
+  | Empfehlung | MAP@12 | |
+  | Prognose | WAPE | |
+
+- **Ampel „Vorhersagekraft“** (`evaluation.vorhersagekraft`), exakt nach 0.7 mit gepaartem Bootstrap (200×, 90-%-Intervall):
+  - Grün: ab +20 % und signifikant
+  - Gelb: +5 bis +20 % und signifikant
+  - Rot: sonst
+- **Ergebnisse Online Retail II** (Vorberechnung, lokale RTX 3060):
+
+  | Use Case | Regel | Sieger | Lift | Ampel |
+  |---|---|---|---|---|
+  | Churn | 0,345 | Hetero-GraphSAGE 0,377 | +9,4 % | Gelb |
+  | Neukunden | 0,519 | GNN 0,560 | +7,9 %, nicht signifikant | Rot |
+  | Cross-Selling | 0,113 | LightGBM 0,266 | +136 % | Grün |
+  | Empfehlung | 0,223 | LightGBM-Ranker mit Graph-Kandidaten 0,257 | +15,5 % | Gelb |
+  | Retouren | 0,318 | LightGBM + Graph-Features 0,397 | +24,9 % | Grün |
+  | Prognose (WAPE) | 1,10 | LightGBM 0,75 | +32 % | Grün |
+
+  Weitere Befunde: TabPFN liegt nahe am GNN. LightGCN (0,138) verliert gegen den Wiederkauf. KumoRFM fehlt ohne Key, Aurora ohne Endpoint.
+- **Stufe 3 in der Ampel:** `Registry.checks(ds, 3)` übernimmt die Vorhersagekraft aus den Artefakten (`_merge_backtest`). Gesamt = schwächste Dimension, weiterhin „vorläufig“, bis Prompt 4 das Euro-Potenzial liefert.
+- **Für Prompt 4 (Was-wäre-wenn):** Die Artefakte enthalten je binärem Use Case Top-Listen und Metriken. Die Churn-Liste ist nach erwartetem Umsatzverlust sortiert; `value_captured_at_10` ist der Anteil des Umsatzes der echten Abwanderer, der in der Top-10-%-Liste liegt. Fehlende Größen für die Euro-Rechnung (Zahl der Abwanderer, deren Vorjahresumsatz) über `backtest.get_task(uc).test` berechnen.
+- **Rechnen:**
+  - Vorberechnung mit GPU: `.venv/bin/python -m graph_ml.precompute`. Die `.venv` ist ein Python 3.10 venv ohne eigenes pip; Pakete mit `python3 -m pip --python .venv/bin/python install …` nachinstallieren.
+  - System-Python rechnet nur die CPU-Engines; GPU-Ergebnisse aus früheren Läufen bleiben erhalten (`previous`).
+  - TabPFN: Version 10.x des Pakets, Gewichte v2 frei ladbar. Neuere Modelle (v2.5 und höher) verlangen eine Lizenzannahme bei Prior Labs.
+- **Render:**
+  - Der Webprozess importiert nie torch; die Spitze liegt bei 198 MB mit allen Rückblicken.
+  - „Live neu berechnen“ läuft auf Render nur über den Graph-ML-Worker, ohne Worker kommt 409. Lokal läuft es als Job im Prozess.
+- **RunPod-Worker** (`runpod_graphml/`, eigener Endpoint; der Aurora/CV-Worker bleibt unverändert):
+  1. Bauen und pushen: `./runpod_graphml/build.sh <dockerhub-user> 1`
+  2. RunPod → Serverless → New Endpoint → Image `<dockerhub-user>/graphready-worker:1`, GPU 16–24 GB, Min 0 / Max 1 Worker
+  3. Render-Dashboard → Environment: `RUNPOD_GRAPHML_ENDPOINT_ID=<Endpoint-ID>` (`RUNPOD_API_KEY` ist schon gesetzt)
+  4. Prüfen: System-Panel → Selbsttest. Lokal getestet: `graphml_selftest` mit 7,5 TFLOP/s auf der RTX 3060; `graphml_gnn_train` liefert eine Antwort von 7 KB.
+
