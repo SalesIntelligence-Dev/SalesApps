@@ -98,13 +98,13 @@ class ArtifactTest(unittest.TestCase):
         churn = next(u for u in res["use_cases"] if u["id"] == "churn")
         self.assertNotEqual(churn["ampel"]["vorhersagekraft"]["status"], "pending")
         nba = next(u for u in res["use_cases"] if u["id"] == "next_best_action")
-        self.assertEqual(nba["ampel"]["vorhersagekraft"]["status"], "na")
+        self.assertIn(nba["ampel"]["vorhersagekraft"]["status"], ("ok", "warn", "bad"))   # Policy-Rückblick (v2)
 
     def test_api(self):
         from app import app
         c = app.test_client()
         r = c.get("/graph_ml/api/backtest").get_json()
-        self.assertEqual(set(r["use_cases"]), set(ev.UC_ORDER))
+        self.assertEqual(set(r["use_cases"]), set(ev.UC_ORDER) | {u for u in ev.POLICY_UCS if ev.load(u)})
         self.assertEqual(c.get("/graph_ml/api/backtest/churn").status_code, 200)
         self.assertEqual(c.get("/graph_ml/api/backtest/margin").status_code, 404)
 

@@ -61,6 +61,14 @@ PARAMS: dict[str, list[dict]] = {
         {"id": "cost", "label": "Kosten je betreutem Account und Quartal", "unit": "€", "default": 150, "min": 0, "max": 1000, "step": 10, "role": "cost"},
         {"id": "margin", "label": "Ergebnisanteil", "unit": "%", "default": 100, "min": 10, "max": 100, "step": 5, "role": "fixed"},
         {"id": "periods", "label": "Quartale pro Jahr", "unit": "×", "default": 4, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
+    "territory_coverage": [
+        {"id": "list_share", "label": "Besuchskapazität (oberste % der Händler)", "unit": "%", "default": 20, "min": 5, "max": 50, "step": 1, "role": "fixed"},
+        {"id": "rate", "label": "Mehrumsatz durch gezielten Besuch (Literatur: Produktivität +5–10 %)", "unit": "%", "default": 7.5, "min": 1, "max": 20, "step": 0.5, "role": "rate"},
+        {"id": "cost", "label": "Kosten je Besuch", "unit": "€", "default": 120, "min": 0, "max": 500, "step": 10, "role": "cost"},
+        {"id": "margin", "label": "Ergebnisanteil", "unit": "%", "default": 100, "min": 10, "max": 100, "step": 5, "role": "fixed"},
+        {"id": "periods", "label": "Besuchsrunden pro Jahr", "unit": "×", "default": 4, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
+    "next_best_action": [
+        {"id": "periods", "label": "Kampagnen pro Jahr (eine Aktion je Kunde und Quartal)", "unit": "×", "default": 4, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
     "demand_forecast": [
         {"id": "coverage_weeks", "label": "Reichweite des Bestands", "unit": "Wochen", "default": 8, "min": 2, "max": 26, "step": 1, "role": "fixed"},
         {"id": "safety_share", "label": "Anteil Sicherheitsbestand am Bestand", "unit": "%", "default": 30, "min": 5, "max": 60, "step": 1, "role": "rate"},
@@ -74,6 +82,8 @@ STEP_LABELS = {"churn": ("Umsatz der Abwanderer", "davon in der Liste", "gerette
                "recommendation": ("Umsatz mit empfohlenen Artikeln", "erreichte Kunden", "ausgelöst (Annahme)"),
                "returns_root_cause": ("Kosten aller Retouren", "davon erkannt", "vermieden (Annahme)"),
                "account_scoring": ("Mehrumsatz wachsender Accounts", "davon in der Liste", "gesichert (Annahme)"),
+               "territory_coverage": ("Händlerumsatz im Quartal", "davon in der Besuchsliste", "Mehrumsatz (Annahme)"),
+               "next_best_action": ("Wert aller Kandidaten-Aktionen", "gewählte Aktionen", "realisiert (Annahme)"),
                "demand_forecast": ("Sicherheitsbestand", "Fehlerreduktion", "Kostensenkung")}
 FUNNEL = [
     {"id": "scan", "name": "Light-Scan", "stage": 1, "price": "kostenlos – 2.500 €", "cost": 2_500,
@@ -105,6 +115,10 @@ def compute(uc: str, w: dict, params: dict, engine: str, fx: float = FX_DEFAULT,
         return None
     scen = scen or {"rate": 1.0, "cost": 1.0}
     fx = fx if w.get("currency", "GBP") == "GBP" else 1.0
+    if w.get("kind") == "policy":                # realisierter Netto-Wert der gewählten Aktionen (nba_eval)
+        net = w["engines"][engine]["net"] * scen["rate"]
+        return {"base": abs(net), "caught": abs(net), "gain": max(net, 0.0), "cost": 0.0, "net": net,
+                "annual": net * _p(params, "periods", 4), "n_list": 0, "tp": 0}
     e = w["engines"][engine]
     r = lambda k: _p(params, k) / 100 * scen["rate"]          # noqa: E731
     c = lambda k: _p(params, k) * scen["cost"]                # noqa: E731
@@ -183,8 +197,9 @@ def use_case_case(uc: str, variant: str = "v0", fx: float = FX_DEFAULT) -> dict 
            "model": model, "model_name": next((e["meta"]["name"] for e in res["engines"] if e["id"] == model), model),
            "recommended": rec, "labels": STEP_LABELS[uc], "currency": w.get("currency"), "fx": fx,
            "dataset": res.get("dataset", "online_retail_ii")}
-    if out["dataset"] == "wwi":
-        out["note"] = ("Gerechnet auf WideWorldImporters (künstliche Beispieldaten) – die Methode ist übertragbar, "
+    if out["dataset"] in ("wwi", "adventureworks_data"):
+        name = {"wwi": "WideWorldImporters", "adventureworks_data": "AdventureWorks"}[out["dataset"]]
+        out["note"] = (f"Gerechnet auf {name} (künstliche Beispieldaten) – die Methode ist übertragbar, "
                        "die Euro-Größenordnung nicht.")
     out["scenarios"] = {}
     for name, sc in SCENARIOS.items():
@@ -200,7 +215,7 @@ def use_case_case(uc: str, variant: str = "v0", fx: float = FX_DEFAULT) -> dict 
 
 def overview(variant: str = "v0", fx: float = FX_DEFAULT) -> dict:
     """Euro-Potenzial aller messbaren Use Cases + Trichter-Empfehlung."""
-    cases = {uc: use_case_case(uc, variant, fx) for uc in ev.UC_ORDER}
+    cases = {uc: use_case_case(uc, variant, fx) for uc in ev.UC_ORDER + ev.POLICY_UCS}
     for uc, why in ev.NOT_MEASURABLE.items():
         cases[uc] = {"use_case": uc, "euro": {"status": "na", "reason": why}}
     return {"variant": variant, "fx": fx, "cases": cases, "funnel": FUNNEL, "next_step": next_step(cases),
@@ -225,7 +240,8 @@ def next_step(cases: dict, vk: dict | None = None) -> dict:
     stage = "pilot" if roi >= 2 else "sprint"
     names = {"churn": "Churn & Retention", "lead_scoring": "Neukunden-Scoring", "cross_selling": "Cross-Selling",
              "recommendation": "Produkt-Empfehlung", "returns_root_cause": "Retouren-Root-Cause",
-             "demand_forecast": "Absatzprognose", "account_scoring": "Account-Scoring"}
+             "demand_forecast": "Absatzprognose", "account_scoring": "Account-Scoring",
+             "territory_coverage": "Vertriebsabdeckung", "next_best_action": "Next Best Action"}
     step = "Pilot" if stage == "pilot" else "Readiness-Sprint"
     roi_txt = str(round(roi, 1)).replace(".", ",")
     return {"stage": stage, "use_case": top, "annual": round(top_val), "year1_cost": year1, "roi": round(roi, 1),

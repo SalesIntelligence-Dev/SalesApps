@@ -336,3 +336,68 @@ class LGBMForecastEngine(Engine):
 
     def explain(self, task):
         return {"global": self.importance}
+
+
+FC_GRAPH_FEATS = ["g_grp_mean4", "g_grp_mean13", "g_grp_trend", "g_nb_mean4", "g_nb_trend", "g_share_grp"]
+FC_LABELS.update({"g_grp_mean4": "Graph: Ø 4 Wochen der Geschwister-Artikel (Gruppe)",
+                  "g_grp_mean13": "Graph: Ø 13 Wochen der Geschwister-Artikel",
+                  "g_grp_trend": "Graph: Trend der Gruppe (4 vs. 13 Wochen)",
+                  "g_nb_mean4": "Graph: Ø 4 Wochen der Co-Kauf-Nachbarn",
+                  "g_nb_trend": "Graph: Trend der Co-Kauf-Nachbarn", "g_share_grp": "Anteil des Artikels an seiner Gruppe"})
+
+
+def _fc_graph_cols(task, Y, o) -> pd.DataFrame:
+    """Hierarchische und Co-Kauf-Signale je Reihe zum Ursprung o: Geschwister (gleiche Artikelgruppe, ohne sich selbst)
+    und die 5 ähnlichsten Artikel im Co-Kauf-Graphen (SVD-Einbettung aus der Zeit vor allen Stichtagen)."""
+    b = bt.base_of(task)
+    prods = np.asarray(task.extra["prods"])
+    grp = b.prod_group[prods]
+    m4, m13 = Y[:, o - 4:o].mean(1), Y[:, o - 13:o].mean(1)
+    df = pd.DataFrame({"g": grp, "m4": m4, "m13": m13})
+    n = df.groupby("g")["m4"].transform("size").to_numpy()
+    s4, s13 = df.groupby("g")["m4"].transform("sum").to_numpy(), df.groupby("g")["m13"].transform("sum").to_numpy()
+    g4 = np.where(n > 1, (s4 - m4) / np.maximum(n - 1, 1), np.nan)
+    g13 = np.where(n > 1, (s13 - m13) / np.maximum(n - 1, 1), np.nan)
+    E = b.svd_items[prods]
+    E = E / np.maximum(np.linalg.norm(E, axis=1, keepdims=True), 1e-9)
+    S = E @ E.T
+    np.fill_diagonal(S, -np.inf)
+    nb = np.argsort(-S, axis=1)[:, :5]
+    nb4, nb13 = m4[nb].mean(1), m13[nb].mean(1)
+    return pd.DataFrame({"g_grp_mean4": g4, "g_grp_mean13": g13, "g_grp_trend": g4 / np.maximum(g13, 1e-6),
+                         "g_nb_mean4": nb4, "g_nb_trend": nb4 / np.maximum(nb13, 1e-6),
+                         "g_share_grp": m13 / np.maximum(s13, 1e-6)})
+
+
+class LGBMForecastGraphEngine(LGBMForecastEngine):
+    """LightGBM-Prognose plus Signale der Geschwister-Artikel und Co-Kauf-Nachbarn (hierarchisch über den Graphen)."""
+    id, name, klass = "lgbm_graph", "LightGBM + Gruppen-/Co-Kauf-Graph", "Graph-ML light"
+
+    def _rows(self, task, Y, o, H, weeks, with_target=True):
+        base = _fc_rows(Y, o, H, weeks, with_target)
+        g = _fc_graph_cols(task, Y, o)
+        return pd.concat([base.reset_index(drop=True), g.iloc[base["series"].to_numpy()].reset_index(drop=True)], axis=1)
+
+    def fit(self, task):
+        lgb = _lgb()
+        Y = task.extra["Y"].to_numpy(dtype=float)
+        weeks, H = task.extra["weeks"], task.extra["horizon"]
+        frames = [self._rows(task, Y, weeks.get_loc(o), H, weeks) for o in task.extra["origins_train"]]
+        tr, va = pd.concat(frames[:-2], ignore_index=True), pd.concat(frames[-2:], ignore_index=True)
+        feats = FC_FEATS + FC_GRAPH_FEATS
+        params = dict(LGB_PARAMS, objective="tweedie", tweedie_variance_power=1.2, metric="l1")
+        X = lambda d: d[feats].astype({"series": "category"})  # noqa: E731
+        self.model = lgb.train(params, lgb.Dataset(X(tr), tr["y"]), 1500, valid_sets=[lgb.Dataset(X(va), va["y"])],
+                               callbacks=[lgb.early_stopping(60, verbose=False)])
+        self._X = X
+        imp = self.model.feature_importance("gain")
+        self.importance = [{"feature": f, "label": FC_LABELS[f], "importance": round(float(v), 1)}
+                           for f, v in sorted(zip(feats, imp), key=lambda x: -x[1])]
+        return self
+
+    def predict(self, task):
+        Y, o = forecast_matrix(task, task.extra["origin_test"])
+        H, weeks = task.extra["horizon"], task.extra["weeks"]
+        te = self._rows(task, Y, o, H, weeks, with_target=False)
+        p = np.clip(self.model.predict(self._X(te), num_iteration=self.model.best_iteration), 0, None)
+        return p.reshape(Y.shape[0], H), Y[:, o:o + H], naive_scale(Y, o)

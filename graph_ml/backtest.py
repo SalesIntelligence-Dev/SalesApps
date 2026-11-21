@@ -31,12 +31,14 @@ HISTORY = 365
 SEED = 7
 TOP_SHARE = 0.10
 
-BINARY_UCS = ("churn", "lead_scoring", "cross_selling", "returns_root_cause", "account_scoring")
+BINARY_UCS = ("churn", "lead_scoring", "cross_selling", "returns_root_cause", "account_scoring", "territory_coverage")
 
 # Zeitachse je Datensatz: (Test-Stichtag, erster Trainings-Stichtag, Ende des SVD-Referenzfensters)
 DATASET_DATES = {"v0": ("2011-09-01", "2010-03-01", "2010-03-01"),
-                 "wwi": ("2016-02-01", "2014-01-01", "2014-01-01")}
-DATASET_OF = {"account_scoring": "wwi"}          # Use Cases, die auf einem anderen Datensatz gerechnet werden
+                 "wwi": ("2016-02-01", "2014-01-01", "2014-01-01"),
+                 "aw": ("2025-03-01", "2023-06-01", "2023-06-01")}
+DATASET_OF = {"account_scoring": "wwi", "territory_coverage": "aw"}
+DATASET_NAMES = {"v0": "online_retail_ii", "wwi": "wwi", "aw": "adventureworks_data"}          # Use Cases, die auf einem anderen Datensatz gerechnet werden
 _TIME_LOCK = threading.RLock()
 
 
@@ -60,7 +62,7 @@ def dataset_key(uc: str, key: str = "v0") -> str:
 # Churn: Hebel ist „Umsatz halten“ → umsatzgewichteter Recall der Top-10-%-Liste (Recall bleibt sichtbar)
 MAIN_METRIC = {"churn": "value_captured_at_10", "lead_scoring": "auprc", "cross_selling": "recall_at_10",
                "returns_root_cause": "recall_at_10", "recommendation": "map_at_12", "demand_forecast": "wape",
-               "account_scoring": "auprc"}
+               "account_scoring": "auprc", "territory_coverage": "value_captured_at_10"}
 LOWER_IS_BETTER = {"wape", "mase"}
 
 FEATURE_LABELS = {
@@ -87,6 +89,10 @@ FEATURE_LABELS = {
     "prod_sales": "Verkäufe des Artikels (log)", "cust_orders": "Belege des Kunden",
 }
 FEATURE_LABELS.update({
+    "g_portfolio_active30": "Graph: Anteil Portfolio-Händler mit Auftrag (30 T.)",
+    "g_portfolio_active90": "Graph: Anteil Portfolio-Händler mit Auftrag (90 T.)",
+    "g_territory_active30": "Graph: Anteil Gebiets-Händler mit Auftrag (30 T.)",
+    "g_portfolio_growth": "Graph: Wachstum im Vertriebler-Portfolio", "salesperson": "Vertriebler",
     "g_peer_group_growth": "Graph: Wachstum der Einkaufsgemeinschaft (Peers)",
     "g_peer_category_growth": "Graph: Wachstum der Kundenkategorie (Peers)",
     "g_peer_region_growth": "Graph: Wachstum der Region (Peers)",
@@ -141,6 +147,9 @@ def get_base(key: str = "v0") -> Base:
         elif key == "wwi" and key not in _VARIANTS:
             from .connectors import wwi_as_retail
             raw = wwi_as_retail()
+        elif key == "aw" and key not in _VARIANTS:
+            from .connectors import aw_as_retail
+            raw = aw_as_retail()
         else:
             raw = _VARIANTS[key]
         _BASES[key] = _build_base(raw, key)
@@ -645,6 +654,60 @@ def build_account(b: Base) -> Task:
     return task
 
 
+def _peer_active(f: pd.DataFrame, key: pd.Series, days: int) -> np.ndarray:
+    """Anteil der anderen Kunden derselben Gruppe mit Kauf in den letzten `days` Tagen (ohne den Kunden selbst)."""
+    a = (f["recency"] <= days).astype(float).to_numpy()
+    k = key.reindex(f.index).astype(str).to_numpy()
+    df = pd.DataFrame({"k": k, "a": a})
+    s, n = df.groupby("k")["a"].transform("sum"), df.groupby("k")["a"].transform("size")
+    return np.where(n > 1, (s - df["a"]) / np.maximum(n - 1, 1), np.nan)
+
+
+def build_territory(b: Base) -> Task:
+    """Vertriebsabdeckung (AdventureWorks): bestellt der Händler im nächsten Quartal? Liste nach erwartetem Umsatz.
+
+    Graph-Signal: Bestellwellen im Portfolio desselben Vertrieblers und im Gebiet (Peers ohne den Händler selbst)
+    sowie die Händler–Artikel-Nachbarschaft – Händler und Vertriebler sind über Kanten verbunden, nicht nur Zeilen.
+    """
+    task = Task(uc="territory_coverage", kind="binary")
+    snaps = snapshots()
+    attrs = b.cust_attrs if b.cust_attrs is not None else pd.DataFrame()
+    stores = attrs.index[attrs.get("customer_category", pd.Series(dtype=str)).astype(str) == "Händler"] \
+        if "customer_category" in attrs else attrs.index
+    frames = []
+    for T in snaps + [T_TEST]:
+        f = customer_features(b, T, task.audit, "territory")
+        f = f[(f["recency"] <= HISTORY) & f.index.isin(stores)]
+        inv = b.inv[(b.inv["time"] < T) & (b.inv["time"] >= T - pd.Timedelta(days=180))]
+        f["prev_rev90"] = inv[inv["time"] < T - pd.Timedelta(days=90)].groupby("cust")["value"].sum().reindex(f.index).fillna(0.0)
+        g = graph_customer_features(b, T, f, task.audit, "territory")
+        port = attrs["buying_group"] if "buying_group" in attrs else pd.Series("–", index=f.index)
+        g["g_portfolio_active30"] = _peer_active(f, port, 30)
+        g["g_portfolio_active90"] = _peer_active(f, port, 90)
+        g["g_territory_active30"] = _peer_active(f, f["country"], 30)
+        g["g_portfolio_growth"] = _peer_growth(f, port)
+        f["salesperson"] = port.reindex(f.index).astype("category").cat.codes.to_numpy()
+        fut = b.inv[(b.inv["time"] >= T) & (b.inv["time"] < T + pd.Timedelta(days=HORIZON))]
+        task.audit.check("territory:label", T, None, T + pd.Timedelta(days=HORIZON))
+        nxt = fut.groupby("cust")["value"].sum().reindex(f.index).fillna(0.0)
+        y = (nxt > 0).astype(int).to_numpy()
+        d = pd.concat([f, g], axis=1).assign(y=y, cutoff=T, rule=f["monetary_365"].to_numpy(),
+                                             value=f["monetary_365"].to_numpy(), next_revenue=nxt.to_numpy())
+        frames.append(d.reset_index().rename(columns={"index": "cust"}))
+    data = pd.concat(frames, ignore_index=True)
+    task.train, task.test = data[data["cutoff"] < T_TEST], data[data["cutoff"] == T_TEST]
+    task.graph_features = [c for c in data.columns if c.startswith("g_")]
+    task.features = ["recency", "freq_90", "freq_365", "monetary_90", "monetary_365", "avg_basket", "tenure",
+                     "n_products", "trend_orders", "trend_revenue", "gap_mean", "overdue", "country", "salesperson"] + \
+        task.graph_features
+    task.cat_features = ["country", "salesperson"]
+    task.snapshots, task.val_cutoff = snaps, snaps[-1]
+    task.extra["rank_by_value"] = True
+    task.timeline = _timeline(snaps, T_TEST, HORIZON, "Händler bestellt im nächsten Quartal")
+    task.extra["rule_text"] = "Händler mit dem höchsten Jahresumsatz zuerst besuchen"
+    return task
+
+
 def build_recommendation(b: Base) -> Task:
     task = Task(uc="recommendation", kind="ranking")
     snaps = [pd.Timestamp("2011-03-01"), pd.Timestamp("2011-06-01")]
@@ -711,6 +774,7 @@ def build_forecast(b: Base, n_series: int = 100) -> Task:
 
 BUILDERS = {"churn": build_churn, "lead_scoring": build_lead, "cross_selling": build_cross_selling,
             "returns_root_cause": build_returns, "recommendation": build_recommendation, "account_scoring": build_account,
+            "territory_coverage": build_territory,
             "demand_forecast": build_forecast}
 _TASKS: dict[tuple, Task] = {}
 

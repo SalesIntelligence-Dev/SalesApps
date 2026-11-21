@@ -475,3 +475,43 @@ def wwi_as_retail() -> pd.DataFrame:
     })
     out["price_gbp"] = out["price_eur"]                  # Spaltenname der Rohdaten; Währung steht in price_eur (EUR)
     return out.sort_values("invoice_date", kind="stable").reset_index(drop=True)
+
+
+# ── Adapter: AdventureWorks im Positionsformat (Vertriebsabdeckung & Gebiete) ─
+
+AW_USD_EUR = 0.92
+
+
+def aw_as_retail() -> pd.DataFrame:
+    """Auftragspositionen mit Gebiet (country), Produktkategorie (pb05_group), Vertriebler-Portfolio (buying_group)
+    und Kundentyp Händler/Endkunde (customer_category) – Händler-Vertriebler kommt aus Store.SalesPersonID."""
+    t = load_tables("adventureworks_data")
+    h, d, cu, st = t["SalesOrderHeader"], t["SalesOrderDetail"], t["Customer"], t["Store"]
+    ter = t["SalesTerritory"].set_index("TerritoryID")["Name"].astype(str)
+    prod = t["Product"].set_index("ProductID")
+    sub = t["ProductSubcategory"].set_index("ProductSubcategoryID")
+    cat = t["ProductCategory"].set_index("ProductCategoryID")["Name"].astype(str)
+    pcat = prod["ProductSubcategoryID"].map(sub["ProductCategoryID"]).map(cat)
+    c = cu.set_index("CustomerID")
+    store_sp = c["StoreID"].map(st.set_index("BusinessEntityID")["SalesPersonID"])
+    df = d.merge(h[["SalesOrderID", "CustomerID", "OrderDate", "TerritoryID"]], on="SalesOrderID", how="left")
+    cid = df["CustomerID"].astype(int)
+    is_store = cid.map(c["StoreID"]).notna()
+    sp = cid.map(store_sp)
+    out = pd.DataFrame({
+        "invoice": df["SalesOrderID"].astype(int).astype(str).astype("category"),
+        "stock_code": df["ProductID"].astype(int).astype(str).astype("category"),
+        "description": df["ProductID"].map(prod["Name"]).astype(str).astype("category"),
+        "quantity": df["OrderQty"].astype(np.int32),
+        "invoice_date": pd.to_datetime(df["OrderDate"]),
+        "price_eur": (df["UnitPrice"].astype(float) * (1 - df["UnitPriceDiscount"].astype(float)) * AW_USD_EUR).astype(np.float32),
+        "customer_id": cid.astype("Int32"),
+        "country": df["TerritoryID"].map(ter).fillna("unbekannt").astype("category"),
+        "pb05_group": df["ProductID"].map(pcat).fillna("Sonstiges").astype("category"),
+        "buying_group": np.where(sp.notna(), "Vertriebler " + sp.fillna(0).astype(int).astype(str), "ohne Vertriebler"),
+        "customer_category": np.where(is_store, "Händler", "Endkunde"),
+    })
+    out["buying_group"] = out["buying_group"].astype("category")
+    out["customer_category"] = out["customer_category"].astype("category")
+    out["price_gbp"] = out["price_eur"]
+    return out.sort_values("invoice_date", kind="stable").reset_index(drop=True)

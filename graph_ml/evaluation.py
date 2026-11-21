@@ -28,9 +28,9 @@ log = logging.getLogger("graph_ml.evaluation")
 ARTIFACTS = Path(__file__).parent / "artifacts"
 RESULT_VERSION = 1
 UC_ORDER = ["churn", "lead_scoring", "cross_selling", "recommendation", "returns_root_cause", "demand_forecast",
-            "account_scoring"]
+            "account_scoring", "territory_coverage"]
+POLICY_UCS = ["next_best_action"]          # Rückblick als Offline-Policy-Vergleich (graph_ml/nba_eval.py)
 NOT_MEASURABLE = {
-    "next_best_action": "Keine Reaktionsdaten – Vorhersagekraft nicht messbar (Regelwerk über die anderen Scores).",
     "margin": "Einstandspreis fehlt – kein Label, Vorhersagekraft nicht messbar.",
     "warranty_root_cause": "Seriennummer, Charge und Garantiefälle fehlen – kein Backtest möglich.",
 }
@@ -129,6 +129,9 @@ def _whatif(task, results: list[dict]) -> dict | None:
             fut = b.inv[(b.inv["time"] >= bt.T_TEST) & (b.inv["time"] < bt.T_TEST + pd.Timedelta(days=bt.HORIZON))]
             v = te["cust"].map(fut.groupby("cust")["value"].sum()).fillna(0).to_numpy()
             unit, period = "Umsatz der Wiederkäufer in 90 Tagen", 90
+        elif task.uc == "territory_coverage":
+            v = te["next_revenue"].to_numpy()
+            unit, period = "Händlerumsatz im nächsten Quartal", 90
         elif task.uc == "account_scoring":
             v = te["value"].to_numpy()
             unit, period = "Mehrumsatz der wachsenden Accounts im Quartal", 90
@@ -271,7 +274,7 @@ def run_use_case(uc: str, engine_ids: list[str] | None = None, ctx=None, previou
         raise ValueError(f"{uc} wird auf {bt.DATASET_OF[uc]} gerechnet – Pipeline-Varianten gelten für Online Retail II")
     with bt.dataset_time(bt.dataset_key(uc, variant)):
         res = _run_use_case(uc, engine_ids, ctx, previous, variant)
-    res["dataset"] = bt.dataset_key(uc, variant) if uc in bt.DATASET_OF else "online_retail_ii"
+    res["dataset"] = bt.DATASET_NAMES.get(bt.dataset_key(uc, variant), "online_retail_ii")
     return res
 
 
@@ -402,6 +405,7 @@ def _top_list(task, best) -> list[dict]:
         te = task.test.assign(_s=s, _o=order).sort_values("_o", ascending=False).head(15)
         cols = {"churn": ["recency", "freq_365", "monetary_365"], "lead_scoring": ["first_value", "first_products"],
                 "account_scoring": ["monetary_90", "trend_revenue", "freq_90"],
+                "territory_coverage": ["recency", "monetary_365", "g_portfolio_active30"],
                 "cross_selling": ["group", "group_pop"], "returns_root_cause": ["prod", "qty", "price"]}[task.uc]
         out = []
         b = bt.base_of(task)
@@ -477,7 +481,7 @@ def load(uc: str, variant: str = "v0") -> dict | None:
 def summary(variant: str = "v0") -> dict:
     """Übersicht für Schritt 4 und die Ampel: je Use Case Sieger, Lift, Vorhersagekraft."""
     out = {}
-    for uc in UC_ORDER:
+    for uc in UC_ORDER + POLICY_UCS:
         r = load(uc, variant)
         if not r:
             out[uc] = {"status": "pending"}
@@ -490,4 +494,7 @@ def summary(variant: str = "v0") -> dict:
                    "pending_engines": [e["id"] for e in r["engines"] if e["status"] != "ok"]}
     for uc, why in NOT_MEASURABLE.items():
         out[uc] = {"status": "na", "vorhersagekraft": {"status": "na", "reason": why}}
+    for uc in POLICY_UCS:
+        if out.get(uc, {}).get("status") == "pending":
+            out[uc] = {"status": "na", "vorhersagekraft": {"status": "na", "reason": "Policy-Rückblick noch nicht gerechnet"}}
     return out

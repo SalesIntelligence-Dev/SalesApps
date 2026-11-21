@@ -1816,6 +1816,35 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
               </template>
             </div>
             <div class="text-[12px] sub mt-2"><b class="text-[#e7e9f3]">Was ein flaches Modell schon sieht:</b> <span x-text="ucMeta()?.story?.tabular"></span></div>
+            <template x-if="ucOpen==='territory_coverage' && terrTable?.territories?.length">
+              <div class="mt-3">
+                <div class="kpi-label" x-text="'Gebiete am Rückblick-Stichtag '+fmtDate(terrTable.T)+' · '+terrTable.engine"></div>
+                <div class="scroll-x scroll-thin mt-1"><table class="tbl min-w-[620px] text-[12px]">
+                  <thead><tr><th>Gebiet</th><th class="text-right">Händler</th><th class="text-right">Vertriebler</th><th class="text-right">Quote/Quartal</th>
+                    <th class="text-right">Umsatz Vorquartal</th><th class="text-right">erwartet</th><th class="text-right">tatsächlich</th><th class="text-right">Lücken</th></tr></thead>
+                  <tbody><template x-for="t in terrTable.territories" :key="t.territory"><tr>
+                    <td class="font-semibold" x-text="t.territory"></td><td class="text-right tabular-nums" x-text="t.stores"></td>
+                    <td class="text-right tabular-nums" x-text="t.salespeople"></td><td class="text-right tabular-nums" x-text="fmtEur(t.quota_quarter)"></td>
+                    <td class="text-right tabular-nums" x-text="fmtEur(t.revenue_last_q)"></td><td class="text-right tabular-nums" x-text="fmtEur(t.expected_next_q)"></td>
+                    <td class="text-right tabular-nums" x-text="fmtEur(t.actual_next_q)"></td>
+                    <td class="text-right tabular-nums" :class="t.underserved ? 'text-amber-300 font-semibold' : 'muted'" x-text="t.underserved"></td></tr></template></tbody>
+                </table></div>
+                <div class="text-[11.5px] sub mt-1.5" x-text="terrText()"></div>
+                <div class="text-[11px] muted mt-0.5" x-text="terrTable.note"></div>
+              </div>
+            </template>
+            <template x-if="ucOpen==='next_best_action' && ucBt?.policy_eval">
+              <div class="mt-3">
+                <div class="kpi-label" x-text="'Policy-Rückblick am '+fmtDate(ucBt.policy_eval.T)+' · '+fmtInt(ucBt.policy_eval.customers)+' Kunden'"></div>
+                <div class="scroll-x scroll-thin mt-1"><table class="tbl min-w-[520px] text-[12px]">
+                  <thead><tr><th>Aktion (NBA mit Modellen)</th><th class="text-right">Kunden</th><th class="text-right">realisierter Netto-Wert</th></tr></thead>
+                  <tbody><template x-for="[k, n] in Object.entries(ucBt.policy_eval.policies.nba_model.actions)" :key="'pa'+k"><tr>
+                    <td x-text="nbaName(k)"></td><td class="text-right tabular-nums" x-text="fmtInt(n)"></td>
+                    <td class="text-right tabular-nums" x-text="fmtEur(ucBt.policy_eval.policies.nba_model.by_action[k])"></td></tr></template></tbody>
+                </table></div>
+                <div class="text-[11.5px] sub mt-1.5" x-text="'Netto-Wert je Quartal: NBA '+fmtEur(ucBt.policy_eval.policies.nba_model.net)+' · Regel-Policy '+fmtEur(ucBt.policy_eval.policies.rule_policy.net)+' · Einheitsaktion '+fmtEur(ucBt.policy_eval.policies.single_action.net)+'. Gemessen ist die Treffsicherheit der Auswahl; die Wirkungsquoten sind Annahmen.'"></div>
+              </div>
+            </template>
             <template x-if="ucOpen==='recommendation' && recoPaths?.customers?.length">
               <div class="mt-3">
                 <div class="flex flex-wrap items-center justify-between gap-2">
@@ -2181,7 +2210,7 @@ function graphReady() {
     timeline: TIMELINE, tourSteps: TOUR, TIMELINE_SOURCES,
     bc: null, bcVariant: 'v0', bcUc: 'churn', bcParams: {}, bcScenario: 'realistisch', bcThr: { green: 100000, yellow: 25000 },
     bt: null, btUc: 'churn', btRes: null, btLoading: false, btErr: '', btJob: null, btSeries: 0,
-    ucBt: null, recoPaths: null, recoPathCust: null, stageAuto: false, checks: null, checksLoading: false, checksSeq: 0, ucOpen: null, ucFocusDim: null, colTable3: null,
+    ucBt: null, recoPaths: null, recoPathCust: null, terrTable: null, stageAuto: false, checks: null, checksLoading: false, checksSeq: 0, ucOpen: null, ucFocusDim: null, colTable3: null,
     playbooks: { 'PB-01': 'Fehlende Kundennummern', 'PB-02': 'Stornos ohne Originalbezug', 'PB-03': 'Nicht-Artikel-Codes',
                  'PB-04': 'Artikelstamm konsolidieren', 'PB-05': 'Freitext → Kategorien', 'PB-06': 'Dubletten entfernen',
                  'PB-07': 'Preis 0 / negative Mengen', 'PB-08': 'Währung umrechnen', 'PB-09': 'Governance-Checkliste',
@@ -2608,6 +2637,10 @@ function graphReady() {
       const e = w.engines[engine];
       const p = (k, d = 0) => Number(params[k] ?? d);
       const r = k => p(k) / 100 * scen.rate, c = k => p(k) * scen.cost;
+      if (w.kind === 'policy') {             // identisch zu business_case.compute (Policy-Rückblick NBA)
+        const net = e.net * scen.rate;
+        return { base: Math.abs(net), caught: Math.abs(net), gain: Math.max(net, 0), cost: 0, net, annual: net * p('periods', 4), n_list: 0, tp: 0 };
+      }
       if (w.kind === 'list') {
         const i = Math.max(0, Math.min(w.k.length - 1, Math.round(p('list_share', 10)) - 1));
         const n = w.n[i], tp = e.tp[i], val = e.value[i] * fx, total = w.value_total * fx;
@@ -2685,7 +2718,7 @@ function graphReady() {
       });
     },
     nextStep() {
-      const home = this.dsId === 'wwi' ? 'wwi' : 'online_retail_ii';        // nächster Schritt je Datensatz
+      const home = ['wwi', 'adventureworks_data'].includes(this.dsId) ? this.dsId : 'online_retail_ii';   // nächster Schritt je Datensatz
       const ranked = (this.usecases || []).filter(u => this.bcCase(u.id) && (this.bc.cases[u.id].dataset || 'online_retail_ii') === home)
         .map(u => ({ id: u.id, a: this.bcNow(u.id)?.model?.annual || 0 }))
         .sort((a, b) => b.a - a.a);
@@ -2909,6 +2942,11 @@ function graphReady() {
     },
     ucVerdict() {
       const rows = this.ucClassRows(); if (!rows.length) return '';
+      if (this.ucBt?.kind === 'policy') {
+        const vk = this.ucBt.vorhersagekraft || {};
+        return `Die NBA-Policy mit Modell-Scores (LightGBM + Graph-Merkmale) hätte im Rückblick ${this.fmtLift(vk.lift)} mehr Netto-Wert erzielt ` +
+          `als die Regel-Policy („Inaktive anrufen, sonst Newsletter“). Ein gelerntes NBA-Modell (Uplift, GNN) braucht Reaktionsdaten auf frühere Aktionen.`;
+      }
       const by = Object.fromEntries(rows.map(x => [x.fam, x])), lower = this.ucBt.lower_is_better;
       const rel = (a, b) => lower ? (b.value - a.value) / b.value : (a.value - b.value) / Math.max(b.value, 1e-9);
       const pct = d => (d > 0 ? '+' : '') + (d * 100).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' %';
@@ -2957,6 +2995,7 @@ function graphReady() {
       this.ucOpen = id; this.ucFocusDim = dim;           // Zeichnen übernimmt $watch('ucOpen')
       this.loadUcBt(id);
       if (id === 'recommendation') this.loadRecoPaths();
+      if (id === 'territory_coverage' && !this.terrTable) this.api('/usecases/territory_coverage/table').then(r => { this.terrTable = r; }).catch(() => {});
       if (dim) setTimeout(() => document.getElementById('chk-' + dim)?.scrollIntoView({ block: 'center' }), 350);
     },
     closeUc() { this.ucOpen = null; this.ucFocusDim = null; if (CY.uc) { CY.uc.destroy(); CY.uc = null; } if (CY.path) { CY.path.destroy(); CY.path = null; } },
@@ -2966,6 +3005,15 @@ function graphReady() {
         if (!this.recoPathCust && this.recoPaths.customers.length) this.recoPathCust = this.recoPaths.customers[0].cust;
         setTimeout(() => this.drawRecoPath(), 400);
       } catch (_) { /* optional */ }
+    },
+    terrText() {
+      const t = this.terrTable; if (!t) return '';
+      const gaps = t.territories.flatMap(x => x.underserved_top), lost = gaps.filter(g => !g.ordered_next_q).length;
+      const total = t.territories.reduce((a, x) => a + x.underserved, 0);
+      const dev = Math.round(t.total.wape_territory * 100);
+      return `Abweichung erwartet vs. tatsächlich je Gebiet ${dev} %. ${total} umsatzstarke Händler sind überfällig – ` +
+        `das Modell gibt den ${gaps.length} größten im Schnitt ${Math.round(gaps.reduce((a, g) => a + g.p, 0) / Math.max(gaps.length, 1) * 100)} % Bestellwahrscheinlichkeit, ` +
+        `${lost} davon bestellten tatsächlich nicht: Abdeckungslücke statt Routinebesuch.`;
     },
     recoPathData() { return this.recoPaths?.customers?.find(c => c.cust === this.recoPathCust) || null; },
     recoPathText() {

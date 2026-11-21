@@ -119,5 +119,62 @@ class SalesCoreTest(unittest.TestCase):
         self.assertNotEqual(ov["next_step"].get("use_case"), "account_scoring")   # keine Werte aus anderen Daten
 
 
+class Prompt4Test(unittest.TestCase):
+    """Next Best Action (Policy-Rückblick), Absatzprognose mit Gruppen-Graph, Vertriebsabdeckung auf AdventureWorks."""
+
+    def test_nba_is_measurable_as_policy(self):
+        from graph_ml import business_case as bc
+        from graph_ml import evaluation as ev
+        self.assertNotIn("next_best_action", ev.NOT_MEASURABLE)
+        r = ev.load("next_best_action")
+        self.assertEqual(r["kind"], "policy")
+        pol = r["policy_eval"]["policies"]
+        self.assertGreater(pol["nba_model"]["net"], pol["single_action"]["net"])
+        w = r["whatif"]
+        a = bc.compute("next_best_action", w, {"periods": 4}, "nba")["annual"]
+        self.assertAlmostEqual(a, w["engines"]["nba"]["net"] * 4, places=2)   # identisch zur JS-Formel
+        self.assertIn(ev.summary()["next_best_action"]["vorhersagekraft"]["status"], ("ok", "warn", "bad"))
+
+    def test_territory_task_and_table(self):
+        import pandas as pd
+
+        from graph_ml import activation as act
+        from graph_ml import backtest as bt
+        task = bt.get_task("territory_coverage")
+        self.assertEqual(task.timeline["test"], "2025-03-01")
+        self.assertNotIn("next_revenue", task.features)              # Zukunftswert nur für Was-wäre-wenn
+        for r in task.audit.rows:
+            if r["max_feature_time"]:
+                self.assertLess(pd.Timestamp(r["max_feature_time"]), pd.Timestamp(r["cutoff"]))
+        tab = act.load_territory_table()
+        self.assertEqual(len(tab["territories"]), 10)
+        self.assertTrue(all("quota_quarter" in t and "underserved" in t for t in tab["territories"]))
+
+    def test_stage3_repeated_calls_keep_backtest(self):
+        from graph_ml.data_loader import Registry
+        r = Registry()
+        first = r.checks("online_retail_ii", 3)
+        second = r.checks("online_retail_ii", 3)             # früher: Cache lieferte die Ampel ohne Rückblick
+        f = {u["id"]: u["ampel"]["gesamt"]["status"] for u in first["use_cases"]}
+        g = {u["id"]: u["ampel"]["gesamt"]["status"] for u in second["use_cases"]}
+        self.assertEqual(f, g)
+        self.assertTrue(second.get("backtest_merged"))
+
+    def test_forecast_graph_features(self):
+        import numpy as np
+
+        from graph_ml import backtest as bt
+        from graph_ml.engines.cpu import _fc_graph_cols
+        task = bt.get_task("demand_forecast")
+        Y, o = task.extra["Y"].to_numpy(float), task.extra["weeks"].get_loc(task.extra["origin_test"])
+        g = _fc_graph_cols(task, Y, o)
+        self.assertEqual(len(g), Y.shape[0])
+        grp = bt.base_of(task).prod_group[np.asarray(task.extra["prods"])]
+        i = 0
+        sib = [j for j in range(len(grp)) if grp[j] == grp[i] and j != i]
+        if sib:
+            self.assertAlmostEqual(g["g_grp_mean4"].iloc[i], Y[sib, o - 4:o].mean(1).mean(), places=6)  # ohne sich selbst
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1352,3 +1352,64 @@ def build_reco_paths(n_customers: int = 40, n_neighbors: int = 5, log=print) -> 
 def load_reco_paths() -> dict | None:
     p = ARTIFACTS / "reco_paths.json"
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
+
+
+# ── Gebietstabelle (Vertriebsabdeckung, AdventureWorks) ───────────────────────
+
+def build_territory_table(log=print) -> dict:
+    """Je Gebiet am Rückblick-Stichtag: Händler, Vertriebler, Quote, Umsatz Vorquartal, prognostizierter und
+    tatsächlicher Umsatz des Folgequartals, unterversorgte Händler (hohes Potenzial, > 90 Tage ohne Auftrag)."""
+    from . import connectors as cn
+    from .engines.cpu import LGBMGraphEngine
+    t0 = time.time()
+    with bt.dataset_time("aw"):
+        task = bt.get_task("territory_coverage")
+        e = LGBMGraphEngine().timed_fit(task)
+        p = np.asarray(e.predict(task), dtype=float)
+        T = bt.T_TEST
+    b = bt.get_base("aw")
+    te = task.test.reset_index(drop=True).assign(p=p)
+    inv = b.inv[b.inv["time"] < T]
+    avg = inv.groupby("cust")["value"].mean()
+    te["exp"] = te["p"] * te["cust"].map(avg).fillna(0).to_numpy()
+    terr = pd.Series(b.country_names)[te["country"].clip(lower=0).to_numpy()].to_numpy()
+    te["territory"] = terr
+    sp = b.cust_attrs["buying_group"].reindex(te["cust"]).astype(str).to_numpy()
+    te["salesperson"] = sp
+    t = cn.load_tables("adventureworks_data")
+    q = t["SalesPersonQuotaHistory"]
+    q = q[q["QuotaDate"] < T].sort_values("QuotaDate").groupby("BusinessEntityID").tail(1)
+    quota = {f"Vertriebler {int(k)}": float(v) * cn.AW_USD_EUR for k, v in zip(q["BusinessEntityID"], q["SalesQuota"])}
+    thr = te["monetary_365"].quantile(0.6)
+    rows = []
+    for name, g in te.groupby("territory"):
+        sps = sorted(set(g["salesperson"]) - {"ohne Vertriebler"})
+        under = g[(g["monetary_365"] >= thr) & (g["overdue"] >= 1.0)].sort_values("monetary_365", ascending=False)
+        rows.append({"territory": name, "stores": int(len(g)), "salespeople": len(sps),
+                     "stores_per_salesperson": round(len(g) / max(len(sps), 1), 1),
+                     "quota_quarter": round(sum(quota.get(x, 0.0) for x in sps), 0),
+                     "revenue_last_q": round(float(g["monetary_90"].sum()), 0),
+                     "expected_next_q": round(float(g["exp"].sum()), 0),
+                     "actual_next_q": round(float(g["next_revenue"].sum()), 0),
+                     "underserved": int(len(under)),
+                     "underserved_top": [{"cust": int(r.cust), "expected": round(float(r.exp), 0), "p": round(float(r.p), 3),
+                                          "annual": round(float(r.monetary_365), 0), "recency": int(r.recency),
+                                          "overdue": round(float(r.overdue), 1), "salesperson": r.salesperson,
+                                          "ordered_next_q": bool(r.y)} for r in under.head(5).itertuples()]})
+    rows.sort(key=lambda r: -r["expected_next_q"])
+    exp, act = sum(r["expected_next_q"] for r in rows), sum(r["actual_next_q"] for r in rows)
+    res = {"T": T.date().isoformat(), "engine": e.name, "territories": rows,
+           "total": {"expected_next_q": exp, "actual_next_q": act,
+                     "wape_territory": round(sum(abs(r["expected_next_q"] - r["actual_next_q"]) for r in rows) / max(act, 1), 4)},
+           "note": ("Rückblick am Stichtag – das Folgequartal ist bekannt und dient als Kontrolle. Unterversorgt = Händler mit "
+                    "Jahresumsatz in den oberen 40 %, der über seinem eigenen üblichen Bestellabstand liegt (überfällig). "
+                    "Quoten aus SalesPersonQuotaHistory (USD → EUR). Erwarteter Umsatz = Bestellwahrscheinlichkeit × Ø Auftragswert.")}
+    (ARTIFACTS / "territory_table.json").write_text(json.dumps(res, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    log(f"[gebiete] {len(rows)} Gebiete · erwartet {exp:,.0f} € · tatsächlich {act:,.0f} € · "
+        f"Abweichung je Gebiet {res['total']['wape_territory']:.1%} · {time.time() - t0:.0f} s")
+    return res
+
+
+def load_territory_table() -> dict | None:
+    p = ARTIFACTS / "territory_table.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None

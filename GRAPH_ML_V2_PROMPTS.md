@@ -209,3 +209,29 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
 - **Ampel:** Rückblick-Ergebnisse fließen nur in die Matrix des Datensatzes, auf dem sie gerechnet wurden (Stufe 3 für WWI neu).
 - **Tests:** 53 grün (u. a. Peer-Signal ohne Selbstbezug, Leakage des Account-Tasks, Zeitachse zurückgesetzt, GNN-Ergebnisse
   vorhanden, keine Datensatz-Vermischung).
+
+## Umsetzungsnotizen nach Prompt 4
+
+- **Next Best Action – jetzt messbar** (`graph_ml/nba_eval.py`): Offline-Policy-Vergleich am Rückblick-Stichtag 01.09.2011.
+  Je Kunde wählt das Regelwerk (Kontrollgruppe, Retention vor Verkauf, Neukunden, höchster erwarteter Wert, 1 Aktion je Quartal)
+  über die Scores von LightGBM + Graph-Merkmalen; gezählt wird, ob das Zielereignis danach eintrat (Abwanderung, Gruppenkauf,
+  Wiederkauf, Artikelkauf) – Wirkungsquoten wie in Schritt 5. Netto-Wert je Quartal: **NBA 49.822 €** · Regel-Policy
+  („Inaktive anrufen, sonst Topseller-Newsletter“) 26.862 € · Einheitsaktion 1.254 € → **+85,5 %** (90-%-Intervall +50 … +161 %),
+  Euro 199.288 €/Jahr. Ein gelerntes NBA-Modell (Uplift) braucht weiterhin Reaktionsdaten – steht so auf der Detailseite.
+  Artefakt `backtest_next_best_action.json` (Art `policy`), `evaluation.POLICY_UCS`, Formel in Python und JS identisch.
+- **Absatzprognose:** neue Engine **LightGBM + Gruppen-/Co-Kauf-Graph** (`lgbm_graph`, Forecast): Ø 4/13 Wochen und Trend der
+  Geschwister-Artikel derselben Gruppe (ohne die Reihe selbst) und der 5 ähnlichsten Artikel im Co-Kauf-Graphen.
+  WAPE: Regel 1,100 · LightGBM 0,748 · **Graph 0,721** (−3,6 % Fehler) – erste Prognose, bei der das Graph-Signal gewinnt.
+  Euro bleibt klein (9.261 €/Jahr, Lagerkosten bei 100 Artikeln) → Gesamt Rot.
+- **Vertriebsabdeckung & Gebiete (neu, AdventureWorks):** `connectors.aw_as_retail()` (Gebiet, Produktkategorie,
+  Vertriebler-Portfolio über Store.SalesPersonID, Händler/Endkunde), Zeitachse 06/2023–03/2025.
+  Label: Händler bestellt im nächsten Quartal; Liste nach Wahrscheinlichkeit × Jahresumsatz.
+  Graph-Signal: Anteil der Portfolio- und Gebiets-Peers mit frischem Auftrag, Portfolio-Wachstum.
+  Umsatz-Recall@Top-10 %: Regel (größte Händler zuerst) 0,384 · **LightGBM 0,457** · GNN 0,449 · TabPFN 0,405 ·
+  LightGBM + Graph 0,391.
+  Gebietstabelle (`activation.build_territory_table()` → `territory_table.json`): Händler, Vertriebler, Quote,
+  Umsatz Vorquartal, erwartet vs. tatsächlich (Abweichung je Gebiet 33 %, Prognose zu hoch – bewusst sichtbar),
+  11 überfällige umsatzstarke Händler – das Modell gab ihnen Ø 1 % Bestellwahrscheinlichkeit, keiner bestellte.
+- **Fehler aus v1 behoben:** `Registry.checks()` lieferte beim zweiten Aufruf für Stufe 3 die Ampel ohne Rückblick und Euro
+  (Cache vor dem Einmischen). Jetzt wird bei jedem Aufruf frisch eingemischt (Regressionstest).
+- **Tests:** 57 grün. Render: 19 Seiten 200, 230 MB.

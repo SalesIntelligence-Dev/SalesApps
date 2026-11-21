@@ -8,12 +8,12 @@ Engine-Registry für den modellunabhängigen Vergleich (Modul 4).
 from __future__ import annotations
 
 from .api import AuroraEngine, KumoRFMEngine
-from .cpu import (ItemKNNEngine, LGBMEngine, LGBMForecastEngine, LGBMGraphEngine, LGBMRankEngine,
+from .cpu import (ItemKNNEngine, LGBMEngine, LGBMForecastEngine, LGBMForecastGraphEngine, LGBMGraphEngine, LGBMRankEngine,
                   NaiveForecastEngine, PopularityEngine, RecoRuleEngine, RuleEngine)
 from .gpu import GNNEngine, GNNRankEngine, LightGCNEngine, TabPFNEngine
 
 ENGINE_CLASSES = [RuleEngine, RecoRuleEngine, NaiveForecastEngine, PopularityEngine, LGBMEngine, LGBMGraphEngine,
-                  ItemKNNEngine, LGBMRankEngine, LGBMForecastEngine, TabPFNEngine, GNNEngine, GNNRankEngine, LightGCNEngine,
+                  ItemKNNEngine, LGBMRankEngine, LGBMForecastEngine, LGBMForecastGraphEngine, TabPFNEngine, GNNEngine, GNNRankEngine, LightGCNEngine,
                   KumoRFMEngine, AuroraEngine]
 ENGINE_ORDER = ["rule", "popularity", "lgbm", "lgbm_graph", "itemknn", "lgbm_rank", "tabpfn", "gnn", "gnn_rank", "lightgcn",
                 "kumorfm", "aurora"]
@@ -29,7 +29,7 @@ def engine_catalog() -> list[dict]:
     seen, out = set(), []
     for cls in ENGINE_CLASSES:
         e = cls()
-        if e.id in seen and e.id in ("rule", "lgbm"):
+        if e.id in seen and e.id in ("rule", "lgbm", "lgbm_graph"):
             continue
         seen.add(e.id)
         ok, why = e.available()

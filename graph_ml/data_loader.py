@@ -782,8 +782,17 @@ class Registry:
         ds = self.get(ds_id)
         stage = max(1, min(int(stage), 3))
         key = (ds_id, ds.version, stage, tuple(sorted(use_cases or [])))
-        if key in self._checks:
-            return self._checks[key]
+        if key not in self._checks:
+            self._checks[key] = self._run_checks(ds, ds_id, stage, use_cases)
+        res = self._checks[key]
+        # Rückblick und Euro bei jedem Aufruf frisch einmischen (Cache hält nur die Datenreife) –
+        # sonst liefert der zweite Aufruf für Stufe 3 die Ampel ohne Vorhersagekraft und Euro
+        if stage == 3 and ds_id in ("online_retail_ii", "wwi", "adventureworks_data"):
+            res = _merge_backtest(res, ds_id)
+        return res
+
+    def _run_checks(self, ds, ds_id: str, stage: int, use_cases) -> dict:
+        from .checks import run_checks
         if stage == 1 or ds.kind == "schema":
             res = run_checks(stage=stage, view=self.schema_view(ds_id), use_case_ids=use_cases, dataset_id=ds_id)
         else:
@@ -791,9 +800,6 @@ class Registry:
                              dataset_id=ds_id)
         res["dataset_kind"] = ds.kind
         res["max_stage_dataset"] = self.max_stage(ds_id)
-        self._checks[key] = res
-        if stage == 3 and ds_id in ("online_retail_ii", "wwi"):
-            res = _merge_backtest(res, ds_id)
         return res
 
     def delete(self, ds_id: str) -> bool:
@@ -976,7 +982,8 @@ def _merge_backtest(res: dict, ds_id: str = "online_retail_ii") -> dict:
     summ = summary()
     rank = {"ok": 0, "warn": 1, "bad": 2}
     for u in res["use_cases"]:
-        home = {"wwi": "wwi"}.get(DATASET_OF.get(u["id"], ""), "online_retail_ii")
+        from .backtest import DATASET_NAMES
+        home = DATASET_NAMES.get(DATASET_OF.get(u["id"], "v0"), "online_retail_ii")
         if home != ds_id:
             continue
         s = summ.get(u["id"]) or {}

@@ -104,7 +104,7 @@ def collect(variant: str = "v0") -> dict:
                                                     for x in c.get("actions") or [])})
 
     models = []
-    for uc in ev.UC_ORDER:
+    for uc in ev.UC_ORDER + ev.POLICY_UCS:
         r = ev.load(uc)
         if not r:
             continue

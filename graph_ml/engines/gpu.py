@@ -149,7 +149,7 @@ def _labels_for(task, g):
 
 class GNNEngine(_GPUEngine):
     id, name, klass, tasks = "gnn", "Hetero-GraphSAGE (RDL)", "Relational", ("binary",)
-    use_cases = ("churn", "lead_scoring", "cross_selling", "account_scoring")
+    use_cases = ("churn", "lead_scoring", "cross_selling", "account_scoring", "territory_coverage")
     needs = ("torch", "torch_geometric")
     license = "MIT (PyTorch Geometric)"
 

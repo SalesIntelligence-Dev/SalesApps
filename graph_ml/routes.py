@@ -223,7 +223,8 @@ def api_backtest_summary():
     from . import evaluation as ev
     from .engines import engine_catalog
     return jsonify({"summary": ev.summary(), "engines": engine_catalog(), "live": _live_mode(),
-                    "use_cases": ev.UC_ORDER, "not_measurable": ev.NOT_MEASURABLE})
+                    "use_cases": ev.UC_ORDER + [u for u in ev.POLICY_UCS if ev.load(u)],
+                    "not_measurable": ev.NOT_MEASURABLE})
 
 
 @graph_bp.route("/graph_ml/api/backtest/<uc>")
@@ -234,6 +235,15 @@ def api_backtest(uc: str):
     res = ev.load(uc)
     if not res:
         return _err("Noch nicht vorberechnet – python -m graph_ml.precompute ausführen", 404)
+    return jsonify(res)
+
+
+@graph_bp.route("/graph_ml/api/backtest/next_best_action")
+def api_backtest_nba():
+    from . import evaluation as ev
+    res = ev.load("next_best_action")
+    if not res:
+        return _err("Policy-Rückblick noch nicht gerechnet – python -m graph_ml.nba_eval", 404)
     return jsonify(res)
 
 
@@ -503,3 +513,9 @@ def api_reco_paths():
     from . import activation as act
     r = act.load_reco_paths()
     return jsonify(r or {"customers": [], "note": _ACT_HINT})
+
+
+@graph_bp.route("/graph_ml/api/usecases/territory_coverage/table")
+def api_territory_table():
+    from . import activation as act
+    return jsonify(act.load_territory_table() or {"territories": []})
