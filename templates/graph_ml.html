@@ -444,7 +444,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div>
             <div class="font-semibold">Schema-Graph</div>
-            <div class="text-[12px] sub" x-text="mapping?.mode==='schema' ? 'Farbe = Schema · Kanten aus deklarierten Fremdschlüsseln' : 'Rahmen = fachliche Gruppe · Kantenfarbe = Verknüpfungsquote · gestrichelt = fehlende Beziehung'"></div>
+            <div class="text-[12px] sub" x-text="mapping?.mode==='schema' ? 'Farbe = Schema · Kanten aus deklarierten Fremdschlüsseln' : 'Farbe = fachliche Gruppe · farbige Kante = Verknüpfung unter 95 % · gestrichelt = fehlende Beziehung'"></div>
           </div>
           <div class="flex gap-1.5">
             <button class="btn btn-ghost !py-1.5 !px-2.5 text-[12px]" @click="zoomCy('schema', 1.25)" aria-label="Vergrößern">+</button>
@@ -453,9 +453,9 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
             <button class="btn btn-ghost !py-1.5 !px-2.5 text-[12px]" @click="fitCy('schema')">Einpassen</button>
           </div>
         </div>
-        <div id="cySchema" class="cy" :class="mapping?.mode==='schema' ? 'h-[420px] sm:h-[600px]' : 'h-[380px] sm:h-[520px]'"></div>
+        <div id="cySchema" class="cy" :class="mapping?.mode==='schema' || (mapping?.tables||[]).length > 12 ? 'h-[420px] sm:h-[600px]' : 'h-[300px] sm:h-[380px]'"></div>
         <div class="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 text-[11.5px] sub" x-show="mapping?.mode==='data'">
-          <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#34d399"></span>≥ 95 % verknüpft</span>
+          <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#5b6488"></span>≥ 95 % verknüpft</span>
           <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#fbbf24"></span>70–95 %</span>
           <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#f87171"></span>&lt; 70 % / fehlt</span>
           <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:transparent;border:2px solid #22d3ee"></span>Tabelle mit Zeitstempel</span>
@@ -3137,10 +3137,11 @@ function graphReady() {
       if (!m || !el || el.offsetParent === null) return;
       if (CY.schema && CY.schemaFor === m.dataset_id) { CY.schema.resize(); CY.schema.fit(undefined, 30); return; }
       if (CY.schema) CY.schema.destroy();
-      const isSchema = m.mode === 'schema';
+      // Einheitlich für alle Datenbanken: kompakte Schema-Darstellung wie AdventureWorks (Gruppenrahmen, kleine Knoten, dünne Kanten)
+      const isSchema = true, dataMode = m.mode !== 'schema';
       const maxRows = Math.max(1, ...m.tables.map(t => t.rows || 0));
       const nodes = m.tables.map(t => ({ data: {
-        id: t.name, label: isSchema ? this.shortName(t.name) : `${t.label}\n${this.fmtCompact(t.rows)}`,
+        id: t.name, label: dataMode ? (t.label || this.shortName(t.name)) : this.shortName(t.name),
         schema: t.schema || '', time: t.time_columns.length ? 1 : 0,
         size: isSchema ? 1 : 0.6 + 0.4 * Math.log10(1 + (t.rows || 0)) / Math.log10(1 + maxRows),
       } }));
@@ -3152,17 +3153,17 @@ function graphReady() {
         n.data.h = Math.round(lines.length * (isSchema ? 13 : 17) + (isSchema ? 12 : 24));
       });
       // Vernetzte Block-Übersicht für alle Datensätze: Gruppen (Schema bzw. fachliche Domäne) als farbige Rahmen
-      const lay = schemaBlocks(m, !isSchema);
+      const lay = schemaBlocks(m, false);
       const positions = lay.pos;
       nodes.forEach(n => {
         const t = m.tables.find(x => x.name === n.data.id);
         n.data.schema = groupOf(t); n.data.parent = 'g:' + n.data.schema;
-        if (isSchema) n.data.label = this.shortName(n.data.id);
+        if (!dataMode) n.data.label = this.shortName(n.data.id);
       });
       nodes.push(...lay.groups.map(g => ({ data: { id: 'g:' + g, label: g, schema: g, group: 1 } })));
       const edges = m.relations.map(r => ({ data: {
         id: r.id, source: r.from_table, target: r.to_table, status: r.status, kind: r.kind,
-        label: r.linkage_rate == null ? '' : this.fmtPct(r.linkage_rate),
+        label: r.linkage_rate == null || (r.status === 'ok' && r.kind !== 'missing') ? '' : this.fmtPct(r.linkage_rate),
         title: r.label || `${r.from_table}.${r.from_column} → ${r.to_table}`,
       } }));
       const style = [
@@ -3180,9 +3181,8 @@ function graphReady() {
           'line-color': '#5b6488', 'target-arrow-color': '#5b6488', 'opacity': isSchema ? .55 : .95,
           'label': 'data(label)', 'font-size': 10.5, 'font-weight': 700, 'color': '#e7e9f3', 'font-family': 'Inter',
           'text-background-color': '#0a0a1f', 'text-background-opacity': 1, 'text-background-padding': '3px', 'text-background-shape': 'roundrectangle' } },
-        { selector: 'edge[status = "ok"]', style: { 'line-color': '#34d399', 'target-arrow-color': '#34d399' } },
-        { selector: 'edge[status = "warn"]', style: { 'line-color': '#fbbf24', 'target-arrow-color': '#fbbf24' } },
-        { selector: 'edge[status = "bad"]', style: { 'line-color': '#f87171', 'target-arrow-color': '#f87171' } },
+        { selector: 'edge[status = "warn"]', style: { 'line-color': '#fbbf24', 'target-arrow-color': '#fbbf24', 'opacity': .95, 'width': 1.6 } },
+        { selector: 'edge[status = "bad"]', style: { 'line-color': '#f87171', 'target-arrow-color': '#f87171', 'opacity': .95, 'width': 1.6 } },
         { selector: 'edge[kind = "missing"]', style: { 'line-style': 'dashed', 'line-dash-pattern': [6, 5], 'label': 'fehlt', 'color': '#fca5a5',
           'loop-direction': '-40deg', 'loop-sweep': '-60deg', 'control-point-step-size': 70 } },
         { selector: ':selected', style: { 'border-color': '#f59e0b', 'border-width': 3, 'line-color': '#f59e0b', 'target-arrow-color': '#f59e0b' } },
@@ -3215,7 +3215,7 @@ function graphReady() {
     },
     relayoutSchema() {
       if (!CY.schema) return;
-      const lay = schemaBlocks(this.mapping, this.mapping?.mode !== 'schema');
+      const lay = schemaBlocks(this.mapping, false);
       CY.schema.layout({ name: 'preset', positions: n => lay.pos[n.id()] || n.position(), animate: true, animationDuration: 450, padding: 16 }).run();
     },
     fitCy(k) { const c = k === 'schema' ? CY.schema : CY.sub; if (c) c.animate({ fit: { padding: 30 } }, { duration: 300 }); },

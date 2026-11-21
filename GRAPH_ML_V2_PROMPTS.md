@@ -145,7 +145,7 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
   Das Euro-Potenzial (Ampel-Dashboard, Was-wäre-wenn, Trichter) steht jetzt unter dem Rückblick in Schritt 5.
 - **Stufen:** Umschalter „1 · Struktur / 2 · Profil / 3 · Rückblick“ im Banner von Schritt 4, auch auf dem Handy sichtbar.
   Schritt 5 und 6 schalten automatisch auf Stufe 3 (auch beim direkten Aufruf über `#s5`/`#s6`).
-- **Graph-Mapping:** Block-Darstellung wie AdventureWorks für alle Datensätze. Tabellen ohne DB-Schema bekommen eine fachliche
+- **Graph-Mapping:** kompakte Darstellung wie AdventureWorks für alle Datenbanken (kleine Knoten in Gruppenfarbe, dünne Kanten, nur Verknüpfungen unter 95 % farbig mit Prozentwert). Tabellen ohne DB-Schema bekommen eine fachliche
   Gruppe (`domainOf`: Vertrieb, Kunden, Artikel, Stammdaten, Daten). Verknüpfungsquoten bleiben an den Kanten;
   Graph und Beziehungen immer in voller Breite.
 - **Use-Case-Detailseite** (Slide-over, 900 px): 1 Worum geht es · 2 Input-Daten · 3 Warum relational · 4 Vorhersage ·
