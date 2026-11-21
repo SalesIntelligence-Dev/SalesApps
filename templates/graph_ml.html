@@ -122,7 +122,11 @@ body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-ser
 .mx .sticky-col{position:sticky;left:0;background:#111130;z-index:2}
 .mx th.sticky-col{z-index:3;background:#13132f}
 .core-dot{width:5px;height:5px;border-radius:99px;background:#8b7cf6;display:inline-block;margin-left:4px;vertical-align:middle}
-.drawer.drawer-wide{width:min(780px,100%)}
+.drawer.drawer-wide{width:min(900px,100%)}
+.uc-sec{display:flex;gap:14px;padding:14px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.02)}
+.uc-num{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-weight:800;font-size:12.5px;
+        background:linear-gradient(135deg,rgba(139,124,246,.35),rgba(34,211,238,.25));border:1px solid rgba(139,124,246,.45)}
+@media (max-width:520px){.uc-sec{flex-direction:column;gap:8px}}
 .chk{border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.02);padding:12px 14px}
 .chk.focus{border-color:rgba(34,211,238,.6);box-shadow:0 0 0 1px rgba(34,211,238,.3)}
 .metric-chip{display:inline-flex;gap:6px;align-items:baseline;border-radius:8px;padding:3px 8px;background:rgba(255,255,255,.04);
@@ -238,84 +242,12 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
 
 <main id="main" class="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 pb-16">
 
-  <!-- ═════════════════════════ HERO + STUFEN ═════════════════════════ -->
-  <section class="grid lg:grid-cols-12 gap-6 pt-8 sm:pt-10 pb-6">
-    <div class="lg:col-span-7 fade-in">
-      <div class="eyebrow mb-3">Modellunabhängige Readiness- und Aktivierungsplattform</div>
-      <h1 class="text-[30px] sm:text-[40px] leading-[1.1] font-extrabold tracking-tight">
-        Trägt <span class="grad-text">Graph ML</span> mit diesen Daten?
-      </h1>
-      <p class="mt-4 text-[15px] sub max-w-[620px]">
-        GraphReady liest Ihre ERP- und CRM-Daten als Graph, prüft je Vertriebs- und After-Sales-Use-Case, ob die Daten reichen,
-        vergleicht mehrere Modellklassen mit zeitlich sauberem Rückblick und zeigt das Euro-Potenzial – mit klar benannten Annahmen.
-      </p>
-      <div class="mt-5 flex flex-wrap gap-2">
-        <span class="chip"><span class="dot dot-ok"></span>Echte Daten: Online Retail II</span>
-        <span class="chip">6 Module · 3 Stufen · 9 Use Cases</span>
-        <span class="chip">Regel · LightGBM · TabPFN · GNN · KumoRFM · Aurora</span>
-      </div>
-      <div class="mt-5 flex flex-wrap gap-2">
-        <button class="btn btn-primary focusable" @click="startTour()">▶ Demo-Tour: Pitch in 3 Akten</button>
-        <button class="btn btn-ghost focusable" @click="timelineOpen=!timelineOpen" :aria-expanded="timelineOpen">ⓘ Markt &amp; Zeitleiste</button>
-      </div>
-      <div class="panel p-4 mt-4" x-show="timelineOpen" x-cloak x-transition.opacity>
-        <div class="flex items-center justify-between gap-2">
-          <div class="text-[12.5px] font-semibold">Ein sehr junger Markt</div>
-          <button class="text-[12px] sub hover:text-white focusable rounded" @click="timelineOpen=false" aria-label="Zeitleiste schließen">✕</button>
-        </div>
-        <div class="text-[11.5px] sub">Graph-ML seit rund zehn Jahren, Foundation Models für Tabellen seit 2022, für verknüpfte Unternehmensdatenbanken erst seit 2025.</div>
-        <div class="tl-row mt-3">
-          <template x-for="t in timeline" :key="t.y">
-            <div class="tl-item" :class="{now: t.now}">
-              <div class="text-[11px] font-bold" :class="t.now ? 'text-[#67e8f9]' : 'text-[#c4b5fd]'" x-text="t.y"></div>
-              <div class="text-[12px] font-semibold leading-tight mt-0.5" x-text="t.t"></div>
-              <div class="text-[10.5px] muted leading-snug mt-0.5" x-text="t.d"></div>
-              <a x-show="t.src" :href="t.src" target="_blank" rel="noopener" class="text-[10.5px] text-[#a5b4fc] hover:underline" x-text="'Quelle: '+t.s"></a>
-            </div>
-          </template>
-        </div>
-        <details class="mt-2 text-[11.5px]"><summary class="cursor-pointer text-[#a5b4fc]">Quellen aus dem Konzept-PDF</summary>
-          <ul class="mt-1 space-y-0.5"><template x-for="q in TIMELINE_SOURCES" :key="q[1]"><li><a class="hover:underline sub" :href="q[1]" target="_blank" rel="noopener" x-text="q[0]"></a></li></template></ul>
-          <div class="muted mt-1">Lehre aus dem Kumo-Praxistest: zu viele falsche „sichere“ Vorhersagen – daher kalibrierte Schwellen und Mensch in der Schleife (Schritt 6).</div>
-        </details>
-      </div>
-    </div>
-
-    <div class="lg:col-span-5 fade-in">
-      <div class="panel p-4 sm:p-5">
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <div class="eyebrow">Readiness-Trichter</div>
-            <div class="text-[13px] sub mt-0.5">Wählen Sie, wie tief geprüft wird</div>
-          </div>
-          <span class="chip" x-show="dataset?.kind==='schema'" x-cloak title="Ohne Daten ist nur der Strukturcheck möglich">
-            <span class="dot dot-warn"></span>nur Stufe 1
-          </span>
-        </div>
-        <div class="space-y-2">
-          <template x-for="s in stages" :key="s.n">
-            <button class="stage focusable" :class="{active: stage===s.n}" @click="stage=s.n"
-                    :style="'margin-left:'+((s.n-1)*14)+'px;width:calc(100% - '+((s.n-1)*14)+'px)'">
-              <div class="flex items-start gap-3">
-                <span class="step-num" :style="stage===s.n ? 'background:linear-gradient(135deg,#22d3ee,#8b7cf6);color:#07071a;border-color:transparent' : ''" x-text="s.n"></span>
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="font-semibold text-[13.5px]" x-text="s.name"></span>
-                    <span class="text-[10.5px] font-semibold sub" x-text="s.price"></span>
-                  </div>
-                  <div class="text-[12px] sub mt-0.5" x-text="s.input"></div>
-                  <div class="text-[11.5px] mt-1" x-show="stage===s.n" x-transition.opacity>
-                    <span class="text-[#e7e9f3]" x-text="'„'+s.claim+'“'"></span>
-                    <span class="muted" x-text="' · Risiko: '+s.risk"></span>
-                  </div>
-                </div>
-              </div>
-            </button>
-          </template>
-        </div>
-        <div class="text-[11px] muted mt-3">Die Stufe steuert ab Schritt 3, welche Ampel-Dimensionen belastbar sind.</div>
-      </div>
-    </div>
+  <!-- ═════════════════════════ KOPF ═════════════════════════ -->
+  <section class="pt-7 sm:pt-9 pb-5 fade-in">
+    <div class="eyebrow mb-2">Modellunabhängige Readiness- und Aktivierungsplattform</div>
+    <h1 class="text-[28px] sm:text-[36px] leading-[1.1] font-extrabold tracking-tight">Trägt <span class="grad-text">Graph ML</span> mit diesen Daten?</h1>
+    <p class="mt-3 text-[14.5px] sub max-w-[860px]">Daten als Graph lesen, Lücken schließen, je Use Case prüfen, Modelle zeitlich sauber vergleichen,
+      Euro-Potenzial bewerten und die Ergebnisse dorthin bringen, wo der Vertrieb arbeitet.</p>
   </section>
 
   <!-- ═════════════════════════ STEPPER ═════════════════════════ -->
@@ -337,7 +269,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
   </nav>
 
   <!-- Fehlerzustand: GPU-Worker konfiguriert, aber nicht erreichbar → klarer Hinweis auf den Fallback -->
-  <div class="panel p-3 mb-5 flex items-start gap-3 border-[rgba(251,191,36,.45)]" x-show="runpodDown() && step >= 4" x-cloak role="status">
+  <div class="panel p-3 mb-5 flex items-start gap-3 border-[rgba(251,191,36,.45)]" x-show="runpodDown() && step >= 3" x-cloak role="status">
     <span class="text-[18px]">⚠️</span>
     <div class="text-[12.5px]"><b>RunPod-GPU-Worker nicht erreichbar</b> <span class="sub" x-text="'('+runpodDown()+')'"></span>.
       <span class="sub">Fallback: Rückblick, Playbooks und Aktivierung kommen aus der Vorberechnung, CPU-Engines rechnen weiter. Live-GPU-Läufe
@@ -349,10 +281,10 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
   <section x-show="step===1" x-cloak class="fade-in space-y-5">
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
       <div>
-        <div class="eyebrow">Schritt 1 · Konnektoren</div>
+        <div class="eyebrow">Schritt 1 · Daten</div>
         <h2 class="text-[22px] font-bold mt-1">Datenquelle anbinden</h2>
         <p class="sub text-[13.5px] mt-1 max-w-[760px]">ERP-, CRM- und Service-Daten als Export. Die Rohdaten bleiben unverändert –
-          jede Bereinigung erfolgt später nachvollziehbar als Fix-Playbook (Schritt 5).</p>
+          jede Bereinigung erfolgt später nachvollziehbar als Fix-Playbook (Schritt 3).</p>
       </div>
     </div>
 
@@ -442,7 +374,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
               <div class="min-w-0 flex-1">
                 <div class="flex items-start justify-between gap-2">
                   <div class="text-[13px] font-semibold leading-snug" x-text="f.title"></div>
-                  <span class="pb" x-show="f.playbook" x-text="f.playbook" :title="'Fix-Playbook in Schritt 5'"></span>
+                  <span class="pb" x-show="f.playbook" x-text="f.playbook" :title="'Fix-Playbook in Schritt 3'"></span>
                 </div>
                 <div class="text-[12px] sub leading-snug" x-text="f.text"></div>
               </div>
@@ -508,11 +440,11 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
     </div>
 
     <div class="grid lg:grid-cols-12 gap-4">
-      <div class="panel p-4 sm:p-5" data-tour="s2-graph" :class="mapping?.mode==='schema' ? 'lg:col-span-12' : 'lg:col-span-7'">
+      <div class="panel p-4 sm:p-5 lg:col-span-12" data-tour="s2-graph">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div>
             <div class="font-semibold">Schema-Graph</div>
-            <div class="text-[12px] sub" x-text="mapping?.mode==='schema' ? 'Farbe = Schema · Kanten aus deklarierten Fremdschlüsseln' : 'Kantenfarbe = Verknüpfungsquote · gestrichelt = fehlende Beziehung'"></div>
+            <div class="text-[12px] sub" x-text="mapping?.mode==='schema' ? 'Farbe = Schema · Kanten aus deklarierten Fremdschlüsseln' : 'Rahmen = fachliche Gruppe · Kantenfarbe = Verknüpfungsquote · gestrichelt = fehlende Beziehung'"></div>
           </div>
           <div class="flex gap-1.5">
             <button class="btn btn-ghost !py-1.5 !px-2.5 text-[12px]" @click="zoomCy('schema', 1.25)" aria-label="Vergrößern">+</button>
@@ -521,25 +453,25 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
             <button class="btn btn-ghost !py-1.5 !px-2.5 text-[12px]" @click="fitCy('schema')">Einpassen</button>
           </div>
         </div>
-        <div id="cySchema" class="cy" :class="mapping?.mode==='schema' ? 'h-[420px] sm:h-[600px]' : 'h-[360px] sm:h-[460px]'"></div>
+        <div id="cySchema" class="cy" :class="mapping?.mode==='schema' ? 'h-[420px] sm:h-[600px]' : 'h-[380px] sm:h-[520px]'"></div>
         <div class="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 text-[11.5px] sub" x-show="mapping?.mode==='data'">
           <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#34d399"></span>≥ 95 % verknüpft</span>
           <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#fbbf24"></span>70–95 %</span>
           <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#f87171"></span>&lt; 70 % / fehlt</span>
           <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:transparent;border:2px solid #22d3ee"></span>Tabelle mit Zeitstempel</span>
         </div>
-        <div class="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 text-[11.5px] sub" x-show="mapping?.mode==='schema'">
-          <template x-for="(col, name) in schemaColors" :key="name">
+        <div class="flex flex-wrap gap-x-4 gap-y-1.5 mt-2 text-[11.5px] sub">
+          <template x-for="(col, name) in schemaGroups()" :key="name">
             <span class="flex items-center gap-1.5"><span class="legend-dot" :style="'background:'+col"></span><span x-text="name"></span></span>
           </template>
         </div>
         <div class="text-[12px] mt-2 min-h-[18px]" :class="cySelection ? '' : 'muted'" x-text="cySelection || 'Tabelle oder Kante antippen für Details · Strg + Mausrad zoomt'"></div>
       </div>
 
-      <div class="panel p-4 sm:p-5 flex flex-col" :class="mapping?.mode==='schema' ? 'lg:col-span-12' : 'lg:col-span-5'">
+      <div class="panel p-4 sm:p-5 flex flex-col lg:col-span-12">
         <div class="font-semibold">Beziehungen</div>
         <div class="text-[12px] sub mb-3" x-text="mapping?.mode==='schema' ? 'Deklariert – ob sie gefüllt sind, zeigt erst Stufe 2' : 'Anteil der Zeilen, deren Schlüssel einen Datensatz findet'"></div>
-        <div class="scroll-y scroll-thin pr-1 overflow-x-hidden" :class="mapping?.mode==='schema' ? 'grid sm:grid-cols-2 xl:grid-cols-4 gap-3 max-h-[420px] content-start' : 'space-y-3'">
+        <div class="scroll-y scroll-thin pr-1 overflow-x-hidden grid sm:grid-cols-2 xl:grid-cols-4 gap-3 max-h-[420px] content-start">
           <template x-for="r in (mapping?.relations||[])" :key="r.id">
             <div class="panel-flat p-3" :class="r.kind==='missing' ? 'border-dashed !border-[rgba(248,113,113,.5)]' : ''">
               <div class="flex items-start justify-between gap-2">
@@ -649,7 +581,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 mb-3">
         <div>
           <div class="font-semibold">Spaltenprofil &amp; Rollen</div>
-          <div class="text-[12px] sub">PK · FK · Zeit · Freitext · hohe Kardinalität – Grundlage für die Readiness-Checks in Schritt 3</div>
+          <div class="text-[12px] sub">PK · FK · Zeit · Freitext · hohe Kardinalität – Grundlage für die Readiness-Checks in Schritt 4</div>
         </div>
         <select class="select !w-full lg:!w-72" x-show="(mapping?.tables||[]).length > 8" x-model="colTable">
           <template x-for="t in (mapping?.tables||[])" :key="t.name"><option :value="t.name" x-text="t.name"></option></template>
@@ -689,11 +621,161 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
     </div>
   </section>
 
-  <!-- ═════════════════════════ SCHRITT 3 · READINESS-CHECKS ═════════════════════════ -->
+  <!-- ═════════════════════════ SCHRITT 3 · FIX-PLAYBOOKS ═════════════════════════ -->
   <section x-show="step===3" x-cloak class="fade-in space-y-5">
     <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
       <div>
-        <div class="eyebrow">Schritt 3 · Readiness-Checks</div>
+        <div class="eyebrow">Schritt 3 · Fix-Playbooks</div>
+        <h2 class="text-[22px] font-bold mt-1">Lücken schließen, bevor geprüft und gerechnet wird</h2>
+        <p class="sub text-[13.5px] mt-1 max-w-[880px]">Jedes Playbook ist ein reproduzierbarer Schritt auf einer Kopie der Rohdaten
+          (Pipeline v0 → v1). Danach laufen die Checks neu – auf Wunsch auch der Rückblick – bis die Ampel trägt.</p>
+      </div>
+      <div class="flex flex-wrap gap-2 items-center">
+        <span class="chip"><span class="dot dot-ok"></span>Rohdaten v0 bleiben unverändert</span>
+      </div>
+    </div>
+
+    <!-- Playbook-Karten -->
+    <div class="panel p-4 sm:p-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+        <div>
+          <div class="font-semibold">Playbooks</div>
+          <div class="text-[12px] sub">Wirkung einzeln vorberechnet (Datenreife je Use Case) · Reihenfolge fest: <span class="mono" x-text="(pb?.order||[]).join(' → ')"></span></div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button class="btn btn-ghost text-[12.5px]" @click="pbSelectRecommended()">Empfohlenes Paket wählen</button>
+          <button class="btn btn-ghost text-[12.5px]" @click="pbSelectNone()">Keins</button>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
+        <template x-for="c in (pb?.catalog||[])" :key="'pb'+c.id">
+          <div class="pb-card min-w-0" :class="{on: c.kind==='data' && pbSel[c.id]?.on}">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0 flex-wrap">
+                <span class="pb" x-text="c.id"></span>
+                <span class="font-semibold text-[13.5px] leading-tight" x-text="c.title"></span>
+                <span class="text-[10.5px] muted" x-show="c.effort" :title="c.effort_note || 'Aufwandsschätzung für den Readiness-Sprint'" x-text="'≈ '+c.effort"></span>
+              </div>
+              <template x-if="c.kind==='data' && pbSel[c.id]">
+                <label class="flex items-center gap-1.5 text-[12px] cursor-pointer flex-none">
+                  <input type="checkbox" class="accent-[#34d399] w-4 h-4" x-model="pbSel[c.id].on"> anwenden
+                </label>
+              </template>
+            </div>
+            <div class="text-[12px] sub mt-1.5" x-text="c.problem"></div>
+            <template x-if="c.options && c.options.length > 1">
+              <div class="mt-2 space-y-1">
+                <template x-for="o in c.options" :key="c.id+o.id">
+                  <label class="flex items-start gap-2 text-[12px] cursor-pointer">
+                    <input type="radio" class="mt-0.5 accent-[#8b7cf6]" :name="'opt'+c.id" :value="o.id" x-model="pbSel[c.id].option">
+                    <span><span class="font-medium" x-text="o.label"></span><span class="block text-[11px] muted" x-text="'+ '+o.pro+' · − '+o.con"></span></span>
+                  </label>
+                </template>
+              </div>
+            </template>
+            <template x-if="c.options && c.options.length === 1">
+              <div class="mt-2 text-[12px]"><span class="font-medium" x-text="c.options[0].label"></span>
+                <span class="block text-[11px] muted" x-text="'+ '+c.options[0].pro+' · − '+c.options[0].con"></span></div>
+            </template>
+            <div class="text-[11px] text-amber-200/90 mt-1.5" x-show="c.note" x-text="c.note"></div>
+            <!-- Vorschau der Wirkung -->
+            <template x-if="c.kind==='data' && pb?.effects?.[c.id]">
+              <div class="mt-2.5 pt-2.5 border-t border-[#22224a] text-[11.5px]">
+                <div class="flex flex-wrap gap-x-3 gap-y-0.5 sub">
+                  <span x-text="fmtInt(pb.effects[c.id].effect.rows_removed)+' Zeilen entfernt'"></span>
+                  <span x-show="pb.effects[c.id].effect.match_rate" x-text="'Zuordnung '+fmtPct(pb.effects[c.id].effect.match_rate)"></span>
+                  <span x-show="(pb.effects[c.id].effect.groups||[]).length" x-text="(pb.effects[c.id].effect.groups||[]).length+' Gruppen'"></span>
+                  <span x-show="pb.effects[c.id].effect.revenue_change_gbp" x-text="'Umsatz '+fmtSignedEur(pb.effects[c.id].effect.revenue_change_gbp*1.15)"></span>
+                </div>
+                <div class="flex flex-wrap gap-1 mt-1.5">
+                  <template x-for="d in pb.effects[c.id].comparison.filter(x => x.delta !== 0)" :key="c.id+d.id">
+                    <span class="chip !py-0 !text-[10.5px]" :class="d.delta > 0 ? 'delta-up' : 'delta-down'" x-text="ucShort(d.id)+' '+(d.delta > 0 ? '+' : '')+d.delta"></span>
+                  </template>
+                  <template x-if="!pb.effects[c.id].comparison.some(x => x.delta !== 0)">
+                    <span class="text-[11px] muted" x-text="pbChangedText(pb.effects[c.id].comparison)"></span>
+                  </template>
+                </div>
+              </div>
+            </template>
+            <template x-if="c.id==='PB-05' && pb?.effects?.['PB-05']">
+              <details class="mt-2 text-[11.5px]"><summary class="cursor-pointer text-[#a5b4fc]">Gruppen ansehen</summary>
+                <div class="flex flex-wrap gap-1 mt-1.5"><template x-for="g in pb.effects['PB-05'].effect.groups" :key="g.name">
+                  <span class="chip !py-0 !text-[10.5px]" :title="g.terms.join(', ')" x-text="g.name+' · '+g.products"></span></template></div></details>
+            </template>
+            <!-- Checkliste -->
+            <template x-if="c.kind==='checklist'">
+              <div class="mt-2 space-y-1">
+                <template x-for="it in c.items" :key="it"><label class="flex items-center gap-2 text-[12px] cursor-pointer">
+                  <input type="checkbox" class="accent-[#34d399] w-4 h-4" x-model="pbGov[it]"><span x-text="it"></span></label></template>
+              </div>
+            </template>
+            <!-- Datenanforderung -->
+            <template x-if="c.kind==='request'">
+              <div class="mt-2">
+                <template x-for="sct in (pb?.data_request?.sections||[])" :key="'dr'+sct.use_case">
+                  <div class="text-[12px] mt-1"><span class="font-medium" x-text="sct.name+':'"></span>
+                    <span class="sub" x-text="sct.fields.map(f => f.label).join(', ')"></span></div>
+                </template>
+                <div class="flex flex-wrap gap-2 mt-2.5">
+                  <a class="btn btn-ghost !py-1.5 text-[12px]" href="/graph_ml/api/playbooks/datarequest.md">⬇ Anforderung (.md)</a>
+                  <a class="btn btn-ghost !py-1.5 text-[12px]" href="/graph_ml/api/playbooks/datarequest.csv">⬇ Mapping-Vorlage (.csv)</a>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+      <div class="flex flex-col md:flex-row md:items-center gap-3 mt-4 pt-4 border-t border-[#22224a]">
+        <label class="flex items-center gap-2 text-[12.5px] cursor-pointer"><input type="checkbox" class="accent-[#8b7cf6] w-4 h-4" x-model="pbBacktest">
+          auch Rückblick neu rechnen (Stufe 3, Job)</label>
+        <span class="text-[11.5px] muted md:ml-2" x-text="pbHint()"></span>
+        <button class="btn btn-primary md:ml-auto" @click="applyPlaybooks()" :disabled="pbJob && (pbJob.status==='running' || pbJob.status==='queued')">Anwenden &amp; neu prüfen</button>
+      </div>
+      <template x-if="pbJob && pbJob.status !== 'completed'">
+        <div class="mt-3"><div class="bar"><span :style="'width:'+pbJob.progress+'%;background:linear-gradient(90deg,#34d399,#22d3ee)'"></span></div>
+          <div class="text-[11px] sub mt-1" x-text="pbJob.message || pbJob.status"></div></div>
+      </template>
+    </div>
+
+    <!-- Vorher / Nachher -->
+    <div class="panel p-4 sm:p-5" x-show="pbResult">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-3">
+        <div>
+          <div class="font-semibold">Vorher / Nachher</div>
+          <div class="text-[12px] sub" x-text="'Pipeline '+(pbResult?.variant||'')+' · '+(pbResult?.steps||[]).map(s => s.id+(s.option!=='A' ? ' '+s.option : '')).join(' → ')"></div>
+        </div>
+        <div class="flex flex-wrap gap-2 text-[12px]">
+          <span class="chip" x-text="'vorher: '+(pbResult?.before_counts?.ok||0)+' grün · '+(pbResult?.before_counts?.warn||0)+' gelb · '+(pbResult?.before_counts?.bad||0)+' rot'"></span>
+          <span class="chip" style="border-color:rgba(52,211,153,.5)" x-text="'nachher: '+(pbResult?.after_counts?.ok||0)+' grün · '+(pbResult?.after_counts?.warn||0)+' gelb · '+(pbResult?.after_counts?.bad||0)+' rot'"></span>
+        </div>
+      </div>
+      <div class="rounded-xl border border-[#22224a] overflow-hidden"><div class="scroll-x scroll-thin">
+        <table class="tbl min-w-[860px]">
+          <thead><tr><th>Use Case</th><th>Datenreife vorher</th><th>nachher</th><th>Δ</th><th>Vorhersagekraft nachher</th><th>Geänderte Prüfungen</th></tr></thead>
+          <tbody><template x-for="c in (pbResult?.comparison||[])" :key="'cmp'+c.id"><tr>
+            <td class="font-semibold whitespace-nowrap" x-text="c.name"></td>
+            <td><span class="amp" :class="'amp-'+c.before.status"><span class="amp-ic" x-text="ampIcon(c.before.status)"></span><span x-text="c.before.score"></span></span></td>
+            <td><span class="amp" :class="'amp-'+c.after.status"><span class="amp-ic" x-text="ampIcon(c.after.status)"></span><span x-text="c.after.score"></span></span></td>
+            <td class="font-bold tabular-nums" :class="c.delta > 0 ? 'delta-up' : c.delta < 0 ? 'delta-down' : 'muted'" x-text="(c.delta > 0 ? '▲ +' : c.delta < 0 ? '▼ ' : '')+c.delta"></td>
+            <td class="whitespace-nowrap">
+              <template x-if="pbResult?.backtest?.[c.id]"><span class="amp" :class="'amp-'+pbResult.backtest[c.id].vorhersagekraft.status">
+                <span class="amp-ic" x-text="ampIcon(pbResult.backtest[c.id].vorhersagekraft.status)"></span><span x-text="fmtLift(pbResult.backtest[c.id].vorhersagekraft.lift)"></span></span></template>
+              <span x-show="!pbResult?.backtest?.[c.id]" class="muted text-[11.5px]">–</span>
+            </td>
+            <td class="text-[11.5px] sub min-w-[280px]">
+              <template x-for="d in c.changed.slice(0, 4)" :key="c.id+d.dim"><span class="inline-block mr-2" :class="d.after > d.before ? 'delta-up' : 'delta-down'"
+                x-text="dimName(d.dim)+' '+(d.before ?? '–')+'→'+(d.after ?? '–')"></span></template>
+            </td></tr></template></tbody>
+        </table></div></div>
+    </div>
+
+  </section>
+
+  <!-- ═════════════════════════ SCHRITT 4 · READINESS ═════════════════════════ -->
+  <section x-show="step===4" x-cloak class="fade-in space-y-5">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
+      <div>
+        <div class="eyebrow">Schritt 4 · Readiness</div>
         <h2 class="text-[22px] font-bold mt-1">Trägt die Datenlage den Use Case?</h2>
         <p class="sub text-[13.5px] mt-1 max-w-[820px]">Neun Prüfdimensionen je Use Case – die ersten fünf (●) sind use-case-spezifisch
           und zählen 70 %. Jede Bewertung mit Begründung und konkreter Maßnahme.</p>
@@ -708,7 +790,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
     </div>
 
     <!-- Stufen-Banner -->
-    <div class="banner" :class="'banner-'+(checks?.stage_used===1 ? 1 : stage===3 ? 3 : 2)" x-show="checks">
+    <div class="banner flex-wrap" :class="'banner-'+(checks?.stage_used===1 ? 1 : stage===3 ? 3 : 2)" x-show="checks">
       <span class="text-[20px] leading-none mt-0.5" x-text="checks?.stage_used===1 ? '⚠️' : stage===3 ? '⏳' : '🛡️'"></span>
       <div class="min-w-0 flex-1">
         <div class="flex flex-wrap items-center gap-2">
@@ -719,10 +801,11 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
         <div class="text-[12.5px] sub mt-0.5" x-text="checks?.stage_note"></div>
         <div class="text-[11.5px] muted mt-1" x-show="checks?.profile_meta" x-text="'Profil: '+(checks?.profile_meta?.source||'')+' · erzeugt '+fmtDateTime(checks?.profile_meta?.generated_at)"></div>
       </div>
-      <div class="hidden sm:flex gap-1 flex-none">
+      <div class="flex flex-wrap gap-1 flex-none" role="group" aria-label="Prüfstufe wählen">
         <template x-for="sn in [1,2,3]" :key="sn">
-          <button class="tab !px-2.5" :class="{active: stage===sn}" @click="stage=sn" :disabled="sn > (checks?.max_stage_dataset||3)"
-                  :title="sn > (checks?.max_stage_dataset||3) ? 'Für diesen Datensatz nicht verfügbar' : stages[sn-1].name" x-text="'Stufe '+sn"></button>
+          <button class="tab !px-2.5 focusable" :class="{active: stage===sn}" @click="stage=sn" :disabled="sn > (checks?.max_stage_dataset||3)"
+                  :aria-pressed="stage===sn" :title="sn > (checks?.max_stage_dataset||3) ? 'Für diesen Datensatz nicht verfügbar' : stages[sn-1].input"
+                  x-text="sn+' · '+['Struktur','Profil','Rückblick'][sn-1]"></button>
         </template>
       </div>
     </div>
@@ -866,11 +949,11 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
     </div>
   </section>
 
-  <!-- ═════════════════════════ SCHRITT 4 · BASELINE-VERGLEICH ═════════════════════════ -->
-  <section x-show="step===4" x-cloak class="fade-in space-y-5">
+  <!-- ═════════════════════════ SCHRITT 5 · RÜCKBLICK & EURO ═════════════════════════ -->
+  <section x-show="step===5" x-cloak class="fade-in space-y-5">
     <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
       <div>
-        <div class="eyebrow">Schritt 4 · Baseline-Vergleich (Stufe 3 · Rückblick)</div>
+        <div class="eyebrow">Schritt 5 · Rückblick &amp; Euro-Potenzial (Stufe 3)</div>
         <h2 class="text-[22px] font-bold mt-1">Welche Modellklasse gewinnt – und schlägt sie die Regel?</h2>
         <p class="sub text-[13.5px] mt-1 max-w-[860px]">Regel-Baseline gegen Baum-Modell, Graph-Features, Tabular Foundation Model,
           Graph Neural Network und relationale Foundation Models – auf demselben, zeitlich strikt getrennten Split.</p>
@@ -930,7 +1013,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
             <div class="banner banner-1 !py-2.5">
               <span class="text-[18px] leading-none">⚖️</span>
               <div class="text-[12.5px]"><b>So gut wäre die Vorhersage gewesen.</b> <span class="sub">Gemessen ist die Trefferqualität im
-                Rückblick – nicht, ob der Vertrieb reagiert hätte. Die Umsatzwirkung ist eine Annahme (Was-wäre-wenn in Schritt 5),
+                Rückblick – nicht, ob der Vertrieb reagiert hätte. Die Umsatzwirkung ist eine Annahme (Was-wäre-wenn weiter unten),
                 belegt erst im Pilot mit Kontrollgruppe.</span></div>
             </div>
             <template x-for="n in (btRes.notes||[])"><div class="text-[11.5px] muted">ⓘ <span x-text="n"></span></div></template>
@@ -970,7 +1053,8 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
         <div class="panel p-4 sm:p-5" data-tour="s4-leader">
           <div class="flex items-center justify-between mb-3">
             <div>
-              <div class="font-semibold">Leaderboard</div>
+              <div class="font-semibold flex items-center gap-2">Leaderboard
+                <button class="btn btn-ghost !py-0.5 !px-2 text-[11.5px] focusable" x-show="ucCheck(btUc)" @click="openUc(btUc)">ⓘ Use-Case-Seite</button></div>
               <div class="text-[12px] sub" x-text="'Test: '+btRes.timeline.test+' – '+btRes.timeline.test_label_end+' · '+sizeText()"></div>
             </div>
           </div>
@@ -1104,156 +1188,11 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
         </div>
       </div>
     </template>
-  </section>
-
-  <!-- ═════════════════════════ SCHRITT 5 · FIX-PLAYBOOKS & BUSINESS CASE ═════════════════════════ -->
-  <section x-show="step===5" x-cloak class="fade-in space-y-5">
-    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
-      <div>
-        <div class="eyebrow">Schritt 5 · Fix-Playbooks &amp; Business Case</div>
-        <h2 class="text-[22px] font-bold mt-1">Lücken schließen, bis der Use Case trägt – und was es bringt</h2>
-        <p class="sub text-[13.5px] mt-1 max-w-[880px]">Jedes Playbook ist ein reproduzierbarer Schritt auf einer Kopie der Rohdaten
-          (Pipeline v0 → v1). Danach laufen die Checks neu – auf Wunsch auch der Rückblick – bis die Ampel trägt.</p>
-      </div>
-      <div class="flex flex-wrap gap-2 items-center">
-        <span class="chip"><span class="dot dot-ok"></span>Rohdaten v0 bleiben unverändert</span>
-      </div>
+    <!-- ── Euro-Potenzial (früher Schritt 5) ── -->
+    <div class="pt-2">
+      <div class="eyebrow">Euro-Potenzial &amp; Was-wäre-wenn</div>
+      <div class="text-[13px] sub mt-1">Aus den Rückblick-Zahlen oben und klar benannten Annahmen – realistisch, konservativ, optimistisch.</div>
     </div>
-
-    <!-- Playbook-Karten -->
-    <div class="panel p-4 sm:p-5">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
-        <div>
-          <div class="font-semibold">Playbooks</div>
-          <div class="text-[12px] sub">Wirkung einzeln vorberechnet (Datenreife je Use Case) · Reihenfolge fest: <span class="mono" x-text="(pb?.order||[]).join(' → ')"></span></div>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button class="btn btn-ghost text-[12.5px]" @click="pbSelectRecommended()">Empfohlenes Paket wählen</button>
-          <button class="btn btn-ghost text-[12.5px]" @click="pbSelectNone()">Keins</button>
-        </div>
-      </div>
-      <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
-        <template x-for="c in (pb?.catalog||[])" :key="'pb'+c.id">
-          <div class="pb-card min-w-0" :class="{on: c.kind==='data' && pbSel[c.id]?.on}">
-            <div class="flex items-start justify-between gap-2">
-              <div class="flex items-center gap-2 min-w-0 flex-wrap">
-                <span class="pb" x-text="c.id"></span>
-                <span class="font-semibold text-[13.5px] leading-tight" x-text="c.title"></span>
-                <span class="text-[10.5px] muted" x-show="c.effort" :title="c.effort_note || 'Aufwandsschätzung für den Readiness-Sprint'" x-text="'≈ '+c.effort"></span>
-              </div>
-              <template x-if="c.kind==='data' && pbSel[c.id]">
-                <label class="flex items-center gap-1.5 text-[12px] cursor-pointer flex-none">
-                  <input type="checkbox" class="accent-[#34d399] w-4 h-4" x-model="pbSel[c.id].on"> anwenden
-                </label>
-              </template>
-            </div>
-            <div class="text-[12px] sub mt-1.5" x-text="c.problem"></div>
-            <template x-if="c.options && c.options.length > 1">
-              <div class="mt-2 space-y-1">
-                <template x-for="o in c.options" :key="c.id+o.id">
-                  <label class="flex items-start gap-2 text-[12px] cursor-pointer">
-                    <input type="radio" class="mt-0.5 accent-[#8b7cf6]" :name="'opt'+c.id" :value="o.id" x-model="pbSel[c.id].option">
-                    <span><span class="font-medium" x-text="o.label"></span><span class="block text-[11px] muted" x-text="'+ '+o.pro+' · − '+o.con"></span></span>
-                  </label>
-                </template>
-              </div>
-            </template>
-            <template x-if="c.options && c.options.length === 1">
-              <div class="mt-2 text-[12px]"><span class="font-medium" x-text="c.options[0].label"></span>
-                <span class="block text-[11px] muted" x-text="'+ '+c.options[0].pro+' · − '+c.options[0].con"></span></div>
-            </template>
-            <div class="text-[11px] text-amber-200/90 mt-1.5" x-show="c.note" x-text="c.note"></div>
-            <!-- Vorschau der Wirkung -->
-            <template x-if="c.kind==='data' && pb?.effects?.[c.id]">
-              <div class="mt-2.5 pt-2.5 border-t border-[#22224a] text-[11.5px]">
-                <div class="flex flex-wrap gap-x-3 gap-y-0.5 sub">
-                  <span x-text="fmtInt(pb.effects[c.id].effect.rows_removed)+' Zeilen entfernt'"></span>
-                  <span x-show="pb.effects[c.id].effect.match_rate" x-text="'Zuordnung '+fmtPct(pb.effects[c.id].effect.match_rate)"></span>
-                  <span x-show="(pb.effects[c.id].effect.groups||[]).length" x-text="(pb.effects[c.id].effect.groups||[]).length+' Gruppen'"></span>
-                  <span x-show="pb.effects[c.id].effect.revenue_change_gbp" x-text="'Umsatz '+fmtSignedEur(pb.effects[c.id].effect.revenue_change_gbp*1.15)"></span>
-                </div>
-                <div class="flex flex-wrap gap-1 mt-1.5">
-                  <template x-for="d in pb.effects[c.id].comparison.filter(x => x.delta !== 0)" :key="c.id+d.id">
-                    <span class="chip !py-0 !text-[10.5px]" :class="d.delta > 0 ? 'delta-up' : 'delta-down'" x-text="ucShort(d.id)+' '+(d.delta > 0 ? '+' : '')+d.delta"></span>
-                  </template>
-                  <template x-if="!pb.effects[c.id].comparison.some(x => x.delta !== 0)">
-                    <span class="text-[11px] muted" x-text="pbChangedText(pb.effects[c.id].comparison)"></span>
-                  </template>
-                </div>
-              </div>
-            </template>
-            <template x-if="c.id==='PB-05' && pb?.effects?.['PB-05']">
-              <details class="mt-2 text-[11.5px]"><summary class="cursor-pointer text-[#a5b4fc]">Gruppen ansehen</summary>
-                <div class="flex flex-wrap gap-1 mt-1.5"><template x-for="g in pb.effects['PB-05'].effect.groups" :key="g.name">
-                  <span class="chip !py-0 !text-[10.5px]" :title="g.terms.join(', ')" x-text="g.name+' · '+g.products"></span></template></div></details>
-            </template>
-            <!-- Checkliste -->
-            <template x-if="c.kind==='checklist'">
-              <div class="mt-2 space-y-1">
-                <template x-for="it in c.items" :key="it"><label class="flex items-center gap-2 text-[12px] cursor-pointer">
-                  <input type="checkbox" class="accent-[#34d399] w-4 h-4" x-model="pbGov[it]"><span x-text="it"></span></label></template>
-              </div>
-            </template>
-            <!-- Datenanforderung -->
-            <template x-if="c.kind==='request'">
-              <div class="mt-2">
-                <template x-for="sct in (pb?.data_request?.sections||[])" :key="'dr'+sct.use_case">
-                  <div class="text-[12px] mt-1"><span class="font-medium" x-text="sct.name+':'"></span>
-                    <span class="sub" x-text="sct.fields.map(f => f.label).join(', ')"></span></div>
-                </template>
-                <div class="flex flex-wrap gap-2 mt-2.5">
-                  <a class="btn btn-ghost !py-1.5 text-[12px]" href="/graph_ml/api/playbooks/datarequest.md">⬇ Anforderung (.md)</a>
-                  <a class="btn btn-ghost !py-1.5 text-[12px]" href="/graph_ml/api/playbooks/datarequest.csv">⬇ Mapping-Vorlage (.csv)</a>
-                </div>
-              </div>
-            </template>
-          </div>
-        </template>
-      </div>
-      <div class="flex flex-col md:flex-row md:items-center gap-3 mt-4 pt-4 border-t border-[#22224a]">
-        <label class="flex items-center gap-2 text-[12.5px] cursor-pointer"><input type="checkbox" class="accent-[#8b7cf6] w-4 h-4" x-model="pbBacktest">
-          auch Rückblick neu rechnen (Stufe 3, Job)</label>
-        <span class="text-[11.5px] muted md:ml-2" x-text="pbHint()"></span>
-        <button class="btn btn-primary md:ml-auto" @click="applyPlaybooks()" :disabled="pbJob && (pbJob.status==='running' || pbJob.status==='queued')">Anwenden &amp; neu prüfen</button>
-      </div>
-      <template x-if="pbJob && pbJob.status !== 'completed'">
-        <div class="mt-3"><div class="bar"><span :style="'width:'+pbJob.progress+'%;background:linear-gradient(90deg,#34d399,#22d3ee)'"></span></div>
-          <div class="text-[11px] sub mt-1" x-text="pbJob.message || pbJob.status"></div></div>
-      </template>
-    </div>
-
-    <!-- Vorher / Nachher -->
-    <div class="panel p-4 sm:p-5" x-show="pbResult">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-3">
-        <div>
-          <div class="font-semibold">Vorher / Nachher</div>
-          <div class="text-[12px] sub" x-text="'Pipeline '+(pbResult?.variant||'')+' · '+(pbResult?.steps||[]).map(s => s.id+(s.option!=='A' ? ' '+s.option : '')).join(' → ')"></div>
-        </div>
-        <div class="flex flex-wrap gap-2 text-[12px]">
-          <span class="chip" x-text="'vorher: '+(pbResult?.before_counts?.ok||0)+' grün · '+(pbResult?.before_counts?.warn||0)+' gelb · '+(pbResult?.before_counts?.bad||0)+' rot'"></span>
-          <span class="chip" style="border-color:rgba(52,211,153,.5)" x-text="'nachher: '+(pbResult?.after_counts?.ok||0)+' grün · '+(pbResult?.after_counts?.warn||0)+' gelb · '+(pbResult?.after_counts?.bad||0)+' rot'"></span>
-        </div>
-      </div>
-      <div class="rounded-xl border border-[#22224a] overflow-hidden"><div class="scroll-x scroll-thin">
-        <table class="tbl min-w-[860px]">
-          <thead><tr><th>Use Case</th><th>Datenreife vorher</th><th>nachher</th><th>Δ</th><th>Vorhersagekraft nachher</th><th>Geänderte Prüfungen</th></tr></thead>
-          <tbody><template x-for="c in (pbResult?.comparison||[])" :key="'cmp'+c.id"><tr>
-            <td class="font-semibold whitespace-nowrap" x-text="c.name"></td>
-            <td><span class="amp" :class="'amp-'+c.before.status"><span class="amp-ic" x-text="ampIcon(c.before.status)"></span><span x-text="c.before.score"></span></span></td>
-            <td><span class="amp" :class="'amp-'+c.after.status"><span class="amp-ic" x-text="ampIcon(c.after.status)"></span><span x-text="c.after.score"></span></span></td>
-            <td class="font-bold tabular-nums" :class="c.delta > 0 ? 'delta-up' : c.delta < 0 ? 'delta-down' : 'muted'" x-text="(c.delta > 0 ? '▲ +' : c.delta < 0 ? '▼ ' : '')+c.delta"></td>
-            <td class="whitespace-nowrap">
-              <template x-if="pbResult?.backtest?.[c.id]"><span class="amp" :class="'amp-'+pbResult.backtest[c.id].vorhersagekraft.status">
-                <span class="amp-ic" x-text="ampIcon(pbResult.backtest[c.id].vorhersagekraft.status)"></span><span x-text="fmtLift(pbResult.backtest[c.id].vorhersagekraft.lift)"></span></span></template>
-              <span x-show="!pbResult?.backtest?.[c.id]" class="muted text-[11.5px]">–</span>
-            </td>
-            <td class="text-[11.5px] sub min-w-[280px]">
-              <template x-for="d in c.changed.slice(0, 4)" :key="c.id+d.dim"><span class="inline-block mr-2" :class="d.after > d.before ? 'delta-up' : 'delta-down'"
-                x-text="dimName(d.dim)+' '+(d.before ?? '–')+'→'+(d.after ?? '–')"></span></template>
-            </td></tr></template></tbody>
-        </table></div></div>
-    </div>
-
     <!-- Ampel-Dashboard -->
     <div class="panel p-4 sm:p-5">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
@@ -1398,7 +1337,8 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
     <div class="panel p-4 sm:p-5" data-tour="s6-lists">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
         <div>
-          <div class="font-semibold">Aktionslisten</div>
+          <div class="font-semibold flex items-center gap-2">Aktionslisten
+            <button class="btn btn-ghost !py-0.5 !px-2 text-[11.5px] focusable" x-show="ucCheck(actUc)" @click="openUc(actUc)">ⓘ Use-Case-Seite</button></div>
           <div class="text-[12px] sub">Eine Liste je Use Case aus der empfohlenen Engine · Next Best Action führt sie je Kunde zusammen</div>
         </div>
         <div class="flex flex-wrap gap-1.5" role="tablist" aria-label="Liste wählen">
@@ -1709,7 +1649,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
                 <td class="whitespace-nowrap">
                   <div class="flex items-center gap-2">
                     <span x-show="u.lighthouse" class="text-amber-300" title="Leuchtturm-Use-Case">★</span>
-                    <span class="font-semibold" x-text="u.name"></span>
+                    <button class="font-semibold text-left hover:text-[#a5b4fc] focusable rounded" @click="openUc(u.id)" :title="'Use-Case-Seite: '+u.name" x-text="u.name"></button>
                   </div>
                 </td>
                 <td><span class="chip !py-0.5" :style="u.area==='After Sales' ? 'color:#f9a8d4;border-color:rgba(244,114,182,.4)' : ''" x-text="u.area"></span></td>
@@ -1730,7 +1670,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
                 </td>
                 <td>
                   <template x-if="vkOf(u.id)">
-                    <button class="amp focusable" :class="'amp-'+vkOf(u.id).status" @click="step=4; selectBt(u.id)" :title="vkOf(u.id).reason">
+                    <button class="amp focusable" :class="'amp-'+vkOf(u.id).status" @click="step=5; selectBt(u.id)" :title="vkOf(u.id).reason">
                       <span class="amp-ic" x-text="ampIcon(vkOf(u.id).status)"></span><span x-text="vkOf(u.id).status==='na' ? 'nicht messbar' : fmtLift(vkOf(u.id).lift)"></span>
                     </button>
                   </template>
@@ -1805,7 +1745,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
             <span class="font-bold text-[16px]" x-text="ucDetail().name"></span>
             <span class="chip !py-0.5" x-text="ucDetail().area"></span>
           </div>
-          <div class="text-[12px] sub mt-1" x-text="'Stufe '+checks?.stage_used+' · max. Stufe '+ucDetail().max_stage+' · '+ucDetail().readiness.reason"></div>
+          <div class="text-[12px] sub mt-1" x-text="'Prüfstufe '+stage+' · max. Stufe '+ucDetail().max_stage+' · '+ucDetail().readiness.reason"></div>
         </div>
         <div class="flex items-center gap-2 flex-none">
           <span class="amp amp-lg" :class="ampClass(ucDetail().readiness)"><span class="amp-ic" x-text="ampIcon(ucDetail().readiness.status)"></span>
@@ -1814,76 +1754,144 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
         </div>
       </div>
       <div class="flex-1 scroll-y scroll-thin p-5 space-y-5">
-        <!-- Ampel 3 Dimensionen -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <div class="panel-flat p-3"><div class="kpi-label">Datenreife</div>
-            <div class="mt-1.5"><span class="amp" :class="ampClass(ucDetail().readiness)"><span class="amp-ic" x-text="ampIcon(ucDetail().readiness.status)"></span><span x-text="ucDetail().readiness.score"></span></span></div></div>
-          <div class="panel-flat p-3"><div class="kpi-label">Vorhersagekraft</div><div class="mt-1.5">
-            <template x-if="vkOf(ucDetail().id)"><span class="amp" :class="'amp-'+vkOf(ucDetail().id).status" :title="vkOf(ucDetail().id).reason">
-              <span class="amp-ic" x-text="ampIcon(vkOf(ucDetail().id).status)"></span><span x-text="vkOf(ucDetail().id).status==='na' ? 'n. m.' : fmtLift(vkOf(ucDetail().id).lift)"></span></span></template>
-            <template x-if="!vkOf(ucDetail().id)"><span class="amp amp-pending"><span class="ring"></span>Stufe 3</span></template></div></div>
-          <div class="panel-flat p-3"><div class="kpi-label">Euro-Potenzial</div><div class="mt-1.5">
-            <template x-if="euroOf(ucDetail().id)"><span class="amp" :class="'amp-'+euroOf(ucDetail().id).status"><span class="amp-ic" x-text="ampIcon(euroOf(ucDetail().id).status)"></span>
-              <span x-text="euroOf(ucDetail().id).status==='na' ? 'n. m.' : fmtEur(euroOf(ucDetail().id).annual)"></span></span></template>
-            <template x-if="!euroOf(ucDetail().id)"><span class="amp amp-pending"><span class="ring"></span>Stufe 3</span></template></div></div>
-          <div class="panel-flat p-3"><div class="kpi-label">Gesamt</div>
-            <div class="mt-1.5"><span class="amp" :class="'amp-'+gesamtOf(ucDetail().id).status+(gesamtOf(ucDetail().id).provisional ? ' amp-prov' : '')" :title="gesamtOf(ucDetail().id).note">
-              <span class="amp-ic" x-text="ampIcon(gesamtOf(ucDetail().id).status)"></span><span x-text="gesamtOf(ucDetail().id).provisional ? 'vorläufig' : ampText(gesamtOf(ucDetail().id).status)"></span></span></div></div>
+        <!-- 1 · Worum geht es -->
+        <div class="uc-sec">
+          <div class="uc-num">1</div>
+          <div class="flex-1 min-w-0">
+            <div class="eyebrow">Worum geht es</div>
+            <div class="font-semibold text-[15px] mt-1" x-text="ucMeta()?.story?.v2 || ucDetail().name"></div>
+            <div class="grid sm:grid-cols-3 gap-3 mt-2 text-[12.5px]">
+              <div><div class="kpi-label">Hebel</div><div x-text="ucDetail().lever"></div></div>
+              <div><div class="kpi-label">Wirkung laut Literatur</div><div x-text="ucMeta()?.story?.effect || '–'"></div></div>
+              <div><div class="kpi-label">Eignung Graph ML / TFM</div>
+                <span class="chip !py-0.5 mt-0.5" :class="{'delta-up': ucMeta()?.story?.fit==='hoch'}" x-text="ucMeta()?.story?.fit || '–'"></span></div>
+            </div>
+            <div class="text-[11px] muted mt-1.5">Literaturwerte sind Größenordnungen aus Studien und Praxisfällen – den eigenen Effekt misst erst der Pilot.</div>
+            <div class="flex flex-wrap gap-1.5 mt-2" x-show="ucDetail().blockers.length">
+              <template x-for="b in ucDetail().blockers"><span class="chip !py-0.5 !text-[11px]">⚑ <span x-text="b"></span></span></template>
+            </div>
+            <div class="text-[12px] mt-2" x-show="ucDetail().app_route">Bisherige App:
+              <a :href="ucDetail().app_route" class="text-[#a5b4fc] hover:underline" x-text="ucDetail().app_name"></a></div>
+          </div>
         </div>
 
-        <!-- Label -->
-        <div class="panel p-4">
-          <div class="eyebrow">Vorhersageziel (Label)</div>
-          <div class="font-semibold mt-1.5" x-text="ucDetail().label"></div>
-          <div class="text-[12.5px] sub mt-1" x-text="ucDetail().label_detail"></div>
-          <div class="grid sm:grid-cols-3 gap-3 mt-3 text-[12px]">
-            <div><div class="muted text-[10.5px] uppercase tracking-wide font-bold">Regel-Baseline</div><div x-text="ucDetail().baseline"></div></div>
-            <div><div class="muted text-[10.5px] uppercase tracking-wide font-bold">Hebel</div><div x-text="ucDetail().lever"></div></div>
-            <div><div class="muted text-[10.5px] uppercase tracking-wide font-bold">Bisherige App</div>
-              <a x-show="ucDetail().app_route" :href="ucDetail().app_route" class="text-[#a5b4fc] hover:underline" x-text="ucDetail().app_name"></a>
-              <span x-show="!ucDetail().app_route" class="muted" x-text="ucDetail().app_name"></span></div>
+        <!-- 2 · Input-Daten -->
+        <div class="uc-sec">
+          <div class="uc-num">2</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <div class="eyebrow">Input-Daten</div>
+              <span class="text-[11px] muted">rot gestrichelt = fehlt</span>
+            </div>
+            <div id="cyUc" class="cy h-[200px] mt-2"></div>
+            <div class="mt-2">
+              <template x-for="f in ucDetail().fields" :key="'f'+f.field">
+                <div class="field-row">
+                  <span class="w-4 text-center font-bold" :class="f.state==='found' ? 'text-emerald-300' : f.state==='substituted' ? 'text-amber-300' : (f.importance==='optional' ? 'muted' : 'text-red-300')"
+                        x-text="f.state==='found' ? '✓' : f.state==='substituted' ? '≈' : '✕'"></span>
+                  <span class="flex-1 min-w-0"><span x-text="f.label"></span><span class="text-[10.5px] muted ml-1" x-text="f.importance"></span>
+                    <span x-show="f.state==='substituted'" class="block text-[11px] text-amber-200" x-text="'ersetzt über '+f.alt_label"></span></span>
+                  <span class="mono text-[11.5px] sub text-right truncate max-w-[45%]" x-text="f.binding ? f.binding.table+'.'+f.binding.column : (f.state==='substituted' ? '' : 'fehlt')"></span>
+                  <span class="pb" x-show="f.playbook && f.state!=='found'" x-text="f.playbook"></span>
+                </div>
+              </template>
+            </div>
           </div>
-          <div class="flex flex-wrap gap-1.5 mt-3"><template x-for="b in ucDetail().blockers"><span class="chip !py-0.5">⚑ <span x-text="b"></span></span></template></div>
         </div>
 
-        <!-- Daten -->
-        <div class="panel p-4">
-          <div class="flex items-center justify-between">
-            <div class="eyebrow">Benötigte vs. vorhandene Daten</div>
-            <span class="text-[11px] muted">rot gestrichelt = fehlt</span>
-          </div>
-          <div id="cyUc" class="cy h-[220px] mt-3"></div>
-          <div class="mt-3">
-            <template x-for="f in ucDetail().fields" :key="'f'+f.field">
-              <div class="field-row">
-                <span class="w-4 text-center font-bold" :class="f.state==='found' ? 'text-emerald-300' : f.state==='substituted' ? 'text-amber-300' : (f.importance==='optional' ? 'muted' : 'text-red-300')"
-                      x-text="f.state==='found' ? '✓' : f.state==='substituted' ? '≈' : '✕'"></span>
-                <span class="flex-1 min-w-0">
-                  <span x-text="f.label"></span>
-                  <span class="text-[10.5px] muted ml-1" x-text="f.importance"></span>
-                  <span x-show="f.state==='substituted'" class="block text-[11px] text-amber-200" x-text="'ersetzt über '+f.alt_label"></span>
-                </span>
-                <span class="mono text-[11.5px] sub text-right truncate max-w-[45%]" x-text="f.binding ? f.binding.table+'.'+f.binding.column : (f.state==='substituted' ? '' : 'fehlt')"></span>
-                <span class="pb" x-show="f.playbook && f.state!=='found'" x-text="f.playbook"></span>
+        <!-- 3 · Warum relational / Graph -->
+        <div class="uc-sec">
+          <div class="uc-num">3</div>
+          <div class="flex-1 min-w-0">
+            <div class="eyebrow">Warum relationales Lernen – oder reicht LightGBM?</div>
+            <div class="text-[13px] mt-1.5" x-text="ucMeta()?.story?.graph"></div>
+            <div class="flex flex-wrap items-center gap-1.5 mt-2.5" x-show="ucMeta()?.story?.path">
+              <template x-for="(n, i) in (ucMeta()?.story?.path || [])" :key="'p'+i">
+                <span class="flex items-center gap-1.5"><span class="chip !py-0.5 !text-[11.5px]" style="border-color:rgba(34,211,238,.45);color:#a5f3fc" x-text="n"></span>
+                  <span x-show="i < ucMeta().story.path.length-1" class="text-[#22d3ee]">→</span></span>
+              </template>
+            </div>
+            <div class="text-[12px] sub mt-2"><b class="text-[#e7e9f3]">Was ein flaches Modell schon sieht:</b> <span x-text="ucMeta()?.story?.tabular"></span></div>
+            <template x-if="ucClassRows().length">
+              <div class="mt-3">
+                <div class="kpi-label mb-1" x-text="'Gemessen im Rückblick · '+(ucBt?.main_metric_label||'')"></div>
+                <template x-for="r in ucClassRows()" :key="r.fam">
+                  <div class="flex items-center gap-2 text-[12px] py-0.5">
+                    <span class="w-[42%] truncate" :title="r.name"><b x-text="r.famName"></b> <span class="muted" x-text="'· '+r.name"></span></span>
+                    <div class="bar flex-1"><span :style="'width:'+r.w+'%;background:'+(r.best ? '#22d3ee' : r.fam==='graph' ? '#8b7cf6' : '#5b6488')"></span></div>
+                    <span class="tabular-nums w-14 text-right" x-text="fmtNum(r.value, 3)"></span>
+                    <span class="tabular-nums w-16 text-right" :class="r.lift > 0 ? 'delta-up' : 'muted'" x-text="r.fam==='rule' ? 'Basis' : fmtLift(r.lift)"></span>
+                  </div>
+                </template>
+                <div class="text-[12px] mt-2 panel-flat p-2.5" x-text="ucVerdict()"></div>
               </div>
             </template>
+            <div class="text-[12px] muted mt-2" x-show="!ucClassRows().length">Kein Rückblick möglich – der Datensatz enthält die nötigen Tabellen nicht.</div>
           </div>
         </div>
 
-        <!-- Engine -->
-        <div class="panel p-4" x-show="ucDetail().engine">
-          <div class="eyebrow">Empfohlene Engine</div>
-          <div class="flex flex-wrap items-center gap-2 mt-2">
-            <span class="chip !text-[12px] !py-1" style="color:#c4b5fd;border-color:rgba(139,124,246,.5);background:rgba(139,124,246,.12)" x-text="ucDetail().engine?.primary"></span>
-            <template x-for="c in (ucDetail().engine?.challengers||[])"><span class="chip !py-1" x-text="'Herausforderer: '+c"></span></template>
-            <span class="chip !py-1" x-text="'Baseline: '+(ucDetail().engine?.baseline||'')"></span>
+        <!-- 4 · Vorhersage -->
+        <div class="uc-sec">
+          <div class="uc-num">4</div>
+          <div class="flex-1 min-w-0">
+            <div class="eyebrow">Was wird vorhergesagt</div>
+            <div class="font-semibold mt-1" x-text="ucDetail().label"></div>
+            <div class="text-[12.5px] sub mt-0.5" x-text="ucDetail().label_detail"></div>
+            <div class="grid sm:grid-cols-2 gap-3 mt-2 text-[12px]">
+              <div><div class="kpi-label">Einheit &amp; Zeitfenster</div><div x-text="ucMeta()?.story?.unit || '–'"></div></div>
+              <div><div class="kpi-label">Vergleich: so macht es der Vertrieb heute</div><div x-text="ucDetail().baseline"></div></div>
+            </div>
           </div>
-          <div class="text-[12.5px] sub mt-2" x-text="ucDetail().engine?.reason"></div>
         </div>
 
-        <!-- Prüfergebnisse -->
-        <div>
-          <div class="eyebrow mb-2">Prüfergebnisse</div>
+        <!-- 5 · Nutzen in Euro -->
+        <div class="uc-sec">
+          <div class="uc-num">5</div>
+          <div class="flex-1 min-w-0">
+            <div class="eyebrow">Nutzen in Euro</div>
+            <div class="text-[12.5px] mt-1"><span class="muted">Formel:</span> <span x-text="ucMeta()?.story?.euro || '–'"></span></div>
+            <template x-if="bc?.cases?.[ucDetail().id]?.euro?.annual != null">
+              <div class="flex flex-wrap items-center gap-3 mt-2">
+                <div><span class="text-[20px] font-bold tabular-nums" x-text="fmtEur(bc.cases[ucDetail().id].euro.annual)"></span>
+                  <span class="text-[12px] sub">pro Jahr · realistisch, netto</span></div>
+                <span class="amp" :class="'amp-'+bc.cases[ucDetail().id].euro.status"><span class="amp-ic" x-text="ampIcon(bc.cases[ucDetail().id].euro.status)"></span><span x-text="ampText(bc.cases[ucDetail().id].euro.status)"></span></span>
+                <button class="btn btn-ghost !py-1 !px-2.5 text-[12px] ml-auto focusable" @click="const id = ucDetail().id; closeUc(); step=5; bcUc=id">Annahmen anpassen →</button>
+              </div>
+            </template>
+            <div class="text-[12px] muted mt-2" x-show="bc?.cases?.[ucDetail().id]?.euro?.annual == null">Mit diesem Datensatz nicht bewertbar – Datenanforderung im Schritt Fix-Playbooks (PB-10).</div>
+            <div class="text-[11px] muted mt-1.5" x-text="bc?.disclaimer"></div>
+          </div>
+        </div>
+
+        <!-- 6 · Readiness-Ampel -->
+        <div class="uc-sec">
+          <div class="uc-num">6</div>
+          <div class="flex-1 min-w-0">
+            <div class="eyebrow">Readiness-Ampel</div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+              <div class="panel-flat p-3"><div class="kpi-label">Datenreife</div>
+                <div class="mt-1.5"><span class="amp" :class="ampClass(ucDetail().readiness)"><span class="amp-ic" x-text="ampIcon(ucDetail().readiness.status)"></span><span x-text="ucDetail().readiness.score"></span></span></div></div>
+              <div class="panel-flat p-3"><div class="kpi-label">Vorhersagekraft</div><div class="mt-1.5">
+                <template x-if="vkOf(ucDetail().id)"><span class="amp" :class="'amp-'+vkOf(ucDetail().id).status" :title="vkOf(ucDetail().id).reason">
+                  <span class="amp-ic" x-text="ampIcon(vkOf(ucDetail().id).status)"></span><span x-text="vkOf(ucDetail().id).status==='na' ? 'n. m.' : fmtLift(vkOf(ucDetail().id).lift)"></span></span></template>
+                <template x-if="!vkOf(ucDetail().id)"><span class="amp amp-pending"><span class="ring"></span>Stufe 3</span></template></div></div>
+              <div class="panel-flat p-3"><div class="kpi-label">Euro-Potenzial</div><div class="mt-1.5">
+                <template x-if="euroOf(ucDetail().id)"><span class="amp" :class="'amp-'+euroOf(ucDetail().id).status"><span class="amp-ic" x-text="ampIcon(euroOf(ucDetail().id).status)"></span>
+                  <span x-text="euroOf(ucDetail().id).status==='na' ? 'n. m.' : fmtEur(euroOf(ucDetail().id).annual)"></span></span></template>
+                <template x-if="!euroOf(ucDetail().id)"><span class="amp amp-pending"><span class="ring"></span>Stufe 3</span></template></div></div>
+              <div class="panel-flat p-3"><div class="kpi-label">Gesamt</div>
+                <div class="mt-1.5"><span class="amp" :class="'amp-'+gesamtOf(ucDetail().id).status+(gesamtOf(ucDetail().id).provisional ? ' amp-prov' : '')" :title="gesamtOf(ucDetail().id).note">
+                  <span class="amp-ic" x-text="ampIcon(gesamtOf(ucDetail().id).status)"></span><span x-text="gesamtOf(ucDetail().id).provisional ? 'vorläufig' : ampText(gesamtOf(ucDetail().id).status)"></span></span></div></div>
+            </div>
+            <div class="text-[12px] sub mt-2" x-text="(gesamtOf(ucDetail().id).note || '')"></div>
+            <div class="text-[12.5px] mt-2" x-show="ucBt?.recommendation?.text"><b>Empfehlung:</b> <span x-text="ucBt?.recommendation?.text"></span></div>
+            <div class="text-[12.5px] mt-1" x-show="!ucBt && ucDetail().engine"><b>Erwartete Engine:</b> <span x-text="ucDetail().engine?.primary+' – '+ucDetail().engine?.reason"></span></div>
+          </div>
+        </div>
+
+        <!-- Prüfergebnisse im Detail -->
+        <details class="uc-details" :open="!!ucFocusDim">
+          <summary class="cursor-pointer eyebrow mb-2">Prüfergebnisse im Detail (9 Dimensionen)</summary>
           <div class="space-y-2.5">
             <template x-for="c in ucDetail().checks" :key="'chk'+c.dim">
               <div class="chk" :class="{focus: ucFocusDim===c.dim}" :id="'chk-'+c.dim">
@@ -1912,7 +1920,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
               </div>
             </template>
           </div>
-        </div>
+        </details>
       </div>
     </div>
   </template>
@@ -2054,13 +2062,13 @@ const TIMELINE_SOURCES = [
 const TOUR = [
   { act: 1, title: 'Echte Daten, echte Lücken', step: 1, stage: 2, ds: 'online_retail_ii', target: '[data-tour="s1-facts"]',
     text: 'Online Retail II: 1,07 Mio. Positionen eines britischen Händlers. 22,8 % ohne Kundennummer, Stornos ohne Originalbeleg, Dubletten, Preis 0 – so sehen ERP-Exporte aus.' },
-  { act: 1, title: 'Die Ampel macht sichtbar, was trägt', step: 3, stage: 2, target: '#ampel',
+  { act: 1, title: 'Die Ampel macht sichtbar, was trägt', step: 4, stage: 2, target: '#ampel',
     text: 'Neun Use Cases, neun Prüfungen. Schon der Profilcheck – nur Kennzahlen, keine Rohdaten – zeigt: Warranty und Marge tragen nicht, Churn und Retouren schon.' },
   { act: 2, title: 'Die Datenbank als Graph', step: 2, ds: 'online_retail_ii', target: '[data-tour="s2-graph"]',
     text: 'Jede Tabelle ein Knotentyp, jeder Schlüssel eine Kante. Verknüpfungsquoten zeigen, wo der Graph reißt – hier fehlen Kunden an 22,8 % der Positionen.' },
   { act: 2, title: 'ERP-Schema: AdventureWorks', step: 2, ds: 'adventureworks', target: '[data-tour="s2-graph"]',
     text: '68 Tabellen eines Fahrradherstellers, nur das Schema. Der Strukturcheck (Stufe 1) erkennt Schlüssel und zeigt, welche Use Cases grundsätzlich abbildbar sind.' },
-  { act: 3, title: 'Rückblick: Wer gewinnt?', step: 4, stage: 3, ds: 'online_retail_ii', btUc: 'churn', target: '[data-tour="s4-leader"]',
+  { act: 3, title: 'Rückblick: Wer gewinnt?', step: 5, stage: 3, ds: 'online_retail_ii', btUc: 'churn', target: '[data-tour="s4-leader"]',
     text: 'Streng nach Datum getrennt: Regel des Vertriebs gegen Bäume, TabPFN und Graph Neural Network. Bei Churn gewinnt das GNN mit +15 % Umsatz-Recall.' },
   { act: 3, title: 'Was wäre wenn – in Euro', step: 5, bcUc: 'churn', target: '[data-tour="s5-whatif"]',
     text: 'Aus echten Rückblick-Zahlen und klar benannten Annahmen: Rettungsquote, Kosten, Kampagnen. Den echten Effekt belegt erst der Pilot mit Kontrollgruppe.' },
@@ -2074,15 +2082,27 @@ function afterRender(fn) { setTimeout(fn, 20); }
 
 // Großes Schema lesbar anordnen: ein Block je Schema, Tabellen nach Vernetzung sortiert,
 // Blöcke auf zwei Spalten verteilt (feste Positionen statt Kräfte-Layout).
-function schemaBlocks(m) {
+// Fachliche Gruppe für Tabellen ohne Datenbank-Schema (Online Retail II, Uploads) – gleiche Block-Darstellung wie AdventureWorks
+function domainOf(t) {
+  const n = ((t.name || '') + ' ' + (t.label || '')).toLowerCase();
+  if (/kunde|customer|account|debitor|person|contact/.test(n)) return 'Kunden';
+  if (/artikel|product|stock|item|material|sku/.test(n)) return 'Artikel';
+  if (/invoice|rechnung|order|auftrag|position|line|beleg|sales|umsatz/.test(n)) return 'Vertrieb';
+  if (/countr|land|region|currency|waehrung|territor/.test(n)) return 'Stammdaten';
+  return 'Daten';
+}
+function groupOf(t) { return t.schema || domainOf(t); }
+
+function schemaBlocks(m, big = false) {
   const groups = {}, deg = {};
-  m.tables.forEach(t => (groups[t.schema || '—'] ||= []).push(t));
+  m.tables.forEach(t => (groups[groupOf(t)] ||= []).push(t));
   m.relations.forEach(r => { deg[r.from_table] = (deg[r.from_table] || 0) + 1; deg[r.to_table] = (deg[r.to_table] || 0) + 1; });
-  const CW = 205, CH = 52, COLS = 4, GAP = 90, HEAD = 30;
+  const CW = big ? 240 : 205, CH = big ? 96 : 52, COLS = big ? 2 : 4, GAP = big ? 110 : 90, HEAD = big ? 40 : 30;
   const order = Object.keys(groups).sort((a, b) => groups[b].length - groups[a].length);
   const colH = [0, 0], pos = {};
   order.forEach(g => {
-    const ts = groups[g].sort((a, b) => (deg[b.name] || 0) - (deg[a.name] || 0));
+    // ERP-Schema: zentrale Tabellen zuerst; Datenmodus: zentrale Tabelle nach rechts, zur Nachbargruppe hin
+    const ts = groups[g].sort((a, b) => big ? (deg[a.name] || 0) - (deg[b.name] || 0) : (deg[b.name] || 0) - (deg[a.name] || 0));
     const rows = Math.ceil(ts.length / COLS);
     const c = colH[0] <= colH[1] ? 0 : 1;
     const x0 = c * (COLS * CW + GAP), y0 = colH[c] + HEAD;
@@ -2104,7 +2124,8 @@ function guardWheel(el) {
   el.parentElement.addEventListener('wheel', e => { if (!(e.ctrlKey || e.metaKey)) e.stopPropagation(); }, { capture: true });
 }
 
-const SCHEMA_COLORS = { Sales: '#8b7cf6', Production: '#22d3ee', Person: '#f59e0b', Purchasing: '#34d399', HumanResources: '#f472b6' };
+const SCHEMA_COLORS = { Sales: '#8b7cf6', Production: '#22d3ee', Person: '#f59e0b', Purchasing: '#34d399', HumanResources: '#f472b6',
+                        Vertrieb: '#8b7cf6', Artikel: '#22d3ee', Kunden: '#f59e0b', Stammdaten: '#34d399', Daten: '#f472b6' };
 const STATUS_COLORS = { ok: '#34d399', warn: '#fbbf24', bad: '#f87171', unknown: '#5b6488' };
 
 function graphReady() {
@@ -2116,24 +2137,12 @@ function graphReady() {
       { n: 3, name: 'Rückblick', input: 'Historische Rohdaten, streng nach Datum getrennt', claim: 'So gut wäre die Vorhersage gewesen – so viel Potenzial', risk: 'Annahme zur Wirkung', price: '8.000 – 20.000 €' },
     ],
     steps: [
-      { n: 1, name: 'Konnektoren', sub: 'ERP · CRM · Export', ready: true },
-      { n: 2, name: 'Graph-Mapping', sub: 'Schlüssel · Zeit · Kanten', ready: true },
-      { n: 3, name: 'Readiness-Checks', sub: '9 Prüfungen je Use Case', ready: true, prompt: 2, icon: '🚦',
-        title: 'Trägt die Datenlage den Use Case?',
-        desc: 'Neun Prüfdimensionen je Use Case ergeben einen Readiness-Score mit konkreten Maßnahmen – für Strukturcheck (Stufe 1) und Profilcheck (Stufe 2).',
-        bullets: ['Use-Case-Bibliothek mit Label-Definition, Pflichttabellen und typischen Blockern', 'Struktur, Zeit & Leakage, Label & Historie, Modellwahl, Cold Start, Spaltenqualität, Freitext, Limits, Governance', 'Profil-Export für Kunden: nur Kennzahlen, keine personenbezogenen Daten', 'Ampel-Matrix mit Begründung je Prüfung'] },
-      { n: 4, name: 'Baseline-Vergleich', sub: 'Bäume · TFM · GNN · RFM', ready: true, prompt: 3, icon: '⚖️',
-        title: 'Welche Modellklasse gewinnt – und schlägt sie die Regel?',
-        desc: 'Zeitlich strikt getrennter Rückblick (Stufe 3): Regel-Baseline gegen LightGBM, TabPFN, Graph Neural Network, KumoRFM und Aurora – auf CPU, lokaler GPU oder RunPod.',
-        bullets: ['RelBench-artige Snapshots mit 90-Tage-Labels, Leakage-Guard', 'Leaderboard mit Konfidenzintervallen, Kalibrierung und Laufzeit je Gerät', 'Empfohlene Engine je Use Case nach „Beyond IID“', 'GPU-Jobs über eigenen RunPod-Worker'] },
-      { n: 5, name: 'Fix-Playbooks', sub: 'Bereinigen · neu prüfen', ready: true, prompt: 4, icon: '🛠️',
-        title: 'Lücken schließen, bis der Use Case trägt',
-        desc: 'Reproduzierbare Reparaturschritte mit Vorher/Nachher-Ampel – und die Was-wäre-wenn-Rechnung mit Euro-Potenzial unter klar benannten Annahmen.',
-        bullets: ['PB-01 fehlende Kundennummern · PB-02 Storno-Matching · PB-05 Artikelgruppen aus Freitext …', 'Ampel aus Datenreife, Vorhersagekraft und Euro-Potenzial', 'Was-wäre-wenn mit Schiebereglern: Listengröße, Rettungsquote, Kosten', 'Trichter vom Light-Scan bis zur Lizenz'] },
-      { n: 6, name: 'Aktivierung', sub: 'CRM · Kontrollgruppe', ready: true, prompt: 5, icon: '🚀',
-        title: 'Vorhersagen dorthin, wo der Vertrieb arbeitet',
-        desc: 'Priorisierte Aktionslisten mit Gründen, Mensch in der Schleife, Kontrollgruppe für den Pilot, Monitoring von Datenqualität und Drift.',
-        bullets: ['Aktionslisten je Use Case mit kalibrierten Schwellen', 'Export für CRM-Import (Salesforce, HubSpot, Dynamics) als Vorschau', 'Kontrollgruppe und Fallzahlschätzung für den Pilot', 'Readiness-Report als PDF und Excel'] },
+      { n: 1, name: 'Daten', sub: 'Datensatz · Lücken', ready: true },
+      { n: 2, name: 'Graph-Mapping', sub: 'Tabellen als Graph', ready: true },
+      { n: 3, name: 'Fix-Playbooks', sub: 'Lücken schließen', ready: true },
+      { n: 4, name: 'Readiness', sub: 'Ampel je Use Case', ready: true },
+      { n: 5, name: 'Rückblick & €', sub: 'Modelle · Potenzial', ready: true },
+      { n: 6, name: 'Aktivierung', sub: 'Listen · Monitoring', ready: true },
     ],
     schemaColors: SCHEMA_COLORS,
     system: null, systemOpen: false, selftest: null,
@@ -2153,7 +2162,7 @@ function graphReady() {
     timeline: TIMELINE, tourSteps: TOUR, TIMELINE_SOURCES,
     bc: null, bcVariant: 'v0', bcUc: 'churn', bcParams: {}, bcScenario: 'realistisch', bcThr: { green: 100000, yellow: 25000 },
     bt: null, btUc: 'churn', btRes: null, btLoading: false, btErr: '', btJob: null, btSeries: 0,
-    stageAuto: false, checks: null, checksLoading: false, checksSeq: 0, ucOpen: null, ucFocusDim: null, colTable3: null,
+    ucBt: null, stageAuto: false, checks: null, checksLoading: false, checksSeq: 0, ucOpen: null, ucFocusDim: null, colTable3: null,
     playbooks: { 'PB-01': 'Fehlende Kundennummern', 'PB-02': 'Stornos ohne Originalbezug', 'PB-03': 'Nicht-Artikel-Codes',
                  'PB-04': 'Artikelstamm konsolidieren', 'PB-05': 'Freitext → Kategorien', 'PB-06': 'Dubletten entfernen',
                  'PB-07': 'Preis 0 / negative Mengen', 'PB-08': 'Währung umrechnen', 'PB-09': 'Governance-Checkliste',
@@ -2175,8 +2184,14 @@ function graphReady() {
     async init() {
       const m = location.hash.match(/s(\d)/);
       if (m) this.step = Math.min(6, Math.max(1, +m[1]));
+      if (this.step >= 5) this.stage = 3;                // Rückblick & Aktivierung starten in Stufe 3
       // Zeichnen reaktiv auslösen (nicht aus Event-Handlern heraus – deren Scope kann veraltet sein)
-      this.$watch('step', v => { if (location.hash !== '#s' + v) history.replaceState(null, '', '#s' + v); afterRender(() => this.renderStep()); });
+      this.$watch('step', v => {
+        if (location.hash !== '#s' + v) history.replaceState(null, '', '#s' + v);
+        // Rückblick & € und Aktivierung brauchen Stufe 3 – ohne Trichter-Panel automatisch umschalten
+        if (v >= 5 && this.stage < 3 && !['schema', 'profile'].includes(this.dataset?.kind)) this.stage = 3;
+        afterRender(() => this.renderStep());
+      });
       this.$watch('mapping', m => { if (m) afterRender(() => this.renderStep()); });
       this.$watch('overview', o => { if (o && this.step === 1) afterRender(() => this.drawMonthly()); });
       this.$watch('subgraph', g => { if (g) afterRender(() => this.drawSubgraph()); });
@@ -2285,7 +2300,7 @@ function graphReady() {
 
     renderStep() {
       if (this.step === 1) this.drawMonthly();
-      if (this.step === 4 && this.btRes) this.drawBtCharts();
+      if (this.step === 5 && this.btRes) this.drawBtCharts();
       if (this.step === 5) this.drawBcCharts();
       if (this.step === 6) this.drawMonCharts();
       if (this.step === 2) {
@@ -2498,6 +2513,10 @@ function graphReady() {
     fmtNum(x, d = 2) { return x == null || isNaN(x) ? '–' : Number(x).toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d }); },
     titleCase(s) { return (s || '').toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase()); },
     shortName(n) { return n.includes('.') ? n.split('.').pop() : n; },
+    schemaGroups() {
+      const used = new Set((this.mapping?.tables || []).map(groupOf));
+      return Object.fromEntries(Object.entries(SCHEMA_COLORS).filter(([k]) => used.has(k)));
+    },
     tblLabel(name) { return this.mapping?.tables.find(t => t.name === name)?.label || name; },
     statusColor(s) { return STATUS_COLORS[s] || STATUS_COLORS.unknown; },
     roleClass(r) { return { PK: 'role-PK', FK: 'role-FK', Zeit: 'role-Zeit', Freitext: 'role-Freitext', 'Hohe Kardinalität': 'role-HK' }[r] || 'role-other'; },
@@ -2771,7 +2790,7 @@ function graphReady() {
       return '';
     },
     drawBtCharts() {
-      const r = this.btRes; if (!r || this.step !== 4) return;
+      const r = this.btRes; if (!r || this.step !== 5) return;
       const ok = r.engines.filter(e => e.status === 'ok');
       const base = { responsive: true, maintainAspectRatio: false, animation: false,
         plugins: { legend: { labels: { color: '#a0a8bf', boxWidth: 10, boxHeight: 10, font: { size: 11 } } },
@@ -2841,6 +2860,55 @@ function graphReady() {
     },
     ucCheck(id) { return this.checks?.use_cases.find(u => u.id === id) || null; },
     ucDetail() { return this.ucOpen ? this.ucCheck(this.ucOpen) : null; },
+    ucMeta() { return this.usecases.find(u => u.id === this.ucOpen) || null; },
+    async loadUcBt(id) {
+      this.ucBt = null;
+      if (!(this.bt?.use_cases || []).includes(id)) return;
+      try { const r = await this.api('/backtest/' + id); if (this.ucOpen === id) this.ucBt = r; } catch (_) { /* optional */ }
+    },
+    ucClassRows() {
+      const r = this.ucBt; if (!r) return [];
+      const m = r.main_metric, lower = r.lower_is_better;
+      // Familien bewusst getrennt: Graph-Merkmale in einem Baum-/Ranking-Modell ≠ gelerntes Graph-Modell (GNN)
+      const fam = k => /^Relational/.test(k) ? 'gnn' : /Graph-ML light/.test(k) ? 'light' : /TFM/.test(k) ? 'tfm' : /Baum/.test(k) ? 'tree' : /Zeitreihen/.test(k) ? 'tsfm' : 'rule';
+      const names = { rule: 'Regel', tree: 'Baum (LightGBM)', light: 'Graph-Merkmale', tfm: 'Tabular FM', gnn: 'Graph-Modell (GNN)', tsfm: 'Zeitreihen-FM' };
+      const best = {};
+      r.engines.filter(e => e.status === 'ok' && e.metrics?.[m] != null && e.id !== 'popularity').forEach(e => {
+        const f = fam(e.meta.klass), v = e.metrics[m];
+        if (!best[f] || (lower ? v < best[f].value : v > best[f].value)) best[f] = { fam: f, famName: names[f], name: e.meta.name, value: v, id: e.id };
+      });
+      const rule = best.rule?.value;
+      const rows = ['rule', 'tree', 'tfm', 'light', 'gnn', 'tsfm'].filter(f => best[f]).map(f => best[f]);
+      if (!rows.length) return [];
+      const top = lower ? Math.min(...rows.map(x => x.value)) : Math.max(...rows.map(x => x.value));
+      const maxV = Math.max(...rows.map(x => x.value)) || 1;
+      rows.forEach(x => { x.lift = rule ? (lower ? (rule - x.value) / rule : (x.value - rule) / rule) : null; x.best = x.value === top;
+                          x.w = Math.max(4, (lower ? Math.min(...rows.map(y => y.value)) / x.value : x.value / maxV) * 100); });
+      return rows;
+    },
+    ucVerdict() {
+      const rows = this.ucClassRows(); if (!rows.length) return '';
+      const by = Object.fromEntries(rows.map(x => [x.fam, x])), lower = this.ucBt.lower_is_better;
+      const rel = (a, b) => lower ? (b.value - a.value) / b.value : (a.value - b.value) / Math.max(b.value, 1e-9);
+      const pct = d => (d > 0 ? '+' : '') + (d * 100).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' %';
+      const ref = by.tree || by.rule, refName = by.tree ? 'der Baum-Baseline (LightGBM)' : 'der Regel';
+      const parts = [];
+      if (by.gnn) {
+        const d = rel(by.gnn, ref);
+        parts.push(d > 0.02 ? `Gelerntes Graph-Modell (${by.gnn.name}) ${pct(d)} gegenüber ${refName} – relationales Lernen hilft messbar.`
+                            : `Gelerntes Graph-Modell (${by.gnn.name}) ${pct(d)} gegenüber ${refName} – bringt hier keinen belastbaren Vorteil.`);
+      } else parts.push('Ein gelerntes Graph-Modell (GNN) wurde für diesen Use Case noch nicht gerechnet.');
+      if (by.light) {
+        const d = rel(by.light, ref);
+        parts.push(`Graph-Merkmale im Baum-/Ranking-Modell (${by.light.name}) ${pct(d)} gegenüber ${refName}.`);
+      }
+      const win = rows.find(x => x.best);
+      parts.push(win.fam === 'tree' || win.fam === 'rule' ? 'Fazit: LightGBM bzw. die Regel genügt – Graph bleibt Option.'
+        : win.fam === 'gnn' ? 'Fazit: Graph ML ist hier die beste Wahl.'
+        : win.fam === 'light' ? 'Fazit: Das Graph-Signal zählt, ein einfaches Modell mit Graph-Merkmalen reicht dafür.'
+        : `Fazit: ${win.famName} gewinnt.`);
+      return parts.join(' ');
+    },
     dimName(id) { return this.checks?.dimensions.find(d => d.id === id)?.name || id; },
     dimCore(id) { return !!this.checks?.dimensions.find(d => d.id === id)?.core; },
     playbookName(pb) { return pb ? pb + ' · ' + (this.playbooks[pb] || '') : ''; },
@@ -2865,6 +2933,7 @@ function graphReady() {
     },
     openUc(id, dim = null) {
       this.ucOpen = id; this.ucFocusDim = dim;           // Zeichnen übernimmt $watch('ucOpen')
+      this.loadUcBt(id);
       if (dim) setTimeout(() => document.getElementById('chk-' + dim)?.scrollIntoView({ block: 'center' }), 350);
     },
     closeUc() { this.ucOpen = null; this.ucFocusDim = null; if (CY.uc) { CY.uc.destroy(); CY.uc = null; } },
@@ -3082,13 +3151,15 @@ function graphReady() {
         n.data.w = Math.round(longest * (isSchema ? 6.2 : 7.6) + (isSchema ? 14 : 30));
         n.data.h = Math.round(lines.length * (isSchema ? 13 : 17) + (isSchema ? 12 : 24));
       });
-      let positions = null;
-      if (isSchema) {
-        const lay = schemaBlocks(m);
-        positions = lay.pos;
-        nodes.forEach(n => { n.data.parent = 'g:' + (n.data.schema || '—'); n.data.label = this.shortName(n.data.id); });
-        nodes.push(...lay.groups.map(g => ({ data: { id: 'g:' + g, label: g, schema: g, group: 1 } })));
-      }
+      // Vernetzte Block-Übersicht für alle Datensätze: Gruppen (Schema bzw. fachliche Domäne) als farbige Rahmen
+      const lay = schemaBlocks(m, !isSchema);
+      const positions = lay.pos;
+      nodes.forEach(n => {
+        const t = m.tables.find(x => x.name === n.data.id);
+        n.data.schema = groupOf(t); n.data.parent = 'g:' + n.data.schema;
+        if (isSchema) n.data.label = this.shortName(n.data.id);
+      });
+      nodes.push(...lay.groups.map(g => ({ data: { id: 'g:' + g, label: g, schema: g, group: 1 } })));
       const edges = m.relations.map(r => ({ data: {
         id: r.id, source: r.from_table, target: r.to_table, status: r.status, kind: r.kind,
         label: r.linkage_rate == null ? '' : this.fmtPct(r.linkage_rate),
@@ -3121,10 +3192,9 @@ function graphReady() {
         style.push({ selector: `node[schema = "${s}"]`, style: { 'background-color': hexA(c, .16), 'border-color': c } });
         style.push({ selector: `node[group = 1][schema = "${s}"]`, style: { 'background-color': c, 'background-opacity': .05, 'color': c, 'border-color': hexA(c, .55) } });
       });
-      const root = isSchema ? undefined : (m.tables.reduce((a, b) => (b.rows || 0) > (a.rows || 0) ? b : a).name);
       CY.schema = cytoscape({
         container: el, elements: [...nodes, ...edges], style, minZoom: 0.2, maxZoom: 3,
-        layout: isSchema ? { name: 'preset', positions: n => positions[n.id()], padding: 16 } : this.schemaLayout(false, root),
+        layout: { name: 'preset', positions: n => positions[n.id()], padding: 16 },
       });
       CY.schemaFor = m.dataset_id;
       guardWheel(el);
@@ -3145,10 +3215,8 @@ function graphReady() {
     },
     relayoutSchema() {
       if (!CY.schema) return;
-      const isSchema = this.mapping?.mode === 'schema';
-      if (isSchema) return;
-      const lay = { name: 'circle', padding: 40, avoidOverlap: true };
-      CY.schema.layout({ ...lay, animate: true, animationDuration: 450 }).run();
+      const lay = schemaBlocks(this.mapping, this.mapping?.mode !== 'schema');
+      CY.schema.layout({ name: 'preset', positions: n => lay.pos[n.id()] || n.position(), animate: true, animationDuration: 450, padding: 16 }).run();
     },
     fitCy(k) { const c = k === 'schema' ? CY.schema : CY.sub; if (c) c.animate({ fit: { padding: 30 } }, { duration: 300 }); },
     zoomCy(k, f) {

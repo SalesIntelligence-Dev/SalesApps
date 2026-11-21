@@ -36,7 +36,7 @@ LEAK_RE = re.compile(r"(status|storno|cancel|return|retour|^last|letzte|total|su
 STAGE_NOTES = {
     1: "Strukturcheck: nur Tabellen- und Feldliste. Falsches Grün möglich – Felder können existieren, aber leer sein.",
     2: "Profilcheck: nur aggregierte Kennzahlen. Es verlassen keine personenbezogenen Daten das Unternehmen.",
-    3: "Rückblick: zeitlich strikt getrennter Backtest – Vorhersagekraft je Use Case aus Schritt 4. Datenreife wie im Profilcheck.",
+    3: "Rückblick: zeitlich strikt getrennter Backtest – Vorhersagekraft je Use Case aus Schritt 5. Datenreife wie im Profilcheck.",
 }
 
 

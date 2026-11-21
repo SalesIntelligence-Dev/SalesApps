@@ -311,11 +311,98 @@ def get_use_case(uc_id: str) -> dict:
     return next(u for u in USE_CASES if u["id"] == uc_id)
 
 
+# ── Detailseite je Use Case (v2): Hebel laut Literatur, Input, Graph-Signal, Vorhersage, Euro ──────────────
+# v2      Bezeichnung in der Use-Case-Bibliothek v2 (GRAPH_ML_V2_PROMPTS.md, 0.4)
+# effect  Wirkung laut Literatur bzw. Praxisfällen – Größenordnung, kein Versprechen
+# graph   welches Signal über mehrere Tabellen läuft (das sieht relationales Lernen zusätzlich)
+# path    Pfad im Graphen, der dieses Signal trägt (für die Mini-Grafik)
+# tabular was ein flaches Modell (LightGBM, TabPFN) aus einer Zeile je Fall schon sieht
+# unit    wofür vorhergesagt wird · euro  wie der Nutzen in Euro bewertet wird
+STORY: dict[str, dict] = {
+    "churn": {
+        "v2": "Abwanderung früh erkennen", "effect": "5 % mehr Kundenbindung → 25–95 % mehr Gewinn", "fit": "hoch",
+        "graph": "Kunden, die dieselben Artikel kaufen wie inaktive Kunden, wandern häufiger ab – das Signal läuft über "
+                 "Kunde → Artikel → anderer Kunde und ist in keiner einzelnen Kundenzeile enthalten.",
+        "path": ["Kunde", "Rechnung", "Artikel", "Nachbarkunde"],
+        "tabular": "Recency, Frequenz, Umsatz, Bestellrhythmus, Stornoquote je Kunde",
+        "unit": "je aktivem Kunde, 90-Tage-Fenster ab Stichtag",
+        "euro": "erkannte Abwanderer in der Top-Liste × Ø Quartalsumsatz × Rettungsquote − Kontakte × Kosten je Kontakt, × Kampagnen pro Jahr"},
+    "cross_selling": {
+        "v2": "Cross-Selling und Produktempfehlung", "effect": "meist 10–15 % mehr Umsatz", "fit": "hoch",
+        "graph": "Welche Artikelgruppen gemeinsam gekauft werden, ergibt sich aus allen Kunden: Kunde → Gruppe ← "
+                 "andere Kunden → nächste Gruppe (Co-Kauf-Affinität).",
+        "path": ["Kunde", "Artikelgruppe", "Kunden derselben Gruppe", "neue Gruppe"],
+        "tabular": "Beliebtheit und Wachstum der Gruppe, Umsatz und Breite des Kunden",
+        "unit": "je Kunde × noch nicht gekaufter Artikelgruppe, 90 Tage",
+        "euro": "Umsatz der Erstkäufe in neuen Gruppen, die die Liste erfasst × ausgelöster Anteil − Angebote × Kosten"},
+    "recommendation": {
+        "v2": "Cross-Selling und Produktempfehlung", "effect": "meist 10–15 % mehr Umsatz", "fit": "hoch",
+        "graph": "Heute: Kandidaten aus dem Co-Kauf-Graphen aller Kunden („wer A kaufte, kaufte auch B“) – andere Kunden "
+                 "fließen als Artikel-Ähnlichkeit ein (Graph-ML light). Ein gelerntes Kunden-Graph-Modell (LightGCN) "
+                 "verlor im Rückblick; ein heterogenes GNN folgt in Prompt 3.",
+        "path": ["Kunde", "gekaufter Artikel", "Kunden mit demselben Artikel", "empfohlener Artikel"],
+        "tabular": "eigene Wiederkäufe, Beliebtheit 30/90 Tage",
+        "unit": "je aktivem Kunde: Top-12-Artikel für die nächsten 90 Tage",
+        "euro": "Umsatz der getroffenen Empfehlungen × Abdeckung × ausgelöster Anteil − Kosten je Kunde"},
+    "lead_scoring": {
+        "v2": "Lead- und Account-Scoring", "effect": "Lead-ROI +77 % (ältere Umfrage)", "fit": "mittel",
+        "graph": "Neukunden ähneln früheren Erstkäufern derselben Artikel und desselben Landes – deren Wiederkaufquote "
+                 "ist ein Graph-Merkmal (Erstkäufer → Artikel → frühere Erstkäufer).",
+        "path": ["Neukunde", "Erstkauf-Artikel", "frühere Erstkäufer", "Wiederkauf"],
+        "tabular": "Wert, Breite und Ø Preis des ersten Warenkorbs, Land",
+        "unit": "je Erstkäufer der letzten 90 Tage: Wiederkauf in 90 Tagen",
+        "euro": "Umsatz der Wiederkäufer in der Liste × Mehrumsatz durch Betreuung − Kontakte × Kosten"},
+    "next_best_action": {
+        "v2": "Next Best Action im Vertrieb", "effect": "Umsatz +5–8 %, Betreuungskosten −20–30 %", "fit": "hoch",
+        "graph": "Kombiniert die Graph-Scores aus Churn, Cross-Selling, Empfehlung und Neukunden je Kunde. Ein lernendes "
+                 "Modell braucht Reaktionsdaten auf frühere Aktionen – die fehlen hier.",
+        "path": ["Kunde", "Scores je Use Case", "Regelwerk", "eine Aktion"],
+        "tabular": "Scores und erwartete Werte der Einzel-Use-Cases",
+        "unit": "je Kunde: eine Aktion je Quartal",
+        "euro": "Summe der erwarteten Werte der gewählten Aktionen (aus den Einzel-Use-Cases)"},
+    "demand_forecast": {
+        "v2": "Absatzprognose", "effect": "Prognosefehler −20 bis −50 %", "fit": "mittel",
+        "graph": "Artikel derselben Gruppe teilen Saison und Trends (Artikel → Gruppe → Artikel). Gemessen: LightGBM mit "
+                 "Verzögerungs-Merkmalen gewinnt – der Graph bringt hier wenig.",
+        "path": ["Artikel", "Artikelgruppe", "Geschwister-Artikel"],
+        "tabular": "Vorwochen, Vorjahreswoche, gleitende Mittel, Kalender",
+        "unit": "je Top-100-Artikel und Woche, 13 Wochen voraus",
+        "euro": "Sicherheitsbestand × relative Fehlerreduktion ggü. Regel × Lagerhaltungskostensatz"},
+    "margin": {
+        "v2": "Preis- und Rabattempfehlung · Preis-Leakage", "effect": "+2–7 Pp. Umsatzrendite; > 6 % des Umsatzes versickern",
+        "fit": "mittel",
+        "graph": "Rabatte ähnlicher Kunden für ähnliche Artikel (Kunde → Artikel → Peer-Kunden) zeigen, wo Preise unter "
+                 "Peer-Niveau liegen. Ohne Einstandspreis keine Marge – deshalb hier nur Profil.",
+        "path": ["Kunde", "Position", "Artikel", "Peer-Kunden"],
+        "tabular": "Preisstreuung je Artikel und Kunde",
+        "unit": "je Position: Preis unter Peer-Niveau (Leakage)",
+        "euro": "Umsatz der Leakage-Positionen × schließbare Lücke zum Peer-Preis (Prompt 5)"},
+    "returns_root_cause": {
+        "v2": "Garantie: Frühwarnung und Root Cause (Retouren)", "effect": "Garantie-/Retourenkosten −4 bis −20 %",
+        "fit": "hoch",
+        "graph": "Stornos häufen sich bei Artikeln, die dieselben Kunden kaufen (Position → Artikel → Kunden → "
+                 "Nachbarartikel) – die Retourenquote der Nachbarn ist ein Graph-Merkmal.",
+        "path": ["Position", "Artikel", "Kunden", "Nachbarartikel"],
+        "tabular": "Menge, Preis vs. üblich, Positionen im Beleg, Kundenhistorie",
+        "unit": "je Verkaufsposition: Storno binnen 30 Tagen",
+        "euro": "erkannte Retouren × Vermeidungsquote × (Prozesskosten + Wertverlust) − Prüfkosten"},
+    "warranty_root_cause": {
+        "v2": "Garantie: Frühwarnung und Root Cause", "effect": "Garantiekosten −4 bis −20 % (Anbieter)", "fit": "hoch",
+        "graph": "Fehler pflanzen sich über Charge → Bauteil → Lieferant fort: gleiche Charge, ähnliche Ausfälle. "
+                 "Mit Online Retail II nicht berechenbar (keine Seriennummern, Chargen, Garantiefälle).",
+        "path": ["Maschine", "Bauteil", "Charge", "Lieferant"],
+        "tabular": "Alter, Laufzeit, Einsatzland je Maschine",
+        "unit": "je Maschine: Garantiefall in X Monaten",
+        "euro": "vermiedene Garantiefälle × Ø Kosten je Fall (Prompt 7)"},
+}
+
+
 def list_use_cases() -> list[dict]:
     """UI-Sicht: Felder mit Klartext-Labels statt Tupeln."""
     out = []
     for u in USE_CASES:
         d = {k: v for k, v in u.items() if k not in ("requires", "links")}
+        d["story"] = STORY.get(u["id"])
         d["requires"] = [{"field": f, "label": FIELDS[f]["label"], "importance": imp,
                           "alt": alt, "alt_label": FIELDS[alt]["label"] if alt else None, "playbook": pb}
                          for f, imp, alt, pb in u["requires"]]

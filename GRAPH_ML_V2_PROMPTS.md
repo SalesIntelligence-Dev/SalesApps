@@ -135,3 +135,25 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
 ## Prompt 10 – Gesamtabgleich und Deployment
 - Ampel-Matrix über alle Use Cases × Datensätze, Report um neue Use Cases ergänzen, Render-Speicher prüfen,
   Artefakte committen, nach Freigabe pushen.
+
+---
+
+## Umsetzungsnotizen nach Prompt 1
+
+- **Seite:** Hero ohne Trichter, ohne Demo- und Markt-Button (Tour-Code bleibt, ist aber nicht mehr erreichbar). Stepper:
+  1 Daten · 2 Graph-Mapping · 3 Fix-Playbooks · 4 Readiness · 5 Rückblick & € · 6 Aktivierung.
+  Das Euro-Potenzial (Ampel-Dashboard, Was-wäre-wenn, Trichter) steht jetzt unter dem Rückblick in Schritt 5.
+- **Stufen:** Umschalter „1 · Struktur / 2 · Profil / 3 · Rückblick“ im Banner von Schritt 4, auch auf dem Handy sichtbar.
+  Schritt 5 und 6 schalten automatisch auf Stufe 3 (auch beim direkten Aufruf über `#s5`/`#s6`).
+- **Graph-Mapping:** Block-Darstellung wie AdventureWorks für alle Datensätze. Tabellen ohne DB-Schema bekommen eine fachliche
+  Gruppe (`domainOf`: Vertrieb, Kunden, Artikel, Stammdaten, Daten). Verknüpfungsquoten bleiben an den Kanten;
+  Graph und Beziehungen immer in voller Breite.
+- **Use-Case-Detailseite** (Slide-over, 900 px): 1 Worum geht es · 2 Input-Daten · 3 Warum relational · 4 Vorhersage ·
+  5 Nutzen in Euro · 6 Readiness-Ampel, darunter aufklappbar die 9 Prüfungen. Texte in `usecases.STORY`.
+  Abschnitt 3 vergleicht die Modellfamilien aus dem Rückblick getrennt:
+  Regel · Baum · Tabular FM · Graph-Merkmale (LightGBM mit Graph-Features, ItemKNN, Ranker) · Graph-Modell (GNN, LightGCN).
+  Urteile: Churn GNN +15,1 % ggü. LightGBM; Empfehlung Graph-Merkmale +15,5 %, LightGCN −37,9 % ggü. Regel;
+  Cross-Selling noch ohne GNN.
+- **Aufruf:** Use-Case-Name in der Ampel-Matrix, „ⓘ Use-Case-Seite“ am Leaderboard (Schritt 5) und an den Aktionslisten (Schritt 6).
+- **Qualität:** 48 Tests grün (neu `tests/test_graph_ml_v2.py`), 375 px ohne seitliches Scrollen in allen Schritten,
+  19 Seiten 200.

@@ -461,7 +461,7 @@ def single_effects() -> dict | None:
 
 
 def compute_single_effects(log=print) -> dict:
-    """Wirkung jedes Daten-Playbooks einzeln (Standardoption) auf Rohdaten – für die Karten in Schritt 5."""
+    """Wirkung jedes Daten-Playbooks einzeln (Standardoption) auf Rohdaten – für die Karten in Schritt 3."""
     from .data_loader import get_registry
     raw = get_registry().raw_online_retail()
     base = baseline_checks()
