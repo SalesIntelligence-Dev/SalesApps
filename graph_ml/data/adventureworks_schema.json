@@ -1,0 +1,4880 @@
+{
+ "id": "adventureworks",
+ "name": "AdventureWorks (OLTP-Schema)",
+ "kind": "schema",
+ "source": "Microsoft sql-server-samples · instawdb.sql",
+ "source_url": "https://raw.githubusercontent.com/microsoft/sql-server-samples/master/samples/databases/adventure-works/oltp-install-script/instawdb.sql",
+ "license": "MIT (nur Schema, keine Daten)",
+ "description": "Fahrradhersteller mit Vertrieb, Produktion, Einkauf, Personal – ERP-typisches Schema.",
+ "tables": [
+  {
+   "name": "HumanResources.Department",
+   "schema": "HumanResources",
+   "columns": [
+    {
+     "name": "DepartmentID",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "GroupName",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "DepartmentID"
+   ]
+  },
+  {
+   "name": "HumanResources.Employee",
+   "schema": "HumanResources",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "NationalIDNumber",
+     "sql_type": "nvarchar(15)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "LoginID",
+     "sql_type": "nvarchar(256)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "OrganizationNode",
+     "sql_type": "hierarchyid",
+     "type": "id",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "OrganizationLevel",
+     "sql_type": "computed",
+     "type": "string",
+     "nullable": true,
+     "computed": true
+    },
+    {
+     "name": "JobTitle",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "BirthDate",
+     "sql_type": "date",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "MaritalStatus",
+     "sql_type": "nchar(1)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Gender",
+     "sql_type": "nchar(1)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "HireDate",
+     "sql_type": "date",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SalariedFlag",
+     "sql_type": "bit",
+     "type": "boolean",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "VacationHours",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SickLeaveHours",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CurrentFlag",
+     "sql_type": "bit",
+     "type": "boolean",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "HumanResources.EmployeeDepartmentHistory",
+   "schema": "HumanResources",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "DepartmentID",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ShiftID",
+     "sql_type": "tinyint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StartDate",
+     "sql_type": "date",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "EndDate",
+     "sql_type": "date",
+     "type": "datetime",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID",
+    "StartDate",
+    "DepartmentID",
+    "ShiftID"
+   ]
+  },
+  {
+   "name": "HumanResources.EmployeePayHistory",
+   "schema": "HumanResources",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "RateChangeDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Rate",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "PayFrequency",
+     "sql_type": "tinyint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID",
+    "RateChangeDate"
+   ]
+  },
+  {
+   "name": "HumanResources.JobCandidate",
+   "schema": "HumanResources",
+   "columns": [
+    {
+     "name": "JobCandidateID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "Resume",
+     "sql_type": "XML([HumanResources].[HRResumeSchemaCollection])",
+     "type": "text",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "JobCandidateID"
+   ]
+  },
+  {
+   "name": "HumanResources.Shift",
+   "schema": "HumanResources",
+   "columns": [
+    {
+     "name": "ShiftID",
+     "sql_type": "tinyint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StartTime",
+     "sql_type": "time",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "EndTime",
+     "sql_type": "time",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ShiftID"
+   ]
+  },
+  {
+   "name": "Person.Address",
+   "schema": "Person",
+   "columns": [
+    {
+     "name": "AddressID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "AddressLine1",
+     "sql_type": "nvarchar(60)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "AddressLine2",
+     "sql_type": "nvarchar(60)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "City",
+     "sql_type": "nvarchar(30)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StateProvinceID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "PostalCode",
+     "sql_type": "nvarchar(15)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SpatialLocation",
+     "sql_type": "geography",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "AddressID"
+   ]
+  },
+  {
+   "name": "Person.AddressType",
+   "schema": "Person",
+   "columns": [
+    {
+     "name": "AddressTypeID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "AddressTypeID"
+   ]
+  },
+  {
+   "name": "Person.BusinessEntity",
+   "schema": "Person",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "Person.BusinessEntityAddress",
+   "schema": "Person",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "AddressID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "AddressTypeID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID",
+    "AddressID",
+    "AddressTypeID"
+   ]
+  },
+  {
+   "name": "Person.BusinessEntityContact",
+   "schema": "Person",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "PersonID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ContactTypeID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID",
+    "PersonID",
+    "ContactTypeID"
+   ]
+  },
+  {
+   "name": "Person.ContactType",
+   "schema": "Person",
+   "columns": [
+    {
+     "name": "ContactTypeID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ContactTypeID"
+   ]
+  },
+  {
+   "name": "Person.CountryRegion",
+   "schema": "Person",
+   "columns": [
+    {
+     "name": "CountryRegionCode",
+     "sql_type": "nvarchar(3)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "CountryRegionCode"
+   ]
+  },
+  {
+   "name": "Person.EmailAddress",
+   "schema": "Person",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "EmailAddressID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "EmailAddress",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID",
+    "EmailAddressID"
+   ]
+  },
+  {
+   "name": "Person.Password",
+   "schema": "Person",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "PasswordHash",
+     "sql_type": "varchar(128)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "PasswordSalt",
+     "sql_type": "varchar(10)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "Person.Person",
+   "schema": "Person",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "PersonType",
+     "sql_type": "nchar(2)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "NameStyle",
+     "sql_type": "bit",
+     "type": "boolean",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Title",
+     "sql_type": "nvarchar(8)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "FirstName",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "MiddleName",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "LastName",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Suffix",
+     "sql_type": "nvarchar(10)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "EmailPromotion",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "AdditionalContactInfo",
+     "sql_type": "XML([Person].[AdditionalContactInfoSchemaCollection])",
+     "type": "text",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "Demographics",
+     "sql_type": "XML([Person].[IndividualSurveySchemaCollection])",
+     "type": "text",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "Person.PersonPhone",
+   "schema": "Person",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "PhoneNumber",
+     "sql_type": "nvarchar(25)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "PhoneNumberTypeID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID",
+    "PhoneNumber",
+    "PhoneNumberTypeID"
+   ]
+  },
+  {
+   "name": "Person.PhoneNumberType",
+   "schema": "Person",
+   "columns": [
+    {
+     "name": "PhoneNumberTypeID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "PhoneNumberTypeID"
+   ]
+  },
+  {
+   "name": "Person.StateProvince",
+   "schema": "Person",
+   "columns": [
+    {
+     "name": "StateProvinceID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StateProvinceCode",
+     "sql_type": "nchar(3)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CountryRegionCode",
+     "sql_type": "nvarchar(3)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "IsOnlyStateProvinceFlag",
+     "sql_type": "bit",
+     "type": "boolean",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "TerritoryID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "StateProvinceID"
+   ]
+  },
+  {
+   "name": "Production.BillOfMaterials",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "BillOfMaterialsID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductAssemblyID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ComponentID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StartDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "EndDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "UnitMeasureCode",
+     "sql_type": "nchar(3)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "BOMLevel",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "PerAssemblyQty",
+     "sql_type": "decimal(8, 2)",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BillOfMaterialsID"
+   ]
+  },
+  {
+   "name": "Production.Culture",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "CultureID",
+     "sql_type": "nchar(6)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "CultureID"
+   ]
+  },
+  {
+   "name": "Production.Document",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "DocumentNode",
+     "sql_type": "hierarchyid",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "DocumentLevel",
+     "sql_type": "computed",
+     "type": "string",
+     "nullable": true,
+     "computed": true
+    },
+    {
+     "name": "Title",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Owner",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "FolderFlag",
+     "sql_type": "bit",
+     "type": "boolean",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "FileName",
+     "sql_type": "nvarchar(400)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Revision",
+     "sql_type": "nchar(5)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ChangeNumber",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Status",
+     "sql_type": "tinyint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "DocumentSummary",
+     "sql_type": "nvarchar(max)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "Document",
+     "sql_type": "varbinary(max)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "DocumentNode"
+   ]
+  },
+  {
+   "name": "Production.Illustration",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "IllustrationID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Diagram",
+     "sql_type": "XML",
+     "type": "text",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "IllustrationID"
+   ]
+  },
+  {
+   "name": "Production.Location",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "LocationID",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CostRate",
+     "sql_type": "smallmoney",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Availability",
+     "sql_type": "decimal(8, 2)",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "LocationID"
+   ]
+  },
+  {
+   "name": "Production.Product",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductNumber",
+     "sql_type": "nvarchar(25)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "MakeFlag",
+     "sql_type": "bit",
+     "type": "boolean",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "FinishedGoodsFlag",
+     "sql_type": "bit",
+     "type": "boolean",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Color",
+     "sql_type": "nvarchar(15)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "SafetyStockLevel",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ReorderPoint",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StandardCost",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ListPrice",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Size",
+     "sql_type": "nvarchar(5)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "SizeUnitMeasureCode",
+     "sql_type": "nchar(3)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "WeightUnitMeasureCode",
+     "sql_type": "nchar(3)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "Weight",
+     "sql_type": "decimal(8, 2)",
+     "type": "number",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "DaysToManufacture",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductLine",
+     "sql_type": "nchar(2)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "Class",
+     "sql_type": "nchar(2)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "Style",
+     "sql_type": "nchar(2)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ProductSubcategoryID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ProductModelID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "SellStartDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SellEndDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "DiscontinuedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "Production.ProductCategory",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ProductCategoryID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductCategoryID"
+   ]
+  },
+  {
+   "name": "Production.ProductCostHistory",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StartDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "EndDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "StandardCost",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductID",
+    "StartDate"
+   ]
+  },
+  {
+   "name": "Production.ProductDescription",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ProductDescriptionID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Description",
+     "sql_type": "nvarchar(400)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductDescriptionID"
+   ]
+  },
+  {
+   "name": "Production.ProductDocument",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "DocumentNode",
+     "sql_type": "hierarchyid",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductID",
+    "DocumentNode"
+   ]
+  },
+  {
+   "name": "Production.ProductInventory",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "LocationID",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Shelf",
+     "sql_type": "nvarchar(10)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Bin",
+     "sql_type": "tinyint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Quantity",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductID",
+    "LocationID"
+   ]
+  },
+  {
+   "name": "Production.ProductListPriceHistory",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StartDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "EndDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ListPrice",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductID",
+    "StartDate"
+   ]
+  },
+  {
+   "name": "Production.ProductModel",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ProductModelID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CatalogDescription",
+     "sql_type": "XML([Production].[ProductDescriptionSchemaCollection])",
+     "type": "text",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "Instructions",
+     "sql_type": "XML([Production].[ManuInstructionsSchemaCollection])",
+     "type": "text",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductModelID"
+   ]
+  },
+  {
+   "name": "Production.ProductModelIllustration",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ProductModelID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "IllustrationID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductModelID",
+    "IllustrationID"
+   ]
+  },
+  {
+   "name": "Production.ProductModelProductDescriptionCulture",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ProductModelID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductDescriptionID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CultureID",
+     "sql_type": "nchar(6)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductModelID",
+    "ProductDescriptionID",
+    "CultureID"
+   ]
+  },
+  {
+   "name": "Production.ProductPhoto",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ProductPhotoID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ThumbNailPhoto",
+     "sql_type": "varbinary(max)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ThumbnailPhotoFileName",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "LargePhoto",
+     "sql_type": "varbinary(max)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "LargePhotoFileName",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductPhotoID"
+   ]
+  },
+  {
+   "name": "Production.ProductProductPhoto",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductPhotoID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Primary",
+     "sql_type": "bit",
+     "type": "boolean",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductID",
+    "ProductPhotoID"
+   ]
+  },
+  {
+   "name": "Production.ProductReview",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ProductReviewID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ReviewerName",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ReviewDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "EmailAddress",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Rating",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Comments",
+     "sql_type": "nvarchar(3850)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductReviewID"
+   ]
+  },
+  {
+   "name": "Production.ProductSubcategory",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ProductSubcategoryID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductCategoryID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductSubcategoryID"
+   ]
+  },
+  {
+   "name": "Production.ScrapReason",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "ScrapReasonID",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ScrapReasonID"
+   ]
+  },
+  {
+   "name": "Production.TransactionHistory",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "TransactionID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ReferenceOrderID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ReferenceOrderLineID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "TransactionDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "TransactionType",
+     "sql_type": "nchar(1)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Quantity",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ActualCost",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "TransactionID"
+   ]
+  },
+  {
+   "name": "Production.TransactionHistoryArchive",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "TransactionID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ReferenceOrderID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ReferenceOrderLineID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "TransactionDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "TransactionType",
+     "sql_type": "nchar(1)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Quantity",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ActualCost",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "TransactionID"
+   ]
+  },
+  {
+   "name": "Production.UnitMeasure",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "UnitMeasureCode",
+     "sql_type": "nchar(3)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "UnitMeasureCode"
+   ]
+  },
+  {
+   "name": "Production.WorkOrder",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "WorkOrderID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "OrderQty",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StockedQty",
+     "sql_type": "computed",
+     "type": "string",
+     "nullable": true,
+     "computed": true
+    },
+    {
+     "name": "ScrappedQty",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StartDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "EndDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "DueDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ScrapReasonID",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "WorkOrderID"
+   ]
+  },
+  {
+   "name": "Production.WorkOrderRouting",
+   "schema": "Production",
+   "columns": [
+    {
+     "name": "WorkOrderID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "OperationSequence",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "LocationID",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ScheduledStartDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ScheduledEndDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ActualStartDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ActualEndDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ActualResourceHrs",
+     "sql_type": "decimal(9, 4)",
+     "type": "number",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "PlannedCost",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ActualCost",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "WorkOrderID",
+    "ProductID",
+    "OperationSequence"
+   ]
+  },
+  {
+   "name": "Purchasing.ProductVendor",
+   "schema": "Purchasing",
+   "columns": [
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "AverageLeadTime",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StandardPrice",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "LastReceiptCost",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "LastReceiptDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "MinOrderQty",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "MaxOrderQty",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "OnOrderQty",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "UnitMeasureCode",
+     "sql_type": "nchar(3)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ProductID",
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "Purchasing.PurchaseOrderDetail",
+   "schema": "Purchasing",
+   "columns": [
+    {
+     "name": "PurchaseOrderID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "PurchaseOrderDetailID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "DueDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "OrderQty",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "UnitPrice",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "LineTotal",
+     "sql_type": "computed",
+     "type": "string",
+     "nullable": true,
+     "computed": true
+    },
+    {
+     "name": "ReceivedQty",
+     "sql_type": "decimal(8, 2)",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "RejectedQty",
+     "sql_type": "decimal(8, 2)",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StockedQty",
+     "sql_type": "computed",
+     "type": "string",
+     "nullable": true,
+     "computed": true
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "PurchaseOrderID",
+    "PurchaseOrderDetailID"
+   ]
+  },
+  {
+   "name": "Purchasing.PurchaseOrderHeader",
+   "schema": "Purchasing",
+   "columns": [
+    {
+     "name": "PurchaseOrderID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "RevisionNumber",
+     "sql_type": "tinyint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Status",
+     "sql_type": "tinyint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "EmployeeID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "VendorID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ShipMethodID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "OrderDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ShipDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "SubTotal",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "TaxAmt",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Freight",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "TotalDue",
+     "sql_type": "computed",
+     "type": "string",
+     "nullable": true,
+     "computed": true
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "PurchaseOrderID"
+   ]
+  },
+  {
+   "name": "Purchasing.ShipMethod",
+   "schema": "Purchasing",
+   "columns": [
+    {
+     "name": "ShipMethodID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ShipBase",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ShipRate",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ShipMethodID"
+   ]
+  },
+  {
+   "name": "Purchasing.Vendor",
+   "schema": "Purchasing",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "AccountNumber",
+     "sql_type": "nvarchar(15)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CreditRating",
+     "sql_type": "tinyint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "PreferredVendorStatus",
+     "sql_type": "bit",
+     "type": "boolean",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ActiveFlag",
+     "sql_type": "bit",
+     "type": "boolean",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "PurchasingWebServiceURL",
+     "sql_type": "nvarchar(1024)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "Sales.CountryRegionCurrency",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "CountryRegionCode",
+     "sql_type": "nvarchar(3)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CurrencyCode",
+     "sql_type": "nchar(3)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "CountryRegionCode",
+    "CurrencyCode"
+   ]
+  },
+  {
+   "name": "Sales.CreditCard",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "CreditCardID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CardType",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CardNumber",
+     "sql_type": "nvarchar(25)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ExpMonth",
+     "sql_type": "tinyint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ExpYear",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "CreditCardID"
+   ]
+  },
+  {
+   "name": "Sales.Currency",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "CurrencyCode",
+     "sql_type": "nchar(3)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "CurrencyCode"
+   ]
+  },
+  {
+   "name": "Sales.CurrencyRate",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "CurrencyRateID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CurrencyRateDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "FromCurrencyCode",
+     "sql_type": "nchar(3)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ToCurrencyCode",
+     "sql_type": "nchar(3)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "AverageRate",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "EndOfDayRate",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "CurrencyRateID"
+   ]
+  },
+  {
+   "name": "Sales.Customer",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "CustomerID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "PersonID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "StoreID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "TerritoryID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "AccountNumber",
+     "sql_type": "computed",
+     "type": "string",
+     "nullable": true,
+     "computed": true
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "CustomerID"
+   ]
+  },
+  {
+   "name": "Sales.PersonCreditCard",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CreditCardID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID",
+    "CreditCardID"
+   ]
+  },
+  {
+   "name": "Sales.SalesOrderDetail",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "SalesOrderID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SalesOrderDetailID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CarrierTrackingNumber",
+     "sql_type": "nvarchar(25)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "OrderQty",
+     "sql_type": "smallint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SpecialOfferID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "UnitPrice",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "UnitPriceDiscount",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "LineTotal",
+     "sql_type": "computed",
+     "type": "string",
+     "nullable": true,
+     "computed": true
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "SalesOrderID",
+    "SalesOrderDetailID"
+   ]
+  },
+  {
+   "name": "Sales.SalesOrderHeader",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "SalesOrderID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "RevisionNumber",
+     "sql_type": "tinyint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "OrderDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "DueDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ShipDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "Status",
+     "sql_type": "tinyint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "OnlineOrderFlag",
+     "sql_type": "bit",
+     "type": "boolean",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SalesOrderNumber",
+     "sql_type": "computed",
+     "type": "string",
+     "nullable": true,
+     "computed": true
+    },
+    {
+     "name": "PurchaseOrderNumber",
+     "sql_type": "nvarchar(25)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "AccountNumber",
+     "sql_type": "nvarchar(15)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "CustomerID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SalesPersonID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "TerritoryID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "BillToAddressID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ShipToAddressID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ShipMethodID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CreditCardID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "CreditCardApprovalCode",
+     "sql_type": "varchar(15)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "CurrencyRateID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "SubTotal",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "TaxAmt",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Freight",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "TotalDue",
+     "sql_type": "computed",
+     "type": "string",
+     "nullable": true,
+     "computed": true
+    },
+    {
+     "name": "Comment",
+     "sql_type": "nvarchar(128)",
+     "type": "string",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "SalesOrderID"
+   ]
+  },
+  {
+   "name": "Sales.SalesOrderHeaderSalesReason",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "SalesOrderID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SalesReasonID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "SalesOrderID",
+    "SalesReasonID"
+   ]
+  },
+  {
+   "name": "Sales.SalesPerson",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "TerritoryID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "SalesQuota",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "Bonus",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CommissionPct",
+     "sql_type": "smallmoney",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SalesYTD",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SalesLastYear",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "Sales.SalesPersonQuotaHistory",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "QuotaDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SalesQuota",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID",
+    "QuotaDate",
+    "ProductCategoryID"
+   ]
+  },
+  {
+   "name": "Sales.SalesReason",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "SalesReasonID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ReasonType",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "SalesReasonID"
+   ]
+  },
+  {
+   "name": "Sales.SalesTaxRate",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "SalesTaxRateID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StateProvinceID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "TaxType",
+     "sql_type": "tinyint",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "TaxRate",
+     "sql_type": "smallmoney",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "SalesTaxRateID"
+   ]
+  },
+  {
+   "name": "Sales.SalesTerritory",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "TerritoryID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CountryRegionCode",
+     "sql_type": "nvarchar(3)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Group",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SalesYTD",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SalesLastYear",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CostYTD",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "CostLastYear",
+     "sql_type": "money",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "TerritoryID"
+   ]
+  },
+  {
+   "name": "Sales.SalesTerritoryHistory",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "TerritoryID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StartDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "EndDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID",
+    "StartDate",
+    "TerritoryID"
+   ]
+  },
+  {
+   "name": "Sales.ShoppingCartItem",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "ShoppingCartItemID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ShoppingCartID",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Quantity",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "DateCreated",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "ShoppingCartItemID"
+   ]
+  },
+  {
+   "name": "Sales.SpecialOffer",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "SpecialOfferID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Description",
+     "sql_type": "nvarchar(255)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "DiscountPct",
+     "sql_type": "smallmoney",
+     "type": "number",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Type",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Category",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "StartDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "EndDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "MinQty",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "MaxQty",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "SpecialOfferID"
+   ]
+  },
+  {
+   "name": "Sales.SpecialOfferProduct",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "SpecialOfferID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ProductID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "SpecialOfferID",
+    "ProductID"
+   ]
+  },
+  {
+   "name": "Sales.Store",
+   "schema": "Sales",
+   "columns": [
+    {
+     "name": "BusinessEntityID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "Name",
+     "sql_type": "nvarchar(50)",
+     "type": "string",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "SalesPersonID",
+     "sql_type": "int",
+     "type": "integer",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "Demographics",
+     "sql_type": "XML([Sales].[StoreSurveySchemaCollection])",
+     "type": "text",
+     "nullable": true,
+     "computed": false
+    },
+    {
+     "name": "rowguid",
+     "sql_type": "uniqueidentifier",
+     "type": "id",
+     "nullable": false,
+     "computed": false
+    },
+    {
+     "name": "ModifiedDate",
+     "sql_type": "datetime",
+     "type": "datetime",
+     "nullable": false,
+     "computed": false
+    }
+   ],
+   "primary_key": [
+    "BusinessEntityID"
+   ]
+  }
+ ],
+ "foreign_keys": [
+  {
+   "name": "FK_Address_StateProvince_StateProvinceID",
+   "from_table": "Person.Address",
+   "from_columns": [
+    "StateProvinceID"
+   ],
+   "to_table": "Person.StateProvince",
+   "to_columns": [
+    "StateProvinceID"
+   ]
+  },
+  {
+   "name": "FK_BillOfMaterials_Product_ProductAssemblyID",
+   "from_table": "Production.BillOfMaterials",
+   "from_columns": [
+    "ProductAssemblyID"
+   ],
+   "to_table": "Production.Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_BillOfMaterials_Product_ComponentID",
+   "from_table": "Production.BillOfMaterials",
+   "from_columns": [
+    "ComponentID"
+   ],
+   "to_table": "Production.Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_BillOfMaterials_UnitMeasure_UnitMeasureCode",
+   "from_table": "Production.BillOfMaterials",
+   "from_columns": [
+    "UnitMeasureCode"
+   ],
+   "to_table": "Production.UnitMeasure",
+   "to_columns": [
+    "UnitMeasureCode"
+   ]
+  },
+  {
+   "name": "FK_BusinessEntityAddress_Address_AddressID",
+   "from_table": "Person.BusinessEntityAddress",
+   "from_columns": [
+    "AddressID"
+   ],
+   "to_table": "Person.Address",
+   "to_columns": [
+    "AddressID"
+   ]
+  },
+  {
+   "name": "FK_BusinessEntityAddress_AddressType_AddressTypeID",
+   "from_table": "Person.BusinessEntityAddress",
+   "from_columns": [
+    "AddressTypeID"
+   ],
+   "to_table": "Person.AddressType",
+   "to_columns": [
+    "AddressTypeID"
+   ]
+  },
+  {
+   "name": "FK_BusinessEntityAddress_BusinessEntity_BusinessEntityID",
+   "from_table": "Person.BusinessEntityAddress",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Person.BusinessEntity",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_BusinessEntityContact_Person_PersonID",
+   "from_table": "Person.BusinessEntityContact",
+   "from_columns": [
+    "PersonID"
+   ],
+   "to_table": "Person.Person",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_BusinessEntityContact_ContactType_ContactTypeID",
+   "from_table": "Person.BusinessEntityContact",
+   "from_columns": [
+    "ContactTypeID"
+   ],
+   "to_table": "Person.ContactType",
+   "to_columns": [
+    "ContactTypeID"
+   ]
+  },
+  {
+   "name": "FK_BusinessEntityContact_BusinessEntity_BusinessEntityID",
+   "from_table": "Person.BusinessEntityContact",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Person.BusinessEntity",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_CountryRegionCurrency_CountryRegion_CountryRegionCode",
+   "from_table": "Sales.CountryRegionCurrency",
+   "from_columns": [
+    "CountryRegionCode"
+   ],
+   "to_table": "Person.CountryRegion",
+   "to_columns": [
+    "CountryRegionCode"
+   ]
+  },
+  {
+   "name": "FK_CountryRegionCurrency_Currency_CurrencyCode",
+   "from_table": "Sales.CountryRegionCurrency",
+   "from_columns": [
+    "CurrencyCode"
+   ],
+   "to_table": "Sales.Currency",
+   "to_columns": [
+    "CurrencyCode"
+   ]
+  },
+  {
+   "name": "FK_CurrencyRate_Currency_FromCurrencyCode",
+   "from_table": "Sales.CurrencyRate",
+   "from_columns": [
+    "FromCurrencyCode"
+   ],
+   "to_table": "Sales.Currency",
+   "to_columns": [
+    "CurrencyCode"
+   ]
+  },
+  {
+   "name": "FK_CurrencyRate_Currency_ToCurrencyCode",
+   "from_table": "Sales.CurrencyRate",
+   "from_columns": [
+    "ToCurrencyCode"
+   ],
+   "to_table": "Sales.Currency",
+   "to_columns": [
+    "CurrencyCode"
+   ]
+  },
+  {
+   "name": "FK_Customer_Person_PersonID",
+   "from_table": "Sales.Customer",
+   "from_columns": [
+    "PersonID"
+   ],
+   "to_table": "Person.Person",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_Customer_Store_StoreID",
+   "from_table": "Sales.Customer",
+   "from_columns": [
+    "StoreID"
+   ],
+   "to_table": "Sales.Store",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_Customer_SalesTerritory_TerritoryID",
+   "from_table": "Sales.Customer",
+   "from_columns": [
+    "TerritoryID"
+   ],
+   "to_table": "Sales.SalesTerritory",
+   "to_columns": [
+    "TerritoryID"
+   ]
+  },
+  {
+   "name": "FK_Document_Employee_Owner",
+   "from_table": "Production.Document",
+   "from_columns": [
+    "Owner"
+   ],
+   "to_table": "HumanResources.Employee",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_EmailAddress_Person_BusinessEntityID",
+   "from_table": "Person.EmailAddress",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Person.Person",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_Employee_Person_BusinessEntityID",
+   "from_table": "HumanResources.Employee",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Person.Person",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_EmployeeDepartmentHistory_Department_DepartmentID",
+   "from_table": "HumanResources.EmployeeDepartmentHistory",
+   "from_columns": [
+    "DepartmentID"
+   ],
+   "to_table": "HumanResources.Department",
+   "to_columns": [
+    "DepartmentID"
+   ]
+  },
+  {
+   "name": "FK_EmployeeDepartmentHistory_Employee_BusinessEntityID",
+   "from_table": "HumanResources.EmployeeDepartmentHistory",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "HumanResources.Employee",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_EmployeeDepartmentHistory_Shift_ShiftID",
+   "from_table": "HumanResources.EmployeeDepartmentHistory",
+   "from_columns": [
+    "ShiftID"
+   ],
+   "to_table": "HumanResources.Shift",
+   "to_columns": [
+    "ShiftID"
+   ]
+  },
+  {
+   "name": "FK_EmployeePayHistory_Employee_BusinessEntityID",
+   "from_table": "HumanResources.EmployeePayHistory",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "HumanResources.Employee",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_JobCandidate_Employee_BusinessEntityID",
+   "from_table": "HumanResources.JobCandidate",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "HumanResources.Employee",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_Password_Person_BusinessEntityID",
+   "from_table": "Person.Password",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Person.Person",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_Person_BusinessEntity_BusinessEntityID",
+   "from_table": "Person.Person",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Person.BusinessEntity",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_PersonCreditCard_Person_BusinessEntityID",
+   "from_table": "Sales.PersonCreditCard",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Person.Person",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_PersonCreditCard_CreditCard_CreditCardID",
+   "from_table": "Sales.PersonCreditCard",
+   "from_columns": [
+    "CreditCardID"
+   ],
+   "to_table": "Sales.CreditCard",
+   "to_columns": [
+    "CreditCardID"
+   ]
+  },
+  {
+   "name": "FK_PersonPhone_Person_BusinessEntityID",
+   "from_table": "Person.PersonPhone",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Person.Person",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_PersonPhone_PhoneNumberType_PhoneNumberTypeID",
+   "from_table": "Person.PersonPhone",
+   "from_columns": [
+    "PhoneNumberTypeID"
+   ],
+   "to_table": "Person.PhoneNumberType",
+   "to_columns": [
+    "PhoneNumberTypeID"
+   ]
+  },
+  {
+   "name": "FK_Product_UnitMeasure_SizeUnitMeasureCode",
+   "from_table": "Production.Product",
+   "from_columns": [
+    "SizeUnitMeasureCode"
+   ],
+   "to_table": "Production.UnitMeasure",
+   "to_columns": [
+    "UnitMeasureCode"
+   ]
+  },
+  {
+   "name": "FK_Product_UnitMeasure_WeightUnitMeasureCode",
+   "from_table": "Production.Product",
+   "from_columns": [
+    "WeightUnitMeasureCode"
+   ],
+   "to_table": "Production.UnitMeasure",
+   "to_columns": [
+    "UnitMeasureCode"
+   ]
+  },
+  {
+   "name": "FK_Product_ProductModel_ProductModelID",
+   "from_table": "Production.Product",
+   "from_columns": [
+    "ProductModelID"
+   ],
+   "to_table": "Production.ProductModel",
+   "to_columns": [
+    "ProductModelID"
+   ]
+  },
+  {
+   "name": "FK_Product_ProductSubcategory_ProductSubcategoryID",
+   "from_table": "Production.Product",
+   "from_columns": [
+    "ProductSubcategoryID"
+   ],
+   "to_table": "Production.ProductSubcategory",
+   "to_columns": [
+    "ProductSubcategoryID"
+   ]
+  },
+  {
+   "name": "FK_ProductCostHistory_Product_ProductID",
+   "from_table": "Production.ProductCostHistory",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Production.Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_ProductDocument_Product_ProductID",
+   "from_table": "Production.ProductDocument",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Production.Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_ProductDocument_Document_DocumentNode",
+   "from_table": "Production.ProductDocument",
+   "from_columns": [
+    "DocumentNode"
+   ],
+   "to_table": "Production.Document",
+   "to_columns": [
+    "DocumentNode"
+   ]
+  },
+  {
+   "name": "FK_ProductInventory_Location_LocationID",
+   "from_table": "Production.ProductInventory",
+   "from_columns": [
+    "LocationID"
+   ],
+   "to_table": "Production.Location",
+   "to_columns": [
+    "LocationID"
+   ]
+  },
+  {
+   "name": "FK_ProductInventory_Product_ProductID",
+   "from_table": "Production.ProductInventory",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Production.Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_ProductListPriceHistory_Product_ProductID",
+   "from_table": "Production.ProductListPriceHistory",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Production.Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_ProductModelIllustration_ProductModel_ProductModelID",
+   "from_table": "Production.ProductModelIllustration",
+   "from_columns": [
+    "ProductModelID"
+   ],
+   "to_table": "Production.ProductModel",
+   "to_columns": [
+    "ProductModelID"
+   ]
+  },
+  {
+   "name": "FK_ProductModelIllustration_Illustration_IllustrationID",
+   "from_table": "Production.ProductModelIllustration",
+   "from_columns": [
+    "IllustrationID"
+   ],
+   "to_table": "Production.Illustration",
+   "to_columns": [
+    "IllustrationID"
+   ]
+  },
+  {
+   "name": "FK_ProductModelProductDescriptionCulture_ProductDescription_ProductDescriptionID",
+   "from_table": "Production.ProductModelProductDescriptionCulture",
+   "from_columns": [
+    "ProductDescriptionID"
+   ],
+   "to_table": "Production.ProductDescription",
+   "to_columns": [
+    "ProductDescriptionID"
+   ]
+  },
+  {
+   "name": "FK_ProductModelProductDescriptionCulture_Culture_CultureID",
+   "from_table": "Production.ProductModelProductDescriptionCulture",
+   "from_columns": [
+    "CultureID",
+    "Production",
+    "Culture",
+    "CultureID",
+    "FK_ProductModelProductDescriptionCulture_ProductModel_ProductModelID",
+    "ProductModelID"
+   ],
+   "to_table": "Production.ProductModel",
+   "to_columns": [
+    "ProductModelID"
+   ]
+  },
+  {
+   "name": "FK_ProductProductPhoto_Product_ProductID",
+   "from_table": "Production.ProductProductPhoto",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Production.Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_ProductProductPhoto_ProductPhoto_ProductPhotoID",
+   "from_table": "Production.ProductProductPhoto",
+   "from_columns": [
+    "ProductPhotoID"
+   ],
+   "to_table": "Production.ProductPhoto",
+   "to_columns": [
+    "ProductPhotoID"
+   ]
+  },
+  {
+   "name": "FK_ProductReview_Product_ProductID",
+   "from_table": "Production.ProductReview",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Production.Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_ProductSubcategory_ProductCategory_ProductCategoryID",
+   "from_table": "Production.ProductSubcategory",
+   "from_columns": [
+    "ProductCategoryID"
+   ],
+   "to_table": "Production.ProductCategory",
+   "to_columns": [
+    "ProductCategoryID"
+   ]
+  },
+  {
+   "name": "FK_ProductVendor_Product_ProductID",
+   "from_table": "Purchasing.ProductVendor",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Production.Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_ProductVendor_UnitMeasure_UnitMeasureCode",
+   "from_table": "Purchasing.ProductVendor",
+   "from_columns": [
+    "UnitMeasureCode"
+   ],
+   "to_table": "Production.UnitMeasure",
+   "to_columns": [
+    "UnitMeasureCode"
+   ]
+  },
+  {
+   "name": "FK_ProductVendor_Vendor_BusinessEntityID",
+   "from_table": "Purchasing.ProductVendor",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Purchasing.Vendor",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_PurchaseOrderDetail_Product_ProductID",
+   "from_table": "Purchasing.PurchaseOrderDetail",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Production.Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_PurchaseOrderDetail_PurchaseOrderHeader_PurchaseOrderID",
+   "from_table": "Purchasing.PurchaseOrderDetail",
+   "from_columns": [
+    "PurchaseOrderID"
+   ],
+   "to_table": "Purchasing.PurchaseOrderHeader",
+   "to_columns": [
+    "PurchaseOrderID"
+   ]
+  },
+  {
+   "name": "FK_PurchaseOrderHeader_Employee_EmployeeID",
+   "from_table": "Purchasing.PurchaseOrderHeader",
+   "from_columns": [
+    "EmployeeID"
+   ],
+   "to_table": "HumanResources.Employee",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_PurchaseOrderHeader_Vendor_VendorID",
+   "from_table": "Purchasing.PurchaseOrderHeader",
+   "from_columns": [
+    "VendorID"
+   ],
+   "to_table": "Purchasing.Vendor",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_PurchaseOrderHeader_ShipMethod_ShipMethodID",
+   "from_table": "Purchasing.PurchaseOrderHeader",
+   "from_columns": [
+    "ShipMethodID"
+   ],
+   "to_table": "Purchasing.ShipMethod",
+   "to_columns": [
+    "ShipMethodID"
+   ]
+  },
+  {
+   "name": "FK_SalesOrderDetail_SalesOrderHeader_SalesOrderID",
+   "from_table": "Sales.SalesOrderDetail",
+   "from_columns": [
+    "SalesOrderID"
+   ],
+   "to_table": "Sales.SalesOrderHeader",
+   "to_columns": [
+    "SalesOrderID"
+   ]
+  },
+  {
+   "name": "FK_SalesOrderDetail_SpecialOfferProduct_SpecialOfferIDProductID",
+   "from_table": "Sales.SalesOrderDetail",
+   "from_columns": [
+    "SpecialOfferID",
+    "ProductID"
+   ],
+   "to_table": "Sales.SpecialOfferProduct",
+   "to_columns": [
+    "SpecialOfferID",
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_SalesOrderHeader_Address_BillToAddressID",
+   "from_table": "Sales.SalesOrderHeader",
+   "from_columns": [
+    "BillToAddressID"
+   ],
+   "to_table": "Person.Address",
+   "to_columns": [
+    "AddressID"
+   ]
+  },
+  {
+   "name": "FK_SalesOrderHeader_Address_ShipToAddressID",
+   "from_table": "Sales.SalesOrderHeader",
+   "from_columns": [
+    "ShipToAddressID"
+   ],
+   "to_table": "Person.Address",
+   "to_columns": [
+    "AddressID"
+   ]
+  },
+  {
+   "name": "FK_SalesOrderHeader_CreditCard_CreditCardID",
+   "from_table": "Sales.SalesOrderHeader",
+   "from_columns": [
+    "CreditCardID"
+   ],
+   "to_table": "Sales.CreditCard",
+   "to_columns": [
+    "CreditCardID"
+   ]
+  },
+  {
+   "name": "FK_SalesOrderHeader_CurrencyRate_CurrencyRateID",
+   "from_table": "Sales.SalesOrderHeader",
+   "from_columns": [
+    "CurrencyRateID"
+   ],
+   "to_table": "Sales.CurrencyRate",
+   "to_columns": [
+    "CurrencyRateID"
+   ]
+  },
+  {
+   "name": "FK_SalesOrderHeader_Customer_CustomerID",
+   "from_table": "Sales.SalesOrderHeader",
+   "from_columns": [
+    "CustomerID"
+   ],
+   "to_table": "Sales.Customer",
+   "to_columns": [
+    "CustomerID"
+   ]
+  },
+  {
+   "name": "FK_SalesOrderHeader_SalesPerson_SalesPersonID",
+   "from_table": "Sales.SalesOrderHeader",
+   "from_columns": [
+    "SalesPersonID"
+   ],
+   "to_table": "Sales.SalesPerson",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_SalesOrderHeader_ShipMethod_ShipMethodID",
+   "from_table": "Sales.SalesOrderHeader",
+   "from_columns": [
+    "ShipMethodID"
+   ],
+   "to_table": "Purchasing.ShipMethod",
+   "to_columns": [
+    "ShipMethodID"
+   ]
+  },
+  {
+   "name": "FK_SalesOrderHeader_SalesTerritory_TerritoryID",
+   "from_table": "Sales.SalesOrderHeader",
+   "from_columns": [
+    "TerritoryID"
+   ],
+   "to_table": "Sales.SalesTerritory",
+   "to_columns": [
+    "TerritoryID"
+   ]
+  },
+  {
+   "name": "FK_SalesOrderHeaderSalesReason_SalesReason_SalesReasonID",
+   "from_table": "Sales.SalesOrderHeaderSalesReason",
+   "from_columns": [
+    "SalesReasonID"
+   ],
+   "to_table": "Sales.SalesReason",
+   "to_columns": [
+    "SalesReasonID"
+   ]
+  },
+  {
+   "name": "FK_SalesOrderHeaderSalesReason_SalesOrderHeader_SalesOrderID",
+   "from_table": "Sales.SalesOrderHeaderSalesReason",
+   "from_columns": [
+    "SalesOrderID"
+   ],
+   "to_table": "Sales.SalesOrderHeader",
+   "to_columns": [
+    "SalesOrderID"
+   ]
+  },
+  {
+   "name": "FK_SalesPerson_Employee_BusinessEntityID",
+   "from_table": "Sales.SalesPerson",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "HumanResources.Employee",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_SalesPerson_SalesTerritory_TerritoryID",
+   "from_table": "Sales.SalesPerson",
+   "from_columns": [
+    "TerritoryID"
+   ],
+   "to_table": "Sales.SalesTerritory",
+   "to_columns": [
+    "TerritoryID"
+   ]
+  },
+  {
+   "name": "FK_SalesPersonQuotaHistory_SalesPerson_BusinessEntityID",
+   "from_table": "Sales.SalesPersonQuotaHistory",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Sales.SalesPerson",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_SalesTaxRate_StateProvince_StateProvinceID",
+   "from_table": "Sales.SalesTaxRate",
+   "from_columns": [
+    "StateProvinceID"
+   ],
+   "to_table": "Person.StateProvince",
+   "to_columns": [
+    "StateProvinceID"
+   ]
+  },
+  {
+   "name": "FK_SalesTerritoryHistory_SalesPerson_BusinessEntityID",
+   "from_table": "Sales.SalesTerritoryHistory",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Sales.SalesPerson",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_SalesTerritoryHistory_SalesTerritory_TerritoryID",
+   "from_table": "Sales.SalesTerritoryHistory",
+   "from_columns": [
+    "TerritoryID"
+   ],
+   "to_table": "Sales.SalesTerritory",
+   "to_columns": [
+    "TerritoryID"
+   ]
+  },
+  {
+   "name": "FK_ShoppingCartItem_Product_ProductID",
+   "from_table": "Sales.ShoppingCartItem",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Production.Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_SpecialOfferProduct_Product_ProductID",
+   "from_table": "Sales.SpecialOfferProduct",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Production.Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID",
+   "from_table": "Sales.SpecialOfferProduct",
+   "from_columns": [
+    "SpecialOfferID"
+   ],
+   "to_table": "Sales.SpecialOffer",
+   "to_columns": [
+    "SpecialOfferID"
+   ]
+  },
+  {
+   "name": "FK_StateProvince_CountryRegion_CountryRegionCode",
+   "from_table": "Person.StateProvince",
+   "from_columns": [
+    "CountryRegionCode"
+   ],
+   "to_table": "Person.CountryRegion",
+   "to_columns": [
+    "CountryRegionCode"
+   ]
+  },
+  {
+   "name": "FK_StateProvince_SalesTerritory_TerritoryID",
+   "from_table": "Person.StateProvince",
+   "from_columns": [
+    "TerritoryID"
+   ],
+   "to_table": "Sales.SalesTerritory",
+   "to_columns": [
+    "TerritoryID"
+   ]
+  },
+  {
+   "name": "FK_Store_BusinessEntity_BusinessEntityID",
+   "from_table": "Sales.Store",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Person.BusinessEntity",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_Store_SalesPerson_SalesPersonID",
+   "from_table": "Sales.Store",
+   "from_columns": [
+    "SalesPersonID"
+   ],
+   "to_table": "Sales.SalesPerson",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_TransactionHistory_Product_ProductID",
+   "from_table": "Production.TransactionHistory",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Production.Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_Vendor_BusinessEntity_BusinessEntityID",
+   "from_table": "Purchasing.Vendor",
+   "from_columns": [
+    "BusinessEntityID"
+   ],
+   "to_table": "Person.BusinessEntity",
+   "to_columns": [
+    "BusinessEntityID"
+   ]
+  },
+  {
+   "name": "FK_WorkOrder_Product_ProductID",
+   "from_table": "Production.WorkOrder",
+   "from_columns": [
+    "ProductID"
+   ],
+   "to_table": "Production.Product",
+   "to_columns": [
+    "ProductID"
+   ]
+  },
+  {
+   "name": "FK_WorkOrder_ScrapReason_ScrapReasonID",
+   "from_table": "Production.WorkOrder",
+   "from_columns": [
+    "ScrapReasonID"
+   ],
+   "to_table": "Production.ScrapReason",
+   "to_columns": [
+    "ScrapReasonID"
+   ]
+  },
+  {
+   "name": "FK_WorkOrderRouting_Location_LocationID",
+   "from_table": "Production.WorkOrderRouting",
+   "from_columns": [
+    "LocationID"
+   ],
+   "to_table": "Production.Location",
+   "to_columns": [
+    "LocationID"
+   ]
+  },
+  {
+   "name": "FK_WorkOrderRouting_WorkOrder_WorkOrderID",
+   "from_table": "Production.WorkOrderRouting",
+   "from_columns": [
+    "WorkOrderID"
+   ],
+   "to_table": "Production.WorkOrder",
+   "to_columns": [
+    "WorkOrderID"
+   ]
+  }
+ ]
+}

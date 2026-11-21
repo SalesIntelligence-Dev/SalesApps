@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+{% raw %}
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GraphReady · Graph-ML-Readiness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'ui-monospace', 'monospace'] },
+    colors: { ink: { 950: '#07071a', 900: '#0b0b20', 850: '#0f0f27', 800: '#13132e', 700: '#1b1b3d', 600: '#26264f' } },
+  } }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
+<style>
+:root{
+  --bg:#07071a;--bg2:#0b0b20;--panel:#10102a;--panel2:#15153a;--border:#22224a;--border2:#30305f;
+  --text:#e7e9f3;--sub:#a0a8bf;--muted:#6f7894;
+  --violet:#8b7cf6;--cyan:#22d3ee;--amber:#f59e0b;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;--off:#64748b;--pink:#f472b6;
+}
+[x-cloak]{display:none!important}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.55;
+     -webkit-font-smoothing:antialiased;overflow-x:hidden}
+.bg-glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(900px 420px at 12% -8%,rgba(139,124,246,.18),transparent 60%),
+             radial-gradient(800px 380px at 92% 0%,rgba(34,211,238,.12),transparent 60%),
+             radial-gradient(700px 500px at 50% 110%,rgba(139,124,246,.06),transparent 60%)}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.35;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:44px 44px;mask-image:linear-gradient(to bottom,black,transparent 70%)}
+.wrap{position:relative;z-index:1}
+.panel{background:linear-gradient(180deg,rgba(21,21,58,.72),rgba(16,16,42,.72));border:1px solid var(--border);
+       border-radius:16px;backdrop-filter:blur(6px)}
+.panel-flat{background:rgba(16,16,42,.6);border:1px solid var(--border);border-radius:12px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sub)}
+.grad-text{background:linear-gradient(92deg,#c4b5fd 0%,#8b7cf6 35%,#22d3ee 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.muted{color:var(--muted)} .sub{color:var(--sub)}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:600;
+      border:1px solid var(--border2);background:rgba(255,255,255,.03);color:var(--sub);white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:999px;display:inline-block;flex:none}
+.dot-ok{background:var(--ok);box-shadow:0 0 0 3px rgba(52,211,153,.15)}
+.dot-warn{background:var(--warn);box-shadow:0 0 0 3px rgba(251,191,36,.15)}
+.dot-bad{background:var(--bad);box-shadow:0 0 0 3px rgba(248,113,113,.15)}
+.dot-off{background:var(--off)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;padding:8px 14px;font-weight:600;
+     font-size:13px;transition:all .15s ease;border:1px solid transparent;cursor:pointer;white-space:nowrap}
+.btn:focus-visible,.focusable:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.btn-primary{background:linear-gradient(92deg,#7c6cf3,#5b8cf5);color:#fff;box-shadow:0 6px 22px -8px rgba(124,108,243,.7)}
+.btn-primary:hover{filter:brightness(1.1)}
+.btn-ghost{background:rgba(255,255,255,.04);border-color:var(--border2);color:var(--text)}
+.btn-ghost:hover{background:rgba(255,255,255,.08)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.kpi{padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.02)}
+.kpi-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kpi-value{font-size:22px;font-weight:700;line-height:1.15;margin-top:4px;font-variant-numeric:tabular-nums}
+.kpi-sub{font-size:11px;color:var(--sub);margin-top:2px}
+.kpi-warn{border-color:rgba(251,191,36,.35);background:linear-gradient(180deg,rgba(251,191,36,.08),rgba(251,191,36,.02))}
+.kpi-warn .kpi-value{color:#fcd34d}
+.step{position:relative;text-align:left;border-radius:14px;padding:12px 14px;border:1px solid var(--border);
+      background:rgba(255,255,255,.02);transition:all .18s ease;cursor:pointer;min-width:0}
+.step:hover{border-color:var(--border2);background:rgba(255,255,255,.04)}
+.step.active{border-color:rgba(139,124,246,.7);background:linear-gradient(180deg,rgba(139,124,246,.18),rgba(139,124,246,.05));
+             box-shadow:0 10px 30px -14px rgba(139,124,246,.8)}
+.step-num{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-weight:800;font-size:12px;
+          background:rgba(255,255,255,.06);border:1px solid var(--border2);flex:none}
+.step.active .step-num{background:linear-gradient(135deg,#8b7cf6,#22d3ee);border-color:transparent;color:#07071a}
+.step.done .step-num{background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.5);color:var(--ok)}
+.stage{position:relative;border-radius:12px;padding:12px 14px;border:1px solid var(--border);cursor:pointer;transition:all .18s;
+       background:rgba(255,255,255,.02);text-align:left;width:100%}
+.stage:hover{background:rgba(255,255,255,.04)}
+.stage.active{border-color:rgba(34,211,238,.6);background:linear-gradient(90deg,rgba(34,211,238,.14),rgba(139,124,246,.08));
+              box-shadow:inset 3px 0 0 var(--cyan)}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px}
+.tbl th{position:sticky;top:0;z-index:1;background:#13132f;text-align:left;font-size:10px;font-weight:700;letter-spacing:.07em;
+        text-transform:uppercase;color:var(--muted);padding:9px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl td{padding:8px 10px;border-bottom:1px solid rgba(34,34,74,.6);vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px}
+.null-cell{color:#fcd34d;font-style:italic;opacity:.9}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.scroll-y{overflow-y:auto}
+.scroll-thin::-webkit-scrollbar{height:8px;width:8px}
+.scroll-thin::-webkit-scrollbar-thumb{background:#2a2a58;border-radius:8px}
+.role{display:inline-flex;align-items:center;border-radius:6px;padding:1px 7px;font-size:10.5px;font-weight:700;margin:1px 3px 1px 0;border:1px solid}
+.role-PK{color:#c4b5fd;border-color:rgba(139,124,246,.45);background:rgba(139,124,246,.12)}
+.role-FK{color:#67e8f9;border-color:rgba(34,211,238,.45);background:rgba(34,211,238,.1)}
+.role-Zeit{color:#6ee7b7;border-color:rgba(52,211,153,.45);background:rgba(52,211,153,.1)}
+.role-Freitext{color:#f9a8d4;border-color:rgba(244,114,182,.45);background:rgba(244,114,182,.1)}
+.role-HK{color:#fcd34d;border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.1)}
+.role-other{color:var(--sub);border-color:var(--border2);background:rgba(255,255,255,.03)}
+.bar{height:6px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden}
+.bar>span{display:block;height:100%;border-radius:999px}
+.sev{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;flex:none}
+.sev-bad{background:rgba(248,113,113,.14);color:var(--bad)}
+.sev-warn{background:rgba(251,191,36,.14);color:var(--warn)}
+.sev-info{background:rgba(96,165,250,.14);color:#93c5fd}
+.pb{font-size:10.5px;font-weight:700;color:#c4b5fd;border:1px solid rgba(139,124,246,.4);border-radius:6px;padding:1px 6px;white-space:nowrap}
+.amp{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px 3px 8px;font-size:11px;font-weight:600;white-space:nowrap}
+.amp-pending{color:var(--muted);border:1px dashed var(--border2)}
+.amp-pending .ring{width:9px;height:9px;border-radius:999px;border:1.5px solid var(--off);flex:none}
+.cy{width:100%;border-radius:12px;background:radial-gradient(600px 300px at 50% 40%,rgba(139,124,246,.07),transparent 70%),#0a0a1f;
+    border:1px solid var(--border)}
+.legend-dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+.drop{border:1.5px dashed var(--border2);border-radius:12px;transition:all .15s}
+.drop.drag{border-color:var(--cyan);background:rgba(34,211,238,.06)}
+.skel{background:linear-gradient(90deg,rgba(255,255,255,.03),rgba(255,255,255,.07),rgba(255,255,255,.03));background-size:200% 100%;
+      animation:sk 1.4s infinite;border-radius:8px}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.fade-in{animation:fi .35s ease both}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(460px,100%);z-index:60;background:#0d0d24;border-left:1px solid var(--border);
+        box-shadow:-30px 0 60px -20px rgba(0,0,0,.6)}
+.overlay{position:fixed;inset:0;background:rgba(3,3,12,.6);backdrop-filter:blur(2px);z-index:55}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:70;max-width:min(560px,calc(100% - 32px))}
+.ph-line{height:10px;border-radius:6px;background:rgba(255,255,255,.05)}
+.select{background:#0d0d24;border:1px solid var(--border2);border-radius:10px;color:var(--text);padding:8px 10px;font-size:13px;width:100%}
+.select:focus{outline:2px solid var(--cyan);outline-offset:1px}
+.tab{padding:6px 12px;border-radius:9px;font-size:12.5px;font-weight:600;color:var(--sub);border:1px solid transparent;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--text);background:rgba(139,124,246,.14);border-color:rgba(139,124,246,.45)}
+.insight-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;
+            background:linear-gradient(135deg,rgba(139,124,246,.22),rgba(34,211,238,.14));color:#c4b5fd;border:1px solid rgba(139,124,246,.3)}
+</style>
+</head>
+
+<body x-data="graphReady()" @keydown.escape.window="systemOpen=false">
+<div class="bg-glow"></div><div class="grid-bg"></div>
+
+<div class="wrap min-h-screen flex flex-col">
+
+<!-- ═════════════════════════ HEADER ═════════════════════════ -->
+<header class="sticky top-0 z-40 border-b border-[#1c1c42] bg-[#08081bcc] backdrop-blur-md">
+  <div class="max-w-[1440px] mx-auto px-4 sm:px-6 h-[60px] flex items-center gap-3">
+    <a href="/" class="flex items-center gap-2.5 focusable rounded-lg" title="Zur SalesApps-Startseite">
+      <span class="text-[22px]">⚡</span>
+      <span class="hidden sm:block leading-tight">
+        <span class="block text-[14px] font-bold">SalesApps</span>
+        <span class="block text-[10.5px] sub">KI-gestützte Vertriebsoptimierung</span>
+      </span>
+    </a>
+    <span class="hidden sm:block w-px h-7 bg-[#26264f] mx-1"></span>
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="w-7 h-7 rounded-lg grid place-items-center flex-none" style="background:linear-gradient(135deg,#8b7cf6,#22d3ee)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#07071a" stroke-width="2.4" stroke-linecap="round"><circle cx="5" cy="6" r="2.4"/><circle cx="19" cy="6" r="2.4"/><circle cx="12" cy="18" r="2.4"/><path d="M7 7.3l3.6 8.6M17 7.3l-3.6 8.6M7.4 6h9.2"/></svg>
+      </span>
+      <div class="leading-tight min-w-0">
+        <div class="text-[14px] font-bold truncate">GraphReady</div>
+        <div class="text-[10.5px] sub truncate">Graph-ML-Readiness-Plattform</div>
+      </div>
+    </div>
+
+    <div class="ml-auto flex items-center gap-2">
+      <template x-for="c in (system?.chips || [])" :key="c.id">
+        <button class="chip hidden lg:inline-flex focusable hover:border-[#3d3d78]" @click="openSystem()" :title="c.hint">
+          <span class="dot" :class="'dot-'+c.state"></span>
+          <span class="text-[#e7e9f3]" x-text="c.label"></span>
+          <span class="font-medium hidden xl:inline" x-text="c.value"></span>
+        </button>
+      </template>
+      <template x-if="!system">
+        <span class="chip hidden lg:inline-flex"><span class="skel w-24 h-3"></span></span>
+      </template>
+      <button class="btn btn-ghost !py-1.5 !px-3 lg:hidden" @click="openSystem()" aria-label="Systemstatus öffnen">
+        <span class="dot" :class="'dot-'+gpuState()"></span> System
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 pb-16">
+
+  <!-- ═════════════════════════ HERO + STUFEN ═════════════════════════ -->
+  <section class="grid lg:grid-cols-12 gap-6 pt-8 sm:pt-10 pb-6">
+    <div class="lg:col-span-7 fade-in">
+      <div class="eyebrow mb-3">Modellunabhängige Readiness- und Aktivierungsplattform</div>
+      <h1 class="text-[30px] sm:text-[40px] leading-[1.1] font-extrabold tracking-tight">
+        Trägt <span class="grad-text">Graph ML</span> mit diesen Daten?
+      </h1>
+      <p class="mt-4 text-[15px] sub max-w-[620px]">
+        GraphReady liest Ihre ERP- und CRM-Daten als Graph, prüft je Vertriebs- und After-Sales-Use-Case, ob die Daten reichen,
+        vergleicht mehrere Modellklassen mit zeitlich sauberem Rückblick und zeigt das Euro-Potenzial – mit klar benannten Annahmen.
+      </p>
+      <div class="mt-5 flex flex-wrap gap-2">
+        <span class="chip"><span class="dot dot-ok"></span>Echte Daten: Online Retail II</span>
+        <span class="chip">6 Module · 3 Stufen · 9 Use Cases</span>
+        <span class="chip">Regel · LightGBM · TabPFN · GNN · KumoRFM · Aurora</span>
+      </div>
+    </div>
+
+    <div class="lg:col-span-5 fade-in">
+      <div class="panel p-4 sm:p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="eyebrow">Readiness-Trichter</div>
+            <div class="text-[13px] sub mt-0.5">Wählen Sie, wie tief geprüft wird</div>
+          </div>
+          <span class="chip" x-show="dataset?.kind==='schema'" x-cloak title="Ohne Daten ist nur der Strukturcheck möglich">
+            <span class="dot dot-warn"></span>nur Stufe 1
+          </span>
+        </div>
+        <div class="space-y-2">
+          <template x-for="s in stages" :key="s.n">
+            <button class="stage focusable" :class="{active: stage===s.n}" @click="stage=s.n"
+                    :style="'margin-left:'+((s.n-1)*14)+'px;width:calc(100% - '+((s.n-1)*14)+'px)'">
+              <div class="flex items-start gap-3">
+                <span class="step-num" :style="stage===s.n ? 'background:linear-gradient(135deg,#22d3ee,#8b7cf6);color:#07071a;border-color:transparent' : ''" x-text="s.n"></span>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="font-semibold text-[13.5px]" x-text="s.name"></span>
+                    <span class="text-[10.5px] font-semibold sub" x-text="s.price"></span>
+                  </div>
+                  <div class="text-[12px] sub mt-0.5" x-text="s.input"></div>
+                  <div class="text-[11.5px] mt-1" x-show="stage===s.n" x-transition.opacity>
+                    <span class="text-[#e7e9f3]" x-text="'„'+s.claim+'“'"></span>
+                    <span class="muted" x-text="' · Risiko: '+s.risk"></span>
+                  </div>
+                </div>
+              </div>
+            </button>
+          </template>
+        </div>
+        <div class="text-[11px] muted mt-3">Die Stufe steuert ab Schritt 3, welche Ampel-Dimensionen belastbar sind.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════════════════ STEPPER ═════════════════════════ -->
+  <nav class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mb-6" aria-label="Module">
+    <template x-for="s in steps" :key="s.n">
+      <button class="step focusable" :class="{active: step===s.n, done: s.ready && step!==s.n}" @click="step=s.n"
+              :aria-current="step===s.n ? 'step' : null">
+        <div class="flex items-center gap-2.5 pr-3">
+          <span class="step-num" x-text="s.n"></span>
+          <div class="min-w-0">
+            <div class="font-semibold text-[13px] leading-tight" x-text="s.name"></div>
+            <div class="text-[11px] sub truncate mt-0.5" x-text="s.sub"></div>
+          </div>
+        </div>
+        <span class="absolute top-2.5 right-2.5 dot" :class="s.ready ? 'dot-ok' : 'dot-off'"
+              :title="s.ready ? 'bereit' : 'folgt mit Prompt '+s.prompt" :aria-label="s.ready ? 'bereit' : 'folgt'"></span>
+      </button>
+    </template>
+  </nav>
+
+  <!-- ═════════════════════════ SCHRITT 1 · KONNEKTOREN ═════════════════════════ -->
+  <section x-show="step===1" x-cloak class="fade-in space-y-5">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+      <div>
+        <div class="eyebrow">Schritt 1 · Konnektoren</div>
+        <h2 class="text-[22px] font-bold mt-1">Datenquelle anbinden</h2>
+        <p class="sub text-[13.5px] mt-1 max-w-[760px]">ERP-, CRM- und Service-Daten als Export. Die Rohdaten bleiben unverändert –
+          jede Bereinigung erfolgt später nachvollziehbar als Fix-Playbook (Schritt 5).</p>
+      </div>
+    </div>
+
+    <!-- Quellen -->
+    <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-3">
+      <template x-for="d in datasets" :key="d.id">
+        <div role="button" tabindex="0" class="panel p-4 text-left focusable relative cursor-pointer transition"
+             :class="dsId===d.id ? 'ring-2 ring-[#8b7cf6] shadow-[0_10px_40px_-16px_rgba(139,124,246,.9)]' : 'hover:border-[#30305f]'"
+             @click="selectDataset(d.id)" @keydown.enter="selectDataset(d.id)">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <span class="w-9 h-9 rounded-xl grid place-items-center text-[17px]"
+                    :style="d.kind==='schema' ? 'background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.35)' : 'background:rgba(139,124,246,.14);border:1px solid rgba(139,124,246,.4)'"
+                    x-text="d.kind==='schema' ? '🗂️' : (d.builtin ? '🛒' : '📄')"></span>
+              <div>
+                <div class="font-semibold text-[14px]" x-text="d.name"></div>
+                <div class="text-[11px] sub" x-text="d.source"></div>
+              </div>
+            </div>
+            <span class="chip !py-0.5" x-text="d.kind==='schema' ? 'nur Schema' : 'Daten'"></span>
+          </div>
+          <p class="text-[12px] sub mt-3 line-clamp-2" x-text="d.description"></p>
+          <div class="flex items-center justify-between mt-3 text-[11.5px]">
+            <span class="sub" x-text="cardFacts(d)"></span>
+            <span class="muted" x-text="d.license"></span>
+          </div>
+          <button x-show="!d.builtin" class="absolute top-2 right-2 w-6 h-6 rounded-md grid place-items-center muted hover:text-white hover:bg-white/10"
+                  @click.stop="removeDataset(d.id)" aria-label="Upload entfernen">✕</button>
+        </div>
+      </template>
+
+      <!-- Upload -->
+      <label class="drop p-4 flex flex-col justify-center items-center text-center cursor-pointer min-h-[150px]"
+             :class="{drag: upload.drag}" @dragover.prevent="upload.drag=true" @dragleave.prevent="upload.drag=false"
+             @drop.prevent="upload.drag=false; doUpload($event.dataTransfer.files)">
+        <input type="file" class="hidden" multiple accept=".csv,.txt,.xlsx,.xls,.parquet,.json" @change="doUpload($event.target.files)">
+        <template x-if="!upload.busy">
+          <div>
+            <div class="w-9 h-9 mx-auto rounded-xl grid place-items-center bg-white/5 border border-[#30305f]">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a0a8bf" stroke-width="2" stroke-linecap="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>
+            </div>
+            <div class="font-semibold text-[13.5px] mt-2">Eigene Daten hochladen</div>
+            <div class="text-[11.5px] sub mt-1">CSV, XLSX, Parquet – je Datei eine Tabelle<br>oder Schema (JSON / CSV „tabelle,spalte,typ“)</div>
+          </div>
+        </template>
+        <template x-if="upload.busy">
+          <div class="text-[13px] sub flex items-center gap-2"><span class="w-4 h-4 rounded-full border-2 border-[#8b7cf6] border-t-transparent animate-spin"></span> Lese Dateien …</div>
+        </template>
+        <div x-show="upload.error" x-cloak class="text-[11.5px] mt-2 text-red-300" x-text="upload.error"></div>
+      </label>
+    </div>
+
+    <!-- KPIs -->
+    <div x-show="loading.ds" class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 gap-3">
+      <template x-for="i in 7"><div class="kpi"><div class="skel h-3 w-16"></div><div class="skel h-6 w-20 mt-2"></div></div></template>
+    </div>
+    <div x-show="!loading.ds && overview" x-cloak class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 gap-3">
+      <template x-for="k in kpis()" :key="k.label">
+        <div class="kpi" :class="k.warn ? 'kpi-warn' : ''">
+          <div class="kpi-label" x-text="k.label"></div>
+          <div class="kpi-value" x-text="k.value"></div>
+          <div class="kpi-sub" x-text="k.sub || ''"></div>
+        </div>
+      </template>
+    </div>
+
+    <!-- Verlauf + Befunde -->
+    <div class="grid lg:grid-cols-12 gap-4" x-show="overview && dataset?.kind==='data'" x-cloak>
+      <div class="panel p-4 sm:p-5 lg:col-span-7" x-show="overview?.monthly">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="font-semibold">Positionen je Monat</div>
+            <div class="text-[12px] sub">mit Kundennummer · ohne Kundennummer · Storno – Linie: Umsatz (£) · Dez 2011 nur bis 09.12.</div>
+          </div>
+        </div>
+        <div class="relative h-[260px]"><canvas id="chartMonthly"></canvas></div>
+      </div>
+      <div class="panel p-4 sm:p-5" :class="overview?.monthly ? 'lg:col-span-5' : 'lg:col-span-12'">
+        <div class="flex items-center justify-between mb-3">
+          <div class="font-semibold">Datenlage auf einen Blick</div>
+          <span class="text-[11px] muted">automatisch erkannt</span>
+        </div>
+        <div class="space-y-2.5 max-h-[290px] scroll-y scroll-thin pr-1">
+          <template x-for="f in (mapping?.findings || [])" :key="f.title">
+            <div class="flex gap-3 items-start">
+              <span class="sev" :class="'sev-'+f.severity" x-html="sevIcon(f.severity)"></span>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="text-[13px] font-semibold leading-snug" x-text="f.title"></div>
+                  <span class="pb" x-show="f.playbook" x-text="f.playbook" :title="'Fix-Playbook in Schritt 5'"></span>
+                </div>
+                <div class="text-[12px] sub leading-snug" x-text="f.text"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabellen + Vorschau -->
+    <div class="panel p-4 sm:p-5" x-show="overview" x-cloak>
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-3">
+        <div>
+          <div class="font-semibold" x-text="dataset?.kind==='schema' ? 'Tabellen des Schemas' : 'Tabellen (aus dem Export abgeleitet)'"></div>
+          <div class="text-[12px] sub" x-text="dataset?.kind==='schema' ? 'Nur Struktur – Spalten, Typen, Pflichtfelder, Primärschlüssel' : 'Flacher Export → relationales Schema wie im ERP: Kunden, Rechnungen, Positionen, Artikel, Länder'"></div>
+        </div>
+        <input x-show="(overview?.tables||[]).length > 12" type="search" class="select !w-full lg:!w-64" placeholder="Tabelle suchen …" x-model="tableFilter">
+      </div>
+      <div class="flex gap-1.5 scroll-x scroll-thin pb-2" :class="(overview?.tables||[]).length > 12 ? 'flex-wrap max-h-[120px] scroll-y' : ''">
+        <template x-for="t in filteredTables()" :key="t.name">
+          <button class="tab focusable" :class="{active: previewTable===t.name}" @click="previewTable=t.name; loadPreview()">
+            <span x-text="t.label || shortName(t.name)"></span>
+            <span class="muted font-medium ml-1" x-text="t.rows!=null ? fmtCompact(t.rows) : t.n_columns+' Sp.'"></span>
+          </button>
+        </template>
+      </div>
+      <div class="mt-2 rounded-xl border border-[#22224a] overflow-hidden">
+        <div class="max-h-[380px] scroll-x scroll-y scroll-thin">
+          <table class="tbl" x-show="preview">
+            <thead><tr><template x-for="c in (preview?.columns||[])"><th x-text="c"></th></template></tr></thead>
+            <tbody>
+              <template x-for="(r, i) in (preview?.rows||[])" :key="i">
+                <tr><template x-for="(v, j) in r" :key="j">
+                  <td class="mono whitespace-nowrap" :class="v===null ? 'null-cell' : ''" x-text="v===null ? '∅ leer' : v"></td>
+                </template></tr>
+              </template>
+            </tbody>
+          </table>
+          <div x-show="!preview" class="p-6 space-y-2"><div class="skel h-4"></div><div class="skel h-4"></div><div class="skel h-4 w-2/3"></div></div>
+        </div>
+      </div>
+      <div class="text-[11.5px] muted mt-2" x-show="preview" x-text="previewNote()"></div>
+    </div>
+  </section>
+
+  <!-- ═════════════════════════ SCHRITT 2 · GRAPH-MAPPING ═════════════════════════ -->
+  <section x-show="step===2" x-cloak class="fade-in space-y-5">
+    <div>
+      <div class="eyebrow">Schritt 2 · Graph-Mapping</div>
+      <h2 class="text-[22px] font-bold mt-1">Die Datenbank als Graph</h2>
+      <p class="sub text-[13.5px] mt-1 max-w-[820px]">Jede Tabelle wird ein Knotentyp, jede Zeile ein Knoten, jede Schlüsselbeziehung eine Kante
+        (Relational Deep Learning). Schlüssel, Zeitspalten und Verknüpfungen werden automatisch erkannt und gemessen.</p>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" x-show="mapping">
+      <template x-for="k in mappingKpis()" :key="k.label">
+        <div class="kpi" :class="k.warn ? 'kpi-warn' : ''">
+          <div class="kpi-label" x-text="k.label"></div>
+          <div class="kpi-value" x-text="k.value"></div>
+          <div class="kpi-sub" x-text="k.sub || ''"></div>
+        </div>
+      </template>
+    </div>
+
+    <div class="grid lg:grid-cols-12 gap-4">
+      <div class="panel p-4 sm:p-5" :class="mapping?.mode==='schema' ? 'lg:col-span-12' : 'lg:col-span-7'">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div>
+            <div class="font-semibold">Schema-Graph</div>
+            <div class="text-[12px] sub" x-text="mapping?.mode==='schema' ? 'Farbe = Schema · Kanten aus deklarierten Fremdschlüsseln' : 'Kantenfarbe = Verknüpfungsquote · gestrichelt = fehlende Beziehung'"></div>
+          </div>
+          <div class="flex gap-1.5">
+            <button class="btn btn-ghost !py-1.5 !px-2.5 text-[12px]" @click="zoomCy('schema', 1.25)" aria-label="Vergrößern">+</button>
+            <button class="btn btn-ghost !py-1.5 !px-2.5 text-[12px]" @click="zoomCy('schema', 0.8)" aria-label="Verkleinern">−</button>
+            <button class="btn btn-ghost !py-1.5 !px-2.5 text-[12px]" x-show="mapping?.mode!=='schema'" @click="relayoutSchema()">Neu anordnen</button>
+            <button class="btn btn-ghost !py-1.5 !px-2.5 text-[12px]" @click="fitCy('schema')">Einpassen</button>
+          </div>
+        </div>
+        <div id="cySchema" class="cy" :class="mapping?.mode==='schema' ? 'h-[420px] sm:h-[600px]' : 'h-[360px] sm:h-[460px]'"></div>
+        <div class="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 text-[11.5px] sub" x-show="mapping?.mode==='data'">
+          <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#34d399"></span>≥ 95 % verknüpft</span>
+          <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#fbbf24"></span>70–95 %</span>
+          <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#f87171"></span>&lt; 70 % / fehlt</span>
+          <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:transparent;border:2px solid #22d3ee"></span>Tabelle mit Zeitstempel</span>
+        </div>
+        <div class="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 text-[11.5px] sub" x-show="mapping?.mode==='schema'">
+          <template x-for="(col, name) in schemaColors" :key="name">
+            <span class="flex items-center gap-1.5"><span class="legend-dot" :style="'background:'+col"></span><span x-text="name"></span></span>
+          </template>
+        </div>
+        <div class="text-[12px] mt-2 min-h-[18px]" :class="cySelection ? '' : 'muted'" x-text="cySelection || 'Tabelle oder Kante antippen für Details · Strg + Mausrad zoomt'"></div>
+      </div>
+
+      <div class="panel p-4 sm:p-5 flex flex-col" :class="mapping?.mode==='schema' ? 'lg:col-span-12' : 'lg:col-span-5'">
+        <div class="font-semibold">Beziehungen</div>
+        <div class="text-[12px] sub mb-3" x-text="mapping?.mode==='schema' ? 'Deklariert – ob sie gefüllt sind, zeigt erst Stufe 2' : 'Anteil der Zeilen, deren Schlüssel einen Datensatz findet'"></div>
+        <div class="scroll-y scroll-thin pr-1 overflow-x-hidden" :class="mapping?.mode==='schema' ? 'grid sm:grid-cols-2 xl:grid-cols-4 gap-3 max-h-[420px] content-start' : 'space-y-3'">
+          <template x-for="r in (mapping?.relations||[])" :key="r.id">
+            <div class="panel-flat p-3" :class="r.kind==='missing' ? 'border-dashed !border-[rgba(248,113,113,.5)]' : ''">
+              <div class="flex items-start justify-between gap-2">
+                <div class="text-[12.5px] font-semibold leading-snug min-w-0 break-words">
+                  <span x-text="r.label || (tblLabel(r.from_table)+' → '+tblLabel(r.to_table))"></span>
+                  <div class="mono muted text-[11px] font-normal break-all" x-text="r.from_column+' → '+r.to_column"></div>
+                </div>
+                <span class="text-[13px] font-bold tabular-nums" :style="'color:'+statusColor(r.status)"
+                      x-text="r.linkage_rate==null ? 'deklariert' : fmtPct(r.linkage_rate)"></span>
+              </div>
+              <div class="bar mt-2" x-show="r.linkage_rate!=null"><span :style="'width:'+(r.linkage_rate*100)+'%;background:'+statusColor(r.status)"></span></div>
+              <div class="text-[11px] sub mt-1.5" x-show="r.kind==='fk' && (r.null_rows||r.orphan_rows)"
+                   x-text="fmtInt(r.null_rows)+' leer · '+fmtInt(r.orphan_rows)+' verwaist von '+fmtInt(r.rows)"></div>
+              <div class="text-[11px] text-red-300 mt-1.5" x-show="r.note" x-text="r.note"></div>
+            </div>
+          </template>
+        </div>
+        <template x-if="(mapping?.paths||[]).some(p => p.hops>1)">
+          <div class="mt-4">
+            <div class="font-semibold text-[13px]">Abdeckung über mehrere Schritte</div>
+            <div class="space-y-2 mt-2">
+              <template x-for="p in mapping.paths.filter(p => p.hops>1)" :key="p.via.join('>')">
+                <div class="flex items-center justify-between gap-3 text-[12px]">
+                  <span class="sub truncate" x-text="p.via.map(t => tblLabel(t)).join(' → ')"></span>
+                  <span class="font-bold tabular-nums" :style="'color:'+statusColor(p.status)" x-text="fmtPct(p.coverage)"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Insights -->
+    <div class="panel p-4 sm:p-5" x-show="mapping">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="font-semibold text-[15px]">Was bedeutet das für Graph ML?</div>
+      </div>
+      <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        <template x-for="i in (mapping?.insights||[])" :key="i.title">
+          <div class="panel-flat p-4 flex gap-3">
+            <span class="insight-ic" x-html="insightIcon(i.icon)"></span>
+            <div>
+              <div class="font-semibold text-[13.5px]" x-text="i.title"></div>
+              <div class="text-[12.5px] sub mt-1 leading-relaxed" x-text="i.text"></div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Subgraph -->
+    <div class="panel p-4 sm:p-5" x-show="dsId==='online_retail_ii'">
+      <div class="grid lg:grid-cols-12 gap-4">
+        <div class="lg:col-span-4 space-y-3">
+          <div>
+            <div class="font-semibold">Beispiel-Subgraph</div>
+            <div class="text-[12px] sub">Kunde → Rechnungen → Artikel → andere Kunden mit gleichen Artikeln (2 Schritte entfernt)</div>
+          </div>
+          <label class="block">
+            <span class="text-[11px] font-semibold muted uppercase tracking-wide">Kunde wählen</span>
+            <select class="select mt-1" x-model.number="customerId" @change="loadSubgraph()">
+              <template x-for="c in customers" :key="c.customer_id">
+                <option :value="c.customer_id" x-text="c.customer_id+' · '+c.label"></option>
+              </template>
+              <template x-if="customerId && !customers.some(c => c.customer_id===customerId)">
+                <option :value="customerId" x-text="customerId+' · zufällig'"></option>
+              </template>
+            </select>
+          </label>
+          <button class="btn btn-ghost w-full" @click="loadSubgraph(true)">🎲 Zufälliger Kunde</button>
+          <div class="grid grid-cols-2 gap-2" x-show="subgraph">
+            <div class="kpi !p-3"><div class="kpi-label">Rechnungen</div><div class="text-[17px] font-bold" x-text="fmtInt(subgraph?.stats.invoices)"></div><div class="kpi-sub" x-text="subgraph?.stats.invoices_shown+' gezeigt · '+subgraph?.stats.stornos_total+' Stornos'"></div></div>
+            <div class="kpi !p-3"><div class="kpi-label">Umsatz</div><div class="text-[17px] font-bold" x-text="'£ '+fmtInt(subgraph?.stats.revenue_gbp)"></div><div class="kpi-sub" x-text="subgraph?.stats.country"></div></div>
+            <div class="kpi !p-3"><div class="kpi-label">Artikel</div><div class="text-[17px] font-bold" x-text="fmtInt(subgraph?.stats.products)"></div><div class="kpi-sub" x-text="subgraph?.stats.products_shown+' gezeigt'"></div></div>
+            <div class="kpi !p-3"><div class="kpi-label">Nachbarkunden</div><div class="text-[17px] font-bold" x-text="fmtInt(subgraph?.stats.neighbors)"></div><div class="kpi-sub" x-text="subgraph?.stats.neighbors_shown+' gezeigt'"></div></div>
+          </div>
+          <div class="text-[12px] sub" x-show="subgraph" x-text="'Aktiv vom '+fmtDate(subgraph?.stats.first)+' bis '+fmtDate(subgraph?.stats.last)"></div>
+          <div class="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11.5px] sub pt-1">
+            <span class="flex items-center gap-1.5"><span class="legend-dot rounded-full" style="background:#f59e0b"></span>Kunde</span>
+            <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#8b7cf6"></span>Rechnung</span>
+            <span class="flex items-center gap-1.5"><span class="legend-dot" style="background:#f87171"></span>Storno</span>
+            <span class="flex items-center gap-1.5"><span class="legend-dot rounded-full" style="background:#22d3ee"></span>Artikel</span>
+            <span class="flex items-center gap-1.5"><span class="legend-dot rounded-full" style="background:#64748b"></span>Nachbarkunde</span>
+            <span class="flex items-center gap-1.5"><span class="legend-dot rotate-45" style="background:#34d399"></span>Land</span>
+          </div>
+        </div>
+        <div class="lg:col-span-8">
+          <div class="relative">
+            <div id="cySub" class="cy h-[380px] sm:h-[520px]"></div>
+            <div class="absolute top-2 right-2 flex gap-1">
+              <button class="btn btn-ghost !py-1 !px-2.5 text-[12px] bg-[#0a0a1f]" @click="zoomCy('sub', 1.25)" aria-label="Vergrößern">+</button>
+              <button class="btn btn-ghost !py-1 !px-2.5 text-[12px] bg-[#0a0a1f]" @click="zoomCy('sub', 0.8)" aria-label="Verkleinern">−</button>
+              <button class="btn btn-ghost !py-1 !px-2.5 text-[12px] bg-[#0a0a1f]" @click="fitCy('sub')">Einpassen</button>
+            </div>
+            <div x-show="loading.sub" class="absolute inset-0 grid place-items-center rounded-xl bg-[#0a0a1fcc]">
+              <div class="text-[13px] sub flex items-center gap-2"><span class="w-4 h-4 rounded-full border-2 border-[#22d3ee] border-t-transparent animate-spin"></span> Baue Subgraph …</div>
+            </div>
+          </div>
+          <div class="text-[12px] mt-2 min-h-[18px]" :class="subSelection ? '' : 'muted'" x-text="subSelection || 'Knoten antippen für Details · Strg + Mausrad zoomt · ziehen verschiebt'"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spaltenprofil -->
+    <div class="panel p-4 sm:p-5" x-show="mapping">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 mb-3">
+        <div>
+          <div class="font-semibold">Spaltenprofil &amp; Rollen</div>
+          <div class="text-[12px] sub">PK · FK · Zeit · Freitext · hohe Kardinalität – Grundlage für die Readiness-Checks in Schritt 3</div>
+        </div>
+        <select class="select !w-full lg:!w-72" x-show="(mapping?.tables||[]).length > 8" x-model="colTable">
+          <template x-for="t in (mapping?.tables||[])" :key="t.name"><option :value="t.name" x-text="t.name"></option></template>
+        </select>
+      </div>
+      <div class="flex gap-1.5 scroll-x scroll-thin pb-2" x-show="(mapping?.tables||[]).length <= 8">
+        <template x-for="t in (mapping?.tables||[])" :key="t.name">
+          <button class="tab focusable" :class="{active: colTable===t.name}" @click="colTable=t.name">
+            <span x-text="t.label || t.name"></span><span class="muted ml-1" x-text="t.rows!=null ? fmtCompact(t.rows) : ''"></span>
+          </button>
+        </template>
+      </div>
+      <div class="rounded-xl border border-[#22224a] overflow-hidden mt-1">
+        <div class="max-h-[420px] scroll-x scroll-y scroll-thin">
+          <table class="tbl">
+            <thead><tr><th>Spalte</th><th>Rollen</th><th>Typ</th><th x-show="mapping?.mode==='data'">Leerwerte</th><th x-show="mapping?.mode==='data'">Ausprägungen</th><th>Beispiele</th></tr></thead>
+            <tbody>
+              <template x-for="c in colTableData()?.columns || []" :key="c.name">
+                <tr>
+                  <td class="mono font-medium whitespace-nowrap" x-text="c.name"></td>
+                  <td class="whitespace-nowrap"><template x-for="r in c.roles"><span class="role" :class="roleClass(r)" x-text="r"></span></template></td>
+                  <td class="sub whitespace-nowrap" x-text="c.sql_type || c.kind"></td>
+                  <td x-show="mapping?.mode==='data'" class="whitespace-nowrap min-w-[120px]">
+                    <div class="flex items-center gap-2">
+                      <div class="bar w-16"><span :style="'width:'+Math.max(c.null_rate*100, c.null_rate>0?3:0)+'%;background:'+(c.null_rate>0.05?'#fbbf24':'#34d399')"></span></div>
+                      <span class="tabular-nums text-[12px]" :class="c.null_rate>0.05?'text-amber-300':'sub'" x-text="fmtPct(c.null_rate)"></span>
+                    </div>
+                  </td>
+                  <td x-show="mapping?.mode==='data'" class="tabular-nums sub" x-text="fmtInt(c.n_unique)"></td>
+                  <td class="mono sub max-w-[320px] truncate" x-text="(c.examples||[]).join(' · ') || (c.nullable===false ? 'Pflichtfeld' : '')"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════════════════ SCHRITTE 3–6 · PLATZHALTER ═════════════════════════ -->
+  <template x-for="s in steps.filter(s => !s.ready)" :key="'ph'+s.n">
+    <section x-show="step===s.n" x-cloak class="fade-in">
+      <div class="eyebrow" x-text="'Schritt '+s.n+' · '+s.name"></div>
+      <h2 class="text-[22px] font-bold mt-1" x-text="s.title"></h2>
+      <p class="sub text-[13.5px] mt-1 max-w-[780px]" x-text="s.desc"></p>
+      <div class="grid lg:grid-cols-12 gap-4 mt-5">
+        <div class="panel p-5 lg:col-span-5">
+          <div class="flex items-center gap-2"><span class="chip"><span class="dot dot-off"></span>folgt mit Prompt <span x-text="s.prompt"></span></span></div>
+          <div class="font-semibold mt-4">Was hier entsteht</div>
+          <ul class="mt-2 space-y-2">
+            <template x-for="b in s.bullets"><li class="flex gap-2 text-[13px] sub"><span class="text-[#8b7cf6]">▸</span><span x-text="b"></span></li></template>
+          </ul>
+        </div>
+        <div class="panel p-5 lg:col-span-7 relative overflow-hidden">
+          <div class="space-y-3 opacity-70">
+            <div class="flex gap-3"><div class="ph-line w-1/3"></div><div class="ph-line w-1/5"></div></div>
+            <template x-for="i in 6"><div class="flex items-center gap-3">
+              <div class="ph-line w-1/4"></div>
+              <template x-for="j in 4"><div class="w-14 h-5 rounded-full border border-dashed border-[#30305f]"></div></template>
+            </div></template>
+          </div>
+          <div class="absolute inset-0 grid place-items-center">
+            <div class="text-center px-6">
+              <div class="text-[34px]" x-text="s.icon"></div>
+              <div class="font-semibold mt-1" x-text="s.name"></div>
+              <div class="text-[12px] sub mt-1">Vorschau – die Daten aus Schritt 1 und 2 stehen bereit</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <!-- ═════════════════════════ AMPEL-MATRIX ═════════════════════════ -->
+  <section class="mt-8" id="ampel">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-3">
+      <div>
+        <div class="eyebrow">Use-Case-Readiness-Ampel</div>
+        <h2 class="text-[20px] font-bold mt-1">9 Vorlagen aus Sales und After Sales</h2>
+        <p class="text-[13px] sub mt-1">Drei Dimensionen je Use Case: Datenreife · Vorhersagekraft · Euro-Potenzial. Wird ab Schritt 3 befüllt.</p>
+      </div>
+      <div class="flex gap-1.5">
+        <template x-for="f in ['Alle','Sales','After Sales']" :key="f">
+          <button class="tab focusable" :class="{active: ucFilter===f}" @click="ucFilter=f" x-text="f"></button>
+        </template>
+      </div>
+    </div>
+    <div class="panel overflow-hidden">
+      <div class="scroll-x scroll-thin">
+        <table class="tbl min-w-[900px]">
+          <thead><tr>
+            <th>Use Case</th><th>Bereich</th><th>Bisherige App</th><th>Vorhersageziel (Label)</th>
+            <th>Max. Stufe</th><th>Datenreife</th><th>Vorhersagekraft</th><th>Euro-Potenzial</th><th>Gesamt</th>
+          </tr></thead>
+          <tbody>
+            <template x-for="u in filteredUseCases()" :key="u.id">
+              <tr>
+                <td class="whitespace-nowrap">
+                  <div class="flex items-center gap-2">
+                    <span x-show="u.lighthouse" class="text-amber-300" title="Leuchtturm-Use-Case">★</span>
+                    <span class="font-semibold" x-text="u.name"></span>
+                  </div>
+                </td>
+                <td><span class="chip !py-0.5" :style="u.area==='After Sales' ? 'color:#f9a8d4;border-color:rgba(244,114,182,.4)' : ''" x-text="u.area"></span></td>
+                <td class="whitespace-nowrap">
+                  <a x-show="u.app_route" :href="u.app_route" class="text-[#a5b4fc] hover:underline" x-text="u.app_name"></a>
+                  <span x-show="!u.app_route" class="muted" x-text="u.app_name"></span>
+                </td>
+                <td class="sub min-w-[220px]"><span x-text="u.label"></span><span x-show="u.note" class="block text-[11px] muted" x-text="u.note"></span></td>
+                <td class="whitespace-nowrap"><span class="font-semibold tabular-nums" x-text="u.max_stage"></span><span class="muted"> / 3</span></td>
+                <template x-for="d in ['Datenreife','Vorhersagekraft','Euro-Potenzial','Gesamt']" :key="d">
+                  <td><span class="amp amp-pending" :title="d+' – wird in Schritt 3–4 berechnet'"><span class="ring"></span>offen</span></td>
+                </template>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="text-[11.5px] muted mt-2">★ Leuchtturm-Use-Cases (wie im Konzept: Retention und Root Cause). Max. Stufe = was mit Online Retail II höchstens prüfbar ist.</p>
+  </section>
+</main>
+
+<footer class="border-t border-[#1c1c42] mt-6">
+  <div class="max-w-[1440px] mx-auto px-4 sm:px-6 py-6 text-[11.5px] muted flex flex-col md:flex-row gap-2 md:items-center justify-between">
+    <div>Daten: <a class="hover:text-white underline-offset-2 hover:underline" href="https://archive.ics.uci.edu/dataset/502/online+retail+ii" target="_blank" rel="noopener">Online Retail II</a>, UCI Machine Learning Repository (CC BY 4.0) ·
+      Schema: AdventureWorks, Microsoft sql-server-samples (MIT) · Grundlage: Konzept „Graph-ML-Readiness-Plattform“</div>
+    <a href="/" class="hover:text-white">← SalesApps</a>
+  </div>
+</footer>
+</div>
+
+<!-- ═════════════════════════ SYSTEM-DRAWER ═════════════════════════ -->
+<div x-show="systemOpen" x-cloak class="overlay" x-transition.opacity @click="systemOpen=false"></div>
+<aside x-show="systemOpen" x-cloak class="drawer flex flex-col" x-transition:enter="transition duration-200" x-transition:enter-start="translate-x-full"
+       x-transition:leave="transition duration-150" x-transition:leave-end="translate-x-full" role="dialog" aria-label="Systemstatus">
+  <div class="flex items-center justify-between px-5 h-[60px] border-b border-[#1c1c42] flex-none">
+    <div>
+      <div class="font-bold">System &amp; Rechenressourcen</div>
+      <div class="text-[11px] sub" x-text="system?.host"></div>
+    </div>
+    <button class="w-8 h-8 rounded-lg grid place-items-center hover:bg-white/10" @click="systemOpen=false" aria-label="Schließen">✕</button>
+  </div>
+  <div class="flex-1 scroll-y scroll-thin p-5 space-y-5">
+    <div class="grid grid-cols-2 gap-2">
+      <template x-for="c in (system?.chips||[])" :key="c.id">
+        <div class="panel-flat p-3">
+          <div class="flex items-center gap-2 text-[12px] font-semibold"><span class="dot" :class="'dot-'+c.state"></span><span x-text="c.label"></span></div>
+          <div class="text-[12.5px] mt-1" x-text="c.value"></div>
+          <div class="text-[11px] muted mt-1 leading-snug" x-text="c.hint"></div>
+        </div>
+      </template>
+    </div>
+
+    <div>
+      <div class="eyebrow mb-2">Laufzeit</div>
+      <dl class="grid grid-cols-2 gap-y-1.5 text-[12.5px]">
+        <dt class="sub">Host</dt><dd x-text="system?.host"></dd>
+        <dt class="sub">Python</dt><dd x-text="system?.python"></dd>
+        <dt class="sub">CPU-Kerne</dt><dd x-text="system?.cpu_count + (system?.load_avg ? ' · Last '+system.load_avg[0] : '')"></dd>
+        <dt class="sub">RAM Prozess</dt><dd x-text="(system?.memory.process_rss_mb ?? '–')+' MB'+(system?.memory.container_limit_mb ? ' von '+system.memory.container_limit_mb+' MB' : '')"></dd>
+        <dt class="sub">Daten im RAM</dt><dd x-text="system ? (system.data_memory_mb.raw + system.data_memory_mb.tables).toFixed(0)+' MB' : '–'"></dd>
+        <dt class="sub">Bevorzugt</dt><dd x-text="deviceLabel(system?.preferred_device)"></dd>
+      </dl>
+    </div>
+
+    <div>
+      <div class="eyebrow mb-2">GPU</div>
+      <template x-for="g in (system?.gpu.nvidia||[])" :key="g.index">
+        <div class="panel-flat p-3 mb-2">
+          <div class="flex justify-between text-[12.5px]"><span class="font-semibold" x-text="'GPU '+g.index+' · '+g.name"></span><span class="sub" x-text="g.utilization_pct+' %'"></span></div>
+          <div class="bar mt-2"><span :style="'width:'+(g.memory_used_mb/g.memory_total_mb*100)+'%;background:#22d3ee'"></span></div>
+          <div class="text-[11px] muted mt-1" x-text="fmtInt(g.memory_used_mb)+' / '+fmtInt(g.memory_total_mb)+' MB · Treiber '+g.driver"></div>
+        </div>
+      </template>
+      <div class="text-[12px] sub" x-show="!(system?.gpu.nvidia||[]).length">Keine lokale NVIDIA-GPU (auf Render normal – GPU-Jobs laufen über RunPod).</div>
+      <div class="text-[12px] mt-1"><span class="sub">PyTorch:</span>
+        <span x-text="system?.gpu.torch.installed ? ('v'+system.gpu.torch.version+(system.gpu.torch.cuda ? ' · CUDA '+system.gpu.torch.cuda_version : ' · '+system.gpu.torch.reason)) : 'nicht installiert'"></span></div>
+    </div>
+
+    <div>
+      <div class="eyebrow mb-2">RunPod Serverless</div>
+      <div class="space-y-2 text-[12.5px]">
+        <div class="flex justify-between"><span class="sub">API-Key</span><span x-text="system?.runpod.api_key_set ? 'gesetzt' : 'fehlt'"></span></div>
+        <div class="flex justify-between gap-2"><span class="sub">Graph-ML-Endpoint</span>
+          <span class="text-right" x-text="system?.runpod.graphml.endpoint_set ? (system.runpod.graphml.endpoint_id+healthText(system.runpod.graphml.health)) : 'nicht gesetzt'"></span></div>
+        <div class="flex justify-between gap-2"><span class="sub">Aurora/CV-Endpoint</span>
+          <span class="text-right" x-text="system?.runpod.aurora.endpoint_set ? (system.runpod.aurora.endpoint_id+healthText(system.runpod.aurora.health)) : 'nicht gesetzt'"></span></div>
+      </div>
+      <div class="text-[11px] muted mt-2">Variablen nur im Render-Dashboard setzen: RUNPOD_API_KEY, RUNPOD_GRAPHML_ENDPOINT_ID, optional KUMO_API_KEY.</div>
+    </div>
+
+    <div>
+      <div class="eyebrow mb-2">Engines &amp; Pakete</div>
+      <div class="rounded-xl border border-[#22224a] overflow-hidden">
+        <table class="tbl">
+          <tbody>
+            <template x-for="p in (system?.packages||[])" :key="p.package">
+              <tr><td class="font-medium" x-text="p.name"></td><td class="sub text-[11.5px]" x-text="p.purpose"></td>
+                <td class="text-right mono" :class="p.version ? 'text-emerald-300' : 'muted'" x-text="p.version || '—'"></td></tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="font-semibold">Selbsttest</div>
+          <div class="text-[11.5px] sub">Rechnet einen Benchmark auf CPU, lokaler GPU und RunPod</div>
+        </div>
+        <button class="btn btn-primary" @click="runSelftest()" :disabled="selftest && selftest.status==='running'">Starten</button>
+      </div>
+      <template x-if="selftest">
+        <div class="mt-3">
+          <div class="bar"><span :style="'width:'+selftest.progress+'%;background:linear-gradient(90deg,#8b7cf6,#22d3ee)'"></span></div>
+          <div class="text-[11.5px] sub mt-1.5" x-text="selftest.message || selftest.status"></div>
+          <div class="mt-3 space-y-1.5" x-show="selftest.result">
+            <template x-for="r in (selftest.result?.results||[])" :key="r.device">
+              <div class="flex items-start justify-between gap-2 text-[12px]">
+                <span class="flex items-center gap-2"><span class="dot" :class="r.ok ? 'dot-ok' : (r.skipped ? 'dot-off' : 'dot-bad')"></span><span x-text="r.device"></span></span>
+                <span class="text-right" :class="r.ok ? '' : 'muted'" x-text="r.ok ? (r.gflops+' GFLOP/s · '+r.where) : r.error"></span>
+              </div>
+            </template>
+          </div>
+          <pre class="mt-3 text-[10.5px] mono sub bg-black/30 rounded-lg p-2 max-h-[140px] scroll-y scroll-thin whitespace-pre-wrap" x-text="(selftest.log||[]).join('\n')"></pre>
+        </div>
+      </template>
+    </div>
+  </div>
+</aside>
+
+<!-- Toast -->
+<div class="toast" x-show="toast" x-cloak x-transition>
+  <div class="panel px-4 py-3 text-[13px] flex items-center gap-3"
+       :class="toast?.type==='bad' ? '!border-[rgba(248,113,113,.5)]' : '!border-[rgba(52,211,153,.4)]'">
+    <span class="dot" :class="toast?.type==='bad' ? 'dot-bad' : 'dot-ok'"></span><span x-text="toast?.msg"></span>
+  </div>
+</div>
+
+<script>
+const API = '/graph_ml/api';
+const CY = {};
+let monthlyChart = null;
+
+// Nach dem nächsten DOM-Update ausführen. Alpine aktualisiert das DOM per Microtask;
+// ein Timer läuft danach – auch in Hintergrund-Tabs, wo requestAnimationFrame pausiert.
+function afterRender(fn) { setTimeout(fn, 20); }
+
+// Großes Schema lesbar anordnen: ein Block je Schema, Tabellen nach Vernetzung sortiert,
+// Blöcke auf zwei Spalten verteilt (feste Positionen statt Kräfte-Layout).
+function schemaBlocks(m) {
+  const groups = {}, deg = {};
+  m.tables.forEach(t => (groups[t.schema || '—'] ||= []).push(t));
+  m.relations.forEach(r => { deg[r.from_table] = (deg[r.from_table] || 0) + 1; deg[r.to_table] = (deg[r.to_table] || 0) + 1; });
+  const CW = 205, CH = 52, COLS = 4, GAP = 90, HEAD = 30;
+  const order = Object.keys(groups).sort((a, b) => groups[b].length - groups[a].length);
+  const colH = [0, 0], pos = {};
+  order.forEach(g => {
+    const ts = groups[g].sort((a, b) => (deg[b.name] || 0) - (deg[a.name] || 0));
+    const rows = Math.ceil(ts.length / COLS);
+    const c = colH[0] <= colH[1] ? 0 : 1;
+    const x0 = c * (COLS * CW + GAP), y0 = colH[c] + HEAD;
+    ts.forEach((t, i) => { pos[t.name] = { x: x0 + (i % COLS) * CW + CW / 2, y: y0 + Math.floor(i / COLS) * CH }; });
+    colH[c] += HEAD + rows * CH + GAP;
+  });
+  return { pos, groups: order };
+}
+
+function hexA(hex, a) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+
+// Mausrad scrollt die Seite; Zoomen im Graphen nur mit Strg/⌘ (oder Buttons)
+function guardWheel(el) {
+  if (el.dataset.wheelGuard) return;
+  el.dataset.wheelGuard = '1';
+  el.parentElement.addEventListener('wheel', e => { if (!(e.ctrlKey || e.metaKey)) e.stopPropagation(); }, { capture: true });
+}
+
+const SCHEMA_COLORS = { Sales: '#8b7cf6', Production: '#22d3ee', Person: '#f59e0b', Purchasing: '#34d399', HumanResources: '#f472b6' };
+const STATUS_COLORS = { ok: '#34d399', warn: '#fbbf24', bad: '#f87171', unknown: '#5b6488' };
+
+function graphReady() {
+  return {
+    stage: 2, step: 1,
+    stages: [
+      { n: 1, name: 'Strukturcheck', input: 'Nur Tabellen- und Feldliste bzw. Graph-Mapping', claim: 'Use Case ist grundsätzlich abbildbar', risk: 'Falsches Grün – Felder existieren, sind aber leer', price: 'kostenlos – 2.500 €' },
+      { n: 2, name: 'Profilcheck', input: 'Nur Kennzahlen, keine Rohdaten – DSGVO-freundlich', claim: 'Menge, Historie und Verknüpfung reichen', risk: 'keine Aussage zur Vorhersagekraft', price: 'im Readiness-Sprint' },
+      { n: 3, name: 'Rückblick', input: 'Historische Rohdaten, streng nach Datum getrennt', claim: 'So gut wäre die Vorhersage gewesen – so viel Potenzial', risk: 'Annahme zur Wirkung', price: '8.000 – 20.000 €' },
+    ],
+    steps: [
+      { n: 1, name: 'Konnektoren', sub: 'ERP · CRM · Export', ready: true },
+      { n: 2, name: 'Graph-Mapping', sub: 'Schlüssel · Zeit · Kanten', ready: true },
+      { n: 3, name: 'Readiness-Checks', sub: '9 Prüfungen je Use Case', ready: false, prompt: 2, icon: '🚦',
+        title: 'Trägt die Datenlage den Use Case?',
+        desc: 'Neun Prüfdimensionen je Use Case ergeben einen Readiness-Score mit konkreten Maßnahmen – für Strukturcheck (Stufe 1) und Profilcheck (Stufe 2).',
+        bullets: ['Use-Case-Bibliothek mit Label-Definition, Pflichttabellen und typischen Blockern', 'Struktur, Zeit & Leakage, Label & Historie, Modellwahl, Cold Start, Spaltenqualität, Freitext, Limits, Governance', 'Profil-Export für Kunden: nur Kennzahlen, keine personenbezogenen Daten', 'Ampel-Matrix mit Begründung je Prüfung'] },
+      { n: 4, name: 'Baseline-Vergleich', sub: 'Bäume · TFM · GNN · RFM', ready: false, prompt: 3, icon: '⚖️',
+        title: 'Welche Modellklasse gewinnt – und schlägt sie die Regel?',
+        desc: 'Zeitlich strikt getrennter Rückblick (Stufe 3): Regel-Baseline gegen LightGBM, TabPFN, Graph Neural Network, KumoRFM und Aurora – auf CPU, lokaler GPU oder RunPod.',
+        bullets: ['RelBench-artige Snapshots mit 90-Tage-Labels, Leakage-Guard', 'Leaderboard mit Konfidenzintervallen, Kalibrierung und Laufzeit je Gerät', 'Empfohlene Engine je Use Case nach „Beyond IID“', 'GPU-Jobs über eigenen RunPod-Worker'] },
+      { n: 5, name: 'Fix-Playbooks', sub: 'Bereinigen · neu prüfen', ready: false, prompt: 4, icon: '🛠️',
+        title: 'Lücken schließen, bis der Use Case trägt',
+        desc: 'Reproduzierbare Reparaturschritte mit Vorher/Nachher-Ampel – und die Was-wäre-wenn-Rechnung mit Euro-Potenzial unter klar benannten Annahmen.',
+        bullets: ['PB-01 fehlende Kundennummern · PB-02 Storno-Matching · PB-05 Artikelgruppen aus Freitext …', 'Ampel aus Datenreife, Vorhersagekraft und Euro-Potenzial', 'Was-wäre-wenn mit Schiebereglern: Listengröße, Rettungsquote, Kosten', 'Trichter vom Light-Scan bis zur Lizenz'] },
+      { n: 6, name: 'Aktivierung', sub: 'CRM · Kontrollgruppe', ready: false, prompt: 5, icon: '🚀',
+        title: 'Vorhersagen dorthin, wo der Vertrieb arbeitet',
+        desc: 'Priorisierte Aktionslisten mit Gründen, Mensch in der Schleife, Kontrollgruppe für den Pilot, Monitoring von Datenqualität und Drift.',
+        bullets: ['Aktionslisten je Use Case mit kalibrierten Schwellen', 'Export für CRM-Import (Salesforce, HubSpot, Dynamics) als Vorschau', 'Kontrollgruppe und Fallzahlschätzung für den Pilot', 'Readiness-Report als PDF und Excel'] },
+    ],
+    schemaColors: SCHEMA_COLORS,
+    system: null, systemOpen: false, selftest: null,
+    usecases: [], ucFilter: 'Alle',
+    datasets: [], dsId: 'online_retail_ii', overview: null, mapping: null,
+    previewTable: null, preview: null, tableFilter: '', colTable: null,
+    customers: [], customerId: null, subgraph: null, subLoadedFor: null,
+    cySelection: '', subSelection: '',
+    loading: { ds: true, sub: false },
+    upload: { busy: false, error: null, drag: false },
+    toast: null,
+
+    get dataset() { return this.datasets.find(d => d.id === this.dsId); },
+
+    async api(path, opts) {
+      const r = await fetch(API + path, opts);
+      let data = null;
+      try { data = await r.json(); } catch (_) { data = {}; }
+      if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+      return data;
+    },
+    notify(msg, type = 'ok') { this.toast = { msg, type }; clearTimeout(this._t); this._t = setTimeout(() => this.toast = null, 4200); },
+
+    async init() {
+      const m = location.hash.match(/s(\d)/);
+      if (m) this.step = Math.min(6, Math.max(1, +m[1]));
+      // Zeichnen reaktiv auslösen (nicht aus Event-Handlern heraus – deren Scope kann veraltet sein)
+      this.$watch('step', v => { if (location.hash !== '#s' + v) history.replaceState(null, '', '#s' + v); afterRender(() => this.renderStep()); });
+      this.$watch('mapping', m => { if (m) afterRender(() => this.renderStep()); });
+      this.$watch('overview', o => { if (o && this.step === 1) afterRender(() => this.drawMonthly()); });
+      this.$watch('subgraph', g => { if (g) afterRender(() => this.drawSubgraph()); });
+      window.addEventListener('hashchange', () => { const h = location.hash.match(/s(\d)/); if (h) this.step = Math.min(6, Math.max(1, +h[1])); });
+      this.loadSystem();
+      try {
+        const [uc, ds] = await Promise.all([this.api('/usecases'), this.api('/datasets')]);
+        this.usecases = uc; this.datasets = ds;
+        if (!ds.some(d => d.id === this.dsId) && ds.length) this.dsId = ds[0].id;
+        await this.selectDataset(this.dsId);
+      } catch (e) { this.notify('Laden fehlgeschlagen: ' + e.message, 'bad'); this.loading.ds = false; }
+    },
+
+    async loadSystem() {
+      try { this.system = await this.api('/system'); } catch (e) { /* Chips bleiben leer */ }
+    },
+    openSystem() { this.systemOpen = true; this.loadSystem(); },
+    gpuState() { return this.system?.chips?.find(c => c.id === 'gpu')?.state || 'off'; },
+    deviceLabel(d) { return { local_gpu: 'Lokale GPU', runpod: 'RunPod GPU', cpu: 'CPU' }[d] || '–'; },
+    healthText(h) { if (!h) return ''; return h.ok ? ` · ${h.workers_ready} Worker bereit` : ` · ${h.error}`; },
+
+    async runSelftest() {
+      try {
+        let job = await this.api('/jobs/selftest', { method: 'POST' });
+        this.selftest = job;
+        while (job.status === 'queued' || job.status === 'running') {
+          await new Promise(r => setTimeout(r, 900));
+          job = await this.api('/jobs/' + job.id);
+          this.selftest = job;
+        }
+        if (job.status === 'failed') this.notify('Selbsttest fehlgeschlagen: ' + job.error, 'bad');
+        else this.notify('Selbsttest fertig – bevorzugt: ' + job.result.preferred);
+      } catch (e) { this.notify(e.message, 'bad'); }
+    },
+
+    async selectDataset(id) {
+      this.dsId = id; this.overview = null; this.mapping = null; this.preview = null;
+      this.subgraph = null; this.subLoadedFor = null; this.cySelection = ''; this.tableFilter = '';
+      this.loading.ds = true;
+      try {
+        const [ov, mp] = await Promise.all([this.api(`/datasets/${id}`), this.api(`/datasets/${id}/mapping`)]);
+        if (this.dsId !== id) return;
+        this.overview = ov; this.mapping = mp;
+        this.previewTable = ov.tables[0]?.name;
+        this.colTable = (mp.tables.find(t => t.rows === Math.max(...mp.tables.map(x => x.rows || 0))) || mp.tables[0])?.name;
+        if (id === 'online_retail_ii') {
+          this.colTable = 'invoices';
+          this.customers = await this.api(`/datasets/${id}/customers`);
+          this.customerId = this.customers[0]?.customer_id ?? null;
+        } else { this.customers = []; }
+        if (this.dataset?.kind === 'schema') this.stage = 1;
+        this.loadPreview();
+      } catch (e) { this.notify(e.message, 'bad'); }
+      finally { this.loading.ds = false; }
+    },
+
+    async loadPreview() {
+      if (!this.previewTable) return;
+      const t = this.previewTable;
+      this.preview = null;
+      try {
+        const p = await this.api(`/datasets/${this.dsId}/preview?table=${encodeURIComponent(t)}&n=50`);
+        if (this.previewTable === t) this.preview = p;
+      } catch (e) { this.notify(e.message, 'bad'); }
+    },
+
+    async doUpload(files) {
+      if (!files || !files.length) return;
+      const fd = new FormData();
+      for (const f of files) fd.append('files', f);
+      this.upload = { busy: true, error: null, drag: false };
+      try {
+        const ds = await this.api('/upload', { method: 'POST', body: fd });
+        this.datasets = await this.api('/datasets');
+        this.notify(`„${ds.name}“ angebunden`);
+        await this.selectDataset(ds.id);
+      } catch (e) { this.upload.error = e.message; }
+      finally { this.upload.busy = false; }
+    },
+    async removeDataset(id) {
+      try {
+        await this.api(`/datasets/${id}`, { method: 'DELETE' });
+        this.datasets = await this.api('/datasets');
+        if (this.dsId === id) await this.selectDataset('online_retail_ii');
+      } catch (e) { this.notify(e.message, 'bad'); }
+    },
+
+    renderStep() {
+      if (this.step === 1) this.drawMonthly();
+      if (this.step === 2) {
+        this.drawSchema();
+        if (this.dsId === 'online_retail_ii' && this.subLoadedFor !== this.customerId) this.loadSubgraph();
+        else if (CY.sub) { CY.sub.resize(); CY.sub.fit(undefined, 24); }
+      }
+    },
+
+    // ── Formatierung ──
+    fmtInt(n) { return n == null ? '–' : Math.round(n).toLocaleString('de-DE'); },
+    fmtPct(x) { return x == null ? '–' : (x * 100).toLocaleString('de-DE', { maximumFractionDigits: 1, minimumFractionDigits: x > 0 && x < 1 ? 1 : 0 }) + ' %'; },
+    fmtCompact(n) {
+      if (n == null) return '';
+      if (n >= 1e6) return (n / 1e6).toLocaleString('de-DE', { maximumFractionDigits: 2 }) + ' Mio.';
+      if (n >= 1e4) return (n / 1e3).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' Tsd.';
+      return n.toLocaleString('de-DE');
+    },
+    fmtDate(iso) { if (!iso) return '–'; const d = new Date(iso); return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }); },
+    shortName(n) { return n.includes('.') ? n.split('.').pop() : n; },
+    tblLabel(name) { return this.mapping?.tables.find(t => t.name === name)?.label || name; },
+    statusColor(s) { return STATUS_COLORS[s] || STATUS_COLORS.unknown; },
+    roleClass(r) { return { PK: 'role-PK', FK: 'role-FK', Zeit: 'role-Zeit', Freitext: 'role-Freitext', 'Hohe Kardinalität': 'role-HK' }[r] || 'role-other'; },
+
+    cardFacts(d) {
+      const f = d.facts || {};
+      if (d.kind === 'schema') return `${f.tables} Tabellen · ${f.foreign_keys} FKs`;
+      if (d.builtin) return `${this.fmtCompact(f.rows)} Zeilen · ${f.months} Monate`;
+      return `${f.tables} Tabelle(n) · ${this.fmtCompact(f.rows)} Zeilen`;
+    },
+    kpis() {
+      const d = this.dataset; if (!d) return [];
+      const f = d.facts || {};
+      if (d.kind === 'schema') {
+        return [
+          { label: 'Tabellen', value: this.fmtInt(f.tables) },
+          { label: 'Spalten', value: this.fmtInt(f.columns) },
+          { label: 'Fremdschlüssel', value: this.fmtInt(f.foreign_keys) },
+          { label: 'Schemata', value: (f.schemas || []).length || '–', sub: (f.schemas || []).join(' · ') },
+          { label: 'Zeilen', value: '—', sub: 'keine Daten (Stufe 1)' },
+          { label: 'Ereignistabellen', value: this.fmtInt(this.mapping?.summary.event_tables), sub: 'mit echter Ereigniszeit' },
+          { label: 'Freitextfelder', value: this.fmtInt(this.mapping?.summary.free_text_columns) },
+        ];
+      }
+      if (d.id === 'online_retail_ii') {
+        return [
+          { label: 'Zeilen', value: this.fmtCompact(f.rows), sub: f.columns + ' Spalten im Export' },
+          { label: 'Zeitraum', value: f.months + ' Monate', sub: this.fmtDate(f.date_min) + ' – ' + this.fmtDate(f.date_max) },
+          { label: 'Kunden', value: this.fmtInt(f.customers), sub: f.countries + ' Länder' },
+          { label: 'Artikel', value: this.fmtInt(f.stock_codes), sub: this.fmtInt(f.descriptions) + ' Beschreibungen' },
+          { label: 'Belege', value: this.fmtInt(f.invoices), sub: 'Rechnungen + Stornos' },
+          { label: 'Stornobelege', value: this.fmtInt(f.storno_invoices), sub: this.fmtInt(f.storno_rows) + ' Positionen', warn: true },
+          { label: 'Ohne Kundennummer', value: this.fmtPct(f.share_without_customer), sub: this.fmtInt(f.rows_without_customer) + ' Positionen', warn: true },
+        ];
+      }
+      return [
+        { label: 'Tabellen', value: this.fmtInt(f.tables) },
+        { label: 'Zeilen', value: this.fmtCompact(f.rows) },
+        { label: 'Spalten', value: this.fmtInt(f.columns) },
+        { label: 'Beziehungen', value: this.fmtInt(this.mapping?.summary.relations) },
+        { label: 'Ø Verknüpfung', value: this.fmtPct(this.mapping?.summary.avg_linkage) },
+        { label: 'Zeitspalten', value: this.fmtInt(this.mapping?.summary.time_tables), sub: 'Tabellen mit Zeit' },
+        { label: 'Freitext', value: this.fmtInt(this.mapping?.summary.free_text_columns) },
+      ];
+    },
+    mappingKpis() {
+      const m = this.mapping; if (!m) return [];
+      const s = m.summary, g = m.graph;
+      const fb = s.findings || {};
+      if (m.mode === 'schema') {
+        return [
+          { label: 'Knotentypen', value: this.fmtInt(g.node_types.length), sub: 'Tabellen' },
+          { label: 'Kantentypen', value: this.fmtInt(g.edge_types.length), sub: 'Fremdschlüssel' },
+          { label: 'Ereignistabellen', value: this.fmtInt(s.event_tables) },
+          { label: 'Zeitspalten', value: this.fmtInt(s.time_tables), sub: 'Tabellen mit Datum' },
+          { label: 'Freitext', value: this.fmtInt(s.free_text_columns), sub: 'Spalten' },
+          { label: 'Befunde', value: (fb.bad || 0) + (fb.warn || 0), sub: 'kritisch + Warnung', warn: (fb.bad || 0) + (fb.warn || 0) > 0 },
+        ];
+      }
+      return [
+        { label: 'Knotentypen', value: this.fmtInt(g.node_types.length), sub: this.fmtCompact(g.n_nodes) + ' Knoten' },
+        { label: 'Kantentypen', value: this.fmtInt(g.edge_types.length), sub: this.fmtCompact(g.n_edges) + ' Kanten' },
+        { label: 'Ø Verknüpfung', value: this.fmtPct(s.avg_linkage), sub: 'min. ' + this.fmtPct(s.min_linkage) },
+        { label: 'Fehlende Beziehung', value: this.fmtInt(s.missing_relations), sub: 'z. B. Storno → Original', warn: s.missing_relations > 0 },
+        { label: 'Zeitspalten', value: this.fmtInt(s.time_tables), sub: 'Tabellen mit Zeitstempel' },
+        { label: 'Befunde', value: (fb.bad || 0) + (fb.warn || 0), sub: (fb.bad || 0) + ' kritisch · ' + (fb.warn || 0) + ' Warnung', warn: true },
+      ];
+    },
+    filteredTables() {
+      const q = this.tableFilter.trim().toLowerCase();
+      const t = this.overview?.tables || [];
+      return q ? t.filter(x => x.name.toLowerCase().includes(q)) : t;
+    },
+    previewNote() {
+      const p = this.preview; if (!p) return '';
+      if (p.schema_only) return 'Nur Struktur: Ob die Felder gefüllt sind, ist in Stufe 1 unbekannt.';
+      if (p.table === 'rohdaten') return `Ausschnitt aus ${this.fmtInt(p.total_rows)} Zeilen – zweite Hälfte bewusst Positionen ohne Kundennummer (∅).`;
+      return `Erste ${p.rows.length} von ${this.fmtInt(p.total_rows)} Zeilen.`;
+    },
+    colTableData() { return this.mapping?.tables.find(t => t.name === this.colTable) || this.mapping?.tables[0]; },
+    filteredUseCases() { return this.ucFilter === 'Alle' ? this.usecases : this.usecases.filter(u => u.area === this.ucFilter); },
+
+    sevIcon(s) {
+      if (s === 'bad') return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+      if (s === 'warn') return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 7v6M12 17.5v.5"/></svg>';
+      return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 11v6M12 6.5v.5"/></svg>';
+    },
+    insightIcon(k) {
+      const p = {
+        graph: '<circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8 7.5l3 8M16 7.5l-3 8M8.5 6h7"/>',
+        hops: '<circle cx="4" cy="12" r="2"/><circle cx="12" cy="6" r="2"/><circle cx="20" cy="12" r="2"/><circle cx="12" cy="18" r="2"/><path d="M5.6 10.8l4.8-3.6M13.6 7.2l4.8 3.6M18.4 13.2l-4.8 3.6"/>',
+        gap: '<path d="M4 12h5M15 12h5"/><circle cx="12" cy="12" r="2.5" stroke-dasharray="2 2"/>',
+        time: '<circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/>',
+        money: '<path d="M12 3v18M16.5 7.5c0-1.7-2-3-4.5-3s-4.5 1.3-4.5 3 2 2.6 4.5 3 4.5 1.3 4.5 3-2 3-4.5 3-4.5-1.3-4.5-3"/>',
+        nodes: '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
+      }[k] || '<circle cx="12" cy="12" r="8"/>';
+      return `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+    },
+
+    // ── Chart: Positionen je Monat ──
+    drawMonthly() {
+      const ov = this.overview;
+      const el = document.getElementById('chartMonthly');
+      if (!el || !ov?.monthly) return;
+      const months = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+      const labels = ov.monthly.map(m => { const [y, mo] = m.month.split('-'); return months[+mo - 1] + ' ' + y.slice(2); });
+      const ds = [
+        { label: 'mit Kundennummer', data: ov.monthly.map(m => m.with_cust), backgroundColor: 'rgba(52,211,153,.75)', stack: 'p', borderRadius: 3, yAxisID: 'y' },
+        { label: 'ohne Kundennummer', data: ov.monthly.map(m => m.no_cust), backgroundColor: 'rgba(251,191,36,.85)', stack: 'p', borderRadius: 3, yAxisID: 'y' },
+        { label: 'Storno', data: ov.monthly.map(m => m.storno), backgroundColor: 'rgba(248,113,113,.9)', stack: 'p', borderRadius: 3, yAxisID: 'y' },
+        { label: 'Umsatz (£)', data: ov.monthly.map(m => m.revenue_gbp), type: 'line', borderColor: '#a78bfa', backgroundColor: '#a78bfa',
+          borderWidth: 2, pointRadius: 0, tension: .35, yAxisID: 'y1' },
+      ];
+      if (monthlyChart) monthlyChart.destroy();
+      monthlyChart = new Chart(el, {
+        type: 'bar', data: { labels, datasets: ds },
+        options: {
+          responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { labels: { color: '#a0a8bf', boxWidth: 10, boxHeight: 10, font: { size: 11 } } },
+            tooltip: { backgroundColor: '#13132e', borderColor: '#30305f', borderWidth: 1, titleColor: '#e7e9f3', bodyColor: '#a0a8bf',
+              callbacks: { label: c => ` ${c.dataset.label}: ${c.dataset.yAxisID === 'y1' ? '£ ' : ''}${Math.round(c.raw).toLocaleString('de-DE')}` } },
+          },
+          scales: {
+            x: { stacked: true, ticks: { color: '#6f7894', font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { display: false } },
+            y: { stacked: true, ticks: { color: '#6f7894', font: { size: 10 }, callback: v => (v / 1000).toLocaleString('de-DE') + ' Tsd.' }, grid: { color: 'rgba(255,255,255,.05)' } },
+            y1: { position: 'right', ticks: { color: '#8b7cf6', font: { size: 10 }, callback: v => '£' + (v / 1e6).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' Mio.' }, grid: { display: false } },
+          },
+        },
+      });
+    },
+
+    // ── Cytoscape: Schema-Graph ──
+    drawSchema() {
+      const m = this.mapping, el = document.getElementById('cySchema');
+      if (!m || !el || el.offsetParent === null) return;
+      if (CY.schema && CY.schemaFor === m.dataset_id) { CY.schema.resize(); CY.schema.fit(undefined, 30); return; }
+      if (CY.schema) CY.schema.destroy();
+      const isSchema = m.mode === 'schema';
+      const maxRows = Math.max(1, ...m.tables.map(t => t.rows || 0));
+      const nodes = m.tables.map(t => ({ data: {
+        id: t.name, label: isSchema ? this.shortName(t.name) : `${t.label}\n${this.fmtCompact(t.rows)}`,
+        schema: t.schema || '', time: t.time_columns.length ? 1 : 0,
+        size: isSchema ? 1 : 0.6 + 0.4 * Math.log10(1 + (t.rows || 0)) / Math.log10(1 + maxRows),
+      } }));
+      // Knotengröße aus der Beschriftung (ersetzt das veraltete width: 'label')
+      nodes.forEach(n => {
+        const lines = n.data.label.split('\n');
+        const longest = Math.max(...lines.map(l => l.length));
+        n.data.w = Math.round(longest * (isSchema ? 6.2 : 7.6) + (isSchema ? 14 : 30));
+        n.data.h = Math.round(lines.length * (isSchema ? 13 : 17) + (isSchema ? 12 : 24));
+      });
+      let positions = null;
+      if (isSchema) {
+        const lay = schemaBlocks(m);
+        positions = lay.pos;
+        nodes.forEach(n => { n.data.parent = 'g:' + (n.data.schema || '—'); n.data.label = this.shortName(n.data.id); });
+        nodes.push(...lay.groups.map(g => ({ data: { id: 'g:' + g, label: g, schema: g, group: 1 } })));
+      }
+      const edges = m.relations.map(r => ({ data: {
+        id: r.id, source: r.from_table, target: r.to_table, status: r.status, kind: r.kind,
+        label: r.linkage_rate == null ? '' : this.fmtPct(r.linkage_rate),
+        title: r.label || `${r.from_table}.${r.from_column} → ${r.to_table}`,
+      } }));
+      const style = [
+        { selector: 'node', style: {
+          'shape': 'round-rectangle', 'background-color': '#16163c', 'border-width': 1.5, 'border-color': '#3a3a74',
+          'label': 'data(label)', 'color': '#e7e9f3', 'font-size': isSchema ? 10 : 12, 'font-weight': 600, 'font-family': 'Inter',
+          'text-wrap': 'wrap', 'text-valign': 'center', 'text-halign': 'center',
+          'width': 'data(w)', 'height': 'data(h)', 'line-height': 1.35 } },
+        { selector: 'node[time = 1]', style: { 'border-color': '#22d3ee', 'border-width': 2 } },
+        { selector: 'node[group = 1]', style: { 'background-opacity': .05, 'border-style': 'dashed', 'border-width': 1.5,
+          'text-valign': 'top', 'text-halign': 'center', 'text-margin-y': -8, 'font-size': 22, 'font-weight': 800,
+          'padding': '18px', 'shape': 'round-rectangle' } },
+        { selector: 'edge', style: {
+          'width': isSchema ? 1 : 2.5, 'curve-style': 'bezier', 'target-arrow-shape': 'triangle', 'arrow-scale': isSchema ? .6 : 1,
+          'line-color': '#5b6488', 'target-arrow-color': '#5b6488', 'opacity': isSchema ? .55 : .95,
+          'label': 'data(label)', 'font-size': 10.5, 'font-weight': 700, 'color': '#e7e9f3', 'font-family': 'Inter',
+          'text-background-color': '#0a0a1f', 'text-background-opacity': 1, 'text-background-padding': '3px', 'text-background-shape': 'roundrectangle' } },
+        { selector: 'edge[status = "ok"]', style: { 'line-color': '#34d399', 'target-arrow-color': '#34d399' } },
+        { selector: 'edge[status = "warn"]', style: { 'line-color': '#fbbf24', 'target-arrow-color': '#fbbf24' } },
+        { selector: 'edge[status = "bad"]', style: { 'line-color': '#f87171', 'target-arrow-color': '#f87171' } },
+        { selector: 'edge[kind = "missing"]', style: { 'line-style': 'dashed', 'line-dash-pattern': [6, 5], 'label': 'fehlt', 'color': '#fca5a5',
+          'loop-direction': '-40deg', 'loop-sweep': '-60deg', 'control-point-step-size': 70 } },
+        { selector: ':selected', style: { 'border-color': '#f59e0b', 'border-width': 3, 'line-color': '#f59e0b', 'target-arrow-color': '#f59e0b' } },
+        { selector: '.faded', style: { 'opacity': .15 } },
+      ];
+      Object.entries(SCHEMA_COLORS).forEach(([s, c]) => {
+        style.push({ selector: `node[schema = "${s}"]`, style: { 'background-color': hexA(c, .16), 'border-color': c } });
+        style.push({ selector: `node[group = 1][schema = "${s}"]`, style: { 'background-color': c, 'background-opacity': .05, 'color': c, 'border-color': hexA(c, .55) } });
+      });
+      const root = isSchema ? undefined : (m.tables.reduce((a, b) => (b.rows || 0) > (a.rows || 0) ? b : a).name);
+      CY.schema = cytoscape({
+        container: el, elements: [...nodes, ...edges], style, minZoom: 0.2, maxZoom: 3,
+        layout: isSchema ? { name: 'preset', positions: n => positions[n.id()], padding: 16 } : this.schemaLayout(false, root),
+      });
+      CY.schemaFor = m.dataset_id;
+      guardWheel(el);
+      CY.schema.on('tap', 'node', e => {
+        const t = m.tables.find(x => x.name === e.target.id());
+        if (!t) return;
+        const deg = e.target.connectedEdges().length;
+        this.cySelection = `${t.label || t.name}: ${t.rows != null ? this.fmtInt(t.rows) + ' Zeilen · ' : ''}${t.n_columns} Spalten · PK ${t.primary_key || '–'} · ${deg} Beziehungen${t.time_columns.length ? ' · Zeit: ' + t.time_columns.join(', ') : ''}`;
+        const nb = e.target.closedNeighborhood();
+        CY.schema.elements().addClass('faded'); nb.removeClass('faded');
+        this.colTable = t.name;
+      });
+      CY.schema.on('tap', 'edge', e => { this.cySelection = e.target.data('title') + (e.target.data('label') ? ' · ' + e.target.data('label') + ' verknüpft' : ''); });
+      CY.schema.on('tap', e => { if (e.target === CY.schema) { CY.schema.elements().removeClass('faded'); this.cySelection = ''; } });
+    },
+    schemaLayout(isSchema, root) {
+      return { name: 'breadthfirst', directed: true, roots: root ? [root] : undefined, spacingFactor: 1.25, padding: 30, avoidOverlap: true };
+    },
+    relayoutSchema() {
+      if (!CY.schema) return;
+      const isSchema = this.mapping?.mode === 'schema';
+      if (isSchema) return;
+      const lay = { name: 'circle', padding: 40, avoidOverlap: true };
+      CY.schema.layout({ ...lay, animate: true, animationDuration: 450 }).run();
+    },
+    fitCy(k) { const c = k === 'schema' ? CY.schema : CY.sub; if (c) c.animate({ fit: { padding: 30 } }, { duration: 300 }); },
+    zoomCy(k, f) {
+      const c = k === 'schema' ? CY.schema : CY.sub; if (!c) return;
+      c.animate({ zoom: { level: c.zoom() * f, renderedPosition: { x: c.width() / 2, y: c.height() / 2 } } }, { duration: 200 });
+    },
+
+    // ── Cytoscape: Kunden-Subgraph ──
+    async loadSubgraph(random = false) {
+      if (this.dsId !== 'online_retail_ii') return;
+      this.loading.sub = true;
+      try {
+        const q = random ? `random=1&seed=${Date.now() % 100000}` : `customer_id=${this.customerId}`;
+        const sg = await this.api(`/datasets/online_retail_ii/subgraph?${q}`);
+        this.subgraph = sg; this.customerId = sg.customer_id; this.subLoadedFor = sg.customer_id;
+        this.subSelection = '';
+      } catch (e) { this.notify(e.message, 'bad'); }
+      finally { this.loading.sub = false; }
+    },
+    drawSubgraph() {
+      const el = document.getElementById('cySub');
+      if (!el || !this.subgraph || el.offsetParent === null) return;
+      if (CY.sub) CY.sub.destroy();
+      const level = { customer_focus: 4, country: 3, invoice: 3, storno: 3, product: 2, neighbor: 1 };
+      CY.sub = cytoscape({
+        container: el, elements: [...this.subgraph.nodes, ...this.subgraph.edges], minZoom: 0.2, maxZoom: 4,
+        style: [
+          { selector: 'node', style: { 'label': 'data(label)', 'font-size': 8, 'color': '#a0a8bf', 'font-family': 'Inter',
+            'text-valign': 'bottom', 'text-margin-y': 3, 'width': 10, 'height': 10, 'background-color': '#64748b', 'border-width': 0, 'min-zoomed-font-size': 7 } },
+          { selector: 'node[type = "customer_focus"]', style: { 'background-color': '#f59e0b', 'width': 30, 'height': 30, 'font-size': 12, 'font-weight': 700, 'color': '#fde68a',
+            'border-width': 4, 'border-color': 'rgba(245,158,11,.35)' } },
+          { selector: 'node[type = "invoice"]', style: { 'shape': 'round-rectangle', 'background-color': '#8b7cf6', 'width': 14, 'height': 14, 'color': '#c4b5fd' } },
+          { selector: 'node[type = "storno"]', style: { 'shape': 'round-rectangle', 'background-color': '#f87171', 'width': 14, 'height': 14, 'color': '#fca5a5' } },
+          { selector: 'node[type = "product"]', style: { 'background-color': '#22d3ee', 'width': 12, 'height': 12, 'color': '#a5f3fc' } },
+          { selector: 'node[type = "neighbor"]', style: { 'background-color': '#64748b', 'width': 8, 'height': 8, 'label': '' } },
+          { selector: 'node[type = "country"]', style: { 'shape': 'diamond', 'background-color': '#34d399', 'width': 16, 'height': 16, 'color': '#6ee7b7', 'font-size': 10 } },
+          { selector: 'edge', style: { 'width': 1, 'line-color': '#2a2a58', 'curve-style': 'haystack', 'opacity': .7 } },
+          { selector: 'edge[type = "places"]', style: { 'line-color': '#5b4fc4', 'width': 1.5 } },
+          { selector: 'edge[type = "contains"]', style: { 'line-color': '#1f6f86' } },
+          { selector: 'edge[type = "co_purchase"]', style: { 'line-color': '#3b4260', 'opacity': .45 } },
+          { selector: 'edge[type = "country"]', style: { 'line-color': '#1f7a5c', 'width': 1.5 } },
+          { selector: '.faded', style: { 'opacity': .08 } },
+          { selector: ':selected', style: { 'border-width': 3, 'border-color': '#fff' } },
+        ],
+        layout: { name: 'concentric', concentric: n => level[n.data('type')] || 1, levelWidth: () => 1, minNodeSpacing: 6,
+                  padding: 20, animate: false, startAngle: 3 / 2 * Math.PI },
+      });
+      guardWheel(el);
+      CY.sub.on('tap', 'node', e => {
+        const d = e.target.data();
+        const typ = { customer_focus: 'Kunde', invoice: 'Rechnung', storno: 'Storno', product: 'Artikel', neighbor: 'Nachbarkunde', country: 'Land' }[d.type];
+        this.subSelection = `${typ} ${d.label}${d.info ? ' · ' + d.info : ''}`;
+        CY.sub.elements().addClass('faded'); e.target.closedNeighborhood().removeClass('faded');
+      });
+      CY.sub.on('tap', e => { if (e.target === CY.sub) { CY.sub.elements().removeClass('faded'); this.subSelection = ''; } });
+    },
+  };
+}
+</script>
+</body>
+</html>
+{% endraw %}

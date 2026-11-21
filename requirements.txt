@@ -19,6 +19,7 @@ numpy>=1.26.0
 pandas>=2.0.0
 openpyxl>=3.1.0
 xlrd>=2.0.1
+pyarrow>=14.0.0   # Graph ML: Parquet-Uploads in /graph_ml (nur bei Bedarf importiert)
 
 # Graph ML
 networkx>=3.2

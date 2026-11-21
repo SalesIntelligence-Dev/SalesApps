@@ -52,6 +52,8 @@ app.config["MAX_CONTENT_LENGTH"] = 64 * 1024 * 1024  # 64 MB Upload-Limit
 # ── CV Quality Blueprint (isolated – no interaction with other routes) ────
 from cv_quality import cv_bp  # noqa: E402
 app.register_blueprint(cv_bp)
+from graph_ml import graph_bp  # noqa: E402  – GraphReady /graph_ml (isoliert)
+app.register_blueprint(graph_bp)
 
 DATASETS_DIR = Path(__file__).parent / "datasets"
 ALLOWED_EXT  = {".csv", ".xlsx", ".xls", ".txt"}
