@@ -962,7 +962,7 @@ body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-ser
             <div class="eyebrow">Benötigte vs. vorhandene Daten</div>
             <span class="text-[11px] muted">rot gestrichelt = fehlt</span>
           </div>
-          <div id="cyUc" class="cy h-[240px] mt-3"></div>
+          <div id="cyUc" class="cy h-[220px] mt-3"></div>
           <div class="mt-3">
             <template x-for="f in ucDetail().fields" :key="'f'+f.field">
               <div class="field-row">
@@ -1245,6 +1245,7 @@ function graphReady() {
       this.$watch('overview', o => { if (o && this.step === 1) afterRender(() => this.drawMonthly()); });
       this.$watch('subgraph', g => { if (g) afterRender(() => this.drawSubgraph()); });
       this.$watch('stage', () => this.loadChecks());
+      this.$watch('ucOpen', v => { if (v) afterRender(() => this.drawUcGraph()); });
       this.$watch('dsId', () => this.loadChecks());
       window.addEventListener('hashchange', () => { const h = location.hash.match(/s(\d)/); if (h) this.step = Math.min(6, Math.max(1, +h[1])); });
       this.loadSystem();
@@ -1372,7 +1373,7 @@ function graphReady() {
           const pick = res.columns.find(t => this.tableWorst(t) !== 'ok' && this.tableWorst(t) !== 'na') || res.columns[0];
           this.colTable3 = pick?.table || null;
         }
-        if (this.ucOpen) afterRender(() => this.drawUcGraph());
+        if (this.ucOpen) afterRender(() => this.drawUcGraph());   // Drawer offen: mit neuen Werten neu zeichnen
       } catch (e) { if (seq === this.checksSeq) this.notify('Readiness-Checks: ' + e.message, 'bad'); }
       finally { if (seq === this.checksSeq) this.checksLoading = false; }
     },
@@ -1405,19 +1406,18 @@ function graphReady() {
         .sort((a, z) => (z.binding ? 1 : 0) - (a.binding ? 1 : 0));
     },
     openUc(id, dim = null) {
-      this.ucOpen = id; this.ucFocusDim = dim;
-      afterRender(() => this.drawUcGraph());
+      this.ucOpen = id; this.ucFocusDim = dim;           // Zeichnen übernimmt $watch('ucOpen')
       if (dim) setTimeout(() => document.getElementById('chk-' + dim)?.scrollIntoView({ block: 'center' }), 350);
     },
     closeUc() { this.ucOpen = null; this.ucFocusDim = null; if (CY.uc) { CY.uc.destroy(); CY.uc = null; } },
     fmtDateTime(iso) { if (!iso) return '–'; const d = new Date(iso); return d.toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' }); },
 
     drawUcGraph(attempt = 0) {
+      if (!this.ucOpen) return;
       const u = this.ucDetail(), el = document.getElementById('cyUc');
-      if (!u) return;
-      // Drawer fährt per Transition ein – warten, bis der Container sichtbar ist
-      if (!el || el.offsetParent === null || el.offsetWidth < 50) {
-        if (attempt < 20) setTimeout(() => this.drawUcGraph(attempt + 1), 60);
+      // Drawer fährt per Transition ein bzw. Checks laden noch – warten, bis beides bereit ist
+      if (!u || !el || el.offsetParent === null || el.offsetWidth < 50) {
+        if (attempt < 40) setTimeout(() => this.drawUcGraph(attempt + 1), 75);
         return;
       }
       if (CY.uc) CY.uc.destroy();
@@ -1447,11 +1447,18 @@ function graphReady() {
             'color': '#e7e9f3', 'text-valign': 'center', 'text-halign': 'center', 'width': 'data(w)', 'height': 'data(h)',
             'background-color': 'rgba(52,211,153,.12)', 'border-width': 1.5, 'border-color': '#34d399' } },
           { selector: 'node[kind = "missing"]', style: { 'background-color': 'rgba(248,113,113,.08)', 'border-color': '#f87171', 'border-style': 'dashed', 'color': '#fca5a5' } },
-          { selector: 'edge', style: { 'width': 1.6, 'line-color': '#4b5a8a', 'curve-style': 'bezier', 'target-arrow-shape': 'triangle', 'target-arrow-color': '#4b5a8a', 'arrow-scale': .7 } },
+          { selector: 'edge', style: { 'width': 1.6, 'line-color': '#4b5a8a', 'curve-style': 'unbundled-bezier', 'control-point-distances': 40, 'target-arrow-shape': 'triangle', 'target-arrow-color': '#4b5a8a', 'arrow-scale': .7 } },
           { selector: 'edge[kind = "missing"]', style: { 'line-style': 'dashed', 'line-color': '#f87171', 'target-arrow-color': '#f87171', 'opacity': .7 } },
         ],
-        layout: { name: tables.length + missing.length > 2 ? 'cose' : 'grid', animate: false, padding: 16, nodeRepulsion: 9000, idealEdgeLength: 70, randomize: false },
+        // Feste Anordnung: vorhandene Tabellen links, fehlende Daten rechts – lesbar statt Kräfte-Layout
+        layout: { name: 'preset', padding: 18, fit: true, positions: n => {
+          const isMiss = n.data('kind') === 'missing';
+          const list = isMiss ? missing.map(f => 'miss:' + f.field) : tables;
+          const i = list.indexOf(n.id()), gap = isMiss ? 46 : 64;
+          return { x: isMiss ? 330 : 0, y: (i - (list.length - 1) / 2) * gap };
+        } },
       });
+      if (CY.uc.zoom() > 1.25) { CY.uc.zoom(1.25); CY.uc.center(); }
       guardWheel(el);
     },
 

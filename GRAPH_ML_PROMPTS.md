@@ -541,3 +541,28 @@ Aufgabe: Modul 6 „Aktivierung“, Monitoring, Report-Export und der Feinschlif
 - **Frontend:** Alpine ruft `init()` automatisch auf, deshalb kein zusätzliches `x-init` setzen. Zum Zeichnen nach DOM-Updates `afterRender(fn)` verwenden, nicht `$nextTick` (das lief im Vorschaufenster nach dem Start nicht mehr) und nicht `requestAnimationFrame` (pausiert in Hintergrund-Tabs). Gezeichnet wird über `$watch` auf `mapping`, `overview` und `subgraph`. Cytoscape-Container bekommen `guardWheel(el)`, damit das Mausrad die Seite scrollt; gezoomt wird mit Strg/⌘ oder den Buttons. Farben als `hexA()`/rgba angeben; Cytoscape kennt kein 8-stelliges Hex.
 - **Tests:** `python -m unittest tests.test_graph_ml_mapping -v` (pytest ist lokal nicht installiert). Der Test `test_existing_routes_unchanged` prüft alle bestehenden Routen.
 
+---
+
+## Umsetzungsnotizen nach Prompt 2 (für die folgenden Prompts)
+
+- **Bausteine:**
+  - `usecases.py` enthält den Feldkatalog `FIELDS` mit ERP-Synonymen und die Vorlagen `USE_CASES`. Jede Vorlage hat `requires` als Tupel (Feld, pflicht/optional/messung, Ersatzfeld, Playbook) und `links` für Felder, die über Schlüssel verbunden sein müssen.
+  - `semantics.py` stellt `schema_view()` (Struktur ohne Zahlen) und `bind_fields()` bereit. `bind_fields()` liefert die Feldzuordnung, z. B. customer_key → `invoices.customer_id`, `Sales.SalesOrderHeader.CustomerID` oder `KNA1.KUNNR`.
+  - `profiler.py` enthält `build_profile()`, `events_from_online_retail()` und `assemble_events()`. Letzteres baut eine flache Ereignistabelle über FK-Pfade.
+  - `checks.py` enthält `run_checks()` mit den 9 Dimensionen, der Readiness-Aggregation, `max_stage` und der Spalten-Ampel.
+- **Stufen-Isolation:** `Registry.checks(ds, stage)` ruft Stufe 1 nur mit `schema_view(mapping)` auf, Stufe ≥ 2 nur mit `Registry.profile(ds)`. Die Tests sperren dafür jeden Datenzugriff (`tests/test_graph_ml_checks.py`). Diese Trennung in Prompt 3 beibehalten: Der Backtest liest Rohdaten, die Checks nicht.
+- **Profil:**
+  - Für Online Retail II liegt das Profil als Artefakt `artifacts/profile_online_retail_ii.json` vor. Download über `/graph_ml/api/datasets/<id>/profile`.
+  - Ein hochgeladenes Profil-JSON (Schlüssel `profile_version`) wird zu einem Datensatz der Art `profile`: höchstens Stufe 2, Schritt 2 zeigt den Graphen aus dem Profil, es gibt keinen Kunden-Subgraphen.
+  - Kunden-CLI: `python -m graph_ml.profiler_cli <ordner> --out profil.json`. `assert_privacy()` verhindert Beispiel- und Schlüsselwerte im Export.
+- **Kennzahlen für Prompt 3** in `profile["events"]["usecase_stats"]`:
+  - Zeitfenster je Use Case (`windows`: cutoff, eligible, positives)
+  - `cutoffs`: monatlich, mit ≥ 12 Monaten Historie und 90 Tagen Label
+  - Für Online Retail II: Test-Stichtag 2011-09-01; Churn 4.335 aktiv / 2.189 abgewandert; Neukunden 307 / 160; Stornos 80,6 % heuristisch zuordenbar; PSI max. 0,027
+- **Ampel-Struktur** je Use Case:
+  - `ampel.datenreife` ist berechnet.
+  - `ampel.vorhersagekraft` und `ampel.euro` stehen auf `status: "pending"` und werden in Prompt 3 bzw. 4 befüllt.
+  - Die Gesamtampel ist bis dahin „vorläufig“ und gleich der Datenreife.
+- **Engine-Empfehlung** liegt je Use Case in `engine` (`primary`, `challengers`, `baseline`, `reason`). Prompt 3 soll sie mit dem Backtest bestätigen oder korrigieren.
+- **Frontend:** Der Drawer-Graph wird über `$watch('ucOpen')` gezeichnet und wiederholt den Versuch, bis der Container sichtbar ist. Die Checks laden bei Änderung von `stage` oder `dsId` neu; `checksSeq` verwirft veraltete Antworten.
+
