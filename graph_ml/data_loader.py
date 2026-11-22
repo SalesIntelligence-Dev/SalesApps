@@ -789,7 +789,7 @@ class Registry:
         # sonst liefert der zweite Aufruf für Stufe 3 die Ampel ohne Vorhersagekraft und Euro
         if stage == 3 and ds_id in ("online_retail_ii", "wwi", "adventureworks_data", "scania", "cmapss"):
             res = _merge_backtest(res, ds_id)
-        return res
+        return _annotate_data_prediction(res, ds_id, stage)
 
     def _run_checks(self, ds, ds_id: str, stage: int, use_cases) -> dict:
         from .checks import run_checks
@@ -1000,6 +1000,40 @@ def _merge_backtest(res: dict, ds_id: str = "online_retail_ii") -> dict:
         if u["ampel"]["vorhersagekraft"].get("status") not in ("pending", None):
             merge_ampel(u, cases.get(u["id"]))
     res["backtest_merged"] = True
+    return res
+
+
+def _annotate_data_prediction(res: dict, ds_id: str, stage: int) -> dict:
+    """Sammel-Kachel „Data Prediction“: Datenreife, Vorhersagekraft und Euro je Datensatz aus der Data-Classifier-Analyse."""
+    import copy
+
+    from . import data_prediction as dpm
+    if not any(u["id"] == dpm.UC for u in res.get("use_cases", [])):
+        return res
+    res = dict(res)
+    res["use_cases"] = [copy.deepcopy(u) if u["id"] == dpm.UC else u for u in res["use_cases"]]
+    u = next(x for x in res["use_cases"] if x["id"] == dpm.UC)
+    dp = dpm.for_dataset(ds_id)
+    u["dp"] = {k: dp[k] for k in ("count", "ok", "warn", "checked", "likely", "hours_year")} if dp else {"count": 0, "checked": 0}
+    u["dp_fields"] = (dp or {}).get("fields", [])[:20]
+    u["readiness"] = {**dpm.readiness(dp), "provisional": stage == 1}
+    a = u.setdefault("ampel", {})
+    a["datenreife"] = {"status": u["readiness"]["status"], "score": u["readiness"]["score"], "provisional": stage == 1}
+    if stage == 3 and dp and dp.get("checked"):
+        from .business_case import euro_status
+        from .evaluation import vorhersagekraft
+        a["vorhersagekraft"] = {**vorhersagekraft(dp["lift"], dp["lift_ci"]), "best": "Kaskade je Feld",
+                                "metric": "automatisch @ 98 %", "value": dp["mean_auto"]}
+        a["euro"] = euro_status(dp["hours_year"] * 60)
+        rank = {"ok": 0, "warn": 1, "bad": 2}
+        dims = [a["datenreife"]["status"], a["vorhersagekraft"]["status"], a["euro"]["status"]]
+        real = [d for d in dims if d in rank]
+        a["gesamt"] = {"status": max(real, key=lambda x: rank[x]) if real else "na", "provisional": False,
+                       "note": f"{dp['count']} Feld-Use-Cases"}
+    elif stage == 3:
+        a["vorhersagekraft"] = {"status": "na", "reason": "keine prüfbaren manuell gepflegten Felder"}
+        a["euro"] = {"status": "na", "reason": "nicht berechenbar"}
+        a["gesamt"] = {"status": u["readiness"]["status"], "provisional": False, "note": "keine Feld-Use-Cases"}
     return res
 
 

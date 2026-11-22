@@ -74,8 +74,9 @@ def main(argv: list[str] | None = None) -> int:
         maintenance.main()
         from . import sales_pipeline
         sales_pipeline.main()
-        from . import classifier_scan
+        from . import classifier_scan, data_prediction
         classifier_scan.main()
+        data_prediction.main()
         from . import matrix
         matrix.main()                                    # zuletzt: liest alle Rückblicke
         from . import aftersales

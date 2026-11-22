@@ -474,3 +474,24 @@ class ClassifierScanTest(unittest.TestCase):
         r = c.get("/graph_ml/api/classifier/adventureworks_data").get_json()
         self.assertTrue(r["available"])
         self.assertFalse(c.get("/graph_ml/api/classifier/unbekannt").get_json()["available"])
+
+class DataPredictionTest(unittest.TestCase):
+    """Sammel-Kachel „Data Prediction“: je manuell gepflegtem Feld ein Use Case, genau eine Kachel."""
+
+    def test_tile_counts_field_use_cases(self):
+        from graph_ml import business_case as bc
+        from graph_ml import data_prediction as dpm
+        from graph_ml import evaluation as ev
+        from graph_ml.data_loader import get_registry
+        r = ev.load("data_prediction")
+        self.assertEqual(r["kind"], "classifier")
+        aw = r["data_prediction"]["datasets"]["adventureworks_data"]
+        self.assertGreater(aw["count"], 0)
+        self.assertTrue(aw["fields"][0]["special"])                              # Ersatzteil zuerst
+        self.assertFalse(any(f["inherited"] for f in aw["fields"]))             # übernommene Werte zählen nicht
+        w = r["whatif"]
+        self.assertAlmostEqual(bc.compute("data_prediction", w, {"rate": 60}, "cascade")["annual"], w["engines"]["cascade"]["hours"] * 60)
+        for ds, n in (("adventureworks_data", aw["count"]), ("online_retail_ii", 0)):
+            u = next(x for x in get_registry().checks(ds, 3)["use_cases"] if x["id"] == "data_prediction")
+            self.assertEqual(u["dp"]["count"], n)
+        self.assertEqual(dpm.readiness(None)["status"], "bad")

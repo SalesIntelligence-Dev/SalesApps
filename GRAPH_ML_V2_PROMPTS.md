@@ -386,3 +386,15 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
 - **UI:** Panel „Data-Classifier-Analyse“ am Ende von Schritt 3 mit Kennzahlen, Tabelle, Detail je Feld (Modellvergleich,
   Folgefelder, Merkmale, Graubereich, Lückenvorschläge) und editierbaren Euro-Annahmen (Python und JS identisch).
 - **Tests:** 76 grün. Web-Modus 232 MB, alle Routen 200.
+
+## Nachtrag: Data Prediction als Use Case · Schritt-Gruppen
+
+- **Data Prediction (`graph_ml/data_prediction.py`):** Jedes manuell gepflegte Feld, das Regel oder ML sicher vorschlagen kann,
+  ist ein eigener Use Case; in Schritt 4 (Matrix-Zeile) und Schritt 5 (Kachel) erscheint genau eine Sammel-Kachel mit der
+  Anzahl je Datensatz (AdventureWorks 21, davon 17 sicher; WWI 21/17; Online Retail II, SCANIA, C-MAPSS 0). Aus den Stammdaten
+  übernommene Werte zählen nicht. Vorhersagekraft: Ø automatisch entscheidbar 75,1 % (Kaskade) gegen 21,7 % (Regel) auf
+  AdventureWorks, +245,6 % (Bootstrap über Felder, signifikant). Euro: gesparte Pflegestunden × Stundensatz (286 h bzw. 68 h/Jahr).
+  Datenreife/Vorhersagekraft/Euro je Datensatz direkt aus den Classifier-Artefakten; Detailseite listet die Feld-Use-Cases.
+- **Schritt-Leiste in drei Gruppen:** Datenanbindung (1–2, Cyan) · Analyse (3–4, Blau) · Implementierung (5–6, Amber, „ab hier
+  Bezahlmodell“).
+- **Tests:** 77 grün. 26 Use Cases.

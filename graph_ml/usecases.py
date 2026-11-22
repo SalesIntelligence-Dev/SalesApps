@@ -531,6 +531,16 @@ USE_CASES: list[dict] = [
      "requires": [("service_event", "pflicht", None, "PB-10"), ("service_text", "pflicht", None, "PB-05"),
                   ("defect_code", "optional", None, "PB-05"), ("serial_number", "optional", None, None)],
      "links": [("service_event", "service_text")], "learnable": True, "max_stage": 1, "note": "Sprachmodell-Thema · keine offenen Texte"},
+    {"id": "data_prediction", "name": "Data Prediction · Stammdaten-Vorschläge", "area": "Stammdaten", "lighthouse": False,
+     "app_route": None, "app_name": "neu",
+     "label": "Je manuell gepflegtem Feld ein Use Case: Wert vorschlagen statt eintippen (z. B. Ersatzteil ja/nein)",
+     "label_detail": "Sammel-Kachel der Data-Classifier-Analyse aus Schritt 3: jedes Kennzeichen, jede Klassifikation und jeder "
+                     "Parameter, den Regel oder ML sicher vorschlagen kann, zählt als eigener Use Case.",
+     "window_days": 0, "min_positives": 0, "entity": "field",
+     "baseline": "Regel je Feld (häufigster Wert je bestem Einzelfeld)", "lever": "Pflegeaufwand, Datenqualität, Bestand",
+     "blockers": ["Manuelle Felder ohne Historie", "Folgefelder statt Ursachen im Datenmodell"],
+     "requires": [("product_key", "optional", None, None)], "links": [], "learnable": True, "max_stage": 3,
+     "note": "Anzahl Feld-Use-Cases je Datensatz"},
     {"id": "warranty_fraud", "name": "Garantiebetrug & Fehlbuchungen", "area": "After Sales", "lighthouse": False,
      "app_route": None, "app_name": "neu",
      "label": "Auffälliger Garantiefall (Händler–Techniker–Teil-Muster)",
@@ -795,6 +805,16 @@ STORY: dict[str, dict] = {
         "tabular": "Fehlercode, Produkt, Alter",
         "unit": "je Servicemeldung: Kategorie/Lösung",
         "euro": "eingesparte Bearbeitungszeit je Meldung × Meldungen × Stundensatz (sobald Texte und Lösungen vorliegen)"},
+    "data_prediction": {
+        "v2": "Data Prediction (Stammdaten-Vorschläge)", "effect": "Pflegeaufwand und Fehleingaben sinken, Bestände folgen sauberen Stammdaten",
+        "fit": "hoch",
+        "graph": "Ein manuell gepflegter Wert hängt selten nur an der eigenen Zeile: Stückliste (Vater, Geschwister), Lieferant je "
+                 "Artikel, Warengruppe und Benennung tragen ihn. Die Kaskade prüft je Feld Regel, LightGBM, Graph-Kontext, Text und "
+                 "TabPFN und weist Folgefelder (Leakage) aus.",
+        "path": ["Feld", "eigener Datensatz", "verbundene Stammdaten", "ähnliche Datensätze"],
+        "tabular": "übrige Felder derselben Zeile",
+        "unit": "je Feld: automatisch entscheidbarer Anteil bei ≥ 98 % Trefferquote",
+        "euro": "Eingaben pro Jahr × Minuten je Eingabe × Stundensatz × automatisch entschiedener Anteil, summiert über die Feld-Use-Cases"},
     "warranty_fraud": {
         "v2": "Garantiebetrug und Fehlbuchungen", "effect": "3–15 % der Garantiekosten", "fit": "hoch",
         "graph": "Betrug tritt in Ringen auf: dieselben Händler, Techniker und Teile wiederholen sich (Fall → Händler → Techniker → Teil). "

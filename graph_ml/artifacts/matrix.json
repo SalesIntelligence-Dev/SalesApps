@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-22T11:36:47",
+ "generated_at": "2026-11-22T14:38:58",
  "datasets": [
   {
    "id": "online_retail_ii",
@@ -327,6 +327,18 @@
    "ready_in": []
   },
   {
+   "id": "data_prediction",
+   "name": "Data Prediction · Stammdaten-Vorschläge",
+   "area": "Stammdaten",
+   "home": "adventureworks_data",
+   "measured": true,
+   "not_measurable": null,
+   "ready_in": [
+    "adventureworks_data",
+    "wwi"
+   ]
+  },
+  {
    "id": "warranty_fraud",
    "name": "Garantiebetrug & Fehlbuchungen",
    "area": "After Sales",
@@ -613,6 +625,18 @@
   "service_triage|online_retail_ii": {
    "datenreife": "bad",
    "score": 62,
+   "home": false,
+   "measured": false,
+   "vorhersagekraft": null,
+   "lift": null,
+   "euro": null,
+   "annual": null,
+   "gesamt": "bad",
+   "best": null
+  },
+  "data_prediction|online_retail_ii": {
+   "datenreife": "bad",
+   "score": 20,
    "home": false,
    "measured": false,
    "vorhersagekraft": null,
@@ -922,6 +946,18 @@
    "gesamt": "bad",
    "best": null
   },
+  "data_prediction|adventureworks_data": {
+   "datenreife": "ok",
+   "score": 83,
+   "home": true,
+   "measured": true,
+   "vorhersagekraft": "ok",
+   "lift": 2.4559,
+   "euro": "bad",
+   "annual": 17178,
+   "gesamt": "bad",
+   "best": "Kaskade: bestes Modell je Feld (Regel, LightGBM, Graph-Kontext, Text, TabPFN)"
+  },
   "warranty_fraud|adventureworks_data": {
    "datenreife": "bad",
    "score": 58,
@@ -1222,6 +1258,18 @@
    "gesamt": "bad",
    "best": null
   },
+  "data_prediction|wwi": {
+   "datenreife": "ok",
+   "score": 84,
+   "home": false,
+   "measured": false,
+   "vorhersagekraft": null,
+   "lift": null,
+   "euro": null,
+   "annual": null,
+   "gesamt": "ok",
+   "best": null
+  },
   "warranty_fraud|wwi": {
    "datenreife": "bad",
    "score": 63,
@@ -1513,6 +1561,18 @@
   "service_triage|scania": {
    "datenreife": "bad",
    "score": 63,
+   "home": false,
+   "measured": false,
+   "vorhersagekraft": null,
+   "lift": null,
+   "euro": null,
+   "annual": null,
+   "gesamt": "bad",
+   "best": null
+  },
+  "data_prediction|scania": {
+   "datenreife": "bad",
+   "score": 20,
    "home": false,
    "measured": false,
    "vorhersagekraft": null,
@@ -1822,6 +1882,18 @@
    "gesamt": "bad",
    "best": null
   },
+  "data_prediction|cmapss": {
+   "datenreife": "bad",
+   "score": 20,
+   "home": false,
+   "measured": false,
+   "vorhersagekraft": null,
+   "lift": null,
+   "euro": null,
+   "annual": null,
+   "gesamt": "bad",
+   "best": null
+  },
   "warranty_fraud|cmapss": {
    "datenreife": "bad",
    "score": 53,
@@ -2122,6 +2194,18 @@
    "gesamt": "bad",
    "best": null
   },
+  "data_prediction|adventureworks": {
+   "datenreife": "bad",
+   "score": 20,
+   "home": false,
+   "measured": false,
+   "vorhersagekraft": null,
+   "lift": null,
+   "euro": null,
+   "annual": null,
+   "gesamt": "bad",
+   "best": null
+  },
   "warranty_fraud|adventureworks": {
    "datenreife": "bad",
    "score": 44,
@@ -2150,9 +2234,9 @@
  "counts": {
   "ok": 0,
   "warn": 14,
-  "bad": 7,
+  "bad": 8,
   "na": 4
  },
- "measured": 20,
+ "measured": 21,
  "note": "Vorhersagekraft und Euro je Use Case nur auf dem Datensatz, auf dem der Rückblick gerechnet wurde (★). Euro-Werte verschiedener Datensätze sind nicht addierbar."
 }

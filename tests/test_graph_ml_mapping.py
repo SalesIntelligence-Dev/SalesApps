@@ -133,7 +133,7 @@ class RoutesTest(unittest.TestCase):
         ids = [d["id"] for d in self.client.get("/graph_ml/api/datasets").get_json()]
         self.assertEqual(ids[0], "online_retail_ii")
         self.assertIn("adventureworks", ids)
-        self.assertEqual(len(self.client.get("/graph_ml/api/usecases").get_json()), 25)
+        self.assertEqual(len(self.client.get("/graph_ml/api/usecases").get_json()), 26)
 
     def test_upload_roundtrip(self):
         csv = b"kunde_id;name\n1;A\n2;B\n"

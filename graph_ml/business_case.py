@@ -85,6 +85,8 @@ PARAMS: dict[str, list[dict]] = {
         {"id": "cost", "label": "Kosten je Serviceangebot (Kontakt, Terminierung)", "unit": "€", "default": 25, "min": 0, "max": 200, "step": 5, "role": "cost"},
         {"id": "margin", "label": "Ergebnisanteil des Werkstattauftrags", "unit": "%", "default": 35, "min": 10, "max": 100, "step": 5, "role": "fixed"},
         {"id": "periods", "label": "Angebotsrunden pro Jahr", "unit": "×", "default": 4, "min": 1, "max": 6, "step": 1, "role": "fixed"}],
+    "data_prediction": [
+        {"id": "rate", "label": "Stundensatz der Stammdatenpflege", "unit": "€/h", "default": 60, "min": 20, "max": 150, "step": 5, "role": "rate"}],
     "win_probability": [
         {"id": "list_share", "label": "Gefährdete Aufträge mit Maßnahme (oberste % nach Risiko)", "unit": "%", "default": 10, "min": 5, "max": 30, "step": 1, "role": "fixed"},
         {"id": "rate", "label": "Anteil, der durch Nachschub oder Ersatzartikel doch zu Umsatz wird", "unit": "%", "default": 25, "min": 5, "max": 60, "step": 1, "role": "rate"},
@@ -138,6 +140,7 @@ STEP_LABELS = {"churn": ("Umsatz der Abwanderer", "davon in der Liste", "gerette
                "price_recommendation": ("Preislücke zum erwartbaren Preis", "geprüfte Aufträge", "geschlossen (Annahme)"),
                "price_leakage": ("Leakage im Testzeitraum", "geprüfte Aufträge", "vermieden (Annahme)"),
                "quote_check": ("Margenlücke unter 10 %", "geprüfte Angebote", "zurückgeholt (Annahme)"),
+               "data_prediction": ("Pflegeaufwand der Felder", "automatisch entschieden", "eingespart"),
                "win_probability": ("gefährdeter Auftragswert im Test", "davon in der Liste", "gerettet (Annahme)"),
                "predictive_maintenance": ("Mehrkosten aller Ausfälle im Test", "davon in der Liste", "abgefangen (Annahme)"),
                "spare_parts_demand": ("Sicherheitsbestand", "Fehlerreduktion", "Kostensenkung"),
@@ -188,6 +191,9 @@ def compute(uc: str, w: dict, params: dict, engine: str, fx: float = FX_DEFAULT,
         cost = e["n"] * _p(params, "cost") * scen["cost"]
         return {"base": e["rev"], "caught": e["rev"], "gain": gain, "cost": cost, "net": gain - cost,
                 "annual": (gain - cost) * _p(params, "periods", 2), "n_list": e["n"], "tp": e["n"]}
+    if w.get("kind") == "classifier":           # Data Prediction: eingesparte Pflegestunden × Stundensatz (data_prediction.py)
+        gain = w["engines"][engine]["hours"] * _p(params, "rate", 60) * scen["rate"]
+        return {"base": gain, "caught": gain, "gain": gain, "cost": 0.0, "net": gain, "annual": gain, "n_list": 0, "tp": 0}
     if w.get("kind") == "policy":                # realisierter Netto-Wert der gewählten Aktionen (nba_eval)
         net = w["engines"][engine]["net"] * scen["rate"]
         return {"base": abs(net), "caught": abs(net), "gain": max(net, 0.0), "cost": 0.0, "net": net,
@@ -331,7 +337,7 @@ def next_step(cases: dict, vk: dict | None = None) -> dict:
              "installed_base": "Installierte Basis", "service_contracts": "Serviceverträge", "spare_parts_pricing": "Ersatzteilpreise",
              "quality_root_cause": "Qualitäts-Frühwarnung", "supplier_recourse": "Lieferantenregress",
              "predictive_maintenance": "Predictive Maintenance", "spare_parts_demand": "Ersatzteilbedarf",
-             "win_probability": "Gewinnwahrscheinlichkeit"}
+             "win_probability": "Gewinnwahrscheinlichkeit", "data_prediction": "Data Prediction"}
     step = "Pilot" if stage == "pilot" else "Readiness-Sprint"
     roi_txt = str(round(roi, 1)).replace(".", ",")
     return {"stage": stage, "use_case": top, "annual": round(top_val), "year1_cost": year1, "roi": round(roi, 1),
