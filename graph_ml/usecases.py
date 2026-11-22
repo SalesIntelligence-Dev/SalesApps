@@ -155,8 +155,9 @@ FIELDS: dict[str, dict] = {
     },
     "serial_number": {
         "label": "Seriennummer",
-        "syn": ["serialnumber", "serial", "seriennummer", "sernr", "equnr", "equipment", "geraetenr"],
-        "contains": ["serial", "seriennummer", "equipment"],
+        "syn": ["serialnumber", "serial", "seriennummer", "sernr", "equnr", "equipment", "geraetenr", "vehicleid", "fahrzeugid",
+                "vin", "fin", "machineid", "maschinenid", "assetid", "unitid", "engineid", "triebwerk"],
+        "contains": ["serial", "seriennummer", "equipment", "vehicleid", "machineid", "assetid", "engineid"],
         "table_level": ["serialnumber", "equipment", "installedbase", "installiertebasis"],
         "kinds": "any",
     },
@@ -196,9 +197,32 @@ FIELDS: dict[str, dict] = {
     },
     "usage_data": {
         "label": "Einsatz-/Betriebsdaten",
-        "syn": ["operatinghours", "betriebsstunden", "usage", "laufzeit", "telemetry", "sensor"],
-        "contains": ["operatinghour", "betriebsstunden", "telemetry", "sensor", "usage"],
-        "table_level": ["usage", "telemetry", "sensordata", "betriebsdaten", "einsatzdaten"],
+        "syn": ["operatinghours", "betriebsstunden", "usage", "laufzeit", "telemetry", "sensor", "readoutid", "nreadouts",
+                "timestep", "cycle", "zyklus"],
+        "contains": ["operatinghour", "betriebsstunden", "telemetry", "sensor", "usage", "readout"],
+        "table_level": ["usage", "telemetry", "sensordata", "betriebsdaten", "einsatzdaten", "readout", "readouts", "auslesung"],
+        "kinds": "any",
+    },
+    "service_event": {
+        "label": "Reparatur-/Serviceereignis",
+        "syn": ["repairid", "repairtimestep", "serviceorderid", "serviceorder", "wartung", "reparatur", "maintenanceid"],
+        "contains": ["repair", "reparatur", "serviceorder", "maintenance", "wartung"],
+        "exclude": ["workorder", "production", "fertigung"],
+        "table_level": ["repair", "repairs", "reparatur", "serviceorder", "maintenance", "wartung"],
+        "kinds": "any",
+    },
+    "contract": {
+        "label": "Servicevertrag (Abschluss, Laufzeit, Kündigung)",
+        "syn": ["contractid", "servicecontractid", "vertragsnr", "vertrag", "vbeln_contract", "subscriptionid"],
+        "contains": ["contract", "vertrag", "subscription"],
+        "table_level": ["contract", "servicecontract", "vertrag", "servicevertrag", "subscription"],
+        "kinds": "any",
+    },
+    "config": {
+        "label": "Konfiguration / Ausstattung",
+        "syn": ["spec", "configid", "configuration", "konfiguration", "ausstattung", "variant", "variante", "modelcode"],
+        "contains": ["spec", "config", "konfiguration", "ausstattung"],
+        "table_level": ["config", "configuration", "konfiguration", "ausstattung", "variant"],
         "kinds": "any",
     },
 }
@@ -360,6 +384,48 @@ USE_CASES: list[dict] = [
                   ("customer_key", "optional", None, "PB-01"), ("country", "optional", None, None),
                   ("defect_code", "optional", None, "PB-05")],
      "links": [("product_key", "event_time")], "learnable": True, "max_stage": 3},
+    {"id": "installed_base", "name": "Installierte Basis & Servicebedarf", "area": "After Sales", "lighthouse": False,
+     "app_route": None, "app_name": "neu",
+     "label": "Fahrzeug braucht in den nächsten 48 Zeiteinheiten eine Reparatur der Komponente X",
+     "label_detail": "Schnitt an einer Werkstatt-Auslesung je Fahrzeug; positiv, wenn die Reparatur innerhalb von 48 Zeiteinheiten folgt. "
+                     "Test auf anderen Fahrzeugen (SCANIA hat keine Kalenderzeit). Ergebnis: Liste für proaktive Serviceangebote.",
+     "window_days": 0, "min_positives": 100, "entity": "serial",
+     "baseline": "längste Laufzeit zuerst", "lever": "Serviceumsatz, Verfügbarkeit",
+     "blockers": ["Seriennummer nicht mit Auslesungen verknüpft", "Reparaturen ohne Seriennummer"],
+     "requires": [("serial_number", "pflicht", None, "PB-10"), ("usage_data", "pflicht", None, "PB-10"),
+                  ("service_event", "pflicht", None, "PB-10"), ("config", "optional", None, None)],
+     "links": [("serial_number", "usage_data"), ("serial_number", "service_event")], "learnable": True, "max_stage": 3,
+     "note": "gerechnet auf SCANIA Component X"},
+    {"id": "service_contracts", "name": "Serviceverträge", "area": "After Sales", "lighthouse": False,
+     "app_route": None, "app_name": "neu",
+     "label": "Abschluss bzw. Verlängerung eines Servicevertrags – hier: risikobasierte Vertragskalkulation",
+     "label_detail": "Ohne Vertragsdaten ist Abschluss oder Verlängerung nicht messbar. Gezeigt wird die erwartete Reparaturquote je "
+                     "Konfiguration aus dem Modell der installierten Basis als Grundlage für den Vertragspreis.",
+     "window_days": 0, "min_positives": 100, "entity": "serial",
+     "baseline": "Pauschalpreis je Vertrag", "lever": "Serviceumsatz, Marge",
+     "blockers": ["Vertragsdaten (Abschluss, Laufzeit, Kündigung) nicht im Export"],
+     "requires": [("serial_number", "pflicht", None, "PB-10"), ("service_event", "pflicht", None, "PB-10"),
+                  ("contract", "messung", None, "PB-10"), ("config", "optional", None, None), ("usage_data", "optional", None, None)],
+     "links": [("serial_number", "service_event")], "learnable": False, "max_stage": 3, "cap": "warn",
+     "nolabel": {"label": "Kein lernbares Label: Vertragsdaten (Abschluss, Laufzeit, Kündigung) fehlen – nur Kalkulation aus dem "
+                          "Reparaturmodell der installierten Basis.",
+                 "action": "Servicevertragsdaten je Seriennummer exportieren (Beginn, Ende, Kündigung, Preis)",
+                 "model": "Kein lernbares Label – Vertragspreis aus der erwarteten Reparaturquote je Konfiguration.",
+                 "engine": {"primary": "Reparaturmodell der installierten Basis (LightGBM) → Risikoprämie je Konfiguration",
+                            "challengers": ["Churn-Modell für Verlängerung, sobald Vertragsdaten vorliegen"],
+                            "baseline": "Pauschalpreis", "reason": "Ohne Vertragsdaten keine Trainingsbasis für Abschluss/Verlängerung"}},
+     "note": "Kalkulation · SCANIA, Vertragsdaten fehlen"},
+    {"id": "spare_parts_pricing", "name": "Ersatzteilbedarf & -preise", "area": "After Sales", "lighthouse": False,
+     "app_route": None, "app_name": "neu",
+     "label": "Absatz je Komponente im Folgequartal; Preisspielraum bei Teilen, deren Bedarf der installierten Basis folgt",
+     "label_detail": "Installierte Basis je Teil = verkaufte Fahrräder × Stückmenge laut Stückliste. Bewertet mit WAPE auf den letzten "
+                     "beiden Quartalen; gebundene Teile (Korrelation Bedarf ↔ installierte Basis ≥ 0,5) tragen den Preishebel.",
+     "window_days": 91, "min_positives": 0, "entity": "series",
+     "baseline": "Menge des Vorquartals", "lever": "Ersatzteilmarge",
+     "blockers": ["Stückliste nicht gepflegt", "Ersatzteilverkäufe ohne Artikelbezug"],
+     "requires": [("product_key", "pflicht", None, None), ("quantity", "pflicht", None, None), ("event_time", "pflicht", None, None),
+                  ("bom", "pflicht", None, "PB-10"), ("price", "optional", None, None), ("product_group", "optional", None, None)],
+     "links": [("product_key", "quantity")], "learnable": True, "max_stage": 3, "note": "gerechnet auf AdventureWorks"},
     {"id": "warranty_root_cause", "name": "Warranty Root Cause", "area": "After Sales", "lighthouse": False,
      "app_route": None, "app_name": "neu (PDF-Vorlage)",
      "label": "Garantiefall in X Monaten je Maschine",
@@ -476,6 +542,34 @@ STORY: dict[str, dict] = {
         "tabular": "Nettopreis, Standardkosten zum Datum, Sonderangebot",
         "unit": "je Auftrag: Marge unter 10 %",
         "euro": "Margenlücke bis 10 % in markierten Aufträgen × zurückgeholter Anteil − geprüfte Angebote × Kosten, × 2"},
+    "installed_base": {
+        "v2": "Installierte Basis analysieren", "effect": "Serviceumsatz +10–20 % durch proaktive Angebote", "fit": "mittel",
+        "graph": "Fahrzeuge mit gleicher Konfiguration fallen ähnlich aus: Fahrzeug → Konfigurationswert → andere Fahrzeuge. "
+                 "Die Reparaturquote dieser Peers (nur aus Trainingsfahrzeugen) und ein GNN über den Graphen Fahrzeug ↔ "
+                 "Konfiguration ergänzen die eigenen Auslesungen. Gemessen: Die Auslesungen tragen das Signal – LightGBM gewinnt, "
+                 "Konfigurations-Peers und GNN bringen auf SCANIA nichts zusätzlich (Konfiguration erklärt Ausfälle kaum).",
+        "path": ["Fahrzeug", "Konfiguration", "Peer-Fahrzeuge", "Reparatur"],
+        "tabular": "Werkstatt-Auslesungen (Zähler, Histogramme) zum Schnitt, Zuwachs seit der vorigen Auslesung, Laufzeit",
+        "unit": "je Fahrzeug und Auslesung: Reparatur der Komponente X in den nächsten 48 Zeiteinheiten",
+        "euro": "erkannte Reparaturen in der Top-Liste × Auftragswert (Annahme 2.500 €) × Abschlussquote des proaktiven Angebots "
+                "× Ergebnisanteil − Angebote × Kosten, × Runden pro Jahr"},
+    "service_contracts": {
+        "v2": "Serviceverträge", "effect": "wiederkehrender Umsatz, Marge planbarer", "fit": "mittel",
+        "graph": "Der Vertragspreis folgt dem erwarteten Servicebedarf der Konfiguration – derselbe Graph wie bei der "
+                 "installierten Basis. Für Abschluss und Verlängerung bräuchte es zusätzlich Vertragsdaten (Kunde → Vertrag → Maschine).",
+        "path": ["Vertrag", "Fahrzeug", "Konfiguration", "Reparaturrisiko"],
+        "tabular": "Laufzeit, Auslesungen, Konfiguration je Fahrzeug",
+        "unit": "je Konfigurationssegment: erwartete Reparaturquote → Risikoprämie",
+        "euro": "nicht bewertbar ohne Vertragsdaten – Kalkulation: erwartete Reparaturquote × Auftragswert × 1,2 Sicherheitsaufschlag"},
+    "spare_parts_pricing": {
+        "v2": "Ersatzteilpreise optimieren", "effect": "+2 bis 5 % Ersatzteilmarge bei gebundenen Teilen", "fit": "mittel",
+        "graph": "Der Teilebedarf folgt der installierten Basis: Teil → Stückliste → Fahrräder → verkaufte Stück. Dieser Pfad "
+                 "läuft über drei Tabellen (Stückliste, Auftragspositionen, Produkte) und fehlt jeder Zeile der Teile-Historie. "
+                 "Gemessen: leicht besser als ohne (WAPE 0,27 statt 0,29).",
+        "path": ["Ersatzteil", "Stückliste", "Fahrrad", "verkaufte Räder"],
+        "tabular": "Menge Vorquartal, Ø vier Quartale, Vorjahresquartal",
+        "unit": "je Komponente: Absatz im Folgequartal",
+        "euro": "Umsatz gebundener Teile × Preisaufschlag × verbleibende Menge (Elastizität) − Pflegekosten, hochgerechnet auf ein Jahr"},
     "next_best_action": {
         "v2": "Next Best Action im Vertrieb", "effect": "Umsatz +5–8 %, Betreuungskosten −20–30 %", "fit": "hoch",
         "graph": "Kombiniert die Scores aus Churn, Cross-Selling, Empfehlung und Neukunden (LightGBM + Graph-Merkmale) je Kunde "

@@ -79,6 +79,17 @@ PARAMS: dict[str, list[dict]] = {
         {"id": "rate", "label": "Anteil der Margenlücke, der in der Angebotsprüfung zurückgeholt wird", "unit": "%", "default": 25, "min": 5, "max": 80, "step": 5, "role": "rate"},
         {"id": "cost", "label": "Kosten je geprüftem Angebot", "unit": "€", "default": 15, "min": 0, "max": 100, "step": 5, "role": "cost"},
         {"id": "periods", "label": "Testzeiträume pro Jahr (Test = Halbjahr)", "unit": "×", "default": 2, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
+    "installed_base": [
+        {"id": "list_share", "label": "Fahrzeuge mit proaktivem Serviceangebot (oberste %)", "unit": "%", "default": 10, "min": 5, "max": 30, "step": 1, "role": "fixed"},
+        {"id": "rate", "label": "Anteil erkannter Reparaturen, die als eigener Werkstattauftrag gewonnen werden", "unit": "%", "default": 30, "min": 5, "max": 70, "step": 1, "role": "rate"},
+        {"id": "cost", "label": "Kosten je Serviceangebot (Kontakt, Terminierung)", "unit": "€", "default": 25, "min": 0, "max": 200, "step": 5, "role": "cost"},
+        {"id": "margin", "label": "Ergebnisanteil des Werkstattauftrags", "unit": "%", "default": 35, "min": 10, "max": 100, "step": 5, "role": "fixed"},
+        {"id": "periods", "label": "Angebotsrunden pro Jahr", "unit": "×", "default": 4, "min": 1, "max": 6, "step": 1, "role": "fixed"}],
+    "spare_parts_pricing": [
+        {"id": "uplift", "label": "Preisaufschlag auf gebundene Teile", "unit": "%", "default": 3, "min": 1, "max": 10, "step": 0.5, "role": "rate"},
+        {"id": "loss", "label": "davon durch Mengenverlust wieder verloren (Elastizität)", "unit": "%", "default": 30, "min": 0, "max": 90, "step": 5, "role": "fixed"},
+        {"id": "cost", "label": "Pflegekosten je gebundenem Teil und Halbjahr", "unit": "€", "default": 50, "min": 0, "max": 500, "step": 10, "role": "cost"},
+        {"id": "periods", "label": "Testzeiträume pro Jahr (Test = Halbjahr)", "unit": "×", "default": 2, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
     "next_best_action": [
         {"id": "periods", "label": "Kampagnen pro Jahr (eine Aktion je Kunde und Quartal)", "unit": "×", "default": 4, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
     "demand_forecast": [
@@ -99,6 +110,8 @@ STEP_LABELS = {"churn": ("Umsatz der Abwanderer", "davon in der Liste", "gerette
                "price_recommendation": ("Preislücke zum erwartbaren Preis", "geprüfte Aufträge", "geschlossen (Annahme)"),
                "price_leakage": ("Leakage im Testzeitraum", "geprüfte Aufträge", "vermieden (Annahme)"),
                "quote_check": ("Margenlücke unter 10 %", "geprüfte Angebote", "zurückgeholt (Annahme)"),
+               "installed_base": ("Wert aller Reparaturen im Test", "davon in der Liste", "gewonnen (Annahme)"),
+               "spare_parts_pricing": ("Umsatz gebundener Teile", "gebundene Teile", "Mehrmarge (Annahme)"),
                "demand_forecast": ("Sicherheitsbestand", "Fehlerreduktion", "Kostensenkung")}
 FUNNEL = [
     {"id": "scan", "name": "Light-Scan", "stage": 1, "price": "kostenlos – 2.500 €", "cost": 2_500,
@@ -135,6 +148,12 @@ def compute(uc: str, w: dict, params: dict, engine: str, fx: float = FX_DEFAULT,
         lk = e.get("leak_eur", e.get("gap_eur", 0.0))
         gain, cost = lk * _p(params, "rate", 30) / 100 * scen["rate"], e["n"] * _p(params, "cost") * scen["cost"]
         return {"base": lk, "caught": lk, "gain": gain, "cost": cost, "net": gain - cost,
+                "annual": (gain - cost) * _p(params, "periods", 2), "n_list": e["n"], "tp": e["n"]}
+    if w.get("kind") == "uplift":                # Ersatzteile: Umsatz gebundener Teile × Aufschlag × (1 − Mengenverlust)
+        e = w["engines"][engine]
+        gain = e["rev"] * _p(params, "uplift", 3) / 100 * scen["rate"] * (1 - _p(params, "loss", 30) / 100)
+        cost = e["n"] * _p(params, "cost") * scen["cost"]
+        return {"base": e["rev"], "caught": e["rev"], "gain": gain, "cost": cost, "net": gain - cost,
                 "annual": (gain - cost) * _p(params, "periods", 2), "n_list": e["n"], "tp": e["n"]}
     if w.get("kind") == "policy":                # realisierter Netto-Wert der gewählten Aktionen (nba_eval)
         net = w["engines"][engine]["net"] * scen["rate"]
@@ -222,12 +241,15 @@ def use_case_case(uc: str, variant: str = "v0", fx: float = FX_DEFAULT) -> dict 
         name = {"wwi": "WideWorldImporters", "adventureworks_data": "AdventureWorks"}[out["dataset"]]
         out["note"] = (f"Gerechnet auf {name} (künstliche Beispieldaten) – die Methode ist übertragbar, "
                        "die Euro-Größenordnung nicht.")
+    elif out["dataset"] == "scania":
+        out["note"] = ("Gerechnet auf SCANIA Component X (echte, anonymisierte Lkw-Flotte) – der Auftragswert je Reparatur "
+                       f"({_eur(res.get('aftersales', {}).get('repair_eur', 2500))}) ist eine Annahme, SCANIA veröffentlicht keine Preise.")
     out["scenarios"] = {}
     for name, sc in SCENARIOS.items():
         m = compute(uc, w, params, model, fx, sc) if model else None
         r_ = compute(uc, w, params, "rule", fx, sc)
         added = (m["annual"] - r_["annual"]) if m and r_ else None
-        if w.get("kind") in ("leakage", "check"):
+        if w.get("kind") in ("leakage", "check", "uplift"):
             added = None                  # mehr gefundene Lücke ≠ besser – die Regel markiert mehr Fehlalarme
         out["scenarios"][name] = {"model": m, "rule": r_, "added": added}
     real = out["scenarios"]["realistisch"]
@@ -241,6 +263,10 @@ def overview(variant: str = "v0", fx: float = FX_DEFAULT) -> dict:
     cases = {uc: use_case_case(uc, variant, fx) for uc in ev.UC_ORDER + ev.POLICY_UCS}
     for uc, why in ev.NOT_MEASURABLE.items():
         cases[uc] = {"use_case": uc, "euro": {"status": "na", "reason": why}}
+    for uc in ev.POLICY_UCS:                     # Rückblick ohne Was-wäre-wenn (Serviceverträge): Euro nicht bewertbar
+        r = ev.load(uc, variant) if cases.get(uc) is None else None
+        if r and r.get("vorhersagekraft", {}).get("status") == "na":
+            cases[uc] = {"use_case": uc, "dataset": r.get("dataset"), "euro": {"status": "na", "reason": r["vorhersagekraft"]["reason"]}}
     return {"variant": variant, "fx": fx, "cases": cases, "funnel": FUNNEL, "next_step": next_step(cases),
             "disclaimer": DISCLAIMER, "thresholds": {"green": EURO_GREEN, "yellow": EURO_YELLOW}}
 
@@ -265,7 +291,8 @@ def next_step(cases: dict, vk: dict | None = None) -> dict:
              "recommendation": "Produkt-Empfehlung", "returns_root_cause": "Retouren-Root-Cause",
              "demand_forecast": "Absatzprognose", "account_scoring": "Account-Scoring",
              "territory_coverage": "Vertriebsabdeckung", "next_best_action": "Next Best Action",
-             "price_recommendation": "Preis- & Rabattempfehlung", "price_leakage": "Preis-Leakage", "quote_check": "Angebotsprüfung"}
+             "price_recommendation": "Preis- & Rabattempfehlung", "price_leakage": "Preis-Leakage", "quote_check": "Angebotsprüfung",
+             "installed_base": "Installierte Basis", "service_contracts": "Serviceverträge", "spare_parts_pricing": "Ersatzteilpreise"}
     step = "Pilot" if stage == "pilot" else "Readiness-Sprint"
     roi_txt = str(round(roi, 1)).replace(".", ",")
     return {"stage": stage, "use_case": top, "annual": round(top_val), "year1_cost": year1, "roi": round(roi, 1),

@@ -787,7 +787,7 @@ class Registry:
         res = self._checks[key]
         # Rückblick und Euro bei jedem Aufruf frisch einmischen (Cache hält nur die Datenreife) –
         # sonst liefert der zweite Aufruf für Stufe 3 die Ampel ohne Vorhersagekraft und Euro
-        if stage == 3 and ds_id in ("online_retail_ii", "wwi", "adventureworks_data"):
+        if stage == 3 and ds_id in ("online_retail_ii", "wwi", "adventureworks_data", "scania"):
             res = _merge_backtest(res, ds_id)
         return res
 

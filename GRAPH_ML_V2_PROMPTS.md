@@ -260,3 +260,29 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
   `account_group` aus Prompt 3 (Einkaufsgemeinschaft in WWI jetzt erkannt). Neu: Felder `list_price`, `discount`, `sales_rep`;
   Profile neu erzeugt. Route `/backtest/<uc>` lässt jetzt auch die eigenen Rückblicke (NBA, Pricing) zu.
 - **Tests:** 60 grün. Render: 19 Seiten 200, 230 MB.
+
+## Umsetzungsnotizen nach Prompt 6
+
+- **Neu: `graph_ml/aftersales.py`** – drei eigene Rückblicke im Artefaktformat (`POLICY_UCS`), Datensätze über
+  `DATASET_OF` (`installed_base`, `service_contracts` → `scania`, `spare_parts_pricing` → `aw`). Neue Felder
+  `service_event` (Reparatur/Serviceauftrag, Fertigungsaufträge ausgeschlossen), `contract`, `config`; Synonyme für
+  Fahrzeug-/Triebwerks-IDs und Auslesungen. Profile neu erzeugt.
+- **Installierte Basis (SCANIA, echte Flotte):** 232.670 Schnitte (bis 10 je Fahrzeug, 23.550 Fahrzeuge), Label Reparatur
+  Komponente X in 48 Zeiteinheiten (Positivrate 2,8 %). SCANIA hat keine Kalenderzeit → Test auf 20 % der Fahrzeuge.
+  Peer-Quoten je Konfigurationswert fold-basiert nur aus Trainingsfahrzeugen (Test: eigenes Label kippen → eigene Merkmale
+  gleich; ein Leave-one-out-Encoding hatte vorher das eigene Label gespiegelt). AUPRC: Regel (längste Laufzeit) 0,038 ·
+  **LightGBM 0,115** · LightGBM + Konfigurations-Peers 0,105 · GNN Fahrzeug ↔ Konfiguration 0,103 · TabPFN 0,068 → +205 %
+  (signifikant). **Ehrlich:** Das Signal steckt in den Auslesungen, die Konfiguration erklärt Ausfälle kaum – Graph bringt
+  hier nichts zusätzlich. Euro 69.750 €/Jahr (Testflotte, Auftragswert 2.500 € = Annahme).
+- **Serviceverträge:** keine Vertragsdaten → Vorhersagekraft und Euro „nicht messbar“, Datenreife max. Gelb (`cap`), eigener
+  Text zum fehlenden Label (`nolabel`). Gezeigt: risikobasierte Prämie je Konfiguration (spec_2) aus dem Reparaturmodell.
+- **Ersatzteilbedarf & -preise (AdventureWorks):** 111 Komponenten, 101 in Rädern verbaut (1.150 Stücklisten-Kanten);
+  installierte Basis = verkaufte Räder × Stückmenge. Skalenfreies Ziel (Faktor zum Vorquartal, L1). WAPE Folgequartal
+  (Prognose 01/2025 und 04/2025): Regel 0,463 · LightGBM 0,288 · **mit installierter Basis 0,274** → +40,7 % (signifikant).
+  14 gebundene Teile (Korrelation ≥ 0,5), 123.375 € Umsatz im Test; Euro (Aufschlag 3 %, 30 % Mengenverlust) nur 3.782 €/Jahr
+  → Rot. Neue Was-wäre-wenn-Art `uplift` in Python und JS identisch.
+- **UI:** Detailseiten mit Kalkulationstabelle (Verträge) und Panel „gebundene Teile“; Schritt 5 zeigt bei Daten ohne
+  Kalenderzeit den Einheiten-Split statt „Invalid Date“; der Chip „undefined Zeitschnitte“ (betraf auch Pricing) behoben.
+- **Tests:** 63 grün (System-Python; im GPU-`.venv` fehlt `openpyxl` für den Excel-Export). Web-Modus: alle Datensätze
+  und Stufen 200, 206 MB RSS, kein torch. Volle SCANIA-Auslesungen nur lokal (`data/local/`), Precompute-Hook überspringt
+  sonst.

@@ -265,10 +265,11 @@ def check_label(uc: dict, ctx: Ctx) -> dict:
         return _res("label", "bad", 10, "Label nicht berechenbar: " + ", ".join(_label(f) for f, _ in req["missing"])
                     + " fehlt.", actions=[_a("Fehlende Daten anfordern", "PB-10")], provisional=ctx.provisional)
     if not uc.get("learnable", True) and req["measure_missing"]:
+        nl = uc.get("nolabel", {})
         return _res("label", "warn", 45,
-                    "Kein lernbares Label: Kampagnen- und Reaktionsdaten fehlen – nur ein Regelwerk über andere Scores.",
+                    nl.get("label", "Kein lernbares Label: Kampagnen- und Reaktionsdaten fehlen – nur ein Regelwerk über andere Scores."),
                     [_m("Fehlt", ", ".join(_label(f) for f, _ in req["measure_missing"]))],
-                    [_a("Aktionen und Reaktionen im CRM protokollieren", "PB-10")], provisional=ctx.provisional,
+                    [_a(nl.get("action", "Aktionen und Reaktionen im CRM protokollieren"), "PB-10")], provisional=ctx.provisional,
                     forced=True)
     if ctx.stage == 1:
         return _res("label", "ok", 80, "Label aus den Feldern berechenbar – Fallzahl erst im Profilcheck prüfbar.",
@@ -342,6 +343,9 @@ def check_model(uc: dict, ctx: Ctx) -> dict:
     req = _requirements(uc, ctx)
     if req["missing"]:
         return _res("model", "na", None, "Ohne Pflichtfelder keine Modellwahl.", provisional=ctx.provisional)
+    if not uc.get("learnable", True) and req["measure_missing"] and uc.get("nolabel", {}).get("engine"):
+        nl = uc["nolabel"]
+        return _res("model", "na", None, nl["model"], provisional=ctx.provisional, engine=nl["engine"])
     if not uc.get("learnable", True) and req["measure_missing"]:
         return _res("model", "na", None, "Kein lernbares Label – statt eines Modells ein Regelwerk über die Scores "
                     "der anderen Use Cases.", provisional=ctx.provisional,

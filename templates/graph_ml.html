@@ -1004,7 +1004,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div class="font-semibold">Zeitlicher Split</div>
               <span class="chip !py-0.5" :title="'Leakage-Guard: jede Merkmalsberechnung geprüft'">
-                <span class="dot dot-ok"></span><span x-text="btRes.audit.checks+' Zeitschnitte geprüft · 0 Leakage'"></span></span>
+                <span class="dot dot-ok"></span><span x-text="btRes.audit?.checks != null ? btRes.audit.checks+' Zeitschnitte geprüft · 0 Leakage' : 'Merkmale nur aus Trainingsdaten · getrennt geprüft'"></span></span>
             </div>
             <div class="tl-track" x-html="timelineHtml()"></div>
             <div class="flex flex-wrap gap-x-4 gap-y-1 text-[11.5px] sub">
@@ -1859,6 +1859,36 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
                 <div class="text-[12px] mt-1"><b>Anteil Verlustpositionen nach Stücklisten-Tiefe:</b> <span class="sub" x-text="Object.entries(ucBt.pricing.check.loss_share_by_bom_level).map(([k,v]) => 'Ebene '+k+': '+fmtPct(v)).join(' · ')"></span></div>
               </div>
             </template>
+            <template x-if="['installed_base','service_contracts'].includes(ucOpen) && ucBt?.aftersales?.contract_segments?.length">
+              <div class="mt-3">
+                <div class="kpi-label" x-text="'Risikobasierte Vertragskalkulation je Konfiguration ('+ucBt.aftersales.contract_spec+') · Testfahrzeuge'"></div>
+                <div class="scroll-x scroll-thin mt-1"><table class="tbl min-w-[520px] text-[12px]">
+                  <thead><tr><th>Segment</th><th class="text-right">Schnitte</th><th class="text-right">Reparaturquote erwartet</th><th class="text-right">tatsächlich</th><th class="text-right">Risikoprämie je Fahrzeug</th></tr></thead>
+                  <tbody><template x-for="g in ucBt.aftersales.contract_segments" :key="'cs'+g.segment"><tr>
+                    <td x-text="g.segment"></td><td class="text-right tabular-nums" x-text="fmtInt(g.n)"></td>
+                    <td class="text-right tabular-nums" x-text="fmtPct(g.predicted)"></td><td class="text-right tabular-nums" x-text="fmtPct(g.observed)"></td>
+                    <td class="text-right tabular-nums text-[#a5f3fc]" x-text="fmtEur(g.price)"></td></tr></template></tbody>
+                </table></div>
+                <div class="text-[11.5px] sub mt-1.5" x-text="'Prämie = erwartete Reparaturquote im 48er-Fenster × Auftragswert '+fmtEur(ucBt.aftersales.repair_eur)+' (Annahme) × 1,2 Sicherheitsaufschlag. Abschluss und Verlängerung von Verträgen sind ohne Vertragsdaten nicht messbar.'"></div>
+              </div>
+            </template>
+            <template x-if="ucOpen==='spare_parts_pricing' && ucBt?.aftersales">
+              <div class="mt-3">
+                <div class="kpi-label" x-text="'Installierte Basis über die Stückliste · Prognose für die Quartale ab '+ucBt.aftersales.test_quarters.map(q => fmtDate(q)).join(' und ')"></div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
+                  <div class="panel-flat p-2.5"><div class="text-[10.5px] muted uppercase font-bold">Komponenten</div><div class="font-bold tabular-nums" x-text="fmtInt(ucBt.aftersales.parts)"></div></div>
+                  <div class="panel-flat p-2.5"><div class="text-[10.5px] muted uppercase font-bold">in Rädern verbaut</div><div class="font-bold tabular-nums" x-text="fmtInt(ucBt.aftersales.linked_parts)+' · '+fmtInt(ucBt.aftersales.bom_edges)+' Kanten'"></div></div>
+                  <div class="panel-flat p-2.5"><div class="text-[10.5px] muted uppercase font-bold">gebundene Teile</div><div class="font-bold tabular-nums" x-text="fmtInt(ucBt.aftersales.captive_parts)"></div></div>
+                  <div class="panel-flat p-2.5"><div class="text-[10.5px] muted uppercase font-bold">deren Umsatz im Test</div><div class="font-bold tabular-nums" x-text="fmtEur(ucBt.aftersales.captive_rev_test)"></div></div>
+                </div>
+                <div class="scroll-x scroll-thin mt-2"><table class="tbl min-w-[420px] text-[12px]">
+                  <thead><tr><th>Gebundenes Teil</th><th class="text-right">Korrelation mit inst. Basis</th><th class="text-right">Umsatz im Test</th></tr></thead>
+                  <tbody><template x-for="c in ucBt.aftersales.captive_top" :key="'cp'+c.part"><tr>
+                    <td x-text="c.part"></td><td class="text-right tabular-nums" x-text="fmtNum(c.corr, 2)"></td><td class="text-right tabular-nums" x-text="fmtEur(c.rev)"></td></tr></template></tbody>
+                </table></div>
+                <div class="text-[11.5px] sub mt-1.5">Gebunden = Bedarf folgt den verkauften Rädern (Korrelation ≥ 0,5). Hier trägt ein Preisaufschlag, weil Ersatz nur über dieses Teil möglich ist.</div>
+              </div>
+            </template>
             <template x-if="ucOpen==='next_best_action' && ucBt?.policy_eval">
               <div class="mt-3">
                 <div class="kpi-label" x-text="'Policy-Rückblick am '+fmtDate(ucBt.policy_eval.T)+' · '+fmtInt(ucBt.policy_eval.customers)+' Kunden'"></div>
@@ -2667,6 +2697,10 @@ function graphReady() {
         const lk = e.leak_eur ?? e.gap_eur ?? 0, gain = lk * p('rate', 30) / 100 * scen.rate, cost = e.n * p('cost') * scen.cost;
         return { base: lk, caught: lk, gain, cost, net: gain - cost, annual: (gain - cost) * p('periods', 2), n_list: e.n, tp: e.n };
       }
+      if (w.kind === 'uplift') {             // identisch zu business_case.compute (Ersatzteile, aftersales.py)
+        const gain = e.rev * p('uplift', 3) / 100 * scen.rate * (1 - p('loss', 30) / 100), cost = e.n * p('cost') * scen.cost;
+        return { base: e.rev, caught: e.rev, gain, cost, net: gain - cost, annual: (gain - cost) * p('periods', 2), n_list: e.n, tp: e.n };
+      }
       if (w.kind === 'policy') {             // identisch zu business_case.compute (Policy-Rückblick NBA)
         const net = e.net * scen.rate;
         return { base: Math.abs(net), caught: Math.abs(net), gain: Math.max(net, 0), cost: 0, net, annual: net * p('periods', 4), n_list: 0, tp: 0 };
@@ -2702,7 +2736,8 @@ function graphReady() {
       uc = uc || this.bcUc; const c = this.bcCase(uc); if (!c) return null;
       const prm = this.bcParams[uc] || c.defaults, fx = this.bc.fx || 1.15, sc = this.bcScen();
       const model = this.bcCompute(uc, c.whatif, prm, c.model, fx, sc), rule = this.bcCompute(uc, c.whatif, prm, 'rule', fx, sc);
-      return { model, rule, added: model && rule ? model.annual - rule.annual : null };
+      const same = ['leakage', 'check', 'uplift'].includes(c.whatif.kind);   // wie business_case.use_case_case: kein Mehrwert ggü. Regel
+      return { model, rule, added: model && rule && !same ? model.annual - rule.annual : null };
     },
     bcEuro(uc) {
       const n = this.bcNow(uc); const a = n?.model?.annual;
@@ -2841,10 +2876,13 @@ function graphReady() {
       const z = this.btRes?.sizes || {};
       if (this.btRes?.kind === 'binary') return `${this.fmtInt(z.train_rows)} Trainings- / ${this.fmtInt(z.test_rows)} Testfälle · Positivrate Test ${this.fmtPct(z.test_positive_rate)} · ${z.features} Merkmale (${z.graph_features} aus dem Graphen)`;
       if (this.btRes?.kind === 'forecast') return `${z.series} Artikelreihen · ${z.horizon_weeks} Wochen Horizont · ${z.train_origins} Trainings-Ursprünge`;
+      if (z.train_snapshots == null) return `${this.fmtInt(z.train_rows)} Trainings- / ${this.fmtInt(z.test_rows)} Testfälle`;
       return `${z.train_snapshots} Trainings-Stichtage`;
     },
     timelineHtml() {
       const t = this.btRes?.timeline; if (!t) return '';
+      if (isNaN(new Date(t.test).getTime()))   // ohne Kalenderzeit (SCANIA): Split nach Einheiten statt nach Datum
+        return `<div class="text-[12px] sub px-2 py-3">Test: ${t.test} – kein Kalender-Split, weil die Daten nur Zeit seit Studienbeginn je ${t.unit || 'Einheit'} kennen. Training auf den übrigen Einheiten, Peer-Merkmale nur aus Trainingseinheiten.</div>`;
       const all = [...t.train, t.val, t.test, t.test_label_end].map(d => new Date(d).getTime());
       const lo = Math.min(...all), hi = Math.max(...all);
       const x = d => (3 + 94 * (new Date(d).getTime() - lo) / Math.max(hi - lo, 1)).toFixed(2) + '%';
@@ -2972,6 +3010,10 @@ function graphReady() {
     },
     ucVerdict() {
       const rows = this.ucClassRows(); if (!rows.length) return '';
+      if (this.ucOpen === 'service_contracts') {
+        return 'Ohne Vertragsdaten gibt es kein Label für Abschluss oder Verlängerung – also auch keinen Modellvergleich. Die Kalkulation nutzt ' +
+          'das Reparaturmodell der installierten Basis; sobald Verträge je Seriennummer vorliegen, rechnet sich die Verlängerung wie Churn.';
+      }
       if (this.ucBt?.kind === 'check') {
         return 'Angebotsprüfung ist eine Regelprüfung mit Kosten zum Auftragsdatum – kein Modell nötig. Graph ML hilft erst, wenn Kosten im Angebot fehlen ' +
           'und über die Stückliste (Konfiguration → Bauteile → Kosten) geschätzt werden müssen.';

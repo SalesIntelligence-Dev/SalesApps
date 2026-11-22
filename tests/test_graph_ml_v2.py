@@ -219,3 +219,58 @@ class PricingTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class AfterSalesTest(unittest.TestCase):
+    """Prompt 6: Installierte Basis (SCANIA), Serviceverträge, Ersatzteilpreise (AdventureWorks)."""
+
+    def test_peer_rates_never_see_own_label(self):
+        import numpy as np
+        import pandas as pd
+
+        from graph_ml import aftersales as af
+        rng = np.random.default_rng(0)
+        n = 400
+        v = pd.DataFrame({"vehicle_id": np.arange(n), "repaired": rng.integers(0, 2, n),
+                          **{c: rng.choice(["a", "b"], n).astype(str) for c in af.SPEC}})
+        rows = v.assign(test=v["vehicle_id"] >= 320)
+        g1 = af._peer_features(rows, v)
+        v2 = v.copy()
+        v2.loc[5, "repaired"] = 1 - v2.loc[5, "repaired"]          # eigenes Label kippen …
+        g2 = af._peer_features(rows.assign(repaired=v2["repaired"]), v2)
+        self.assertTrue(np.allclose(g1.loc[5].to_numpy(), g2.loc[5].to_numpy()))   # … eigene Merkmale bleiben gleich
+        self.assertFalse(np.allclose(g1.loc[rows["test"]].to_numpy(), g2.loc[rows["test"]].to_numpy()))
+
+    def test_artifacts_and_business_case(self):
+        from graph_ml import business_case as bc
+        from graph_ml import evaluation as ev
+        ib = ev.load("installed_base")
+        self.assertEqual((ib["kind"], ib["dataset"]), ("binary", "scania"))
+        auprc = {e["id"]: e["metrics"]["auprc"] for e in ib["engines"]}
+        self.assertGreater(auprc[ib["best"]], auprc["rule"])
+        self.assertIn("gnn", auprc)
+        sp = ev.load("spare_parts_pricing")
+        self.assertTrue(sp["lower_is_better"])
+        w = sp["whatif"]
+        e = w["engines"][sp["best"]]
+        a = bc.compute("spare_parts_pricing", w, {"uplift": 3, "loss": 30, "cost": 50, "periods": 2}, sp["best"])["annual"]
+        self.assertAlmostEqual(a, (e["rev"] * 0.03 * 0.7 - e["n"] * 50) * 2, places=2)        # identisch zur JS-Formel
+        sc = ev.load("service_contracts")
+        self.assertEqual(sc["vorhersagekraft"]["status"], "na")
+        self.assertTrue(sc["aftersales"]["contract_segments"])
+        ov = bc.overview()["cases"]
+        self.assertEqual(ov["service_contracts"]["euro"]["status"], "na")
+        self.assertEqual(ov["installed_base"]["dataset"], "scania")
+        self.assertIsNone(ov["spare_parts_pricing"]["scenarios"]["realistisch"]["added"])
+
+    def test_stage3_on_scania(self):
+        from graph_ml.data_loader import get_registry
+        res = get_registry().checks("scania", 3)
+        by = {u["id"]: u for u in res["use_cases"]}
+        self.assertEqual(by["installed_base"]["ampel"]["vorhersagekraft"]["status"], "ok")
+        self.assertEqual(by["service_contracts"]["ampel"]["datenreife"]["status"], "warn")
+        bound = {f["field"]: (f["binding"] or {}).get("column") for f in by["installed_base"]["fields"]}
+        self.assertEqual(bound["serial_number"], "vehicle_id")
+        self.assertEqual(bound["service_event"], "repair_id")
+        aw = {u["id"]: u for u in get_registry().checks("adventureworks_data", 3)["use_cases"]}
+        self.assertNotEqual((next(f for f in aw["installed_base"]["fields"] if f["field"] == "service_event")["binding"] or {})
+                            .get("column"), "WorkOrderID")                        # Fertigungsauftrag ≠ Serviceauftrag
