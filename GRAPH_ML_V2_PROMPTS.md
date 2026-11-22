@@ -286,3 +286,22 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
 - **Tests:** 63 grün (System-Python; im GPU-`.venv` fehlt `openpyxl` für den Excel-Export). Web-Modus: alle Datensätze
   und Stufen 200, 206 MB RSS, kein torch. Volle SCANIA-Auslesungen nur lokal (`data/local/`), Precompute-Hook überspringt
   sonst.
+
+## Umsetzungsnotizen nach Prompt 7
+
+- **Deployment:** Prompts 5 und 6 gepusht (`eb58afe`), Render live (17 Use Cases, Routen 200).
+- **Kein offener Garantiedatensatz** → gemessen wird über die AdventureWorks-Kette Lieferant → Bauteil (Wareneingang mit
+  Beanstandungen) → Stückliste → Produkt → Fertigungsauftrag (Ausschuss mit Grund). Neu: `graph_ml/quality.py`, Felder
+  `rejected_qty` und `technician`; Leakage-Guard `past_stats` zählt nur Fälle, die vor dem Start abgeschlossen waren
+  (Beanstandung ab Fälligkeit, Ausschuss ab Auftragsende; Test: Zukunft verändern → Merkmale davor gleich).
+- **Lieferantenregress** (8.845 Bestellpositionen, 86 Lieferanten, Quote 6,4 %; Test ab 01.04.2025): AUPRC Regel (bisherige
+  Lieferantenquote) 0,089 · LightGBM 0,136 · LightGBM + Bauteil-/Lieferanten-Peers 0,138 · **TabPFN 0,166** · GNN Position ↔
+  Lieferant ↔ Bauteil 0,117 → +87,9 % (signifikant). Graph-Peers bringen kaum etwas. Regress-Volumen im Test 465.413 €,
+  Top-10-Lieferanten 64,6 %. Euro 149.336 €/Jahr (Rückholquote 60 % = Annahme) → Gesamt Gelb (Datenreife).
+- **Qualitäts-Frühwarnung & Root Cause** (72.591 Fertigungsaufträge, Ausschuss 1,0 %; Test ab 01.01.2025): Regel (größte
+  Menge) 0,095 · LightGBM 0,089 · + Graph 0,086 · TabPFN 0,099 · GNN 0,079 → +4 % (nicht signifikant). Ausschuss entsteht in
+  AdventureWorks nur bei großen Aufträgen und folgt nicht der Lieferantenqualität (gute Lieferanten 2,2 %, schwache 0,7 %) –
+  ehrlich Rot; Euro negativ (−40.076 €). Ursachen nach Ausschussgrund und Produktgruppe auf der Detailseite.
+- **Garantiebetrug:** keine offenen Daten (Garantiefälle mit Händler, Techniker, Prüfergebnis) → nur Struktur (`NOT_MEASURABLE`).
+  `warranty_root_cause` bleibt Stufe 1 und verweist auf die Qualitäts-Frühwarnung.
+- **Tests:** 66 grün (System-Python). Web-Modus 211 MB, kein torch.

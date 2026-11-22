@@ -274,3 +274,49 @@ class AfterSalesTest(unittest.TestCase):
         aw = {u["id"]: u for u in get_registry().checks("adventureworks_data", 3)["use_cases"]}
         self.assertNotEqual((next(f for f in aw["installed_base"]["fields"] if f["field"] == "service_event")["binding"] or {})
                             .get("column"), "WorkOrderID")                        # Fertigungsauftrag ≠ Serviceauftrag
+
+class QualityTest(unittest.TestCase):
+    """Prompt 7: Qualitäts-Frühwarnung & Root Cause, Lieferantenregress (AdventureWorks), Garantiebetrug (nur Struktur)."""
+
+    def test_past_stats_only_count_finished_cases(self):
+        import pandas as pd
+
+        from graph_ml import quality as q
+        key = pd.Series(["a", "a", "a", "b"])
+        avail = pd.Series(pd.to_datetime(["2025-01-01", "2025-02-01", "2025-03-01", "2025-01-01"]))
+        y = pd.Series([1, 0, 1, 1])
+        s, n = q.past_stats(key, avail, y, pd.Series(["a", "a", "b"]), pd.Series(pd.to_datetime(["2025-02-01", "2025-12-01", "2025-01-01"])))
+        self.assertEqual(list(n), [1, 3, 0])                    # am selben Tag fertig = noch unbekannt
+        self.assertEqual(list(s), [1, 2, 0])
+
+    def test_supplier_features_ignore_future_labels(self):
+        from graph_ml import quality as q
+        t, prod = q._aw()
+        p = q.supplier_lines(t, prod)
+        f1 = q.supplier_features(p, t["BillOfMaterials"])
+        p2 = p.copy()
+        late = p2["DueDate"] >= q.SUP_TEST
+        p2.loc[late, "y"] = 1 - p2.loc[late, "y"]               # Zukunft verändern …
+        f2 = q.supplier_features(p2, t["BillOfMaterials"])
+        early = (p["OrderDate"] < q.SUP_TEST).to_numpy()
+        cols = [c for c in q.SUP_BASE + q.SUP_GRAPH]
+        self.assertTrue(f1.loc[early, cols].fillna(-1).equals(f2.loc[early, cols].fillna(-1)))   # … Merkmale davor bleiben gleich
+
+    def test_artifacts_and_ampel(self):
+        from graph_ml import business_case as bc
+        from graph_ml import evaluation as ev
+        from graph_ml.data_loader import get_registry
+        for uc in ("quality_root_cause", "supplier_recourse"):
+            r = ev.load(uc)
+            self.assertEqual((r["kind"], r["dataset"]), ("binary", "adventureworks_data"))
+            self.assertEqual({e["id"] for e in r["engines"]} >= {"rule", "lgbm", "lgbm_graph", "gnn"}, True)
+        sup = ev.load("supplier_recourse")
+        au = {e["id"]: e["metrics"]["auprc"] for e in sup["engines"]}
+        self.assertGreater(au[sup["best"]], au["rule"])
+        self.assertIn("warranty_fraud", ev.NOT_MEASURABLE)
+        ov = bc.overview()["cases"]
+        self.assertEqual(ov["warranty_fraud"]["euro"]["status"], "na")
+        by = {u["id"]: u for u in get_registry().checks("adventureworks_data", 3)["use_cases"]}
+        rq = next(f for f in by["supplier_recourse"]["fields"] if f["field"] == "rejected_qty")
+        self.assertEqual(rq["binding"]["column"], "RejectedQty")
+        self.assertEqual(by["supplier_recourse"]["ampel"]["vorhersagekraft"]["status"], "ok")

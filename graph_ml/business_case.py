@@ -85,6 +85,18 @@ PARAMS: dict[str, list[dict]] = {
         {"id": "cost", "label": "Kosten je Serviceangebot (Kontakt, Terminierung)", "unit": "€", "default": 25, "min": 0, "max": 200, "step": 5, "role": "cost"},
         {"id": "margin", "label": "Ergebnisanteil des Werkstattauftrags", "unit": "%", "default": 35, "min": 10, "max": 100, "step": 5, "role": "fixed"},
         {"id": "periods", "label": "Angebotsrunden pro Jahr", "unit": "×", "default": 4, "min": 1, "max": 6, "step": 1, "role": "fixed"}],
+    "quality_root_cause": [
+        {"id": "list_share", "label": "Geprüfte Aufträge vor dem Start (oberste % nach Risiko)", "unit": "%", "default": 10, "min": 5, "max": 30, "step": 1, "role": "fixed"},
+        {"id": "rate", "label": "Anteil des Ausschusses, der durch Prüfung vor dem Start vermieden wird", "unit": "%", "default": 25, "min": 5, "max": 60, "step": 1, "role": "rate"},
+        {"id": "cost", "label": "Kosten je geprüftem Auftrag", "unit": "€", "default": 20, "min": 0, "max": 200, "step": 5, "role": "cost"},
+        {"id": "margin", "label": "Ergebnisanteil", "unit": "%", "default": 100, "min": 10, "max": 100, "step": 5, "role": "fixed"},
+        {"id": "periods", "label": "Testzeiträume pro Jahr (Test ≈ Halbjahr)", "unit": "×", "default": 2, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
+    "supplier_recourse": [
+        {"id": "list_share", "label": "Gezielt geprüfte Bestellpositionen (oberste % nach Risiko)", "unit": "%", "default": 10, "min": 5, "max": 30, "step": 1, "role": "fixed"},
+        {"id": "rate", "label": "Anteil des beanstandeten Werts, der beim Lieferanten zurückgeholt wird (inkl. Folgekosten)", "unit": "%", "default": 60, "min": 10, "max": 100, "step": 5, "role": "rate"},
+        {"id": "cost", "label": "Kosten je gezielt geprüfter Position", "unit": "€", "default": 15, "min": 0, "max": 100, "step": 5, "role": "cost"},
+        {"id": "margin", "label": "Ergebnisanteil", "unit": "%", "default": 100, "min": 10, "max": 100, "step": 5, "role": "fixed"},
+        {"id": "periods", "label": "Testzeiträume pro Jahr (Test ≈ Halbjahr)", "unit": "×", "default": 2, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
     "spare_parts_pricing": [
         {"id": "uplift", "label": "Preisaufschlag auf gebundene Teile", "unit": "%", "default": 3, "min": 1, "max": 10, "step": 0.5, "role": "rate"},
         {"id": "loss", "label": "davon durch Mengenverlust wieder verloren (Elastizität)", "unit": "%", "default": 30, "min": 0, "max": 90, "step": 5, "role": "fixed"},
@@ -110,6 +122,8 @@ STEP_LABELS = {"churn": ("Umsatz der Abwanderer", "davon in der Liste", "gerette
                "price_recommendation": ("Preislücke zum erwartbaren Preis", "geprüfte Aufträge", "geschlossen (Annahme)"),
                "price_leakage": ("Leakage im Testzeitraum", "geprüfte Aufträge", "vermieden (Annahme)"),
                "quote_check": ("Margenlücke unter 10 %", "geprüfte Angebote", "zurückgeholt (Annahme)"),
+               "quality_root_cause": ("Ausschusskosten im Test", "davon in der Prüfliste", "vermieden (Annahme)"),
+               "supplier_recourse": ("beanstandeter Warenwert im Test", "davon in der Prüfliste", "zurückgeholt (Annahme)"),
                "installed_base": ("Wert aller Reparaturen im Test", "davon in der Liste", "gewonnen (Annahme)"),
                "spare_parts_pricing": ("Umsatz gebundener Teile", "gebundene Teile", "Mehrmarge (Annahme)"),
                "demand_forecast": ("Sicherheitsbestand", "Fehlerreduktion", "Kostensenkung")}
@@ -292,7 +306,8 @@ def next_step(cases: dict, vk: dict | None = None) -> dict:
              "demand_forecast": "Absatzprognose", "account_scoring": "Account-Scoring",
              "territory_coverage": "Vertriebsabdeckung", "next_best_action": "Next Best Action",
              "price_recommendation": "Preis- & Rabattempfehlung", "price_leakage": "Preis-Leakage", "quote_check": "Angebotsprüfung",
-             "installed_base": "Installierte Basis", "service_contracts": "Serviceverträge", "spare_parts_pricing": "Ersatzteilpreise"}
+             "installed_base": "Installierte Basis", "service_contracts": "Serviceverträge", "spare_parts_pricing": "Ersatzteilpreise",
+             "quality_root_cause": "Qualitäts-Frühwarnung", "supplier_recourse": "Lieferantenregress"}
     step = "Pilot" if stage == "pilot" else "Readiness-Sprint"
     roi_txt = str(round(roi, 1)).replace(".", ",")
     return {"stage": stage, "use_case": top, "annual": round(top_val), "year1_cost": year1, "roi": round(roi, 1),

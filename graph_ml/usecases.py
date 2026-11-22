@@ -211,6 +211,19 @@ FIELDS: dict[str, dict] = {
         "table_level": ["repair", "repairs", "reparatur", "serviceorder", "maintenance", "wartung"],
         "kinds": "any",
     },
+    "rejected_qty": {
+        "label": "Beanstandete Menge (Wareneingangsprüfung)",
+        "syn": ["rejectedqty", "rejected", "beanstandet", "beanstandetemenge", "reklamiertemenge", "rejectqty", "insmk"],
+        "contains": ["rejected", "beanstand", "reject"],
+        "kinds": "any",
+    },
+    "technician": {
+        "label": "Techniker / Servicepartner",
+        "syn": ["technicianid", "techniker", "servicepartnerid", "servicepartner", "mechanicid", "fieldengineerid"],
+        "contains": ["technician", "techniker", "servicepartner", "mechanic"],
+        "table_level": ["technician", "techniker", "servicepartner", "mechanic"],
+        "kinds": "any",
+    },
     "contract": {
         "label": "Servicevertrag (Abschluss, Laufzeit, Kündigung)",
         "syn": ["contractid", "servicecontractid", "vertragsnr", "vertrag", "vbeln_contract", "subscriptionid"],
@@ -426,6 +439,41 @@ USE_CASES: list[dict] = [
      "requires": [("product_key", "pflicht", None, None), ("quantity", "pflicht", None, None), ("event_time", "pflicht", None, None),
                   ("bom", "pflicht", None, "PB-10"), ("price", "optional", None, None), ("product_group", "optional", None, None)],
      "links": [("product_key", "quantity")], "learnable": True, "max_stage": 3, "note": "gerechnet auf AdventureWorks"},
+    {"id": "quality_root_cause", "name": "Qualitäts-Frühwarnung & Root Cause", "area": "After Sales", "lighthouse": False,
+     "app_route": None, "app_name": "neu",
+     "label": "Fertigungsauftrag mit Ausschuss – Frühwarnung vor dem Start, Ursachen nach Grund, Produktgruppe und Bauteil-Lieferant",
+     "label_detail": "Ersatz für Garantiefälle (die es offen nicht gibt): Ausschuss ist der früheste messbare Qualitätsfehler. "
+                     "Quoten zählen nur Aufträge, die vor dem Start abgeschlossen waren. Test: Starts ab 01.01.2025.",
+     "window_days": 0, "min_positives": 100, "entity": "order",
+     "baseline": "größte Auftragsmenge zuerst", "lever": "Kosten (Ausschuss, Garantie)",
+     "blockers": ["Ausschussgrund nur als Freitext", "Bauteil-Lieferant je Charge nicht protokolliert"],
+     "requires": [("product_key", "pflicht", None, None), ("quantity", "pflicht", None, None), ("defect_code", "pflicht", None, "PB-05"),
+                  ("event_time", "pflicht", None, None), ("bom", "optional", None, None), ("supplier", "optional", None, None)],
+     "links": [("product_key", "defect_code")], "learnable": True, "max_stage": 3, "note": "gerechnet auf AdventureWorks (Ausschuss)"},
+    {"id": "supplier_recourse", "name": "Lieferantenregress", "area": "After Sales", "lighthouse": False,
+     "app_route": None, "app_name": "neu",
+     "label": "Bestellposition wird beim Wareneingang beanstandet – gezielt prüfen und beim Lieferanten geltend machen",
+     "label_detail": "Positiv = beanstandete Menge > 0. Beanstandungen zählen erst ab Fälligkeit (≈ Wareneingang). "
+                     "Test: Bestellungen ab 01.04.2025. Regress-Volumen = beanstandete Menge × Stückpreis.",
+     "window_days": 0, "min_positives": 100, "entity": "line",
+     "baseline": "Lieferanten mit der höchsten bisherigen Beanstandungsquote zuerst", "lever": "Kosten, Regress",
+     "blockers": ["Beanstandungen nicht je Bestellposition erfasst", "Garantiefälle ohne Bauteil-/Lieferantenbezug"],
+     "requires": [("supplier", "pflicht", None, "PB-10"), ("product_key", "pflicht", None, None), ("quantity", "pflicht", None, None),
+                  ("rejected_qty", "pflicht", None, "PB-10"), ("event_time", "pflicht", None, None), ("price", "optional", None, None),
+                  ("bom", "optional", None, None)],
+     "links": [("supplier", "product_key")], "learnable": True, "max_stage": 3, "note": "gerechnet auf AdventureWorks (Wareneingang)"},
+    {"id": "warranty_fraud", "name": "Garantiebetrug & Fehlbuchungen", "area": "After Sales", "lighthouse": False,
+     "app_route": None, "app_name": "neu",
+     "label": "Auffälliger Garantiefall (Händler–Techniker–Teil-Muster)",
+     "label_detail": "Braucht Garantiefälle mit Händler, Techniker, getauschten Teilen und Prüfergebnis (Betrug ja/nein). "
+                     "Kein offener Datensatz vorhanden – bewertet wird nur die Struktur.",
+     "window_days": 0, "min_positives": 100, "entity": "claim",
+     "baseline": "Regeln (Kosten über Schwelle, Häufung je Händler)", "lever": "Garantiekosten",
+     "blockers": ["Garantiefälle ohne Techniker/Teile", "Prüfergebnis (Betrug ja/nein) nicht erfasst"],
+     "requires": [("warranty_claim", "pflicht", None, "PB-10"), ("serial_number", "pflicht", None, "PB-10"),
+                  ("technician", "pflicht", None, "PB-10"), ("customer_key", "optional", None, None), ("product_key", "optional", None, None),
+                  ("defect_code", "optional", None, "PB-05")],
+     "links": [("warranty_claim", "serial_number")], "learnable": True, "max_stage": 1, "note": "keine offenen Daten – nur Struktur"},
     {"id": "warranty_root_cause", "name": "Warranty Root Cause", "area": "After Sales", "lighthouse": False,
      "app_route": None, "app_name": "neu (PDF-Vorlage)",
      "label": "Garantiefall in X Monaten je Maschine",
@@ -612,7 +660,34 @@ STORY: dict[str, dict] = {
         "path": ["Maschine", "Bauteil", "Charge", "Lieferant"],
         "tabular": "Alter, Laufzeit, Einsatzland je Maschine",
         "unit": "je Maschine: Garantiefall in X Monaten",
-        "euro": "vermiedene Garantiefälle × Ø Kosten je Fall (Prompt 7)"},
+        "euro": "vermiedene Garantiefälle × Ø Kosten je Fall – gemessen ersatzweise als Qualitäts-Frühwarnung (Ausschuss, AdventureWorks)"},
+    "quality_root_cause": {
+        "v2": "Garantie: Frühwarnung und Root Cause (über Ausschuss)", "effect": "Garantie- und Qualitätskosten −4 bis −20 %", "fit": "mittel",
+        "graph": "Fehler können sich fortpflanzen: Lieferant → Bauteil → Stückliste → Produkt → Fertigungsauftrag. Graph-Merkmale: "
+                 "Ausschuss der Geschwister-Produkte und der Produkte mit gleichen Bauteilen, Beanstandungsquote der Bauteil-Lieferanten. "
+                 "Gemessen auf AdventureWorks: Ausschuss entsteht nur bei großen Aufträgen und folgt nicht der Lieferantenqualität – "
+                 "die Regel „große Aufträge zuerst“ ist so gut wie jedes Modell.",
+        "path": ["Lieferant", "Bauteil", "Produkt", "Fertigungsauftrag"],
+        "tabular": "Auftragsmenge, Fertigungstage, Kosten, Arbeitsgänge, bisherige Ausschussquote des Produkts",
+        "unit": "je Fertigungsauftrag: Ausschuss ja/nein, Ursachen nach Grund und Produktgruppe",
+        "euro": "Ausschusskosten (Menge × Standardkosten) in der Top-Liste × vermiedener Anteil − Prüfungen × Kosten, × 2 Halbjahre"},
+    "supplier_recourse": {
+        "v2": "Lieferantenregress", "effect": "Zulieferer tragen ~10 % der Garantiekosten, fair wären bis 37 %", "fit": "mittel",
+        "graph": "Beanstandungen hängen am Lieferanten und am Bauteil: dasselbe Bauteil bei anderen Lieferanten, die Bauteilgruppe, "
+                 "Lieferanten mit gleichen Bauteilen (Lieferant → Bauteil → Lieferant). Gemessen: Die eigene Historie des Lieferanten "
+                 "trägt das Signal, ein Tabellen-Foundation-Model (TabPFN) nutzt sie am besten – die Peers bringen kaum etwas.",
+        "path": ["Bestellposition", "Lieferant", "Bauteil", "andere Lieferanten"],
+        "tabular": "Bestellmenge, Preis, Lieferzeit, Bonität, bisherige Beanstandungsquote des Lieferanten",
+        "unit": "je Bestellposition: Beanstandung beim Wareneingang",
+        "euro": "beanstandeter Warenwert in der Prüfliste × zurückgeholter Anteil (Regress inkl. Folgekosten) − Prüfungen × Kosten, × 2"},
+    "warranty_fraud": {
+        "v2": "Garantiebetrug und Fehlbuchungen", "effect": "3–15 % der Garantiekosten", "fit": "hoch",
+        "graph": "Betrug tritt in Ringen auf: dieselben Händler, Techniker und Teile wiederholen sich (Fall → Händler → Techniker → Teil). "
+                 "Genau diese Muster sieht ein Graph-Modell, eine einzelne Fallzeile nicht. Ohne offene Daten bleibt es bei der Struktur.",
+        "path": ["Garantiefall", "Händler", "Techniker", "Teil"],
+        "tabular": "Kosten, Laufzeit, Teileanzahl, Fehlercode je Fall",
+        "unit": "je Garantiefall: auffällig ja/nein",
+        "euro": "aufgedeckte Fehlbuchungen × Ø Kosten je Fall − Prüfungen × Kosten (sobald Garantiefälle mit Prüfergebnis vorliegen)"},
 }
 
 

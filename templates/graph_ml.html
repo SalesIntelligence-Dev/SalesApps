@@ -1872,6 +1872,43 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
                 <div class="text-[11.5px] sub mt-1.5" x-text="'Prämie = erwartete Reparaturquote im 48er-Fenster × Auftragswert '+fmtEur(ucBt.aftersales.repair_eur)+' (Annahme) × 1,2 Sicherheitsaufschlag. Abschluss und Verlängerung von Verträgen sind ohne Vertragsdaten nicht messbar.'"></div>
               </div>
             </template>
+            <template x-if="ucOpen==='supplier_recourse' && ucBt?.quality?.vendors">
+              <div class="mt-3">
+                <div class="kpi-label" x-text="'Wareneingang ab '+fmtDate(ucBt.timeline.test)+' · Prüfliste laut '+(ucBt.recommendation?.name||'')"></div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
+                  <div class="panel-flat p-2.5"><div class="text-[10.5px] muted uppercase font-bold">beanstandete Positionen</div><div class="font-bold tabular-nums" x-text="fmtInt(ucBt.quality.recourse.lines_rejected)"></div></div>
+                  <div class="panel-flat p-2.5"><div class="text-[10.5px] muted uppercase font-bold">Regress-Volumen</div><div class="font-bold tabular-nums" x-text="fmtEur(ucBt.quality.recourse.rejected_eur_test)"></div></div>
+                  <div class="panel-flat p-2.5"><div class="text-[10.5px] muted uppercase font-bold">Lieferanten</div><div class="font-bold tabular-nums" x-text="fmtInt(ucBt.quality.recourse.vendors)"></div></div>
+                  <div class="panel-flat p-2.5"><div class="text-[10.5px] muted uppercase font-bold">Anteil Top-10-Lieferanten</div><div class="font-bold tabular-nums" x-text="fmtPct(ucBt.quality.recourse.top10_share)"></div></div>
+                </div>
+                <div class="scroll-x scroll-thin mt-2"><table class="tbl min-w-[520px] text-[12px]">
+                  <thead><tr><th>Lieferant (höchstes Risiko)</th><th class="text-right">Positionen</th><th class="text-right">erwartet</th><th class="text-right">tatsächlich</th><th class="text-right">beanstandet</th></tr></thead>
+                  <tbody><template x-for="v in ucBt.quality.vendors" :key="'qv'+v.vendor"><tr>
+                    <td x-text="v.vendor"></td><td class="text-right tabular-nums" x-text="fmtInt(v.lines)"></td>
+                    <td class="text-right tabular-nums" x-text="fmtPct(v.predicted)"></td><td class="text-right tabular-nums" x-text="fmtPct(v.observed)"></td>
+                    <td class="text-right tabular-nums text-amber-300" x-text="fmtEur(v.rejected_eur)"></td></tr></template></tbody>
+                </table></div>
+                <div class="text-[11.5px] sub mt-1.5">Quote = Anteil beanstandeter Positionen. Beanstandungen zählen erst ab Wareneingang – die Liste entsteht vor der Lieferung.</div>
+              </div>
+            </template>
+            <template x-if="ucOpen==='quality_root_cause' && ucBt?.quality?.root">
+              <div class="mt-3">
+                <div class="kpi-label" x-text="'Fertigungsaufträge ab '+fmtDate(ucBt.timeline.test)+' · '+fmtInt(ucBt.quality.root.orders_scrap)+' von '+fmtInt(ucBt.quality.root.orders)+' mit Ausschuss · '+fmtEur(ucBt.quality.root.scrap_eur_test)"></div>
+                <div class="grid sm:grid-cols-2 gap-3 mt-1">
+                  <div class="scroll-x scroll-thin"><table class="tbl text-[12px]">
+                    <thead><tr><th>Ausschussgrund</th><th class="text-right">Aufträge</th><th class="text-right">Kosten</th></tr></thead>
+                    <tbody><template x-for="r in ucBt.quality.reasons" :key="'qr'+r.reason"><tr>
+                      <td x-text="r.reason"></td><td class="text-right tabular-nums" x-text="fmtInt(r.orders)"></td><td class="text-right tabular-nums" x-text="fmtEur(r.eur)"></td></tr></template></tbody>
+                  </table></div>
+                  <div class="scroll-x scroll-thin"><table class="tbl text-[12px]">
+                    <thead><tr><th>Produktgruppe</th><th class="text-right">Quote</th><th class="text-right">erwartet</th></tr></thead>
+                    <tbody><template x-for="c in ucBt.quality.cohorts" :key="'qc'+c.cohort"><tr>
+                      <td x-text="c.cohort"></td><td class="text-right tabular-nums" x-text="fmtPct(c.observed)"></td><td class="text-right tabular-nums" x-text="fmtPct(c.predicted)"></td></tr></template></tbody>
+                  </table></div>
+                </div>
+                <div class="text-[12px] mt-2"><b>Pflanzt sich Lieferantenqualität fort?</b> <span class="sub" x-text="'Ausschussquote nach Lieferantenqualität der Bauteile: '+Object.entries(ucBt.quality.propagation).map(([k,v]) => k+' '+fmtPct(v)).join(' · ')+' – in AdventureWorks nicht: Ausschuss entsteht erst ab '+fmtInt(ucBt.quality.root.qty_threshold)+' Stück je Auftrag.'"></span></div>
+              </div>
+            </template>
             <template x-if="ucOpen==='spare_parts_pricing' && ucBt?.aftersales">
               <div class="mt-3">
                 <div class="kpi-label" x-text="'Installierte Basis über die Stückliste · Prognose für die Quartale ab '+ucBt.aftersales.test_quarters.map(q => fmtDate(q)).join(' und ')"></div>

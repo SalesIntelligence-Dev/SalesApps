@@ -68,6 +68,8 @@ def main(argv: list[str] | None = None) -> int:
         ev.save(nba_eval.to_result(nba_eval.evaluate(log=lambda m: print(m, flush=True))))
         for res in pricing.to_results(pricing.evaluate(log=lambda m: print(m, flush=True))).values():
             ev.save(res)
+        from . import quality
+        quality.main()
         from . import aftersales
         from .connectors import LOCAL_DIR
         if (LOCAL_DIR / "scania_readouts.npz").exists():   # volle SCANIA-Auslesungen liegen nur lokal (337 MB)
