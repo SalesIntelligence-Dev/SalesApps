@@ -9,6 +9,7 @@ import logging
 from pathlib import Path
 
 import json
+import re
 
 from flask import Blueprint, Response, jsonify, render_template, request
 
@@ -513,6 +514,17 @@ def api_reco_paths():
     from . import activation as act
     r = act.load_reco_paths()
     return jsonify(r or {"customers": [], "note": _ACT_HINT})
+
+
+@graph_bp.route("/graph_ml/api/classifier/<ds_id>")
+def api_classifier(ds_id):
+    from . import classifier_scan as cs
+    res = cs.load(ds_id) if re.fullmatch(r"[a-z0-9_]+", ds_id or "") else None
+    if not res:
+        return jsonify({"available": False, "dataset": ds_id,
+                        "hint": "Für diesen Datensatz liegt noch keine Data-Classifier-Analyse vor – sie läuft im Precompute "
+                                "(python -m graph_ml.classifier_scan)."})
+    return jsonify({"available": True, **res})
 
 
 @graph_bp.route("/graph_ml/api/matrix")

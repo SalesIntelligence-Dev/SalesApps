@@ -187,6 +187,8 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
 .ph-line{height:10px;border-radius:6px;background:rgba(255,255,255,.05)}
 .select{background:#0d0d24;border:1px solid var(--border2);border-radius:10px;color:var(--text);padding:8px 10px;font-size:13px;width:100%}
 .select:focus{outline:2px solid var(--cyan);outline-offset:1px}
+.input{background:#0d0d24;border:1px solid var(--border2);border-radius:10px;color:var(--text);padding:6px 9px;font-size:12.5px}
+.input:focus{outline:2px solid var(--cyan);outline-offset:1px}
 .tab{padding:6px 12px;border-radius:9px;font-size:12.5px;font-weight:600;color:var(--sub);border:1px solid transparent;white-space:nowrap}
 .tab:hover{color:var(--text)}
 .tab.active{color:var(--text);background:rgba(139,124,246,.14);border-color:rgba(139,124,246,.45)}
@@ -770,6 +772,127 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
                 x-text="dimName(d.dim)+' '+(d.before ?? '–')+'→'+(d.after ?? '–')"></span></template>
             </td></tr></template></tbody>
         </table></div></div>
+    </div>
+
+    <!-- Data-Classifier-Analyse: manuell gepflegte Felder, die ML vorschlagen kann -->
+    <div class="panel p-4 sm:p-5" id="dc">
+      <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
+        <div class="min-w-0">
+          <div class="eyebrow">Data-Classifier-Analyse</div>
+          <div class="font-semibold text-[16px] mt-0.5">Welche Felder pflegen Mitarbeiter von Hand – und welche kann ML vorschlagen?</div>
+          <div class="text-[12.5px] sub mt-1 max-w-[900px]">Durchsucht die Datenbank nach Kennzeichen, Klassifikationen und Parametern, die typischerweise manuell
+            gepflegt werden oder lückenhaft sind, und prüft auf den Daten selbst (5-fach kreuzvalidiert), wie viele Einträge eine Kaskade aus Regel, ML und Mensch
+            automatisch und sicher setzen könnte. Leitbeispiel: <b>Ist ein Stücklisten-Bauteil ein Ersatzteil?</b></div>
+        </div>
+        <div class="flex flex-wrap gap-1.5 flex-none">
+          <template x-for="(s, i) in dcStages" :key="'dcs'+i">
+            <span class="chip !py-0.5 !text-[11px]" :style="s.measured ? 'border-color:rgba(34,211,238,.5);color:#a5f3fc' : ''" :title="s.text" x-text="s.short"></span>
+          </template>
+        </div>
+      </div>
+      <template x-if="dc && !dc.available"><div class="text-[12.5px] sub mt-3" x-text="dc.hint"></div></template>
+      <template x-if="dc?.available">
+        <div class="mt-3 space-y-4">
+          <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2">
+            <div class="kpi"><div class="kpi-label">Tabellen geprüft</div><div class="kpi-value !text-[18px]" x-text="fmtInt(dc.tables.length)"></div>
+              <div class="kpi-sub" x-text="fmtInt(dc.tables.filter(t => t.role==='stamm').length)+' Stammdaten'"></div></div>
+            <div class="kpi"><div class="kpi-label">Kandidaten</div><div class="kpi-value !text-[18px]" x-text="fmtInt(dc.n_candidates)"></div>
+              <div class="kpi-sub" x-text="fmtInt(dc.n_likely)+' wahrscheinlich manuell'"></div></div>
+            <div class="kpi"><div class="kpi-label">ML vorhersagbar</div><div class="kpi-value !text-[18px] text-emerald-300" x-text="dc.counts.ok"></div><div class="kpi-sub">≥ 60 % automatisch bei 98 %</div></div>
+            <div class="kpi"><div class="kpi-label">teilweise / Regel</div><div class="kpi-value !text-[18px] text-amber-300" x-text="dc.counts.warn"></div><div class="kpi-sub">Graubereich zum Menschen</div></div>
+            <div class="kpi"><div class="kpi-label">kaum / nicht prüfbar</div><div class="kpi-value !text-[18px]" x-text="dc.counts.bad+' / '+dc.counts.na"></div><div class="kpi-sub">bleibt manuell</div></div>
+            <div class="kpi"><div class="kpi-label">Pflegeaufwand gespart</div><div class="kpi-value !text-[18px]" x-text="fmtEur(dcTotal())"></div><div class="kpi-sub">pro Jahr · Annahmen unten</div></div>
+          </div>
+          <div class="flex flex-wrap items-end gap-3 text-[12px]">
+            <label class="flex flex-col gap-0.5"><span class="muted">Stundensatz (€/h)</span><input type="number" class="input !py-1 !w-24" min="20" max="200" step="5" x-model.number="dcPrm.rate"></label>
+            <label class="flex flex-col gap-0.5"><span class="muted">Minuten je Eingabe (Faktor)</span><input type="number" class="input !py-1 !w-24" min="0.25" max="5" step="0.25" x-model.number="dcPrm.minFactor"></label>
+            <label class="flex flex-col gap-0.5"><span class="muted">Lagerhaltungskostensatz (%)</span><input type="number" class="input !py-1 !w-24" min="5" max="40" step="1" x-model.number="dcPrm.holding"></label>
+            <label class="flex flex-col gap-0.5"><span class="muted">Kosten je übersehenem ET (€)</span><input type="number" class="input !py-1 !w-28" min="0" max="100000" step="500" x-model.number="dcPrm.fn"></label>
+            <span class="muted max-w-[420px]">Gemessen: Automatisierungsquote im Rückblick. Annahmen: Minuten je Eingabe (Kennzeichen 1,5 · Klassifikation 2 · Parameter 3 · Ersatzteil 4), Neuanlagen pro Jahr aus Zeitstempeln, sonst 15 % der Datensätze.</span>
+          </div>
+          <div class="scroll-x scroll-thin"><table class="tbl min-w-[980px] text-[12px]">
+            <thead><tr><th>Feld</th><th>Tabelle</th><th>Art</th><th class="text-right">gefüllt</th><th class="text-right">manuell</th><th>Ergebnis</th>
+              <th class="text-right">automatisch @ 98 %</th><th>bestes Modell</th><th class="text-right">€ / Jahr</th></tr></thead>
+            <tbody><template x-for="r in dc.results" :key="'dcr'+r.id"><tr class="cursor-pointer" :class="dcSel===r.id ? 'bg-[#1b1b3a]' : ''" @click="dcSel = (dcSel===r.id ? null : r.id)">
+              <td><b x-text="r.name || r.column"></b><span x-show="r.special" class="chip !py-0 !text-[10px] ml-1" style="border-color:rgba(34,211,238,.5);color:#a5f3fc">Leitbeispiel</span>
+                <span class="block text-[10.5px] muted mono" x-text="r.table+'.'+r.column+(r.fk_to ? ' → '+r.fk_to : '')"></span></td>
+              <td class="text-[11.5px]"><span x-text="r.table_label || r.table"></span><span class="block text-[10.5px] muted" x-text="{stamm:'Stammdaten',bewegung:'Erfassung im Prozess'}[r.table_role] || r.table_role"></span></td>
+              <td x-text="{flag:'Kennzeichen',class:'Klassifikation',param:'Parameter'}[r.kind]"></td>
+              <td class="text-right tabular-nums" x-text="fmtPct(1 - (r.null_rate||0))"></td>
+              <td class="text-right tabular-nums" x-text="fmtNum(r.manual_score, 2)"></td>
+              <td><span class="amp" :class="'amp-'+(r.status||'na')"><span class="amp-ic" x-text="ampIcon(r.status)"></span><span x-text="r.verdict"></span></span></td>
+              <td class="text-right tabular-nums" x-text="r.auto_98 != null ? fmtPct(r.auto_98) : '–'"></td>
+              <td class="text-[11.5px]" x-text="dcBestName(r)"></td>
+              <td class="text-right tabular-nums" x-text="r.euro ? fmtEur(dcEuro(r).net_year) : '–'"></td></tr></template></tbody>
+          </table></div>
+          <template x-if="dcRow()">
+            <div class="panel-flat p-3 sm:p-4 space-y-3" x-data="{}">
+              <div class="flex flex-wrap items-start justify-between gap-2">
+                <div class="min-w-0"><div class="font-semibold" x-text="(dcRow().name || dcRow().column)+' · '+dcRow().table"></div>
+                  <div class="text-[12px] sub" x-text="dcRow().label || ('Vorhersage des Werts von '+dcRow().table+'.'+dcRow().column+' aus den übrigen Daten')"></div>
+                  <div class="text-[11.5px] text-amber-200/90 mt-0.5" x-show="dcRow().note" x-text="dcRow().note"></div></div>
+                <button class="btn btn-ghost text-[12px]" @click="dcSel=null">schließen</button>
+              </div>
+              <template x-if="dcRow().status==='na'"><div class="text-[12.5px] sub" x-text="dcRow().reason"></div></template>
+              <template x-if="dcRow().engines">
+                <div class="grid lg:grid-cols-2 gap-4">
+                  <div>
+                    <div class="kpi-label mb-1" x-text="dcRow().kind==='param' ? 'Modellvergleich · Anteil innerhalb ±10 %' : 'Modellvergleich · balancierte Trefferquote und automatisch entscheidbar (≥ 98 % richtig)'"></div>
+                    <template x-for="e in dcRow().engines" :key="'dce'+e.id">
+                      <div class="flex items-center gap-2 text-[12px] py-0.5">
+                        <span class="w-[46%] truncate" :title="e.name"><b x-text="e.klass"></b> <span class="muted" x-text="'· '+e.name"></span></span>
+                        <div class="bar flex-1"><span :style="'width:'+Math.max(3, 100*(e.metrics.balanced_accuracy ?? e.metrics.within_10 ?? 0))+'%;background:'+(e.id===dcRow().best ? '#22d3ee' : e.klass==='Graph-ML light' ? '#8b7cf6' : '#5b6488')"></span></div>
+                        <span class="tabular-nums w-12 text-right" x-text="fmtNum(e.metrics.balanced_accuracy ?? e.metrics.within_10, 3)"></span>
+                        <span class="tabular-nums w-14 text-right muted" x-text="e.metrics.auto_98 != null ? fmtPct(e.metrics.auto_98) : ''"></span>
+                      </div>
+                    </template>
+                    <div class="text-[11.5px] sub mt-1.5" x-text="dcVerdictText(dcRow())"></div>
+                    <template x-if="dcRow().positive">
+                      <div class="text-[12px] mt-2 panel-flat p-2.5">
+                        <b>Asymmetrische Automatik (wie im ET-Konzept):</b>
+                        <span class="sub" x-text="'„'+dcPosName(dcRow())+'“ automatisch bei ≥ 98 % Trefferquote für '+fmtPct(dcBest(dcRow()).metrics.auto_positive)+' der Datensätze; „nicht '+dcPosName(dcRow())+'“ nur unter der recall-sicheren Schwelle (im Rückblick kein übersehener Positiv-Fall): '+fmtPct(dcBest(dcRow()).metrics.auto_negative)+'. Mit '+fmtInt(dcRow().n_positive)+' geprüften Positiven ist höchstens '+fmtPct(dcRow().alpha_95, 2)+' übersehen nachweisbar (95 %) – für 0,1 % bräuchte es ≈ 3.000.'"></span>
+                      </div>
+                    </template>
+                  </div>
+                  <div class="space-y-3">
+                    <template x-if="(dcRow().rule_or_leak||[]).length || (dcRow().excluded||[]).length">
+                      <div><div class="kpi-label mb-1">Stufe 0 · Einzelfeld-Regeln und Folgefelder (aus dem ML-Vergleich genommen)</div>
+                        <template x-for="l in dcRow().rule_or_leak" :key="'dcl'+l.feature"><div class="text-[12px]"><span class="mono" x-text="l.feature"></span>
+                          <span class="muted" x-text="' · trennt allein '+fmtPct(l.ba)+' · '+l.source"></span></div></template>
+                        <template x-for="l in (dcRow().excluded||[])" :key="'dcx'+l.feature"><div class="text-[12px]"><span class="mono" x-text="l.feature"></span>
+                          <span class="muted" x-text="' · '+l.reason"></span></div></template>
+                        <div class="text-[11px] muted mt-0.5">Trennt ein einzelnes Feld fast perfekt, ist es entweder eine Regel (Stufe 0) oder eine Folge der Entscheidung (Leakage) – fachlich klären.</div></div>
+                    </template>
+                    <template x-if="(dcRow().importance||[]).length">
+                      <div><div class="kpi-label mb-1">Wichtigste Merkmale (LightGBM + Verknüpfungen)</div>
+                        <template x-for="f in dcRow().importance.slice(0, 6)" :key="'dcf'+f.feature"><div class="text-[12px] flex gap-2"><span class="mono truncate flex-1" x-text="f.feature"></span><span class="muted" x-text="f.source"></span></div></template></div>
+                    </template>
+                    <template x-if="dcRow().missing_fill && dcRow().missing">
+                      <div class="text-[12px]"><b>Lücken:</b> <span class="sub" x-text="fmtInt(dcRow().missing)+' Datensätze leer – '+fmtInt(dcRow().missing_fill.sure)+' davon mit hoher Sicherheit vorschlagbar ('+(dcRow().missing_fill.proposals||[]).map(p => p.value+' '+fmtInt(p.n)).join(' · ')+'). Leer kann auch „nicht zutreffend“ heißen – vor dem Befüllen fachlich klären.'"></span></div>
+                    </template>
+                  </div>
+                </div>
+              </template>
+              <template x-if="(dcRow().examples||[]).length">
+                <div><div class="kpi-label mb-1">Graubereich – diese Fälle ginge an LLM-Prüfer bzw. Mensch</div>
+                  <div class="scroll-x scroll-thin"><table class="tbl min-w-[520px] text-[12px]"><thead><tr><th>Datensatz</th><th>gepflegt</th><th>Vorschlag</th><th class="text-right">Sicherheit</th></tr></thead>
+                    <tbody><template x-for="(x, i) in dcRow().examples" :key="'dcg'+i"><tr><td x-text="x.name"></td><td x-text="dcLabel(dcRow(), x.actual)"></td>
+                      <td :class="x.predicted===x.actual ? '' : 'text-amber-300'" x-text="dcLabel(dcRow(), x.predicted)"></td><td class="text-right tabular-nums" x-text="fmtPct(x.confidence)"></td></tr></template></tbody></table></div></div>
+              </template>
+              <template x-if="dcRow().euro">
+                <div class="text-[12px] panel-flat p-2.5"><b>Euro (Annahmen oben):</b> <span class="sub" x-text="dcEuroText(dcRow())"></span></div>
+              </template>
+            </div>
+          </template>
+          <details class="text-[12px]" x-show="(dc.gaps||[]).length">
+            <summary class="cursor-pointer font-semibold">Lückenhafte Felder, die ein Klassifikator nicht schließt (<span x-text="dc.gaps.length"></span>)</summary>
+            <div class="scroll-x scroll-thin mt-2"><table class="tbl min-w-[560px] text-[12px]"><thead><tr><th>Feld</th><th class="text-right">leer</th><th>Grund / Weg</th></tr></thead>
+              <tbody><template x-for="g in dc.gaps" :key="'dcgap'+g.table+g.column"><tr><td class="mono" x-text="g.table+'.'+g.column"></td><td class="text-right tabular-nums" x-text="fmtPct(g.null_rate)"></td><td class="sub" x-text="g.reason"></td></tr></template></tbody></table></div>
+          </details>
+          <div class="text-[11.5px] muted">Grenzen: gemessen sind Stufe 0 und 1 auf historischen Daten; LLM-Prüfer und Mensch (Stufe 2/3) sowie blinde Stichproben sind Konzept.
+            Bei künstlichen Datensätzen zeigt die Analyse die Methode, nicht die Größenordnung. Personen-, Geo- und Systemfelder werden bewusst nicht vorhergesagt.</div>
+        </div>
+      </template>
     </div>
 
   </section>
@@ -2376,7 +2499,11 @@ function graphReady() {
     timeline: TIMELINE, tourSteps: TOUR, TIMELINE_SOURCES,
     bc: null, bcVariant: 'v0', bcUc: 'churn', bcParams: {}, bcScenario: 'realistisch', bcThr: { green: 100000, yellow: 25000 },
     bt: null, btUc: 'churn', btRes: null, btLoading: false, btErr: '', btJob: null, btSeries: 0,
-    ucBt: null, gm: null, gmOpen: false, recoPaths: null, recoPathCust: null, terrTable: null, stageAuto: false, checks: null, checksLoading: false, checksSeq: 0, ucOpen: null, ucFocusDim: null, colTable3: null,
+    ucBt: null, gm: null, gmOpen: false, dc: null, dcSel: null, dcPrm: { rate: 60, minFactor: 1, holding: 25, fn: 5000 },
+    dcStages: [{ short: 'Stufe 0 · Regeln', text: 'Einzelfeld-Regeln und Lookups; Folgefelder werden ausgewiesen', measured: true },
+               { short: 'Stufe 1 · ML', text: 'LightGBM, Graph-Kontext, Text-Modell, TabPFN, Ensemble – gemessen', measured: true },
+               { short: 'Stufe 2 · LLM-Prüfer', text: 'Graubereich und neue Datensätze, unabhängig von Stufe 1 – Konzept', measured: false },
+               { short: 'Stufe 3 · Mensch', text: 'entscheidet den Graubereich und misst die Automatik blind – Konzept', measured: false }], recoPaths: null, recoPathCust: null, terrTable: null, stageAuto: false, checks: null, checksLoading: false, checksSeq: 0, ucOpen: null, ucFocusDim: null, colTable3: null,
     playbooks: { 'PB-01': 'Fehlende Kundennummern', 'PB-02': 'Stornos ohne Originalbezug', 'PB-03': 'Nicht-Artikel-Codes',
                  'PB-04': 'Artikelstamm konsolidieren', 'PB-05': 'Freitext → Kategorien', 'PB-06': 'Dubletten entfernen',
                  'PB-07': 'Preis 0 / negative Mengen', 'PB-08': 'Währung umrechnen', 'PB-09': 'Governance-Checkliste',
@@ -2477,6 +2604,7 @@ function graphReady() {
         else if (this.stageAuto) { this.stage = 2; this.stageAuto = false; }
         this.loadChecks();
         this.loadPreview();
+        this.loadDc(id);
       } catch (e) { this.notify(e.message, 'bad'); }
       finally { this.loading.ds = false; }
     },
@@ -3093,6 +3221,50 @@ function graphReady() {
     ucCheck(id) { return this.checks?.use_cases.find(u => u.id === id) || null; },
     ucDetail() { return this.ucOpen ? this.ucCheck(this.ucOpen) : null; },
     ucMeta() { return this.usecases.find(u => u.id === this.ucOpen) || null; },
+    async loadDc(id) {
+      this.dc = null; this.dcSel = null;
+      try { const r = await this.api('/classifier/' + id); if (this.dsId === id) { this.dc = r; this.dcSel = r.results?.find(x => x.special)?.id || null; } }
+      catch (_) { this.dc = { available: false, hint: 'Data-Classifier-Analyse nicht erreichbar.' }; }
+    },
+    dcRow() { return this.dc?.results?.find(r => r.id === this.dcSel) || null; },
+    dcBest(r) { return (r.engines || []).find(e => e.id === r.best) || { metrics: {} }; },
+    dcBestName(r) { const e = (r.engines || []).find(x => x.id === r.best); return e ? e.name : '–'; },
+    dcLabel(r, v) { return r.special ? (String(v) === String(r.positive) ? 'Ersatzteil' : 'kein Ersatzteil') : v; },
+    dcPosName(r) { return r.special ? 'Ersatzteil' : (r.column + ' = ' + r.positive); },
+    dcEuro(r) {
+      // identisch zu classifier_scan.euro (mit Minuten-Faktor)
+      const v = r.value || {}, p = this.dcPrm, def = this.dc?.euro_defaults?.minutes || {};
+      const minutes = (r.minutes ?? def[r.kind] ?? 2) * (p.minFactor || 1), rate = p.rate || 60, entries = v.entries_per_year || 0;
+      let labor = entries * minutes / 60 * rate * (r.auto_98 || 0);
+      const gap = (r.missing_fill?.sure || 0) * minutes / 60 * rate;
+      const out = { labor_year: labor, gap_once: gap, entries, minutes, exposure: v.total_eur, net_year: labor };
+      if (v.kind === 'stock' && r.n_positive) {
+        const m = this.dcBest(r).metrics, ap = m.auto_positive || 0, an = m.auto_negative || 0;
+        labor = entries * minutes / 60 * rate * (ap + an);
+        const stockEt = (v.per_positive_eur || 0) * (p.holding / 100);
+        const fp = entries * ((m.auto_positive_fp || 0) / Math.max(r.labeled, 1)) * stockEt;
+        const fnBound = entries * (r.n_positive / Math.max(r.labeled, 1)) * (r.alpha_95 || 0) * p.fn;
+        Object.assign(out, { labor_year: labor, fp_stock: fp, fn_bound: fnBound, stock_et: stockEt, net_year: labor - fp });
+      }
+      return out;
+    },
+    dcTotal() { return (this.dc?.results || []).filter(r => r.euro).reduce((a, r) => a + Math.max(0, this.dcEuro(r).net_year || 0), 0); },
+    dcEuroText(r) {
+      const e = this.dcEuro(r);
+      let t = this.fmtInt(e.entries) + ' Eingaben/Jahr × ' + String(e.minutes).replace('.', ',') + ' min × ' + this.dcPrm.rate + ' €/h × automatisch entschiedener Anteil = ' + this.fmtEur(e.labor_year) + ' Pflegeaufwand pro Jahr';
+      if (e.fp_stock != null) t += ' − Bevorratung gemessener Fehlalarme ' + this.fmtEur(e.fp_stock) + ' (je ET ' + this.fmtEur(e.stock_et) + '/Jahr Lagerkosten) = ' + this.fmtEur(e.net_year) + ' netto. Prüfgrenze: Mit ' + this.fmtInt(r.n_positive) + ' geprüften ET sind übersehene ET nur bis ' + this.fmtPct(r.alpha_95) + ' ausschließbar – das entspricht bis zu ' + this.fmtEur(e.fn_bound) + '/Jahr Risiko; erst ≈ 3.000 geprüfte ET drücken das auf ein Zehntel';
+      if (e.gap > 0) t += ' · einmalig Lücken schließen: ' + this.fmtEur(e.gap);
+      if (e.exposure) t += ' · Wert am Feld: ' + this.fmtEur(e.exposure) + (r.value.kind === 'stock' ? ' Bevorratungswert' : ' Umsatz pro Jahr');
+      return t + '.';
+    },
+    dcVerdictText(r) {
+      const b = this.dcBest(r), rule = (r.engines || [])[0];
+      if (r.kind === 'param') return r.metric_note || '';
+      const fam = { lgbm_graph: 'Die Verknüpfungen (Graph-Kontext) tragen', text: 'Die Benennung trägt', ensemble: 'Text und Verknüpfungen zusammen tragen', lgbm: 'Die eigenen Felder tragen', tabpfn: 'TabPFN nutzt die Felder am besten', rule: 'Nur die Regel trägt' }[r.best] || '';
+      let t = fam + ': balancierte Trefferquote ' + this.fmtNum(b.metrics.balanced_accuracy, 3) + ' gegen Regel ' + this.fmtNum(rule?.metrics?.balanced_accuracy, 3) + ' – ' + this.fmtPct(r.auto_98) + ' der Datensätze ließen sich bei ≥ 98 % Trefferquote automatisch setzen, der Rest ist Graubereich.';
+      if ((b.metrics.balanced_accuracy || 0) >= 0.999) t += ' Perfekte Trennung im Rückblick ist bei künstlichen Daten typisch – echte Stammdaten sind unschärfer (das ET-Konzept nennt ≈ 95 % für die Benennung allein); deshalb Kalibrierung, Schattenbetrieb und blinde Stichproben vor der Automatik.';
+      return t;
+    },
     async loadGm() { try { this.gm = await this.api('/matrix'); } catch (_) { this.gm = null; } },
     gmCell(uc, ds) { return this.gm?.cells?.[uc + '|' + ds] || {}; },
     async gmOpenCell(uc, ds) {

@@ -414,3 +414,63 @@ class MatrixTest(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertIn("Gesamtabgleich".encode(), r.data)
         self.assertEqual(c.get("/graph_ml/api/matrix").status_code, 200)
+
+class ClassifierScanTest(unittest.TestCase):
+    """Schritt 3: Data-Classifier-Analyse – manuell gepflegte Felder, die ML vorschlagen kann."""
+
+    def test_single_field_leak_is_detected(self):
+        import numpy as np
+        import pandas as pd
+
+        from graph_ml import classifier_scan as cs
+        rng = np.random.default_rng(0)
+        y = rng.choice(["a", "b"], 300)
+        X = pd.DataFrame({"folge": pd.Series(np.where(y == "a", "x", "z")).astype("category"), "rauschen": rng.random(300)})
+        rules = cs.single_field_rules(X, y, cs._folds(y))
+        self.assertEqual(rules[0]["feature"], "folge")
+        self.assertGreaterEqual(rules[0]["ba"], cs.LEAK_BA)
+        self.assertLess(next(r for r in rules if r["feature"] == "rauschen")["ba"], 0.7)
+
+    def test_group_share_never_sees_own_label(self):
+        import numpy as np
+        import pandas as pd
+
+        from graph_ml import classifier_scan as cs
+        keys = pd.Series(range(6))
+        groups = [{"name": "g", "edges": pd.DataFrame({"e": [0, 1, 2, 3, 4, 5], "g": [1, 1, 1, 2, 2, 2]})}]
+        y = np.array(["1", "1", "0", "0", "0", "1"])
+        train = np.ones(6, bool)
+        a = cs._group_share(groups, keys, y, train, ["0", "1"])
+        y2 = y.copy()
+        y2[0] = "0"                                                  # eigenes Label kippen …
+        b = cs._group_share(groups, keys, y2, train, ["0", "1"])
+        self.assertTrue(np.allclose(a[0], b[0]))                    # … eigene Nachbarschaft bleibt gleich
+        self.assertAlmostEqual(a[0, 1], 0.5)                        # Geschwister 1 („1“) und 2 („0“)
+
+    def test_artifacts_and_spare_part_example(self):
+        from graph_ml import classifier_scan as cs
+        aw = cs.load("adventureworks_data")
+        self.assertIsNotNone(aw)
+        et = aw["results"][0]
+        self.assertTrue(et["special"])
+        self.assertEqual(et["id"], "Product.FinishedGoodsFlag@BOM")
+        self.assertEqual(et["labeled"], 325)
+        self.assertIn("SpecialOfferProduct", et["leak_tables"])           # Folgetabelle erkannt und entfernt
+        self.assertTrue(all("SpecialOfferProduct" not in f["feature"] for f in et["importance"]))
+        self.assertAlmostEqual(et["alpha_95"], 1 - 0.05 ** (1 / et["n_positive"]), places=5)
+        e = cs.euro(et)
+        m = next(x for x in et["engines"] if x["id"] == et["best"])["metrics"]
+        v = et["value"]
+        labor = v["entries_per_year"] * et["minutes"] / 60 * 60 * (m["auto_positive"] + m["auto_negative"])
+        self.assertAlmostEqual(e["labor_year"], round(labor), places=0)
+        ids = {r["id"] for r in aw["results"]}
+        self.assertFalse(any(PII in i for i in ids for PII in ("Gender", "MaritalStatus", "BirthDate")))
+        for ds in ("scania", "cmapss"):                                      # Sensordaten: keine manuellen Felder
+            self.assertEqual(cs.load(ds)["n_likely"], 0)
+
+    def test_route(self):
+        from app import app
+        c = app.test_client()
+        r = c.get("/graph_ml/api/classifier/adventureworks_data").get_json()
+        self.assertTrue(r["available"])
+        self.assertFalse(c.get("/graph_ml/api/classifier/unbekannt").get_json()["available"])

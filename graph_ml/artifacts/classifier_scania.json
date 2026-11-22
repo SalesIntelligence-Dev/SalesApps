@@ -1,0 +1,187 @@
+{
+ "dataset": "scania",
+ "generated_at": "2026-11-22T13:13:43",
+ "seconds": 0.1,
+ "tables": [
+  {
+   "name": "vehicles",
+   "role": "bewegung",
+   "role_text": "Bewegungsdaten",
+   "rows": 23550
+  },
+  {
+   "name": "config_0",
+   "role": "werteliste",
+   "role_text": "Werteliste",
+   "rows": 3
+  },
+  {
+   "name": "config_1",
+   "role": "werteliste",
+   "role_text": "Werteliste",
+   "rows": 29
+  },
+  {
+   "name": "config_2",
+   "role": "werteliste",
+   "role_text": "Werteliste",
+   "rows": 21
+  },
+  {
+   "name": "config_3",
+   "role": "werteliste",
+   "role_text": "Werteliste",
+   "rows": 4
+  },
+  {
+   "name": "config_4",
+   "role": "werteliste",
+   "role_text": "Werteliste",
+   "rows": 2
+  },
+  {
+   "name": "config_5",
+   "role": "werteliste",
+   "role_text": "Werteliste",
+   "rows": 5
+  },
+  {
+   "name": "config_6",
+   "role": "werteliste",
+   "role_text": "Werteliste",
+   "rows": 17
+  },
+  {
+   "name": "config_7",
+   "role": "werteliste",
+   "role_text": "Werteliste",
+   "rows": 9
+  },
+  {
+   "name": "repairs",
+   "role": "stamm",
+   "role_text": "Stammdaten",
+   "rows": 2272
+  },
+  {
+   "name": "readout_summary",
+   "role": "bewegung",
+   "role_text": "Bewegungsdaten",
+   "rows": 23550
+  },
+  {
+   "name": "readouts_sample",
+   "role": "stamm",
+   "role_text": "Stammdaten",
+   "rows": 19041
+  }
+ ],
+ "n_candidates": 16,
+ "n_likely": 0,
+ "other_candidates": [
+  {
+   "id": "vehicles.spec_0",
+   "manual_score": 0.25,
+   "kind": "class"
+  },
+  {
+   "id": "vehicles.spec_1",
+   "manual_score": 0.25,
+   "kind": "class"
+  },
+  {
+   "id": "vehicles.spec_2",
+   "manual_score": 0.25,
+   "kind": "class"
+  },
+  {
+   "id": "vehicles.spec_3",
+   "manual_score": 0.25,
+   "kind": "class"
+  },
+  {
+   "id": "vehicles.spec_4",
+   "manual_score": 0.25,
+   "kind": "flag"
+  },
+  {
+   "id": "vehicles.spec_5",
+   "manual_score": 0.25,
+   "kind": "class"
+  },
+  {
+   "id": "vehicles.spec_6",
+   "manual_score": 0.25,
+   "kind": "class"
+  },
+  {
+   "id": "vehicles.spec_7",
+   "manual_score": 0.25,
+   "kind": "class"
+  },
+  {
+   "id": "readouts_sample.171_0",
+   "manual_score": 0.2,
+   "kind": "param"
+  },
+  {
+   "id": "readouts_sample.666_0",
+   "manual_score": 0.2,
+   "kind": "param"
+  },
+  {
+   "id": "readouts_sample.427_0",
+   "manual_score": 0.2,
+   "kind": "param"
+  },
+  {
+   "id": "readouts_sample.837_0",
+   "manual_score": 0.2,
+   "kind": "param"
+  },
+  {
+   "id": "readouts_sample.309_0",
+   "manual_score": 0.2,
+   "kind": "param"
+  },
+  {
+   "id": "readouts_sample.835_0",
+   "manual_score": 0.2,
+   "kind": "param"
+  },
+  {
+   "id": "readouts_sample.370_0",
+   "manual_score": 0.2,
+   "kind": "param"
+  },
+  {
+   "id": "readouts_sample.100_0",
+   "manual_score": 0.2,
+   "kind": "param"
+  }
+ ],
+ "results": [],
+ "counts": {
+  "ok": 0,
+  "warn": 0,
+  "bad": 0,
+  "na": 0
+ },
+ "gaps": [],
+ "euro_defaults": {
+  "rate_eur_h": 60.0,
+  "holding_rate": 0.25,
+  "fn_cost_eur": 5000.0,
+  "minutes": {
+   "flag": 1.5,
+   "class": 2.0,
+   "param": 3.0
+  }
+ },
+ "method": [
+  "Stufe 0 · Regeln & Lookups (Einzelfeld-Trenner; Folgefelder ausgewiesen)",
+  "Stufe 1 · LightGBM, Graph-Kontext, Text-Modell, TabPFN, Ensemble (5-fach, verschachtelt out-of-fold)",
+  "Stufe 2 · LLM-Prüfer für Graubereich und neue Datensätze (Konzept, nicht gerechnet)",
+  "Stufe 3 · Mensch entscheidet den Graubereich und misst die Automatik blind (Konzept)"
+ ]
+}

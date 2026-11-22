@@ -361,3 +361,24 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
 - **Tests:** 72 grün. Web-Modus: 34 Routen + 6 Datensätze × 3 Stufen = 200, Spitze 240 MB, kein torch.
 - **Offen (außerhalb v2):** Olist und SAP SALT (Zugang durch den Nutzer), Odoo-Schema, RunPod-Worker für Live-GPU
   (`GRAPH_ML_GPU_TODO.md`).
+
+## Nachtrag Schritt 3: Data-Classifier-Analyse
+
+- **Neu: `graph_ml/classifier_scan.py`** – durchsucht jede Datenbank nach manuell gepflegten oder lückenhaften Feldern
+  (Kennzeichen, Klassifikationen, Parameter) und prüft je Feld, ob ML sie vorschlagen kann. Muster: Kaskade aus dem Konzept
+  „Ersatzteil-Klassifikation in Kfz-Stücklisten“ (Stufe 0 Regeln, Stufe 1 ML gemessen; Stufe 2 LLM-Prüfer, Stufe 3 Mensch als Konzept).
+- **Erkennung:** Tabellenrollen (Stamm-, Bewegungsdaten, Wertelisten; Personen-, Geo- und Systemfelder ausgeschlossen),
+  Wahrscheinlichkeit „manuell“ aus Rolle, Name, Füllgrad, Kardinalität. Kontext: eigene Felder, verbundene Stammdaten,
+  Strukturtabellen (Stückliste, Lieferant je Artikel), Graph-Nachbarschaft (verschachtelt out-of-fold, ohne eigenes Label –
+  Test), Text (Benennung + Benennung des Vaters), sprechende Nummern.
+- **Folgefelder:** Trennt ein Einzelfeld ≥ 97 %, ist es Regel oder Folge der Entscheidung; ist ein Merkmal einer verbundenen
+  Tabelle betroffen, fällt die ganze Tabelle heraus (Ersatzteil: Sonderangebote, Preis- und Kostenhistorie).
+- **Leitbeispiel Ersatzteil (AdventureWorks):** 325 Stücklisten-Bauteile, 240 verkaufsfähig. Regel 0,965 · LightGBM 0,985 ·
+  Text allein 0,974 · mit Stückliste/Graph 1,000 (künstliche Daten – ehrlich markiert). Auto-ET 73,9 %, recall-sicher
+  Auto-Negativ 26,2 %, 0 gemessene Fehlalarme; nachweisbare Fehlergrenze mit 240 ET nur 1,2 % (für 0,1 % ≈ 3.000 ET).
+  Euro: 1.300 € Pflegeaufwand/Jahr, Bevorratung 25.664 € je ET und Jahr, Prüfgrenze getrennt ausgewiesen.
+- **Gesamt:** AdventureWorks 36 Felder (20 ML vorhersagbar, 4 teilweise, 4 kaum, 8 nicht prüfbar), WWI 33 (24 · 3 · 1 · 5);
+  Online Retail II, SCANIA, C-MAPSS: keine manuell gepflegten Felder (Sensor-/Transaktionsdaten) – Lückenliste mit Grund.
+- **UI:** Panel „Data-Classifier-Analyse“ am Ende von Schritt 3 mit Kennzahlen, Tabelle, Detail je Feld (Modellvergleich,
+  Folgefelder, Merkmale, Graubereich, Lückenvorschläge) und editierbaren Euro-Annahmen (Python und JS identisch).
+- **Tests:** 76 grün. Web-Modus 232 MB.
