@@ -1,7 +1,7 @@
 {
  "dataset": "cmapss",
- "generated_at": "2026-11-22T13:13:43",
- "seconds": 0.2,
+ "generated_at": "2026-11-22T14:31:13",
+ "seconds": 0.3,
  "tables": [
   {
    "name": "fleets",

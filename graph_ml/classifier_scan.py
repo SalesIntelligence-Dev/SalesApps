@@ -96,7 +96,8 @@ def table_roles(mapping: dict) -> dict[str, dict]:
         has_dt = any(c["kind"] == "datetime" for c in cols)
         has_text = any("Freitext" in c.get("roles", []) for c in cols)
         personal = sum(1 for c in cols if PERSONAL_COL_RE.search(c["name"])) / max(len(cols), 1)
-        transactional = t["rows"] >= 20000 or (has_dt and t["rows"] >= 5000)
+        transactional = (t["rows"] >= 20000 or (has_dt and t["rows"] >= 5000)
+                         or bool(re.search(r"transaction|orderline|orderdetail|invoiceline|journal|history", t["name"], re.I)))
         person_cols = any(re.search(r"firstname|lastname|fullname|gender|birth|marital", c["name"], re.I) for c in cols)
         if PII_TABLE_RE.search(t["name"]) or (personal >= 0.25 and person_cols):
             role = "personen"
@@ -154,7 +155,7 @@ def candidates(mapping: dict, roles: dict, tables: dict, ds_id: str) -> tuple[li
                 reason = "Schlüssel-/Kennungsspalte"
             elif SYSTEM_RE.search(name) and not MANUAL_RE.search(name):
                 reason = "System-/Bewegungsgröße"
-            elif MONEY_RE.search(name) and not re.search(r"limit|tax", name, re.I):
+            elif MONEY_RE.search(name) and not re.search(r"limit|taxrate", name, re.I) or re.search(r"taxamt|taxamount", name, re.I):
                 reason = "Preis/Kosten – eigene Use Cases (Pricing)"
             elif ro["role"] == "bewegung" and not (r and roles.get(r["to_table"], {}).get("rows", 9e9) <= 60):
                 reason = "Bewegungsdaten – nur Erfassungscodes werden geprüft"
@@ -827,7 +828,7 @@ def euro(r: dict, params: dict | None = None) -> dict:
     p = {**EURO_DEFAULTS, **(params or {})}
     v = r.get("value") or {}
     minutes = p.get("minutes", r.get("minutes", MINUTES.get(r["kind"], 2.0)))
-    auto = r.get("auto_98") or 0.0
+    auto = 0.0 if r.get("inherited") else (r.get("auto_98") or 0.0)
     entries = v.get("entries_per_year") or 0
     labor = entries * minutes / 60 * p["rate_eur_h"] * auto
     fill = r.get("missing_fill") or {}
@@ -880,6 +881,11 @@ def scan(ds_id: str, log=lambda m: print(m, flush=True)) -> dict:
                   "table_label": roles[c["table"]]["label"], "fk_to": c.get("fk_to"), "special": bool(special)})
         if special:
             r.update({"name": special["name"], "label": special["label"], "note": special["note"], "minutes": special["minutes"]})
+        if c["table_role"] == "bewegung" and any(str(l.get("source", "")).startswith("über") for l in r.get("rule_or_leak", [])):
+            # Erfassungsfeld, dessen Wert sich aus verbundenen Stammdaten ergibt: das System übernimmt ihn – kein Pflegeaufwand
+            src = next(l for l in r["rule_or_leak"] if str(l.get("source", "")).startswith("über"))
+            r.update({"status": "ok", "verdict": "Regel genügt – aus Stammdaten übernommen", "inherited": True,
+                      "inherited_from": f"{src['feature']} ({src['source']})"})
         r["value"] = (value_basis(ds_id, tables, mapping, c["table"], c["id"], r.get("rows", 0), special, c["table_role"])
                       if r.get("status") != "na" else None)
         if r.get("status") != "na":

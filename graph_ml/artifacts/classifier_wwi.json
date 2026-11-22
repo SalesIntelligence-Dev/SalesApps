@@ -1,7 +1,7 @@
 {
  "dataset": "wwi",
- "generated_at": "2026-11-22T13:13:41",
- "seconds": 512.8,
+ "generated_at": "2026-11-22T14:31:10",
+ "seconds": 587.0,
  "tables": [
   {
    "name": "Cities",
@@ -77,8 +77,8 @@
   },
   {
    "name": "SupplierTransactions",
-   "role": "stamm",
-   "role_text": "Stammdaten",
+   "role": "bewegung",
+   "role_text": "Bewegungsdaten",
    "rows": 2438
   },
   {
@@ -190,8 +190,8 @@
    "rows": 65998
   }
  ],
- "n_candidates": 37,
- "n_likely": 33,
+ "n_candidates": 35,
+ "n_likely": 31,
  "other_candidates": [
   {
    "id": "PurchaseOrders.IsOrderFinalized",
@@ -215,1042 +215,6 @@
   }
  ],
  "results": [
-  {
-   "id": "StockItemTransactions.SupplierID",
-   "table": "StockItemTransactions",
-   "column": "SupplierID",
-   "kind": "class",
-   "rows": 8000,
-   "labeled": 271,
-   "missing": 7729,
-   "excluded": [],
-   "status": "ok",
-   "verdict": "ML vorhersagbar",
-   "classes": [
-    {
-     "value": "4",
-     "n": 181
-    },
-    {
-     "value": "7",
-     "n": 84
-    }
-   ],
-   "positive": "7",
-   "n_positive": 84,
-   "alpha_95": 0.03504,
-   "engines": [
-    {
-     "id": "rule",
-     "name": "Regel: häufigster Wert je „Quantity“",
-     "klass": "Regel",
-     "metrics": {
-      "balanced_accuracy": 0.5912,
-      "accuracy": 0.6943,
-      "auto_98": 0.0151,
-      "auto_99": 0.0151,
-      "auto_positive": 0.0,
-      "auto_negative": 0.0,
-      "negatives_caught": 0.0
-     }
-    },
-    {
-     "id": "lgbm",
-     "name": "LightGBM (eigene Felder)",
-     "klass": "Baum",
-     "metrics": {
-      "balanced_accuracy": 0.6997,
-      "accuracy": 0.7509,
-      "auto_98": 0.0075,
-      "auto_99": 0.0075,
-      "auroc": 0.7352,
-      "auprc": 0.5819,
-      "auto_positive": 0.0038,
-      "auto_negative": 0.0075,
-      "negatives_caught": 0.011
-     }
-    },
-    {
-     "id": "lgbm_graph",
-     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
-     "klass": "Graph-ML light",
-     "metrics": {
-      "balanced_accuracy": 0.6997,
-      "accuracy": 0.7509,
-      "auto_98": 0.0075,
-      "auto_99": 0.0075,
-      "auroc": 0.7352,
-      "auprc": 0.5819,
-      "auto_positive": 0.0038,
-      "auto_negative": 0.0075,
-      "negatives_caught": 0.011
-     }
-    },
-    {
-     "id": "text",
-     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
-     "klass": "Text",
-     "metrics": {
-      "balanced_accuracy": 1.0,
-      "accuracy": 1.0,
-      "auto_98": 1.0,
-      "auto_99": 1.0,
-      "auroc": 1.0,
-      "auprc": 1.0,
-      "auto_positive": 0.3208,
-      "auto_negative": 0.683,
-      "negatives_caught": 1.0
-     }
-    },
-    {
-     "id": "tabpfn",
-     "name": "TabPFN v2",
-     "klass": "TFM",
-     "metrics": {
-      "balanced_accuracy": 0.7755,
-      "accuracy": 0.8415,
-      "auto_98": 0.4679,
-      "auto_99": 0.3925,
-      "auroc": 0.9056,
-      "auprc": 0.8494,
-      "auto_positive": 0.1396,
-      "auto_negative": 0.0566,
-      "negatives_caught": 0.0829
-     }
-    },
-    {
-     "id": "ensemble",
-     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
-     "klass": "Ensemble",
-     "metrics": {
-      "balanced_accuracy": 1.0,
-      "accuracy": 1.0,
-      "auto_98": 1.0,
-      "auto_99": 1.0,
-      "auroc": 1.0,
-      "auprc": 1.0,
-      "auto_positive": 0.3208,
-      "auto_negative": 0.683,
-      "negatives_caught": 1.0
-     }
-    }
-   ],
-   "best": "text",
-   "lift_vs_rule": 0.6915,
-   "auto_98": 1.0,
-   "threshold_98": 0.975,
-   "rule_or_leak": [
-    {
-     "feature": "StockItemID",
-     "ba": 1.0,
-     "source": "eigen"
-    },
-    {
-     "feature": "PurchaseOrders.SupplierID",
-     "ba": 1.0,
-     "source": "über PurchaseOrderID → PurchaseOrders"
-    },
-    {
-     "feature": "PurchaseOrders.DeliveryMethodID",
-     "ba": 1.0,
-     "source": "über PurchaseOrderID → PurchaseOrders"
-    },
-    {
-     "feature": "PurchaseOrders.SupplierReference",
-     "ba": 1.0,
-     "source": "über PurchaseOrderID → PurchaseOrders"
-    },
-    {
-     "feature": "StockItems.SupplierID",
-     "ba": 1.0,
-     "source": "über StockItemID → StockItems"
-    },
-    {
-     "feature": "StockItems.ColorID",
-     "ba": 1.0,
-     "source": "über StockItemID → StockItems"
-    }
-   ],
-   "rule_cover": {
-    "feature": "StockItemID",
-    "ba": 1.0,
-    "source": "eigen"
-   },
-   "leak_tables": [],
-   "importance": [
-    {
-     "feature": "Quantity",
-     "source": "eigen",
-     "importance": 1510.8
-    },
-    {
-     "feature": "PurchaseOrderID",
-     "source": "eigen",
-     "importance": 1249.0
-    },
-    {
-     "feature": "TransactionTypeID",
-     "source": "eigen",
-     "importance": 0.0
-    },
-    {
-     "feature": "CustomerID",
-     "source": "eigen",
-     "importance": 0.0
-    },
-    {
-     "feature": "Customers.BillToCustomerID",
-     "source": "über CustomerID → Customers",
-     "importance": 0.0
-    },
-    {
-     "feature": "Customers.CustomerCategoryID",
-     "source": "über CustomerID → Customers",
-     "importance": 0.0
-    },
-    {
-     "feature": "Customers.BuyingGroupID",
-     "source": "über CustomerID → Customers",
-     "importance": 0.0
-    },
-    {
-     "feature": "Customers.PrimaryContactPersonID",
-     "source": "über CustomerID → Customers",
-     "importance": 0.0
-    }
-   ],
-   "examples": [
-    {
-     "name": "263",
-     "actual": "4",
-     "predicted": "4",
-     "confidence": 0.975
-    },
-    {
-     "name": "35",
-     "actual": "4",
-     "predicted": "4",
-     "confidence": 0.975
-    },
-    {
-     "name": "202",
-     "actual": "4",
-     "predicted": "4",
-     "confidence": 0.975
-    },
-    {
-     "name": "204",
-     "actual": "4",
-     "predicted": "4",
-     "confidence": 0.975
-    },
-    {
-     "name": "190",
-     "actual": "4",
-     "predicted": "4",
-     "confidence": 0.975
-    },
-    {
-     "name": "126",
-     "actual": "4",
-     "predicted": "4",
-     "confidence": 0.975
-    }
-   ],
-   "missing_fill": {
-    "missing": 7729,
-    "sure": 0,
-    "share_sure": 0.0,
-    "proposals": [],
-    "model": "LightGBM + Verknüpfungen"
-   },
-   "features": {
-    "own": 4,
-    "linked": 12,
-    "groups": [],
-    "text": true
-   },
-   "seconds": 3.8,
-   "manual_score": 0.5,
-   "null_rate": 0.9647,
-   "table_role": "bewegung",
-   "table_label": "StockItemTransactions",
-   "fk_to": "Suppliers",
-   "special": false,
-   "value": {
-    "kind": "none",
-    "label": "kein Umsatz-/Bestandsbezug ermittelbar",
-    "total_eur": null,
-    "entries_per_year": 68280,
-    "years": 3.47
-   },
-   "euro": {
-    "labor_year": 136560.0,
-    "gap_once": 0.0,
-    "entries_per_year": 68280,
-    "minutes": 2.0,
-    "exposure_eur": null,
-    "net_year": 136560.0
-   }
-  },
-  {
-   "id": "OrderLines.PackageTypeID",
-   "table": "OrderLines",
-   "column": "PackageTypeID",
-   "kind": "class",
-   "rows": 8000,
-   "labeled": 8000,
-   "missing": 0,
-   "excluded": [],
-   "status": "ok",
-   "verdict": "ML vorhersagbar",
-   "classes": [
-    {
-     "value": "7",
-     "n": 7628
-    },
-    {
-     "value": "9",
-     "n": 198
-    },
-    {
-     "value": "10",
-     "n": 137
-    },
-    {
-     "value": "1",
-     "n": 37
-    }
-   ],
-   "positive": null,
-   "n_positive": null,
-   "alpha_95": null,
-   "engines": [
-    {
-     "id": "rule",
-     "name": "Regel: häufigster Wert je „StockItems.SupplierID“",
-     "klass": "Regel",
-     "metrics": {
-      "balanced_accuracy": 0.6402,
-      "accuracy": 0.972,
-      "auto_98": 0.0616,
-      "auto_99": 0.0257
-     }
-    },
-    {
-     "id": "lgbm",
-     "name": "LightGBM (eigene Felder)",
-     "klass": "Baum",
-     "metrics": {
-      "balanced_accuracy": 0.9852,
-      "accuracy": 0.9996,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    },
-    {
-     "id": "lgbm_graph",
-     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
-     "klass": "Graph-ML light",
-     "metrics": {
-      "balanced_accuracy": 0.9865,
-      "accuracy": 0.9998,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    },
-    {
-     "id": "text",
-     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
-     "klass": "Text",
-     "metrics": {
-      "balanced_accuracy": 1.0,
-      "accuracy": 1.0,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    },
-    {
-     "id": "ensemble",
-     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
-     "klass": "Ensemble",
-     "metrics": {
-      "balanced_accuracy": 1.0,
-      "accuracy": 1.0,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    }
-   ],
-   "best": "text",
-   "lift_vs_rule": 0.562,
-   "auto_98": 1.0,
-   "threshold_98": 0.8342,
-   "rule_or_leak": [
-    {
-     "feature": "StockItems.UnitPackageID",
-     "ba": 1.0,
-     "source": "über StockItemID → StockItems"
-    }
-   ],
-   "rule_cover": {
-    "feature": "StockItems.UnitPackageID",
-    "ba": 1.0,
-    "source": "über StockItemID → StockItems"
-   },
-   "leak_tables": [],
-   "importance": [
-    {
-     "feature": "StockItems.CustomFields",
-     "source": "über StockItemID → StockItems",
-     "importance": 63421.1
-    },
-    {
-     "feature": "StockItemID",
-     "source": "eigen",
-     "importance": 43537.7
-    },
-    {
-     "feature": "StockItems.TypicalWeightPerUnit",
-     "source": "über StockItemID → StockItems",
-     "importance": 35813.2
-    },
-    {
-     "feature": "StockItems.UnitPrice",
-     "source": "über StockItemID → StockItems",
-     "importance": 10891.3
-    },
-    {
-     "feature": "StockItems.ColorID",
-     "source": "über StockItemID → StockItems",
-     "importance": 8808.7
-    },
-    {
-     "feature": "TaxRate",
-     "source": "eigen",
-     "importance": 6774.9
-    },
-    {
-     "feature": "StockItems.OuterPackageID",
-     "source": "über StockItemID → StockItems",
-     "importance": 6756.6
-    },
-    {
-     "feature": "StockItems.QuantityPerOuter",
-     "source": "über StockItemID → StockItems",
-     "importance": 3085.4
-    }
-   ],
-   "examples": [
-    {
-     "name": "USB food flash drive - chocolate bar",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 0.834
-    },
-    {
-     "name": "USB food flash drive - chocolate bar",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 0.834
-    },
-    {
-     "name": "USB food flash drive - chocolate bar",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 0.834
-    },
-    {
-     "name": "USB food flash drive - chocolate bar",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 0.834
-    },
-    {
-     "name": "USB food flash drive - chocolate bar",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 0.834
-    },
-    {
-     "name": "USB food flash drive - chocolate bar",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 0.834
-    }
-   ],
-   "missing_fill": null,
-   "features": {
-    "own": 5,
-    "linked": 13,
-    "groups": [],
-    "text": true
-   },
-   "seconds": 57.9,
-   "manual_score": 0.8,
-   "null_rate": 0.0,
-   "table_role": "bewegung",
-   "table_label": "OrderLines",
-   "fk_to": "PackageTypes",
-   "special": false,
-   "value": {
-    "kind": "none",
-    "label": "kein Umsatz-/Bestandsbezug ermittelbar",
-    "total_eur": null,
-    "entries_per_year": 66764,
-    "years": 3.47
-   },
-   "euro": {
-    "labor_year": 133528.0,
-    "gap_once": 0.0,
-    "entries_per_year": 66764,
-    "minutes": 2.0,
-    "exposure_eur": null,
-    "net_year": 133528.0
-   }
-  },
-  {
-   "id": "InvoiceLines.PackageTypeID",
-   "table": "InvoiceLines",
-   "column": "PackageTypeID",
-   "kind": "class",
-   "rows": 8000,
-   "labeled": 8000,
-   "missing": 0,
-   "excluded": [],
-   "status": "ok",
-   "verdict": "ML vorhersagbar",
-   "classes": [
-    {
-     "value": "7",
-     "n": 7583
-    },
-    {
-     "value": "9",
-     "n": 208
-    },
-    {
-     "value": "10",
-     "n": 171
-    },
-    {
-     "value": "1",
-     "n": 38
-    }
-   ],
-   "positive": null,
-   "n_positive": null,
-   "alpha_95": null,
-   "engines": [
-    {
-     "id": "rule",
-     "name": "Regel: häufigster Wert je „StockItems.SupplierID“",
-     "klass": "Regel",
-     "metrics": {
-      "balanced_accuracy": 0.6671,
-      "accuracy": 0.97,
-      "auto_98": 0.0447,
-      "auto_99": 0.0173
-     }
-    },
-    {
-     "id": "lgbm",
-     "name": "LightGBM (eigene Felder)",
-     "klass": "Baum",
-     "metrics": {
-      "balanced_accuracy": 0.9988,
-      "accuracy": 0.9999,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    },
-    {
-     "id": "lgbm_graph",
-     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
-     "klass": "Graph-ML light",
-     "metrics": {
-      "balanced_accuracy": 1.0,
-      "accuracy": 1.0,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    },
-    {
-     "id": "text",
-     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
-     "klass": "Text",
-     "metrics": {
-      "balanced_accuracy": 1.0,
-      "accuracy": 1.0,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    },
-    {
-     "id": "ensemble",
-     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
-     "klass": "Ensemble",
-     "metrics": {
-      "balanced_accuracy": 1.0,
-      "accuracy": 1.0,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    }
-   ],
-   "best": "lgbm_graph",
-   "lift_vs_rule": 0.499,
-   "auto_98": 1.0,
-   "threshold_98": 0.9999,
-   "rule_or_leak": [
-    {
-     "feature": "StockItems.UnitPackageID",
-     "ba": 1.0,
-     "source": "über StockItemID → StockItems"
-    }
-   ],
-   "rule_cover": {
-    "feature": "StockItems.UnitPackageID",
-    "ba": 1.0,
-    "source": "über StockItemID → StockItems"
-   },
-   "leak_tables": [],
-   "importance": [
-    {
-     "feature": "StockItems.CustomFields",
-     "source": "über StockItemID → StockItems",
-     "importance": 57502.6
-    },
-    {
-     "feature": "StockItemID",
-     "source": "eigen",
-     "importance": 40034.2
-    },
-    {
-     "feature": "StockItems.TypicalWeightPerUnit",
-     "source": "über StockItemID → StockItems",
-     "importance": 37870.0
-    },
-    {
-     "feature": "StockItems.ColorID",
-     "source": "über StockItemID → StockItems",
-     "importance": 10828.1
-    },
-    {
-     "feature": "StockItems.UnitPrice",
-     "source": "über StockItemID → StockItems",
-     "importance": 8665.9
-    },
-    {
-     "feature": "StockItems.SupplierID",
-     "source": "über StockItemID → StockItems",
-     "importance": 7004.0
-    },
-    {
-     "feature": "StockItems.OuterPackageID",
-     "source": "über StockItemID → StockItems",
-     "importance": 6480.1
-    },
-    {
-     "feature": "TaxRate",
-     "source": "eigen",
-     "importance": 5851.6
-    }
-   ],
-   "examples": [
-    {
-     "name": "USB food flash drive - dim sum 10 drive variety pack",
-     "actual": "9",
-     "predicted": "9",
-     "confidence": 1.0
-    },
-    {
-     "name": "Permanent marker black 5mm nib (Black) 5mm",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 1.0
-    },
-    {
-     "name": "Permanent marker blue 5mm nib (Blue) 5mm",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 1.0
-    },
-    {
-     "name": "Permanent marker red 5mm nib (Red) 5mm",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 1.0
-    },
-    {
-     "name": "Permanent marker red 5mm nib (Red) 5mm",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 1.0
-    },
-    {
-     "name": "Permanent marker blue 5mm nib (Blue) 5mm",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 1.0
-    }
-   ],
-   "missing_fill": null,
-   "features": {
-    "own": 7,
-    "linked": 13,
-    "groups": [],
-    "text": true
-   },
-   "seconds": 59.3,
-   "manual_score": 0.8,
-   "null_rate": 0.0,
-   "table_role": "bewegung",
-   "table_label": "InvoiceLines",
-   "fk_to": "PackageTypes",
-   "special": false,
-   "value": {
-    "kind": "none",
-    "label": "kein Umsatz-/Bestandsbezug ermittelbar",
-    "total_eur": null,
-    "entries_per_year": 65856,
-    "years": 3.47
-   },
-   "euro": {
-    "labor_year": 131712.0,
-    "gap_once": 0.0,
-    "entries_per_year": 65856,
-    "minutes": 2.0,
-    "exposure_eur": null,
-    "net_year": 131712.0
-   }
-  },
-  {
-   "id": "PurchaseOrderLines.PackageTypeID",
-   "table": "PurchaseOrderLines",
-   "column": "PackageTypeID",
-   "kind": "class",
-   "rows": 8000,
-   "labeled": 8000,
-   "missing": 0,
-   "excluded": [],
-   "status": "ok",
-   "verdict": "ML vorhersagbar",
-   "classes": [
-    {
-     "value": "6",
-     "n": 5521
-    },
-    {
-     "value": "7",
-     "n": 2470
-    },
-    {
-     "value": "9",
-     "n": 9
-    }
-   ],
-   "positive": null,
-   "n_positive": null,
-   "alpha_95": null,
-   "engines": [
-    {
-     "id": "rule",
-     "name": "Regel: häufigster Wert je „StockItems.LeadTimeDays“",
-     "klass": "Regel",
-     "metrics": {
-      "balanced_accuracy": 0.7772,
-      "accuracy": 0.9981,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    },
-    {
-     "id": "lgbm",
-     "name": "LightGBM (eigene Felder)",
-     "klass": "Baum",
-     "metrics": {
-      "balanced_accuracy": 0.8888,
-      "accuracy": 0.9994,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    },
-    {
-     "id": "lgbm_graph",
-     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
-     "klass": "Graph-ML light",
-     "metrics": {
-      "balanced_accuracy": 0.9259,
-      "accuracy": 0.9996,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    },
-    {
-     "id": "text",
-     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
-     "klass": "Text",
-     "metrics": {
-      "balanced_accuracy": 0.9256,
-      "accuracy": 0.999,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    },
-    {
-     "id": "ensemble",
-     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
-     "klass": "Ensemble",
-     "metrics": {
-      "balanced_accuracy": 0.9259,
-      "accuracy": 0.9996,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    }
-   ],
-   "best": "lgbm_graph",
-   "lift_vs_rule": 0.1913,
-   "auto_98": 1.0,
-   "threshold_98": 0.9871,
-   "rule_or_leak": [
-    {
-     "feature": "StockItems.OuterPackageID",
-     "ba": 1.0,
-     "source": "über StockItemID → StockItems"
-    }
-   ],
-   "rule_cover": {
-    "feature": "StockItems.OuterPackageID",
-    "ba": 1.0,
-    "source": "über StockItemID → StockItems"
-   },
-   "leak_tables": [],
-   "importance": [
-    {
-     "feature": "PurchaseOrderID",
-     "source": "eigen",
-     "importance": 28767.1
-    },
-    {
-     "feature": "StockItemID",
-     "source": "eigen",
-     "importance": 27890.1
-    },
-    {
-     "feature": "StockItems.ColorID",
-     "source": "über StockItemID → StockItems",
-     "importance": 26943.0
-    },
-    {
-     "feature": "PurchaseOrders.DeliveryMethodID",
-     "source": "über PurchaseOrderID → PurchaseOrders",
-     "importance": 16755.7
-    },
-    {
-     "feature": "ExpectedUnitPricePerOuter",
-     "source": "eigen",
-     "importance": 12015.5
-    },
-    {
-     "feature": "PurchaseOrders.SupplierID",
-     "source": "über PurchaseOrderID → PurchaseOrders",
-     "importance": 8021.6
-    },
-    {
-     "feature": "StockItems.CustomFields",
-     "source": "über StockItemID → StockItems",
-     "importance": 6705.2
-    },
-    {
-     "feature": "OrderedOuters",
-     "source": "eigen",
-     "importance": 3873.8
-    }
-   ],
-   "examples": [
-    {
-     "name": "Novelty chilli chocolates 250g",
-     "actual": "6",
-     "predicted": "6",
-     "confidence": 0.987
-    },
-    {
-     "name": "Office cube periscope (Black)",
-     "actual": "6",
-     "predicted": "7",
-     "confidence": 1.0
-    },
-    {
-     "name": "Ride on toy sedan car (Green) 1/12 scale",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 1.0
-    },
-    {
-     "name": "Ride on vintage American toy coupe (Red) 1/12 scale",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 1.0
-    },
-    {
-     "name": "USB food flash drive - hamburger",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 1.0
-    },
-    {
-     "name": "USB food flash drive - sushi roll",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 1.0
-    }
-   ],
-   "missing_fill": null,
-   "features": {
-    "own": 6,
-    "linked": 17,
-    "groups": [],
-    "text": true
-   },
-   "seconds": 67.2,
-   "manual_score": 0.8,
-   "null_rate": 0.0,
-   "table_role": "bewegung",
-   "table_label": "PurchaseOrderLines",
-   "fk_to": "PackageTypes",
-   "special": false,
-   "value": {
-    "kind": "none",
-    "label": "kein Umsatz-/Bestandsbezug ermittelbar",
-    "total_eur": null,
-    "entries_per_year": 2414,
-    "years": 3.47
-   },
-   "euro": {
-    "labor_year": 4828.0,
-    "gap_once": 0.0,
-    "entries_per_year": 2414,
-    "minutes": 2.0,
-    "exposure_eur": null,
-    "net_year": 4828.0
-   }
-  },
-  {
-   "id": "SupplierTransactions.AmountExcludingTax",
-   "table": "SupplierTransactions",
-   "column": "AmountExcludingTax",
-   "kind": "param",
-   "rows": 2438,
-   "labeled": 2438,
-   "missing": 0,
-   "excluded": [],
-   "status": "ok",
-   "verdict": "ML vorhersagbar",
-   "engines": [
-    {
-     "id": "rule",
-     "name": "Regel: Median je Gruppe",
-     "klass": "Regel",
-     "metrics": {
-      "within_10": 0.4586
-     }
-    },
-    {
-     "id": "lgbm_graph",
-     "name": "LightGBM + Verknüpfungen",
-     "klass": "Graph-ML light",
-     "metrics": {
-      "within_10": 0.8208
-     }
-    }
-   ],
-   "best": "lgbm_graph",
-   "auto_98": 0.8208,
-   "lift_vs_rule": 0.7898,
-   "rule_or_leak": [],
-   "metric_note": "Anteil der Vorschläge innerhalb ±10 % des gepflegten Werts",
-   "seconds": 1.4,
-   "manual_score": 0.45,
-   "null_rate": 0.0,
-   "table_role": "stamm",
-   "table_label": "SupplierTransactions",
-   "fk_to": null,
-   "special": false,
-   "value": {
-    "kind": "none",
-    "label": "kein Umsatz-/Bestandsbezug ermittelbar",
-    "total_eur": null,
-    "entries_per_year": 366,
-    "years": 3.47
-   },
-   "euro": {
-    "labor_year": 901.0,
-    "gap_once": 0.0,
-    "entries_per_year": 366,
-    "minutes": 3.0,
-    "exposure_eur": null,
-    "net_year": 901.0
-   }
-  },
-  {
-   "id": "SupplierTransactions.TaxAmount",
-   "table": "SupplierTransactions",
-   "column": "TaxAmount",
-   "kind": "param",
-   "rows": 2438,
-   "labeled": 2438,
-   "missing": 0,
-   "excluded": [],
-   "status": "ok",
-   "verdict": "ML vorhersagbar",
-   "engines": [
-    {
-     "id": "rule",
-     "name": "Regel: Median je Gruppe",
-     "klass": "Regel",
-     "metrics": {
-      "within_10": 0.4582
-     }
-    },
-    {
-     "id": "lgbm_graph",
-     "name": "LightGBM + Verknüpfungen",
-     "klass": "Graph-ML light",
-     "metrics": {
-      "within_10": 0.815
-     }
-    }
-   ],
-   "best": "lgbm_graph",
-   "auto_98": 0.815,
-   "lift_vs_rule": 0.7789,
-   "rule_or_leak": [],
-   "metric_note": "Anteil der Vorschläge innerhalb ±10 % des gepflegten Werts",
-   "seconds": 0.6,
-   "manual_score": 0.45,
-   "null_rate": 0.0,
-   "table_role": "stamm",
-   "table_label": "SupplierTransactions",
-   "fk_to": null,
-   "special": false,
-   "value": {
-    "kind": "none",
-    "label": "kein Umsatz-/Bestandsbezug ermittelbar",
-    "total_eur": null,
-    "entries_per_year": 366,
-    "years": 3.47
-   },
-   "euro": {
-    "labor_year": 895.0,
-    "gap_once": 0.0,
-    "entries_per_year": 366,
-    "minutes": 3.0,
-    "exposure_eur": null,
-    "net_year": 895.0
-   }
-  },
   {
    "id": "SupplierTransactions.SupplierID",
    "table": "SupplierTransactions",
@@ -1431,10 +395,10 @@
     "groups": [],
     "text": false
    },
-   "seconds": 8.1,
-   "manual_score": 0.6,
+   "seconds": 9.1,
+   "manual_score": 0.5,
    "null_rate": 0.0,
-   "table_role": "stamm",
+   "table_role": "bewegung",
    "table_label": "SupplierTransactions",
    "fk_to": "Suppliers",
    "special": false,
@@ -1442,16 +406,16 @@
     "kind": "none",
     "label": "kein Umsatz-/Bestandsbezug ermittelbar",
     "total_eur": null,
-    "entries_per_year": 366,
+    "entries_per_year": 703,
     "years": 3.47
    },
    "euro": {
-    "labor_year": 678.0,
+    "labor_year": 1302.0,
     "gap_once": 0.0,
-    "entries_per_year": 366,
+    "entries_per_year": 703,
     "minutes": 2.0,
     "exposure_eur": null,
-    "net_year": 678.0
+    "net_year": 1302.0
    }
   },
   {
@@ -1518,32 +482,21 @@
      }
     },
     {
-     "id": "lgbm_graph",
-     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
-     "klass": "Graph-ML light",
-     "metrics": {
-      "balanced_accuracy": 0.9663,
-      "accuracy": 0.9986,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    },
-    {
      "id": "tabpfn",
      "name": "TabPFN v2",
      "klass": "TFM",
      "metrics": {
-      "balanced_accuracy": 0.9997,
-      "accuracy": 0.999,
+      "balanced_accuracy": 0.6667,
+      "accuracy": 0.9952,
       "auto_98": 1.0,
       "auto_99": 1.0
      }
     }
    ],
    "best": "tabpfn",
-   "lift_vs_rule": 0.4995,
+   "lift_vs_rule": 0.0,
    "auto_98": 1.0,
-   "threshold_98": 0.5397,
+   "threshold_98": 0.6452,
    "rule_or_leak": [
     {
      "feature": "SupplierReference",
@@ -1557,333 +510,58 @@
     "source": "eigen"
    },
    "leak_tables": [],
-   "importance": [
-    {
-     "feature": "DeliveryMethodID",
-     "source": "eigen",
-     "importance": 27045.3
-    },
-    {
-     "feature": "SupplierTransactions·Ø SupplierTransactionID (PurchaseOrderID)",
-     "source": "Struktur SupplierTransactions",
-     "importance": 15631.5
-    },
-    {
-     "feature": "Graph·SupplierTransactions.PurchaseOrderID→SupplierID·4",
-     "source": "Nachbarschaft SupplierTransactions",
-     "importance": 8710.6
-    },
-    {
-     "feature": "SupplierTransactions·Ø AmountExcludingTax (PurchaseOrderID)",
-     "source": "Struktur SupplierTransactions",
-     "importance": 5853.2
-    },
-    {
-     "feature": "Graph·SupplierTransactions.PurchaseOrderID→SupplierID·7",
-     "source": "Nachbarschaft SupplierTransactions",
-     "importance": 2359.5
-    },
-    {
-     "feature": "SupplierTransactions·Ø TaxAmount (PurchaseOrderID)",
-     "source": "Struktur SupplierTransactions",
-     "importance": 1454.7
-    },
-    {
-     "feature": "SupplierTransactions·Ø TransactionAmount (PurchaseOrderID)",
-     "source": "Struktur SupplierTransactions",
-     "importance": 11.2
-    },
-    {
-     "feature": "IsOrderFinalized",
-     "source": "eigen",
-     "importance": 0.0
-    }
-   ],
+   "importance": [],
    "examples": [
     {
-     "name": "BC0280982",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 0.54
-    },
-    {
      "name": "293092",
      "actual": "4",
      "predicted": "4",
-     "confidence": 0.58
+     "confidence": 0.645
     },
     {
-     "name": "293092",
-     "actual": "4",
-     "predicted": "7",
-     "confidence": 0.69
+     "name": "08803922",
+     "actual": "5",
+     "predicted": "5",
+     "confidence": 0.872
     },
     {
-     "name": "BC0280982",
-     "actual": "7",
-     "predicted": "4",
-     "confidence": 0.696
+     "name": "08803922",
+     "actual": "5",
+     "predicted": "5",
+     "confidence": 0.872
     },
     {
-     "name": "237408032",
-     "actual": "12",
-     "predicted": "12",
-     "confidence": 0.982
+     "name": "08803922",
+     "actual": "5",
+     "predicted": "5",
+     "confidence": 0.872
     },
     {
-     "name": "237408032",
-     "actual": "12",
-     "predicted": "12",
-     "confidence": 0.982
+     "name": "08803922",
+     "actual": "5",
+     "predicted": "5",
+     "confidence": 0.872
+    },
+    {
+     "name": "08803922",
+     "actual": "5",
+     "predicted": "5",
+     "confidence": 0.872
     }
    ],
    "missing_fill": null,
    "features": {
     "own": 2,
-    "linked": 6,
-    "groups": [
-     "PurchaseOrders → SupplierTransactions (PurchaseOrderID) → Suppliers"
-    ],
+    "linked": 0,
+    "groups": [],
     "text": false
    },
-   "seconds": 6.3,
+   "seconds": 3.3,
    "manual_score": 0.6,
    "null_rate": 0.0,
    "table_role": "stamm",
    "table_label": "PurchaseOrders",
    "fk_to": "Suppliers",
-   "special": false,
-   "value": {
-    "kind": "revenue",
-    "label": "Umsatz pro Jahr der Datensätze (aus SupplierTransactions)",
-    "total_eur": 288251501.0,
-    "entries_per_year": 311,
-    "years": 3.47
-   },
-   "euro": {
-    "labor_year": 622.0,
-    "gap_once": 0.0,
-    "entries_per_year": 311,
-    "minutes": 2.0,
-    "exposure_eur": 288251501.0,
-    "net_year": 622.0
-   }
-  },
-  {
-   "id": "PurchaseOrders.DeliveryMethodID",
-   "table": "PurchaseOrders",
-   "column": "DeliveryMethodID",
-   "kind": "class",
-   "rows": 2074,
-   "labeled": 2074,
-   "missing": 0,
-   "excluded": [],
-   "status": "ok",
-   "verdict": "ML vorhersagbar",
-   "classes": [
-    {
-     "value": "7",
-     "n": 1065
-    },
-    {
-     "value": "2",
-     "n": 985
-    },
-    {
-     "value": "10",
-     "n": 13
-    },
-    {
-     "value": "8",
-     "n": 10
-    }
-   ],
-   "positive": null,
-   "n_positive": null,
-   "alpha_95": null,
-   "engines": [
-    {
-     "id": "rule",
-     "name": "Regel: häufigster Wert je „Graph·SupplierTransactions.PurchaseOrderID→SupplierID·10“",
-     "klass": "Regel",
-     "metrics": {
-      "balanced_accuracy": 0.4998,
-      "accuracy": 0.5195,
-      "auto_98": 0.001,
-      "auto_99": 0.001
-     }
-    },
-    {
-     "id": "lgbm",
-     "name": "LightGBM (eigene Felder)",
-     "klass": "Baum",
-     "metrics": {
-      "balanced_accuracy": 0.2731,
-      "accuracy": 0.1944,
-      "auto_98": 0.0,
-      "auto_99": 0.0
-     }
-    },
-    {
-     "id": "lgbm_graph",
-     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
-     "klass": "Graph-ML light",
-     "metrics": {
-      "balanced_accuracy": 0.936,
-      "accuracy": 0.9976,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    },
-    {
-     "id": "tabpfn",
-     "name": "TabPFN v2",
-     "klass": "TFM",
-     "metrics": {
-      "balanced_accuracy": 0.9995,
-      "accuracy": 0.999,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    }
-   ],
-   "best": "tabpfn",
-   "lift_vs_rule": 0.9998,
-   "auto_98": 1.0,
-   "threshold_98": 0.521,
-   "rule_or_leak": [
-    {
-     "feature": "SupplierID",
-     "ba": 1.0,
-     "source": "eigen"
-    },
-    {
-     "feature": "SupplierReference",
-     "ba": 1.0,
-     "source": "eigen"
-    },
-    {
-     "feature": "Suppliers.PrimaryContactPersonID",
-     "ba": 1.0,
-     "source": "über SupplierID → Suppliers"
-    },
-    {
-     "feature": "Suppliers.AlternateContactPersonID",
-     "ba": 1.0,
-     "source": "über SupplierID → Suppliers"
-    },
-    {
-     "feature": "Suppliers.DeliveryMethodID",
-     "ba": 1.0,
-     "source": "über SupplierID → Suppliers"
-    },
-    {
-     "feature": "Suppliers.DeliveryCityID",
-     "ba": 1.0,
-     "source": "über SupplierID → Suppliers"
-    }
-   ],
-   "rule_cover": {
-    "feature": "SupplierID",
-    "ba": 1.0,
-    "source": "eigen"
-   },
-   "leak_tables": [],
-   "importance": [
-    {
-     "feature": "SupplierTransactions·Ø AmountExcludingTax (PurchaseOrderID)",
-     "source": "Struktur SupplierTransactions",
-     "importance": 14821.0
-    },
-    {
-     "feature": "Graph·SupplierTransactions.PurchaseOrderID→SupplierID·2",
-     "source": "Nachbarschaft SupplierTransactions",
-     "importance": 13245.5
-    },
-    {
-     "feature": "Graph·SupplierTransactions.PurchaseOrderID→SupplierID·7",
-     "source": "Nachbarschaft SupplierTransactions",
-     "importance": 10971.8
-    },
-    {
-     "feature": "SupplierTransactions·Ø SupplierTransactionID (PurchaseOrderID)",
-     "source": "Struktur SupplierTransactions",
-     "importance": 5452.3
-    },
-    {
-     "feature": "SupplierTransactions·Ø TaxAmount (PurchaseOrderID)",
-     "source": "Struktur SupplierTransactions",
-     "importance": 2773.6
-    },
-    {
-     "feature": "SupplierTransactions·Ø TransactionAmount (PurchaseOrderID)",
-     "source": "Struktur SupplierTransactions",
-     "importance": 48.8
-    },
-    {
-     "feature": "IsOrderFinalized",
-     "source": "eigen",
-     "importance": 0.0
-    },
-    {
-     "feature": "Suppliers.PaymentDays",
-     "source": "über SupplierID → Suppliers",
-     "importance": 0.0
-    }
-   ],
-   "examples": [
-    {
-     "name": "BC0280982",
-     "actual": "2",
-     "predicted": "2",
-     "confidence": 0.521
-    },
-    {
-     "name": "293092",
-     "actual": "7",
-     "predicted": "7",
-     "confidence": 0.668
-    },
-    {
-     "name": "08803922",
-     "actual": "10",
-     "predicted": "10",
-     "confidence": 0.984
-    },
-    {
-     "name": "08803922",
-     "actual": "10",
-     "predicted": "10",
-     "confidence": 0.984
-    },
-    {
-     "name": "08803922",
-     "actual": "10",
-     "predicted": "10",
-     "confidence": 0.985
-    },
-    {
-     "name": "08803922",
-     "actual": "10",
-     "predicted": "10",
-     "confidence": 0.988
-    }
-   ],
-   "missing_fill": null,
-   "features": {
-    "own": 1,
-    "linked": 7,
-    "groups": [
-     "PurchaseOrders → SupplierTransactions (PurchaseOrderID) → Suppliers"
-    ],
-    "text": false
-   },
-   "seconds": 5.6,
-   "manual_score": 0.6,
-   "null_rate": 0.0,
-   "table_role": "stamm",
-   "table_label": "PurchaseOrders",
-   "fk_to": "DeliveryMethods",
    "special": false,
    "value": {
     "kind": "revenue",
@@ -1969,8 +647,8 @@
      "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
      "klass": "Graph-ML light",
      "metrics": {
-      "balanced_accuracy": 0.9667,
-      "accuracy": 0.9995,
+      "balanced_accuracy": 0.8333,
+      "accuracy": 0.9976,
       "auto_98": 1.0,
       "auto_99": 1.0
      }
@@ -1990,7 +668,7 @@
    "best": "tabpfn",
    "lift_vs_rule": 0.4999,
    "auto_98": 1.0,
-   "threshold_98": 0.4416,
+   "threshold_98": 0.5607,
    "rule_or_leak": [
     {
      "feature": "SupplierID",
@@ -2023,42 +701,27 @@
     {
      "feature": "DeliveryMethodID",
      "source": "eigen",
-     "importance": 25641.2
-    },
-    {
-     "feature": "SupplierTransactions·Ø SupplierTransactionID (PurchaseOrderID)",
-     "source": "Struktur SupplierTransactions",
-     "importance": 14209.8
-    },
-    {
-     "feature": "Graph·SupplierTransactions.PurchaseOrderID→SupplierID·293092",
-     "source": "Nachbarschaft SupplierTransactions",
-     "importance": 9366.3
+     "importance": 37062.0
     },
     {
      "feature": "Suppliers.SupplierCategoryID",
      "source": "über SupplierID → Suppliers",
-     "importance": 8810.3
+     "importance": 15542.6
+    },
+    {
+     "feature": "IsOrderFinalized",
+     "source": "eigen",
+     "importance": 0.0
     },
     {
      "feature": "Suppliers.DeliveryMethodID",
      "source": "über SupplierID → Suppliers",
-     "importance": 2758.8
+     "importance": 0.0
     },
     {
-     "feature": "SupplierTransactions·Ø TaxAmount (PurchaseOrderID)",
-     "source": "Struktur SupplierTransactions",
-     "importance": 259.8
-    },
-    {
-     "feature": "SupplierTransactions·Ø AmountExcludingTax (PurchaseOrderID)",
-     "source": "Struktur SupplierTransactions",
-     "importance": 119.2
-    },
-    {
-     "feature": "Graph·SupplierTransactions.PurchaseOrderID→SupplierID·BC0280982",
-     "source": "Nachbarschaft SupplierTransactions",
-     "importance": 0.5
+     "feature": "Suppliers.PaymentDays",
+     "source": "über SupplierID → Suppliers",
+     "importance": 0.0
     }
    ],
    "examples": [
@@ -2066,49 +729,47 @@
      "name": "293092",
      "actual": "293092",
      "predicted": "293092",
-     "confidence": 0.442
+     "confidence": 0.561
     },
     {
      "name": "BC0280982",
      "actual": "BC0280982",
      "predicted": "BC0280982",
-     "confidence": 0.606
-    },
-    {
-     "name": "293092",
-     "actual": "293092",
-     "predicted": "293092",
-     "confidence": 0.649
-    },
-    {
-     "name": "BC0280982",
-     "actual": "BC0280982",
-     "predicted": "BC0280982",
-     "confidence": 0.829
+     "confidence": 0.733
     },
     {
      "name": "237408032",
      "actual": "237408032",
      "predicted": "237408032",
-     "confidence": 0.996
+     "confidence": 0.994
     },
     {
      "name": "237408032",
      "actual": "237408032",
      "predicted": "237408032",
-     "confidence": 0.997
+     "confidence": 0.994
+    },
+    {
+     "name": "AA20384",
+     "actual": "AA20384",
+     "predicted": "AA20384",
+     "confidence": 0.995
+    },
+    {
+     "name": "237408032",
+     "actual": "237408032",
+     "predicted": "237408032",
+     "confidence": 0.995
     }
    ],
    "missing_fill": null,
    "features": {
     "own": 2,
-    "linked": 9,
-    "groups": [
-     "PurchaseOrders → SupplierTransactions (PurchaseOrderID) → Suppliers"
-    ],
+    "linked": 3,
+    "groups": [],
     "text": false
    },
-   "seconds": 7.0,
+   "seconds": 4.4,
    "manual_score": 0.5,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -2165,7 +826,8 @@
       "accuracy": 0.5124,
       "auto_98": 0.005,
       "auto_99": 0.005,
-      "auto_positive": 0.2811,
+      "auto_positive": 0.2761,
+      "auto_positive_fp": 0,
       "auto_negative": 0.0,
       "negatives_caught": 0.0
      }
@@ -2182,6 +844,7 @@
       "auroc": 0.496,
       "auprc": 0.4978,
       "auto_positive": 0.0995,
+      "auto_positive_fp": 0,
       "auto_negative": 0.0,
       "negatives_caught": 0.0
      }
@@ -2198,6 +861,7 @@
       "auroc": 0.5,
       "auprc": 0.5126,
       "auto_positive": 0.0025,
+      "auto_positive_fp": 0,
       "auto_negative": 0.0,
       "negatives_caught": 0.0
      }
@@ -2213,7 +877,8 @@
       "auto_99": 1.0,
       "auroc": 1.0,
       "auprc": 1.0,
-      "auto_positive": 0.51,
+      "auto_positive": 0.5,
+      "auto_positive_fp": 0,
       "auto_negative": 0.5,
       "negatives_caught": 1.0
      }
@@ -2230,6 +895,7 @@
       "auroc": 0.4808,
       "auprc": 0.4849,
       "auto_positive": 0.0,
+      "auto_positive_fp": 0,
       "auto_negative": 0.0,
       "negatives_caught": 0.0
      }
@@ -2245,7 +911,8 @@
       "auto_99": 1.0,
       "auroc": 1.0,
       "auprc": 1.0,
-      "auto_positive": 0.51,
+      "auto_positive": 0.5,
+      "auto_positive_fp": 0,
       "auto_negative": 0.5,
       "negatives_caught": 1.0
      }
@@ -2370,7 +1037,7 @@
     "groups": [],
     "text": true
    },
-   "seconds": 7.6,
+   "seconds": 7.7,
    "manual_score": 0.9,
    "null_rate": 0.3937,
    "table_role": "stamm",
@@ -2591,7 +1258,7 @@
     "groups": [],
     "text": true
    },
-   "seconds": 37.4,
+   "seconds": 52.0,
    "manual_score": 0.75,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -2829,7 +1496,7 @@
     "groups": [],
     "text": true
    },
-   "seconds": 18.8,
+   "seconds": 21.7,
    "manual_score": 0.5,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -3058,7 +1725,7 @@
     "groups": [],
     "text": true
    },
-   "seconds": 19.2,
+   "seconds": 22.1,
    "manual_score": 0.5,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -3295,7 +1962,7 @@
     "groups": [],
     "text": true
    },
-   "seconds": 20.1,
+   "seconds": 29.4,
    "manual_score": 0.5,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -3532,7 +2199,7 @@
     ],
     "text": true
    },
-   "seconds": 20.7,
+   "seconds": 36.7,
    "manual_score": 0.75,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -3747,7 +2414,7 @@
     ],
     "text": true
    },
-   "seconds": 5.4,
+   "seconds": 6.3,
    "manual_score": 0.75,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -3962,7 +2629,7 @@
     ],
     "text": true
    },
-   "seconds": 5.6,
+   "seconds": 6.0,
    "manual_score": 0.75,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -4181,7 +2848,7 @@
     ],
     "text": true
    },
-   "seconds": 16.7,
+   "seconds": 19.8,
    "manual_score": 0.65,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -4404,7 +3071,7 @@
     ],
     "text": true
    },
-   "seconds": 19.3,
+   "seconds": 21.1,
    "manual_score": 0.65,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -4650,7 +3317,7 @@
     ],
     "text": true
    },
-   "seconds": 6.2,
+   "seconds": 9.0,
    "manual_score": 0.9,
    "null_rate": 0.4361,
    "table_role": "stamm",
@@ -4890,7 +3557,7 @@
     ],
     "text": true
    },
-   "seconds": 26.6,
+   "seconds": 29.6,
    "manual_score": 0.4,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -4948,6 +3615,7 @@
       "auto_98": 1.0,
       "auto_99": 1.0,
       "auto_positive": 0.0308,
+      "auto_positive_fp": 0,
       "auto_negative": 0.0,
       "negatives_caught": 0.0
      }
@@ -4964,6 +3632,7 @@
       "auroc": 1.0,
       "auprc": 1.0,
       "auto_positive": 0.0352,
+      "auto_positive_fp": 0,
       "auto_negative": 0.9648,
       "negatives_caught": 1.0
      }
@@ -4980,6 +3649,7 @@
       "auroc": 0.9983,
       "auprc": 0.9659,
       "auto_positive": 0.0308,
+      "auto_positive_fp": 0,
       "auto_negative": 0.9515,
       "negatives_caught": 0.9863
      }
@@ -4996,6 +3666,7 @@
       "auroc": 1.0,
       "auprc": 1.0,
       "auto_positive": 0.0352,
+      "auto_positive_fp": 0,
       "auto_negative": 0.9648,
       "negatives_caught": 1.0
      }
@@ -5012,6 +3683,7 @@
       "auroc": 1.0,
       "auprc": 1.0,
       "auto_positive": 0.0352,
+      "auto_positive_fp": 0,
       "auto_negative": 0.9648,
       "negatives_caught": 1.0
      }
@@ -5028,6 +3700,7 @@
       "auroc": 0.9977,
       "auprc": 0.9583,
       "auto_positive": 0.0308,
+      "auto_positive_fp": 0,
       "auto_negative": 0.9471,
       "negatives_caught": 0.9817
      }
@@ -5164,7 +3837,7 @@
     ],
     "text": true
    },
-   "seconds": 4.1,
+   "seconds": 4.4,
    "manual_score": 0.65,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -5222,6 +3895,7 @@
       "auto_98": 1.0,
       "auto_99": 1.0,
       "auto_positive": 0.0308,
+      "auto_positive_fp": 0,
       "auto_negative": 0.0,
       "negatives_caught": 0.0
      }
@@ -5238,6 +3912,7 @@
       "auroc": 1.0,
       "auprc": 1.0,
       "auto_positive": 0.0352,
+      "auto_positive_fp": 0,
       "auto_negative": 0.9648,
       "negatives_caught": 1.0
      }
@@ -5254,6 +3929,7 @@
       "auroc": 0.9983,
       "auprc": 0.9659,
       "auto_positive": 0.0308,
+      "auto_positive_fp": 0,
       "auto_negative": 0.9515,
       "negatives_caught": 0.9863
      }
@@ -5270,6 +3946,7 @@
       "auroc": 1.0,
       "auprc": 1.0,
       "auto_positive": 0.0352,
+      "auto_positive_fp": 0,
       "auto_negative": 0.9648,
       "negatives_caught": 1.0
      }
@@ -5286,6 +3963,7 @@
       "auroc": 1.0,
       "auprc": 1.0,
       "auto_positive": 0.0352,
+      "auto_positive_fp": 0,
       "auto_negative": 0.9648,
       "negatives_caught": 1.0
      }
@@ -5302,6 +3980,7 @@
       "auroc": 0.9977,
       "auprc": 0.9583,
       "auto_positive": 0.0308,
+      "auto_positive_fp": 0,
       "auto_negative": 0.9471,
       "negatives_caught": 0.9817
      }
@@ -5438,7 +4117,7 @@
     ],
     "text": true
    },
-   "seconds": 4.1,
+   "seconds": 4.7,
    "manual_score": 0.65,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -5459,6 +4138,942 @@
     "minutes": 1.5,
     "exposure_eur": 47148851.0,
     "net_year": 51.0
+   }
+  },
+  {
+   "id": "PurchaseOrderLines.PackageTypeID",
+   "table": "PurchaseOrderLines",
+   "column": "PackageTypeID",
+   "kind": "class",
+   "rows": 8000,
+   "labeled": 8000,
+   "missing": 0,
+   "excluded": [],
+   "status": "ok",
+   "verdict": "Regel genügt – aus Stammdaten übernommen",
+   "classes": [
+    {
+     "value": "6",
+     "n": 5521
+    },
+    {
+     "value": "7",
+     "n": 2470
+    },
+    {
+     "value": "9",
+     "n": 9
+    }
+   ],
+   "positive": null,
+   "n_positive": null,
+   "alpha_95": null,
+   "engines": [
+    {
+     "id": "rule",
+     "name": "Regel: häufigster Wert je „StockItems.LeadTimeDays“",
+     "klass": "Regel",
+     "metrics": {
+      "balanced_accuracy": 0.7772,
+      "accuracy": 0.9981,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    },
+    {
+     "id": "lgbm",
+     "name": "LightGBM (eigene Felder)",
+     "klass": "Baum",
+     "metrics": {
+      "balanced_accuracy": 0.8888,
+      "accuracy": 0.9994,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    },
+    {
+     "id": "lgbm_graph",
+     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
+     "klass": "Graph-ML light",
+     "metrics": {
+      "balanced_accuracy": 0.9259,
+      "accuracy": 0.9996,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    },
+    {
+     "id": "text",
+     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
+     "klass": "Text",
+     "metrics": {
+      "balanced_accuracy": 0.9256,
+      "accuracy": 0.999,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    },
+    {
+     "id": "ensemble",
+     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
+     "klass": "Ensemble",
+     "metrics": {
+      "balanced_accuracy": 0.9259,
+      "accuracy": 0.9996,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    }
+   ],
+   "best": "lgbm_graph",
+   "lift_vs_rule": 0.1913,
+   "auto_98": 1.0,
+   "threshold_98": 0.9871,
+   "rule_or_leak": [
+    {
+     "feature": "StockItems.OuterPackageID",
+     "ba": 1.0,
+     "source": "über StockItemID → StockItems"
+    }
+   ],
+   "rule_cover": {
+    "feature": "StockItems.OuterPackageID",
+    "ba": 1.0,
+    "source": "über StockItemID → StockItems"
+   },
+   "leak_tables": [],
+   "importance": [
+    {
+     "feature": "PurchaseOrderID",
+     "source": "eigen",
+     "importance": 28767.1
+    },
+    {
+     "feature": "StockItemID",
+     "source": "eigen",
+     "importance": 27890.1
+    },
+    {
+     "feature": "StockItems.ColorID",
+     "source": "über StockItemID → StockItems",
+     "importance": 26943.0
+    },
+    {
+     "feature": "PurchaseOrders.DeliveryMethodID",
+     "source": "über PurchaseOrderID → PurchaseOrders",
+     "importance": 16755.7
+    },
+    {
+     "feature": "ExpectedUnitPricePerOuter",
+     "source": "eigen",
+     "importance": 12015.5
+    },
+    {
+     "feature": "PurchaseOrders.SupplierID",
+     "source": "über PurchaseOrderID → PurchaseOrders",
+     "importance": 8021.6
+    },
+    {
+     "feature": "StockItems.CustomFields",
+     "source": "über StockItemID → StockItems",
+     "importance": 6705.2
+    },
+    {
+     "feature": "OrderedOuters",
+     "source": "eigen",
+     "importance": 3873.8
+    }
+   ],
+   "examples": [
+    {
+     "name": "Novelty chilli chocolates 250g",
+     "actual": "6",
+     "predicted": "6",
+     "confidence": 0.987
+    },
+    {
+     "name": "Office cube periscope (Black)",
+     "actual": "6",
+     "predicted": "7",
+     "confidence": 1.0
+    },
+    {
+     "name": "Ride on toy sedan car (Green) 1/12 scale",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 1.0
+    },
+    {
+     "name": "Ride on vintage American toy coupe (Red) 1/12 scale",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 1.0
+    },
+    {
+     "name": "USB food flash drive - hamburger",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 1.0
+    },
+    {
+     "name": "USB food flash drive - sushi roll",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 1.0
+    }
+   ],
+   "missing_fill": null,
+   "features": {
+    "own": 6,
+    "linked": 17,
+    "groups": [],
+    "text": true
+   },
+   "seconds": 67.5,
+   "manual_score": 0.8,
+   "null_rate": 0.0,
+   "table_role": "bewegung",
+   "table_label": "PurchaseOrderLines",
+   "fk_to": "PackageTypes",
+   "special": false,
+   "inherited": true,
+   "inherited_from": "StockItems.OuterPackageID (über StockItemID → StockItems)",
+   "value": {
+    "kind": "none",
+    "label": "kein Umsatz-/Bestandsbezug ermittelbar",
+    "total_eur": null,
+    "entries_per_year": 2414,
+    "years": 3.47
+   },
+   "euro": {
+    "labor_year": 0.0,
+    "gap_once": 0.0,
+    "entries_per_year": 2414,
+    "minutes": 2.0,
+    "exposure_eur": null,
+    "net_year": 0.0
+   }
+  },
+  {
+   "id": "InvoiceLines.PackageTypeID",
+   "table": "InvoiceLines",
+   "column": "PackageTypeID",
+   "kind": "class",
+   "rows": 8000,
+   "labeled": 8000,
+   "missing": 0,
+   "excluded": [],
+   "status": "ok",
+   "verdict": "Regel genügt – aus Stammdaten übernommen",
+   "classes": [
+    {
+     "value": "7",
+     "n": 7583
+    },
+    {
+     "value": "9",
+     "n": 208
+    },
+    {
+     "value": "10",
+     "n": 171
+    },
+    {
+     "value": "1",
+     "n": 38
+    }
+   ],
+   "positive": null,
+   "n_positive": null,
+   "alpha_95": null,
+   "engines": [
+    {
+     "id": "rule",
+     "name": "Regel: häufigster Wert je „StockItems.SupplierID“",
+     "klass": "Regel",
+     "metrics": {
+      "balanced_accuracy": 0.6671,
+      "accuracy": 0.97,
+      "auto_98": 0.0447,
+      "auto_99": 0.0173
+     }
+    },
+    {
+     "id": "lgbm",
+     "name": "LightGBM (eigene Felder)",
+     "klass": "Baum",
+     "metrics": {
+      "balanced_accuracy": 0.9988,
+      "accuracy": 0.9999,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    },
+    {
+     "id": "lgbm_graph",
+     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
+     "klass": "Graph-ML light",
+     "metrics": {
+      "balanced_accuracy": 1.0,
+      "accuracy": 1.0,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    },
+    {
+     "id": "text",
+     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
+     "klass": "Text",
+     "metrics": {
+      "balanced_accuracy": 1.0,
+      "accuracy": 1.0,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    },
+    {
+     "id": "ensemble",
+     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
+     "klass": "Ensemble",
+     "metrics": {
+      "balanced_accuracy": 1.0,
+      "accuracy": 1.0,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    }
+   ],
+   "best": "lgbm_graph",
+   "lift_vs_rule": 0.499,
+   "auto_98": 1.0,
+   "threshold_98": 0.9999,
+   "rule_or_leak": [
+    {
+     "feature": "StockItems.UnitPackageID",
+     "ba": 1.0,
+     "source": "über StockItemID → StockItems"
+    }
+   ],
+   "rule_cover": {
+    "feature": "StockItems.UnitPackageID",
+    "ba": 1.0,
+    "source": "über StockItemID → StockItems"
+   },
+   "leak_tables": [],
+   "importance": [
+    {
+     "feature": "StockItems.CustomFields",
+     "source": "über StockItemID → StockItems",
+     "importance": 57502.6
+    },
+    {
+     "feature": "StockItemID",
+     "source": "eigen",
+     "importance": 40034.2
+    },
+    {
+     "feature": "StockItems.TypicalWeightPerUnit",
+     "source": "über StockItemID → StockItems",
+     "importance": 37870.0
+    },
+    {
+     "feature": "StockItems.ColorID",
+     "source": "über StockItemID → StockItems",
+     "importance": 10828.1
+    },
+    {
+     "feature": "StockItems.UnitPrice",
+     "source": "über StockItemID → StockItems",
+     "importance": 8665.9
+    },
+    {
+     "feature": "StockItems.SupplierID",
+     "source": "über StockItemID → StockItems",
+     "importance": 7004.0
+    },
+    {
+     "feature": "StockItems.OuterPackageID",
+     "source": "über StockItemID → StockItems",
+     "importance": 6480.1
+    },
+    {
+     "feature": "TaxRate",
+     "source": "eigen",
+     "importance": 5851.6
+    }
+   ],
+   "examples": [
+    {
+     "name": "USB food flash drive - dim sum 10 drive variety pack",
+     "actual": "9",
+     "predicted": "9",
+     "confidence": 1.0
+    },
+    {
+     "name": "Permanent marker black 5mm nib (Black) 5mm",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 1.0
+    },
+    {
+     "name": "Permanent marker blue 5mm nib (Blue) 5mm",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 1.0
+    },
+    {
+     "name": "Permanent marker red 5mm nib (Red) 5mm",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 1.0
+    },
+    {
+     "name": "Permanent marker red 5mm nib (Red) 5mm",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 1.0
+    },
+    {
+     "name": "Permanent marker blue 5mm nib (Blue) 5mm",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 1.0
+    }
+   ],
+   "missing_fill": null,
+   "features": {
+    "own": 7,
+    "linked": 13,
+    "groups": [],
+    "text": true
+   },
+   "seconds": 63.4,
+   "manual_score": 0.8,
+   "null_rate": 0.0,
+   "table_role": "bewegung",
+   "table_label": "InvoiceLines",
+   "fk_to": "PackageTypes",
+   "special": false,
+   "inherited": true,
+   "inherited_from": "StockItems.UnitPackageID (über StockItemID → StockItems)",
+   "value": {
+    "kind": "none",
+    "label": "kein Umsatz-/Bestandsbezug ermittelbar",
+    "total_eur": null,
+    "entries_per_year": 65856,
+    "years": 3.47
+   },
+   "euro": {
+    "labor_year": 0.0,
+    "gap_once": 0.0,
+    "entries_per_year": 65856,
+    "minutes": 2.0,
+    "exposure_eur": null,
+    "net_year": 0.0
+   }
+  },
+  {
+   "id": "OrderLines.PackageTypeID",
+   "table": "OrderLines",
+   "column": "PackageTypeID",
+   "kind": "class",
+   "rows": 8000,
+   "labeled": 8000,
+   "missing": 0,
+   "excluded": [],
+   "status": "ok",
+   "verdict": "Regel genügt – aus Stammdaten übernommen",
+   "classes": [
+    {
+     "value": "7",
+     "n": 7628
+    },
+    {
+     "value": "9",
+     "n": 198
+    },
+    {
+     "value": "10",
+     "n": 137
+    },
+    {
+     "value": "1",
+     "n": 37
+    }
+   ],
+   "positive": null,
+   "n_positive": null,
+   "alpha_95": null,
+   "engines": [
+    {
+     "id": "rule",
+     "name": "Regel: häufigster Wert je „StockItems.SupplierID“",
+     "klass": "Regel",
+     "metrics": {
+      "balanced_accuracy": 0.6402,
+      "accuracy": 0.972,
+      "auto_98": 0.0616,
+      "auto_99": 0.0257
+     }
+    },
+    {
+     "id": "lgbm",
+     "name": "LightGBM (eigene Felder)",
+     "klass": "Baum",
+     "metrics": {
+      "balanced_accuracy": 0.9852,
+      "accuracy": 0.9996,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    },
+    {
+     "id": "lgbm_graph",
+     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
+     "klass": "Graph-ML light",
+     "metrics": {
+      "balanced_accuracy": 0.9865,
+      "accuracy": 0.9998,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    },
+    {
+     "id": "text",
+     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
+     "klass": "Text",
+     "metrics": {
+      "balanced_accuracy": 1.0,
+      "accuracy": 1.0,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    },
+    {
+     "id": "ensemble",
+     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
+     "klass": "Ensemble",
+     "metrics": {
+      "balanced_accuracy": 1.0,
+      "accuracy": 1.0,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    }
+   ],
+   "best": "text",
+   "lift_vs_rule": 0.562,
+   "auto_98": 1.0,
+   "threshold_98": 0.8342,
+   "rule_or_leak": [
+    {
+     "feature": "StockItems.UnitPackageID",
+     "ba": 1.0,
+     "source": "über StockItemID → StockItems"
+    }
+   ],
+   "rule_cover": {
+    "feature": "StockItems.UnitPackageID",
+    "ba": 1.0,
+    "source": "über StockItemID → StockItems"
+   },
+   "leak_tables": [],
+   "importance": [
+    {
+     "feature": "StockItems.CustomFields",
+     "source": "über StockItemID → StockItems",
+     "importance": 63421.1
+    },
+    {
+     "feature": "StockItemID",
+     "source": "eigen",
+     "importance": 43537.7
+    },
+    {
+     "feature": "StockItems.TypicalWeightPerUnit",
+     "source": "über StockItemID → StockItems",
+     "importance": 35813.2
+    },
+    {
+     "feature": "StockItems.UnitPrice",
+     "source": "über StockItemID → StockItems",
+     "importance": 10891.3
+    },
+    {
+     "feature": "StockItems.ColorID",
+     "source": "über StockItemID → StockItems",
+     "importance": 8808.7
+    },
+    {
+     "feature": "TaxRate",
+     "source": "eigen",
+     "importance": 6774.9
+    },
+    {
+     "feature": "StockItems.OuterPackageID",
+     "source": "über StockItemID → StockItems",
+     "importance": 6756.6
+    },
+    {
+     "feature": "StockItems.QuantityPerOuter",
+     "source": "über StockItemID → StockItems",
+     "importance": 3085.4
+    }
+   ],
+   "examples": [
+    {
+     "name": "USB food flash drive - chocolate bar",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 0.834
+    },
+    {
+     "name": "USB food flash drive - chocolate bar",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 0.834
+    },
+    {
+     "name": "USB food flash drive - chocolate bar",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 0.834
+    },
+    {
+     "name": "USB food flash drive - chocolate bar",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 0.834
+    },
+    {
+     "name": "USB food flash drive - chocolate bar",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 0.834
+    },
+    {
+     "name": "USB food flash drive - chocolate bar",
+     "actual": "7",
+     "predicted": "7",
+     "confidence": 0.834
+    }
+   ],
+   "missing_fill": null,
+   "features": {
+    "own": 5,
+    "linked": 13,
+    "groups": [],
+    "text": true
+   },
+   "seconds": 61.2,
+   "manual_score": 0.8,
+   "null_rate": 0.0,
+   "table_role": "bewegung",
+   "table_label": "OrderLines",
+   "fk_to": "PackageTypes",
+   "special": false,
+   "inherited": true,
+   "inherited_from": "StockItems.UnitPackageID (über StockItemID → StockItems)",
+   "value": {
+    "kind": "none",
+    "label": "kein Umsatz-/Bestandsbezug ermittelbar",
+    "total_eur": null,
+    "entries_per_year": 66764,
+    "years": 3.47
+   },
+   "euro": {
+    "labor_year": 0.0,
+    "gap_once": 0.0,
+    "entries_per_year": 66764,
+    "minutes": 2.0,
+    "exposure_eur": null,
+    "net_year": 0.0
+   }
+  },
+  {
+   "id": "StockItemTransactions.SupplierID",
+   "table": "StockItemTransactions",
+   "column": "SupplierID",
+   "kind": "class",
+   "rows": 8000,
+   "labeled": 271,
+   "missing": 7729,
+   "excluded": [],
+   "status": "ok",
+   "verdict": "Regel genügt – aus Stammdaten übernommen",
+   "classes": [
+    {
+     "value": "4",
+     "n": 181
+    },
+    {
+     "value": "7",
+     "n": 84
+    }
+   ],
+   "positive": "7",
+   "n_positive": 84,
+   "alpha_95": 0.03504,
+   "engines": [
+    {
+     "id": "rule",
+     "name": "Regel: häufigster Wert je „Quantity“",
+     "klass": "Regel",
+     "metrics": {
+      "balanced_accuracy": 0.5912,
+      "accuracy": 0.6943,
+      "auto_98": 0.0151,
+      "auto_99": 0.0151,
+      "auto_positive": 0.0,
+      "auto_positive_fp": 0,
+      "auto_negative": 0.0,
+      "negatives_caught": 0.0
+     }
+    },
+    {
+     "id": "lgbm",
+     "name": "LightGBM (eigene Felder)",
+     "klass": "Baum",
+     "metrics": {
+      "balanced_accuracy": 0.6997,
+      "accuracy": 0.7509,
+      "auto_98": 0.0075,
+      "auto_99": 0.0075,
+      "auroc": 0.7352,
+      "auprc": 0.5819,
+      "auto_positive": 0.0038,
+      "auto_positive_fp": 0,
+      "auto_negative": 0.0075,
+      "negatives_caught": 0.011
+     }
+    },
+    {
+     "id": "lgbm_graph",
+     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
+     "klass": "Graph-ML light",
+     "metrics": {
+      "balanced_accuracy": 0.6997,
+      "accuracy": 0.7509,
+      "auto_98": 0.0075,
+      "auto_99": 0.0075,
+      "auroc": 0.7352,
+      "auprc": 0.5819,
+      "auto_positive": 0.0038,
+      "auto_positive_fp": 0,
+      "auto_negative": 0.0075,
+      "negatives_caught": 0.011
+     }
+    },
+    {
+     "id": "text",
+     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
+     "klass": "Text",
+     "metrics": {
+      "balanced_accuracy": 1.0,
+      "accuracy": 1.0,
+      "auto_98": 1.0,
+      "auto_99": 1.0,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "auto_positive": 0.317,
+      "auto_positive_fp": 0,
+      "auto_negative": 0.683,
+      "negatives_caught": 1.0
+     }
+    },
+    {
+     "id": "tabpfn",
+     "name": "TabPFN v2",
+     "klass": "TFM",
+     "metrics": {
+      "balanced_accuracy": 0.7755,
+      "accuracy": 0.8415,
+      "auto_98": 0.4679,
+      "auto_99": 0.3925,
+      "auroc": 0.9056,
+      "auprc": 0.8494,
+      "auto_positive": 0.1396,
+      "auto_positive_fp": 0,
+      "auto_negative": 0.0566,
+      "negatives_caught": 0.0829
+     }
+    },
+    {
+     "id": "ensemble",
+     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
+     "klass": "Ensemble",
+     "metrics": {
+      "balanced_accuracy": 1.0,
+      "accuracy": 1.0,
+      "auto_98": 1.0,
+      "auto_99": 1.0,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "auto_positive": 0.317,
+      "auto_positive_fp": 0,
+      "auto_negative": 0.683,
+      "negatives_caught": 1.0
+     }
+    }
+   ],
+   "best": "text",
+   "lift_vs_rule": 0.6915,
+   "auto_98": 1.0,
+   "threshold_98": 0.975,
+   "rule_or_leak": [
+    {
+     "feature": "StockItemID",
+     "ba": 1.0,
+     "source": "eigen"
+    },
+    {
+     "feature": "PurchaseOrders.SupplierID",
+     "ba": 1.0,
+     "source": "über PurchaseOrderID → PurchaseOrders"
+    },
+    {
+     "feature": "PurchaseOrders.DeliveryMethodID",
+     "ba": 1.0,
+     "source": "über PurchaseOrderID → PurchaseOrders"
+    },
+    {
+     "feature": "PurchaseOrders.SupplierReference",
+     "ba": 1.0,
+     "source": "über PurchaseOrderID → PurchaseOrders"
+    },
+    {
+     "feature": "StockItems.SupplierID",
+     "ba": 1.0,
+     "source": "über StockItemID → StockItems"
+    },
+    {
+     "feature": "StockItems.ColorID",
+     "ba": 1.0,
+     "source": "über StockItemID → StockItems"
+    }
+   ],
+   "rule_cover": {
+    "feature": "StockItemID",
+    "ba": 1.0,
+    "source": "eigen"
+   },
+   "leak_tables": [],
+   "importance": [
+    {
+     "feature": "Quantity",
+     "source": "eigen",
+     "importance": 1510.8
+    },
+    {
+     "feature": "PurchaseOrderID",
+     "source": "eigen",
+     "importance": 1249.0
+    },
+    {
+     "feature": "TransactionTypeID",
+     "source": "eigen",
+     "importance": 0.0
+    },
+    {
+     "feature": "CustomerID",
+     "source": "eigen",
+     "importance": 0.0
+    },
+    {
+     "feature": "Customers.BillToCustomerID",
+     "source": "über CustomerID → Customers",
+     "importance": 0.0
+    },
+    {
+     "feature": "Customers.CustomerCategoryID",
+     "source": "über CustomerID → Customers",
+     "importance": 0.0
+    },
+    {
+     "feature": "Customers.BuyingGroupID",
+     "source": "über CustomerID → Customers",
+     "importance": 0.0
+    },
+    {
+     "feature": "Customers.PrimaryContactPersonID",
+     "source": "über CustomerID → Customers",
+     "importance": 0.0
+    }
+   ],
+   "examples": [
+    {
+     "name": "263",
+     "actual": "4",
+     "predicted": "4",
+     "confidence": 0.975
+    },
+    {
+     "name": "35",
+     "actual": "4",
+     "predicted": "4",
+     "confidence": 0.975
+    },
+    {
+     "name": "202",
+     "actual": "4",
+     "predicted": "4",
+     "confidence": 0.975
+    },
+    {
+     "name": "204",
+     "actual": "4",
+     "predicted": "4",
+     "confidence": 0.975
+    },
+    {
+     "name": "190",
+     "actual": "4",
+     "predicted": "4",
+     "confidence": 0.975
+    },
+    {
+     "name": "126",
+     "actual": "4",
+     "predicted": "4",
+     "confidence": 0.975
+    }
+   ],
+   "missing_fill": {
+    "missing": 7729,
+    "sure": 0,
+    "share_sure": 0.0,
+    "proposals": [],
+    "model": "LightGBM + Verknüpfungen"
+   },
+   "features": {
+    "own": 4,
+    "linked": 12,
+    "groups": [],
+    "text": true
+   },
+   "seconds": 4.3,
+   "manual_score": 0.5,
+   "null_rate": 0.9647,
+   "table_role": "bewegung",
+   "table_label": "StockItemTransactions",
+   "fk_to": "Suppliers",
+   "special": false,
+   "inherited": true,
+   "inherited_from": "PurchaseOrders.SupplierID (über PurchaseOrderID → PurchaseOrders)",
+   "value": {
+    "kind": "none",
+    "label": "kein Umsatz-/Bestandsbezug ermittelbar",
+    "total_eur": null,
+    "entries_per_year": 68280,
+    "years": 3.47
+   },
+   "euro": {
+    "labor_year": 0.0,
+    "gap_once": 0.0,
+    "entries_per_year": 68280,
+    "minutes": 2.0,
+    "exposure_eur": null,
+    "net_year": 0.0
    }
   },
   {
@@ -5693,7 +5308,7 @@
     ],
     "text": true
    },
-   "seconds": 18.4,
+   "seconds": 20.0,
    "manual_score": 0.8,
    "null_rate": 0.2819,
    "table_role": "stamm",
@@ -5933,7 +5548,7 @@
     ],
     "text": true
    },
-   "seconds": 27.0,
+   "seconds": 39.2,
    "manual_score": 0.65,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -6170,7 +5785,7 @@
     "groups": [],
     "text": true
    },
-   "seconds": 32.7,
+   "seconds": 35.4,
    "manual_score": 0.6,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -6191,6 +5806,206 @@
     "minutes": 2.0,
     "exposure_eur": null,
     "net_year": 27.0
+   }
+  },
+  {
+   "id": "PurchaseOrders.DeliveryMethodID",
+   "table": "PurchaseOrders",
+   "column": "DeliveryMethodID",
+   "kind": "class",
+   "rows": 2074,
+   "labeled": 2074,
+   "missing": 0,
+   "excluded": [],
+   "status": "warn",
+   "verdict": "Regel/Lookup möglich (oder Folgefeld)",
+   "classes": [
+    {
+     "value": "7",
+     "n": 1065
+    },
+    {
+     "value": "2",
+     "n": 985
+    },
+    {
+     "value": "10",
+     "n": 13
+    },
+    {
+     "value": "8",
+     "n": 10
+    }
+   ],
+   "positive": null,
+   "n_positive": null,
+   "alpha_95": null,
+   "engines": [
+    {
+     "id": "rule",
+     "name": "Regel: häufigster Wert je „Suppliers.PaymentDays“",
+     "klass": "Regel",
+     "metrics": {
+      "balanced_accuracy": 0.4988,
+      "accuracy": 0.5176,
+      "auto_98": 0.001,
+      "auto_99": 0.001
+     }
+    },
+    {
+     "id": "lgbm",
+     "name": "LightGBM (eigene Felder)",
+     "klass": "Baum",
+     "metrics": {
+      "balanced_accuracy": 0.2731,
+      "accuracy": 0.1944,
+      "auto_98": 0.0,
+      "auto_99": 0.0
+     }
+    },
+    {
+     "id": "lgbm_graph",
+     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
+     "klass": "Graph-ML light",
+     "metrics": {
+      "balanced_accuracy": 0.2731,
+      "accuracy": 0.1944,
+      "auto_98": 0.0,
+      "auto_99": 0.0
+     }
+    },
+    {
+     "id": "tabpfn",
+     "name": "TabPFN v2",
+     "klass": "TFM",
+     "metrics": {
+      "balanced_accuracy": 0.4986,
+      "accuracy": 0.5171,
+      "auto_98": 0.0014,
+      "auto_99": 0.0014
+     }
+    }
+   ],
+   "best": "tabpfn",
+   "lift_vs_rule": -0.0004,
+   "auto_98": 0.0014,
+   "threshold_98": 0.8752,
+   "rule_or_leak": [
+    {
+     "feature": "SupplierID",
+     "ba": 1.0,
+     "source": "eigen"
+    },
+    {
+     "feature": "SupplierReference",
+     "ba": 1.0,
+     "source": "eigen"
+    },
+    {
+     "feature": "Suppliers.PrimaryContactPersonID",
+     "ba": 1.0,
+     "source": "über SupplierID → Suppliers"
+    },
+    {
+     "feature": "Suppliers.AlternateContactPersonID",
+     "ba": 1.0,
+     "source": "über SupplierID → Suppliers"
+    },
+    {
+     "feature": "Suppliers.DeliveryMethodID",
+     "ba": 1.0,
+     "source": "über SupplierID → Suppliers"
+    },
+    {
+     "feature": "Suppliers.DeliveryCityID",
+     "ba": 1.0,
+     "source": "über SupplierID → Suppliers"
+    }
+   ],
+   "rule_cover": {
+    "feature": "SupplierID",
+    "ba": 1.0,
+    "source": "eigen"
+   },
+   "leak_tables": [],
+   "importance": [
+    {
+     "feature": "IsOrderFinalized",
+     "source": "eigen",
+     "importance": 0.0
+    },
+    {
+     "feature": "Suppliers.PaymentDays",
+     "source": "über SupplierID → Suppliers",
+     "importance": 0.0
+    }
+   ],
+   "examples": [
+    {
+     "name": "08803922",
+     "actual": "10",
+     "predicted": "10",
+     "confidence": 0.875
+    },
+    {
+     "name": "AA20384",
+     "actual": "7",
+     "predicted": "10",
+     "confidence": 0.875
+    },
+    {
+     "name": "08803922",
+     "actual": "10",
+     "predicted": "10",
+     "confidence": 0.875
+    },
+    {
+     "name": "08803922",
+     "actual": "10",
+     "predicted": "10",
+     "confidence": 0.875
+    },
+    {
+     "name": "AA20384",
+     "actual": "7",
+     "predicted": "10",
+     "confidence": 0.871
+    },
+    {
+     "name": "08803922",
+     "actual": "10",
+     "predicted": "10",
+     "confidence": 0.871
+    }
+   ],
+   "missing_fill": null,
+   "features": {
+    "own": 1,
+    "linked": 1,
+    "groups": [],
+    "text": false
+   },
+   "seconds": 2.7,
+   "manual_score": 0.6,
+   "null_rate": 0.0,
+   "table_role": "stamm",
+   "table_label": "PurchaseOrders",
+   "fk_to": "DeliveryMethods",
+   "special": false,
+   "value": {
+    "kind": "revenue",
+    "label": "Umsatz pro Jahr der Datensätze (aus SupplierTransactions)",
+    "total_eur": 288251501.0,
+    "entries_per_year": 311,
+    "years": 3.47
+   },
+   "euro": {
+    "labor_year": 1.0,
+    "gap_once": 0.0,
+    "entries_per_year": 311,
+    "minutes": 2.0,
+    "exposure_eur": 288251501.0,
+    "net_year": 1.0
    }
   },
   {
@@ -6227,7 +6042,7 @@
    "lift_vs_rule": -0.3607,
    "rule_or_leak": [],
    "metric_note": "Anteil der Vorschläge innerhalb ±10 % des gepflegten Werts",
-   "seconds": 0.4,
+   "seconds": 0.5,
    "manual_score": 0.75,
    "null_rate": 0.6063,
    "table_role": "stamm",
@@ -6357,8 +6172,8 @@
   }
  ],
  "counts": {
-  "ok": 24,
-  "warn": 3,
+  "ok": 21,
+  "warn": 4,
   "bad": 1,
   "na": 5
  },

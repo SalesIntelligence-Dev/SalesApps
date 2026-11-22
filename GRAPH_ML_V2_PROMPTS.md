@@ -377,8 +377,12 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
   Text allein 0,974 · mit Stückliste/Graph 1,000 (künstliche Daten – ehrlich markiert). Auto-ET 73,9 %, recall-sicher
   Auto-Negativ 26,2 %, 0 gemessene Fehlalarme; nachweisbare Fehlergrenze mit 240 ET nur 1,2 % (für 0,1 % ≈ 3.000 ET).
   Euro: 1.300 € Pflegeaufwand/Jahr, Bevorratung 25.664 € je ET und Jahr, Prüfgrenze getrennt ausgewiesen.
-- **Gesamt:** AdventureWorks 36 Felder (20 ML vorhersagbar, 4 teilweise, 4 kaum, 8 nicht prüfbar), WWI 33 (24 · 3 · 1 · 5);
-  Online Retail II, SCANIA, C-MAPSS: keine manuell gepflegten Felder (Sensor-/Transaktionsdaten) – Lückenliste mit Grund.
+- **Gesamt:** AdventureWorks 35 Felder (19 vorhersagbar bzw. Regel, 4 teilweise, 4 kaum, 8 nicht prüfbar), WWI 31
+  (21 · 4 · 1 · 5); Online Retail II, SCANIA, C-MAPSS: keine manuell gepflegten Felder (Sensor-/Transaktionsdaten).
+  Pflegeaufwand gespart (Annahmen 60 €/h): AdventureWorks 17.178 €, WWI 4.048 € pro Jahr – kleine Demodatenbanken.
+- **Korrektur nach erstem Lauf:** Erfassungsfelder auf Auftrags-/Rechnungszeilen, deren Wert sich aus den Stammdaten ergibt
+  (Verpackungsart, Lieferant, Gebiet), zählten zunächst als Pflegeaufwand (412.000 € bei WWI) – jetzt „Regel genügt – aus
+  Stammdaten übernommen“ mit 0 €. Steuer-/Betragsfelder ausgeschlossen. Fehlalarm-Bevorratung gemessen statt angenommen.
 - **UI:** Panel „Data-Classifier-Analyse“ am Ende von Schritt 3 mit Kennzahlen, Tabelle, Detail je Feld (Modellvergleich,
   Folgefelder, Merkmale, Graubereich, Lückenvorschläge) und editierbaren Euro-Annahmen (Python und JS identisch).
-- **Tests:** 76 grün. Web-Modus 232 MB.
+- **Tests:** 76 grün. Web-Modus 232 MB, alle Routen 200.

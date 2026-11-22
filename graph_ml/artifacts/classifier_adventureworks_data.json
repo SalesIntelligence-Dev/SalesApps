@@ -1,7 +1,7 @@
 {
  "dataset": "adventureworks_data",
- "generated_at": "2026-11-22T13:05:08",
- "seconds": 1266.3,
+ "generated_at": "2026-11-22T14:21:23",
+ "seconds": 1235.6,
  "tables": [
   {
    "name": "Department",
@@ -137,8 +137,8 @@
   },
   {
    "name": "ProductCostHistory",
-   "role": "stamm",
-   "role_text": "Stammdaten",
+   "role": "bewegung",
+   "role_text": "Bewegungsdaten",
    "rows": 395
   },
   {
@@ -155,8 +155,8 @@
   },
   {
    "name": "ProductListPriceHistory",
-   "role": "stamm",
-   "role_text": "Stammdaten",
+   "role": "bewegung",
+   "role_text": "Bewegungsdaten",
    "rows": 395
   },
   {
@@ -370,8 +370,8 @@
    "rows": 701
   }
  ],
- "n_candidates": 46,
- "n_likely": 36,
+ "n_candidates": 45,
+ "n_likely": 35,
  "other_candidates": [
   {
    "id": "BillOfMaterials.UnitMeasureCode",
@@ -603,21 +603,6 @@
      "feature": "Graph·SpecialOfferProduct.ProductID→SpecialOfferID·0",
      "ba": 1.0,
      "source": "Nachbarschaft SpecialOfferProduct"
-    },
-    {
-     "feature": "ProductCostHistory·Anzahl (ProductID)",
-     "ba": 0.9958,
-     "source": "Struktur ProductCostHistory"
-    },
-    {
-     "feature": "ProductCostHistory·Ø StandardCost (ProductID)",
-     "ba": 0.9958,
-     "source": "Struktur ProductCostHistory"
-    },
-    {
-     "feature": "ProductListPriceHistory·Anzahl (ProductID)",
-     "ba": 0.9958,
-     "source": "Struktur ProductListPriceHistory"
     }
    ],
    "rule_cover": {
@@ -626,8 +611,6 @@
     "source": "Struktur SpecialOfferProduct"
    },
    "leak_tables": [
-    "ProductCostHistory",
-    "ProductListPriceHistory",
     "SpecialOfferProduct"
    ],
    "importance": [
@@ -726,13 +709,17 @@
     ],
     "text": true
    },
-   "seconds": 11.7,
+   "seconds": 11.8,
    "manual_score": 0.95,
    "null_rate": 0.0,
    "table_role": "stamm",
    "table_label": "Product",
    "fk_to": null,
    "special": true,
+   "name": "Ersatzteil-Kennzeichen je Stücklisten-Bauteil",
+   "label": "Bauteil ist einzeln verkaufsfähig (Ersatzteil) – FinishedGoodsFlag der Bauteile in der Stückliste",
+   "note": "AdventureWorks hat kein eigenes ET-Kennzeichen; das Verkaufsfähig-Kennzeichen der Stücklisten-Bauteile entspricht fachlich der ET-Entscheidung (einzeln lieferbar ja/nein).",
+   "minutes": 4.0,
    "value": {
     "kind": "stock",
     "label": "Bevorratungswert der Ersatzteile (Sicherheitsbestand × Standardkosten)",
@@ -741,10 +728,6 @@
     "entries_per_year": 325,
     "years": 4.64
    },
-   "name": "Ersatzteil-Kennzeichen je Stücklisten-Bauteil",
-   "label": "Bauteil ist einzeln verkaufsfähig (Ersatzteil) – FinishedGoodsFlag der Bauteile in der Stückliste",
-   "note": "AdventureWorks hat kein eigenes ET-Kennzeichen; das Verkaufsfähig-Kennzeichen der Stücklisten-Bauteile entspricht fachlich der ET-Entscheidung (einzeln lieferbar ja/nein).",
-   "minutes": 4.0,
    "euro": {
     "labor_year": 1300.0,
     "gap_once": 0.0,
@@ -757,487 +740,6 @@
     "auto_positive": 0.7385,
     "auto_negative": 0.2615,
     "net_year": 1300.0
-   }
-  },
-  {
-   "id": "SalesOrderHeader.TerritoryID",
-   "table": "SalesOrderHeader",
-   "column": "TerritoryID",
-   "kind": "class",
-   "rows": 8000,
-   "labeled": 8000,
-   "missing": 0,
-   "excluded": [],
-   "status": "ok",
-   "verdict": "ML vorhersagbar",
-   "classes": [
-    {
-     "value": "9",
-     "n": 1672
-    },
-    {
-     "value": "4",
-     "n": 1574
-    },
-    {
-     "value": "1",
-     "n": 1211
-    },
-    {
-     "value": "6",
-     "n": 1021
-    },
-    {
-     "value": "10",
-     "n": 844
-    },
-    {
-     "value": "8",
-     "n": 693
-    },
-    {
-     "value": "7",
-     "n": 685
-    },
-    {
-     "value": "5",
-     "n": 122
-    },
-    {
-     "value": "3",
-     "n": 104
-    },
-    {
-     "value": "2",
-     "n": 74
-    }
-   ],
-   "positive": null,
-   "n_positive": null,
-   "alpha_95": null,
-   "engines": [
-    {
-     "id": "rule",
-     "name": "Regel: häufigster Wert je „Address.City“",
-     "klass": "Regel",
-     "metrics": {
-      "balanced_accuracy": 0.9199,
-      "accuracy": 0.9835,
-      "auto_98": 1.0,
-      "auto_99": 0.0158
-     }
-    },
-    {
-     "id": "lgbm",
-     "name": "LightGBM (eigene Felder)",
-     "klass": "Baum",
-     "metrics": {
-      "balanced_accuracy": 0.5568,
-      "accuracy": 0.5278,
-      "auto_98": 0.0146,
-      "auto_99": 0.014
-     }
-    },
-    {
-     "id": "lgbm_graph",
-     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
-     "klass": "Graph-ML light",
-     "metrics": {
-      "balanced_accuracy": 0.9908,
-      "accuracy": 0.9986,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    },
-    {
-     "id": "text",
-     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
-     "klass": "Text",
-     "metrics": {
-      "balanced_accuracy": 0.5952,
-      "accuracy": 0.4715,
-      "auto_98": 0.2045,
-      "auto_99": 0.0932
-     }
-    },
-    {
-     "id": "ensemble",
-     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
-     "klass": "Ensemble",
-     "metrics": {
-      "balanced_accuracy": 0.9814,
-      "accuracy": 0.9968,
-      "auto_98": 1.0,
-      "auto_99": 1.0
-     }
-    }
-   ],
-   "best": "lgbm_graph",
-   "lift_vs_rule": 0.0771,
-   "auto_98": 1.0,
-   "threshold_98": 0.2784,
-   "rule_or_leak": [
-    {
-     "feature": "Customer.TerritoryID",
-     "ba": 1.0,
-     "source": "über CustomerID → Customer"
-    }
-   ],
-   "rule_cover": {
-    "feature": "Customer.TerritoryID",
-    "ba": 1.0,
-    "source": "über CustomerID → Customer"
-   },
-   "leak_tables": [],
-   "importance": [
-    {
-     "feature": "Address.StateProvinceID",
-     "source": "über ShipToAddressID → Address",
-     "importance": 85867.1
-    },
-    {
-     "feature": "Address.City",
-     "source": "über ShipToAddressID → Address",
-     "importance": 70115.5
-    },
-    {
-     "feature": "SalesPersonID",
-     "source": "eigen",
-     "importance": 51711.3
-    },
-    {
-     "feature": "CurrencyRate.AverageRate",
-     "source": "über CurrencyRateID → CurrencyRate",
-     "importance": 29355.1
-    },
-    {
-     "feature": "CurrencyRate.ToCurrencyCode",
-     "source": "über CurrencyRateID → CurrencyRate",
-     "importance": 27376.6
-    },
-    {
-     "feature": "CurrencyRate.EndOfDayRate",
-     "source": "über CurrencyRateID → CurrencyRate",
-     "importance": 17934.7
-    },
-    {
-     "feature": "Customer.StoreID",
-     "source": "über CustomerID → Customer",
-     "importance": 5518.1
-    },
-    {
-     "feature": "CustomerID",
-     "source": "eigen",
-     "importance": 2301.7
-    }
-   ],
-   "examples": [
-    {
-     "name": "SO70273",
-     "actual": "5",
-     "predicted": "8",
-     "confidence": 0.278
-    },
-    {
-     "name": "SO52591",
-     "actual": "5",
-     "predicted": "8",
-     "confidence": 0.401
-    },
-    {
-     "name": "SO57382",
-     "actual": "5",
-     "predicted": "8",
-     "confidence": 0.402
-    },
-    {
-     "name": "SO63339",
-     "actual": "5",
-     "predicted": "5",
-     "confidence": 0.411
-    },
-    {
-     "name": "SO67322",
-     "actual": "1",
-     "predicted": "1",
-     "confidence": 0.449
-    },
-    {
-     "name": "SO45271",
-     "actual": "2",
-     "predicted": "3",
-     "confidence": 0.462
-    }
-   ],
-   "missing_fill": null,
-   "features": {
-    "own": 10,
-    "linked": 9,
-    "groups": [],
-    "text": true
-   },
-   "seconds": 347.4,
-   "manual_score": 0.5,
-   "null_rate": 0.0,
-   "table_role": "bewegung",
-   "table_label": "SalesOrderHeader",
-   "fk_to": "SalesTerritory",
-   "special": false,
-   "value": {
-    "kind": "revenue",
-    "label": "Umsatz pro Jahr der Datensätze (aus SalesOrderDetail)",
-    "total_eur": 21802528.0,
-    "entries_per_year": 6788,
-    "years": 4.64
-   },
-   "euro": {
-    "labor_year": 13576.0,
-    "gap_once": 0.0,
-    "entries_per_year": 6788,
-    "minutes": 2.0,
-    "exposure_eur": 21802528.0,
-    "net_year": 13576.0
-   }
-  },
-  {
-   "id": "SalesOrderHeader.ShipMethodID",
-   "table": "SalesOrderHeader",
-   "column": "ShipMethodID",
-   "kind": "flag",
-   "rows": 8000,
-   "labeled": 8000,
-   "missing": 0,
-   "excluded": [],
-   "status": "ok",
-   "verdict": "ML vorhersagbar",
-   "classes": [
-    {
-     "value": "1",
-     "n": 7011
-    },
-    {
-     "value": "5",
-     "n": 989
-    }
-   ],
-   "positive": "1",
-   "n_positive": 7011,
-   "alpha_95": 0.00043,
-   "engines": [
-    {
-     "id": "rule",
-     "name": "Regel: häufigster Wert je „Customer.PersonID“",
-     "klass": "Regel",
-     "metrics": {
-      "balanced_accuracy": 0.9055,
-      "accuracy": 0.9766,
-      "auto_98": 0.0813,
-      "auto_99": 0.0003,
-      "auto_positive": 0.0199,
-      "auto_negative": 0.1003,
-      "negatives_caught": 0.8109
-     }
-    },
-    {
-     "id": "lgbm",
-     "name": "LightGBM (eigene Felder)",
-     "klass": "Baum",
-     "metrics": {
-      "balanced_accuracy": 0.9995,
-      "accuracy": 0.9999,
-      "auto_98": 1.0,
-      "auto_99": 1.0,
-      "auroc": 1.0,
-      "auprc": 1.0,
-      "auto_positive": 0.8942,
-      "auto_negative": 0.1236,
-      "negatives_caught": 1.0
-     }
-    },
-    {
-     "id": "lgbm_graph",
-     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
-     "klass": "Graph-ML light",
-     "metrics": {
-      "balanced_accuracy": 0.9995,
-      "accuracy": 0.9999,
-      "auto_98": 1.0,
-      "auto_99": 1.0,
-      "auroc": 1.0,
-      "auprc": 1.0,
-      "auto_positive": 0.8942,
-      "auto_negative": 0.1236,
-      "negatives_caught": 1.0
-     }
-    },
-    {
-     "id": "text",
-     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
-     "klass": "Text",
-     "metrics": {
-      "balanced_accuracy": 0.9328,
-      "accuracy": 0.9584,
-      "auto_98": 0.9364,
-      "auto_99": 0.8351,
-      "auroc": 0.9742,
-      "auprc": 0.9947,
-      "auto_positive": 0.882,
-      "auto_negative": 0.0037,
-      "negatives_caught": 0.0303
-     }
-    },
-    {
-     "id": "ensemble",
-     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
-     "klass": "Ensemble",
-     "metrics": {
-      "balanced_accuracy": 0.9995,
-      "accuracy": 0.9999,
-      "auto_98": 1.0,
-      "auto_99": 1.0,
-      "auroc": 1.0,
-      "auprc": 1.0,
-      "auto_positive": 0.8942,
-      "auto_negative": 0.1236,
-      "negatives_caught": 1.0
-     }
-    }
-   ],
-   "best": "lgbm",
-   "lift_vs_rule": 0.1038,
-   "auto_98": 1.0,
-   "threshold_98": 0.9977,
-   "rule_or_leak": [
-    {
-     "feature": "OnlineOrderFlag",
-     "ba": 1.0,
-     "source": "eigen"
-    },
-    {
-     "feature": "SalesPersonID",
-     "ba": 1.0,
-     "source": "eigen"
-    },
-    {
-     "feature": "Customer.StoreID",
-     "ba": 1.0,
-     "source": "über CustomerID → Customer"
-    }
-   ],
-   "rule_cover": {
-    "feature": "OnlineOrderFlag",
-    "ba": 1.0,
-    "source": "eigen"
-   },
-   "leak_tables": [],
-   "importance": [
-    {
-     "feature": "CustomerID",
-     "source": "eigen",
-     "importance": 72401.5
-    },
-    {
-     "feature": "Customer.PersonID",
-     "source": "über CustomerID → Customer",
-     "importance": 17398.1
-    },
-    {
-     "feature": "TaxAmt",
-     "source": "eigen",
-     "importance": 673.0
-    },
-    {
-     "feature": "Address.City",
-     "source": "über ShipToAddressID → Address",
-     "importance": 219.7
-    },
-    {
-     "feature": "SalesTerritory.SalesYTD",
-     "source": "über TerritoryID → SalesTerritory",
-     "importance": 135.0
-    },
-    {
-     "feature": "SubTotal",
-     "source": "eigen",
-     "importance": 78.4
-    },
-    {
-     "feature": "TerritoryID",
-     "source": "eigen",
-     "importance": 11.1
-    },
-    {
-     "feature": "CurrencyRate.EndOfDayRate",
-     "source": "über CurrencyRateID → CurrencyRate",
-     "importance": 9.5
-    }
-   ],
-   "examples": [
-    {
-     "name": "SO45579",
-     "actual": "5",
-     "predicted": "1",
-     "confidence": 0.998
-    },
-    {
-     "name": "SO49746",
-     "actual": "1",
-     "predicted": "1",
-     "confidence": 0.999
-    },
-    {
-     "name": "SO44723",
-     "actual": "1",
-     "predicted": "1",
-     "confidence": 1.0
-    },
-    {
-     "name": "SO44479",
-     "actual": "1",
-     "predicted": "1",
-     "confidence": 1.0
-    },
-    {
-     "name": "SO68808",
-     "actual": "1",
-     "predicted": "1",
-     "confidence": 1.0
-    },
-    {
-     "name": "SO68467",
-     "actual": "1",
-     "predicted": "1",
-     "confidence": 1.0
-    }
-   ],
-   "missing_fill": null,
-   "features": {
-    "own": 8,
-    "linked": 10,
-    "groups": [],
-    "text": true
-   },
-   "seconds": 48.6,
-   "manual_score": 0.65,
-   "null_rate": 0.0,
-   "table_role": "bewegung",
-   "table_label": "SalesOrderHeader",
-   "fk_to": "ShipMethod",
-   "special": false,
-   "value": {
-    "kind": "revenue",
-    "label": "Umsatz pro Jahr der Datensätze (aus SalesOrderDetail)",
-    "total_eur": 21802528.0,
-    "entries_per_year": 6788,
-    "years": 4.64
-   },
-   "euro": {
-    "labor_year": 10182.0,
-    "gap_once": 0.0,
-    "entries_per_year": 6788,
-    "minutes": 1.5,
-    "exposure_eur": 21802528.0,
-    "net_year": 10182.0
    }
   },
   {
@@ -1434,7 +936,7 @@
     "groups": [],
     "text": true
    },
-   "seconds": 23.8,
+   "seconds": 24.7,
    "manual_score": 0.5,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -1455,63 +957,6 @@
     "minutes": 2.0,
     "exposure_eur": null,
     "net_year": 5358.0
-   }
-  },
-  {
-   "id": "PurchaseOrderHeader.TaxAmt",
-   "table": "PurchaseOrderHeader",
-   "column": "TaxAmt",
-   "kind": "param",
-   "rows": 4012,
-   "labeled": 4012,
-   "missing": 0,
-   "excluded": [],
-   "status": "ok",
-   "verdict": "ML vorhersagbar",
-   "engines": [
-    {
-     "id": "rule",
-     "name": "Regel: Median je Gruppe",
-     "klass": "Regel",
-     "metrics": {
-      "within_10": 0.9748
-     }
-    },
-    {
-     "id": "lgbm_graph",
-     "name": "LightGBM + Verknüpfungen",
-     "klass": "Graph-ML light",
-     "metrics": {
-      "within_10": 0.9526
-     }
-    }
-   ],
-   "best": "lgbm_graph",
-   "auto_98": 0.9526,
-   "lift_vs_rule": -0.0228,
-   "rule_or_leak": [],
-   "metric_note": "Anteil der Vorschläge innerhalb ±10 % des gepflegten Werts",
-   "seconds": 1.2,
-   "manual_score": 0.45,
-   "null_rate": 0.0,
-   "table_role": "stamm",
-   "table_label": "PurchaseOrderHeader",
-   "fk_to": null,
-   "special": false,
-   "value": {
-    "kind": "revenue",
-    "label": "Umsatz pro Jahr der Datensätze (aus PurchaseOrderDetail)",
-    "total_eur": 12661562.0,
-    "entries_per_year": 602,
-    "years": 4.64
-   },
-   "euro": {
-    "labor_year": 1720.0,
-    "gap_once": 0.0,
-    "entries_per_year": 602,
-    "minutes": 3.0,
-    "exposure_eur": 12661562.0,
-    "net_year": 1720.0
    }
   },
   {
@@ -1712,7 +1157,7 @@
     "groups": [],
     "text": true
    },
-   "seconds": 25.1,
+   "seconds": 28.0,
    "manual_score": 0.6,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -1950,7 +1395,7 @@
     "groups": [],
     "text": true
    },
-   "seconds": 53.3,
+   "seconds": 65.2,
    "manual_score": 0.5,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -2007,7 +1452,7 @@
    "lift_vs_rule": 0.5338,
    "rule_or_leak": [],
    "metric_note": "Anteil der Vorschläge innerhalb ±10 % des gepflegten Werts",
-   "seconds": 0.9,
+   "seconds": 1.0,
    "manual_score": 0.6,
    "null_rate": 0.4147,
    "table_role": "stamm",
@@ -2098,10 +1543,10 @@
      "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
      "klass": "Graph-ML light",
      "metrics": {
-      "balanced_accuracy": 0.9537,
-      "accuracy": 0.9762,
-      "auto_98": 0.9861,
-      "auto_99": 0.9405
+      "balanced_accuracy": 0.9548,
+      "accuracy": 0.9782,
+      "auto_98": 0.994,
+      "auto_99": 0.9524
      }
     },
     {
@@ -2120,10 +1565,10 @@
      "name": "TabPFN v2",
      "klass": "TFM",
      "metrics": {
-      "balanced_accuracy": 0.9605,
-      "accuracy": 0.9782,
-      "auto_98": 0.998,
-      "auto_99": 0.9782
+      "balanced_accuracy": 0.9615,
+      "accuracy": 0.9802,
+      "auto_98": 1.0,
+      "auto_99": 0.9802
      }
     },
     {
@@ -2131,17 +1576,17 @@
      "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
      "klass": "Ensemble",
      "metrics": {
-      "balanced_accuracy": 0.9552,
-      "accuracy": 0.9683,
-      "auto_98": 0.9742,
-      "auto_99": 0.9524
+      "balanced_accuracy": 0.9629,
+      "accuracy": 0.9722,
+      "auto_98": 0.9762,
+      "auto_99": 0.9544
      }
     }
    ],
    "best": "tabpfn",
-   "lift_vs_rule": 0.1303,
-   "auto_98": 0.998,
-   "threshold_98": 0.4497,
+   "lift_vs_rule": 0.1314,
+   "auto_98": 1.0,
+   "threshold_98": 0.4213,
    "rule_or_leak": [
     {
      "feature": "ReorderPoint",
@@ -2157,332 +1602,88 @@
    "leak_tables": [],
    "importance": [
     {
+     "feature": "Graph·BillOfMaterials.ComponentID→UnitMeasureCode·800",
+     "source": "Nachbarschaft BillOfMaterials",
+     "importance": 2343.8
+    },
+    {
      "feature": "Graph·ProductInventory.ProductID→LocationID·500",
      "source": "Nachbarschaft ProductInventory",
-     "importance": 1752.7
+     "importance": 1835.3
     },
     {
      "feature": "Graph·ProductVendor.ProductID→BusinessEntityID·1000",
      "source": "Nachbarschaft ProductVendor",
-     "importance": 1734.9
-    },
-    {
-     "feature": "Graph·BillOfMaterials.ComponentID→UnitMeasureCode·800",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 1641.5
+     "importance": 1601.6
     },
     {
      "feature": "DaysToManufacture",
      "source": "eigen",
-     "importance": 1596.9
-    },
-    {
-     "feature": "BillOfMaterials·Ø BOMLevel (ComponentID)",
-     "source": "Struktur BillOfMaterials",
-     "importance": 1010.9
+     "importance": 1228.2
     },
     {
      "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·500",
      "source": "Nachbarschaft BillOfMaterials",
-     "importance": 872.2
+     "importance": 1066.5
     },
     {
-     "feature": "Graph·BillOfMaterials.ComponentID→UnitMeasureCode·60",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 776.9
+     "feature": "BillOfMaterials·Ø BOMLevel (ComponentID)",
+     "source": "Struktur BillOfMaterials",
+     "importance": 984.1
+    },
+    {
+     "feature": "ProductSubcategoryID",
+     "source": "eigen",
+     "importance": 888.4
     },
     {
      "feature": "Graph·ProductInventory.ProductID→LocationID·4",
      "source": "Nachbarschaft ProductInventory",
-     "importance": 723.2
+     "importance": 801.4
     }
    ],
    "examples": [
     {
-     "name": "Decal 2",
-     "actual": "1000",
-     "predicted": "800",
-     "confidence": 0.45
+     "name": "Seat Stays",
+     "actual": "800",
+     "predicted": "1000",
+     "confidence": 0.421
     },
     {
-     "name": "Top Tube",
+     "name": "Seat Post",
      "actual": "500",
      "predicted": "500",
      "confidence": 0.454
     },
     {
-     "name": "Seat Stays",
-     "actual": "800",
-     "predicted": "1000",
-     "confidence": 0.411
-    },
-    {
-     "name": "Lower Head Race",
-     "actual": "1000",
-     "predicted": "1000",
-     "confidence": 0.494
-    },
-    {
-     "name": "Seat Lug",
+     "name": "Decal 2",
      "actual": "1000",
      "predicted": "800",
-     "confidence": 0.497
-    },
-    {
-     "name": "Freewheel",
-     "actual": "500",
-     "predicted": "500",
-     "confidence": 0.5
-    }
-   ],
-   "missing_fill": null,
-   "features": {
-    "own": 15,
-    "linked": 32,
-    "groups": [
-     "Product → BillOfMaterials (ProductAssemblyID) → Product",
-     "Product → BillOfMaterials (ProductAssemblyID) → UnitMeasure",
-     "Product → BillOfMaterials (ComponentID) → Product",
-     "Product → BillOfMaterials (ComponentID) → UnitMeasure",
-     "Product → ProductInventory (ProductID) → Location",
-     "Product → ProductVendor (ProductID) → UnitMeasure",
-     "Product → ProductVendor (ProductID) → Vendor",
-     "Product → SpecialOfferProduct (ProductID) → SpecialOffer"
-    ],
-    "text": true
-   },
-   "seconds": 41.5,
-   "manual_score": 0.65,
-   "null_rate": 0.0,
-   "table_role": "stamm",
-   "table_label": "Product",
-   "fk_to": null,
-   "special": false,
-   "value": {
-    "kind": "revenue",
-    "label": "Umsatz pro Jahr der Datensätze (aus PurchaseOrderDetail)",
-    "total_eur": 12661562.0,
-    "entries_per_year": 99,
-    "years": 4.64
-   },
-   "euro": {
-    "labor_year": 198.0,
-    "gap_once": 0.0,
-    "entries_per_year": 99,
-    "minutes": 2.0,
-    "exposure_eur": 12661562.0,
-    "net_year": 198.0
-   }
-  },
-  {
-   "id": "Product.ReorderPoint",
-   "table": "Product",
-   "column": "ReorderPoint",
-   "kind": "class",
-   "rows": 504,
-   "labeled": 504,
-   "missing": 0,
-   "excluded": [],
-   "status": "ok",
-   "verdict": "ML vorhersagbar",
-   "classes": [
-    {
-     "value": "375",
-     "n": 167
-    },
-    {
-     "value": "750",
-     "n": 156
-    },
-    {
-     "value": "75",
-     "n": 97
-    },
-    {
-     "value": "3",
-     "n": 54
-    },
-    {
-     "value": "600",
-     "n": 25
-    },
-    {
-     "value": "45",
-     "n": 5
-    }
-   ],
-   "positive": null,
-   "n_positive": null,
-   "alpha_95": null,
-   "engines": [
-    {
-     "id": "rule",
-     "name": "Regel: häufigster Wert je „ProductNumber·Präfix“",
-     "klass": "Regel",
-     "metrics": {
-      "balanced_accuracy": 0.8498,
-      "accuracy": 0.8968,
-      "auto_98": 0.0,
-      "auto_99": 0.0
-     }
-    },
-    {
-     "id": "lgbm",
-     "name": "LightGBM (eigene Felder)",
-     "klass": "Baum",
-     "metrics": {
-      "balanced_accuracy": 0.9099,
-      "accuracy": 0.9187,
-      "auto_98": 0.8611,
-      "auto_99": 0.8294
-     }
-    },
-    {
-     "id": "lgbm_graph",
-     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
-     "klass": "Graph-ML light",
-     "metrics": {
-      "balanced_accuracy": 0.9537,
-      "accuracy": 0.9762,
-      "auto_98": 0.9861,
-      "auto_99": 0.9405
-     }
-    },
-    {
-     "id": "text",
-     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
-     "klass": "Text",
-     "metrics": {
-      "balanced_accuracy": 0.9483,
-      "accuracy": 0.9444,
-      "auto_98": 0.9107,
-      "auto_99": 0.8353
-     }
-    },
-    {
-     "id": "tabpfn",
-     "name": "TabPFN v2",
-     "klass": "TFM",
-     "metrics": {
-      "balanced_accuracy": 0.9671,
-      "accuracy": 0.9802,
-      "auto_98": 1.0,
-      "auto_99": 0.9782
-     }
-    },
-    {
-     "id": "ensemble",
-     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
-     "klass": "Ensemble",
-     "metrics": {
-      "balanced_accuracy": 0.9552,
-      "accuracy": 0.9683,
-      "auto_98": 0.9742,
-      "auto_99": 0.9524
-     }
-    }
-   ],
-   "best": "tabpfn",
-   "lift_vs_rule": 0.138,
-   "auto_98": 1.0,
-   "threshold_98": 0.3547,
-   "rule_or_leak": [
-    {
-     "feature": "SafetyStockLevel",
-     "ba": 1.0,
-     "source": "eigen"
-    }
-   ],
-   "rule_cover": {
-    "feature": "SafetyStockLevel",
-    "ba": 1.0,
-    "source": "eigen"
-   },
-   "leak_tables": [],
-   "importance": [
-    {
-     "feature": "Graph·ProductInventory.ProductID→LocationID·375",
-     "source": "Nachbarschaft ProductInventory",
-     "importance": 1752.7
-    },
-    {
-     "feature": "Graph·ProductVendor.ProductID→BusinessEntityID·750",
-     "source": "Nachbarschaft ProductVendor",
-     "importance": 1734.9
-    },
-    {
-     "feature": "Graph·BillOfMaterials.ComponentID→UnitMeasureCode·600",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 1641.5
-    },
-    {
-     "feature": "DaysToManufacture",
-     "source": "eigen",
-     "importance": 1596.9
-    },
-    {
-     "feature": "BillOfMaterials·Ø BOMLevel (ComponentID)",
-     "source": "Struktur BillOfMaterials",
-     "importance": 1010.9
-    },
-    {
-     "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·375",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 872.2
-    },
-    {
-     "feature": "Graph·BillOfMaterials.ComponentID→UnitMeasureCode·45",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 776.9
-    },
-    {
-     "feature": "Graph·ProductInventory.ProductID→LocationID·3",
-     "source": "Nachbarschaft ProductInventory",
-     "importance": 723.2
-    }
-   ],
-   "examples": [
-    {
-     "name": "Top Tube",
-     "actual": "375",
-     "predicted": "375",
-     "confidence": 0.355
-    },
-    {
-     "name": "Seat Stays",
-     "actual": "600",
-     "predicted": "600",
-     "confidence": 0.413
-    },
-    {
-     "name": "Decal 2",
-     "actual": "750",
-     "predicted": "600",
-     "confidence": 0.487
-    },
-    {
-     "name": "Seat Lug",
-     "actual": "750",
-     "predicted": "750",
-     "confidence": 0.498
+     "confidence": 0.471
     },
     {
      "name": "Lower Head Race",
-     "actual": "750",
-     "predicted": "600",
-     "confidence": 0.507
+     "actual": "1000",
+     "predicted": "1000",
+     "confidence": 0.499
     },
     {
-     "name": "Guide Pulley",
-     "actual": "600",
-     "predicted": "375",
-     "confidence": 0.508
+     "name": "HL Crankarm",
+     "actual": "500",
+     "predicted": "800",
+     "confidence": 0.518
+    },
+    {
+     "name": "Seat Tube",
+     "actual": "500",
+     "predicted": "800",
+     "confidence": 0.526
     }
    ],
    "missing_fill": null,
    "features": {
     "own": 15,
-    "linked": 32,
+    "linked": 28,
     "groups": [
      "Product → BillOfMaterials (ProductAssemblyID) → Product",
      "Product → BillOfMaterials (ProductAssemblyID) → UnitMeasure",
@@ -2495,7 +1696,7 @@
     ],
     "text": true
    },
-   "seconds": 38.7,
+   "seconds": 39.6,
    "manual_score": 0.65,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -2621,7 +1822,7 @@
    "best": "lgbm_graph",
    "lift_vs_rule": 0.1855,
    "auto_98": 1.0,
-   "threshold_98": 0.8268,
+   "threshold_98": 0.7278,
    "rule_or_leak": [],
    "rule_cover": null,
    "leak_tables": [],
@@ -2629,42 +1830,42 @@
     {
      "feature": "ProductSubcategoryID",
      "source": "eigen",
-     "importance": 2774.4
+     "importance": 2755.4
     },
     {
      "feature": "ProductInventory·Anzahl (ProductID)",
      "source": "Struktur ProductInventory",
-     "importance": 2361.1
+     "importance": 2457.4
     },
     {
      "feature": "ProductInventory·Ø Bin (ProductID)",
      "source": "Struktur ProductInventory",
-     "importance": 1017.2
+     "importance": 977.8
     },
     {
      "feature": "ProductVendor·Ø LastReceiptCost (ProductID)",
      "source": "Struktur ProductVendor",
-     "importance": 926.8
+     "importance": 966.8
     },
     {
      "feature": "ProductVendor·Ø StandardPrice (ProductID)",
      "source": "Struktur ProductVendor",
-     "importance": 922.6
-    },
-    {
-     "feature": "Graph·ProductInventory.ProductID→LocationID·2",
-     "source": "Nachbarschaft ProductInventory",
-     "importance": 513.5
+     "importance": 862.3
     },
     {
      "feature": "Graph·ProductVendor.ProductID→BusinessEntityID·1",
      "source": "Nachbarschaft ProductVendor",
-     "importance": 497.6
+     "importance": 558.0
+    },
+    {
+     "feature": "Graph·ProductInventory.ProductID→LocationID·1",
+     "source": "Nachbarschaft ProductInventory",
+     "importance": 511.6
     },
     {
      "feature": "MakeFlag",
      "source": "eigen",
-     "importance": 442.7
+     "importance": 446.1
     }
    ],
    "examples": [
@@ -2672,43 +1873,43 @@
      "name": "HL Road Pedal",
      "actual": "1",
      "predicted": "1",
-     "confidence": 0.827
+     "confidence": 0.728
     },
     {
      "name": "Chain",
      "actual": "1",
      "predicted": "1",
-     "confidence": 0.868
-    },
-    {
-     "name": "Headset Ball Bearings",
-     "actual": "0",
-     "predicted": "0",
-     "confidence": 0.962
-    },
-    {
-     "name": "HL Crankarm",
-     "actual": "0",
-     "predicted": "0",
-     "confidence": 0.987
-    },
-    {
-     "name": "Paint - Blue",
-     "actual": "0",
-     "predicted": "0",
-     "confidence": 0.991
+     "confidence": 0.88
     },
     {
      "name": "LL Mountain Seat/Saddle",
      "actual": "1",
      "predicted": "1",
-     "confidence": 0.994
+     "confidence": 0.992
+    },
+    {
+     "name": "HL Crankarm",
+     "actual": "0",
+     "predicted": "0",
+     "confidence": 0.992
+    },
+    {
+     "name": "LL Touring Seat/Saddle",
+     "actual": "1",
+     "predicted": "1",
+     "confidence": 0.993
+    },
+    {
+     "name": "Headset Ball Bearings",
+     "actual": "0",
+     "predicted": "0",
+     "confidence": 0.995
     }
    ],
    "missing_fill": null,
    "features": {
     "own": 16,
-    "linked": 32,
+    "linked": 28,
     "groups": [
      "Product → BillOfMaterials (ProductAssemblyID) → Product",
      "Product → BillOfMaterials (ProductAssemblyID) → UnitMeasure",
@@ -2721,7 +1922,7 @@
     ],
     "text": true
    },
-   "seconds": 44.3,
+   "seconds": 34.9,
    "manual_score": 0.65,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -2738,247 +1939,6 @@
    "euro": {
     "labor_year": 198.0,
     "gap_once": 0.0,
-    "entries_per_year": 99,
-    "minutes": 2.0,
-    "exposure_eur": 12661562.0,
-    "net_year": 198.0
-   }
-  },
-  {
-   "id": "Product.Class",
-   "table": "Product",
-   "column": "Class",
-   "kind": "class",
-   "rows": 504,
-   "labeled": 247,
-   "missing": 257,
-   "excluded": [],
-   "status": "ok",
-   "verdict": "ML vorhersagbar",
-   "classes": [
-    {
-     "value": "L",
-     "n": 97
-    },
-    {
-     "value": "H",
-     "n": 82
-    },
-    {
-     "value": "M",
-     "n": 68
-    }
-   ],
-   "positive": null,
-   "n_positive": null,
-   "alpha_95": null,
-   "engines": [
-    {
-     "id": "rule",
-     "name": "Regel: häufigster Wert je „ProductListPriceHistory·Ø ListPrice (ProductID)“",
-     "klass": "Regel",
-     "metrics": {
-      "balanced_accuracy": 0.5988,
-      "accuracy": 0.6356,
-      "auto_98": 0.004,
-      "auto_99": 0.004
-     }
-    },
-    {
-     "id": "lgbm",
-     "name": "LightGBM (eigene Felder)",
-     "klass": "Baum",
-     "metrics": {
-      "balanced_accuracy": 0.8245,
-      "accuracy": 0.83,
-      "auto_98": 0.7449,
-      "auto_99": 0.7206
-     }
-    },
-    {
-     "id": "lgbm_graph",
-     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
-     "klass": "Graph-ML light",
-     "metrics": {
-      "balanced_accuracy": 0.9695,
-      "accuracy": 0.9717,
-      "auto_98": 0.9555,
-      "auto_99": 0.9231
-     }
-    },
-    {
-     "id": "text",
-     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
-     "klass": "Text",
-     "metrics": {
-      "balanced_accuracy": 0.9324,
-      "accuracy": 0.9312,
-      "auto_98": 0.8947,
-      "auto_99": 0.8826
-     }
-    },
-    {
-     "id": "tabpfn",
-     "name": "TabPFN v2",
-     "klass": "TFM",
-     "metrics": {
-      "balanced_accuracy": 0.9758,
-      "accuracy": 0.9757,
-      "auto_98": 0.9879,
-      "auto_99": 0.919
-     }
-    },
-    {
-     "id": "ensemble",
-     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
-     "klass": "Ensemble",
-     "metrics": {
-      "balanced_accuracy": 0.9819,
-      "accuracy": 0.9838,
-      "auto_98": 1.0,
-      "auto_99": 0.9595
-     }
-    }
-   ],
-   "best": "ensemble",
-   "lift_vs_rule": 0.6398,
-   "auto_98": 1.0,
-   "threshold_98": 0.5402,
-   "rule_or_leak": [],
-   "rule_cover": null,
-   "leak_tables": [],
-   "importance": [
-    {
-     "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·L",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 566.5
-    },
-    {
-     "feature": "StandardCost",
-     "source": "eigen",
-     "importance": 461.5
-    },
-    {
-     "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·M",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 446.2
-    },
-    {
-     "feature": "Graph·BillOfMaterials.ProductAssemblyID→ComponentID·M",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 374.2
-    },
-    {
-     "feature": "Style",
-     "source": "eigen",
-     "importance": 374.1
-    },
-    {
-     "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·H",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 359.7
-    },
-    {
-     "feature": "Graph·BillOfMaterials.ProductAssemblyID→ComponentID·H",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 248.2
-    },
-    {
-     "feature": "ProductListPriceHistory·Ø ListPrice (ProductID)",
-     "source": "Struktur ProductListPriceHistory",
-     "importance": 224.7
-    }
-   ],
-   "examples": [
-    {
-     "name": "ML Fork",
-     "actual": "M",
-     "predicted": "M",
-     "confidence": 0.54
-    },
-    {
-     "name": "HL Mountain Tire",
-     "actual": "H",
-     "predicted": "H",
-     "confidence": 0.591
-    },
-    {
-     "name": "HL Road Seat/Saddle",
-     "actual": "H",
-     "predicted": "H",
-     "confidence": 0.811
-    },
-    {
-     "name": "HL Touring Seat/Saddle",
-     "actual": "H",
-     "predicted": "H",
-     "confidence": 0.82
-    },
-    {
-     "name": "HL Mountain Seat/Saddle",
-     "actual": "H",
-     "predicted": "H",
-     "confidence": 0.904
-    },
-    {
-     "name": "ML Road Rim",
-     "actual": "M",
-     "predicted": "L",
-     "confidence": 0.917
-    }
-   ],
-   "missing_fill": {
-    "missing": 257,
-    "sure": 248,
-    "share_sure": 0.965,
-    "proposals": [
-     {
-      "value": "M",
-      "n": 141
-     },
-     {
-      "value": "L",
-      "n": 86
-     },
-     {
-      "value": "H",
-      "n": 21
-     }
-    ],
-    "model": "LightGBM + Verknüpfungen"
-   },
-   "features": {
-    "own": 16,
-    "linked": 32,
-    "groups": [
-     "Product → BillOfMaterials (ProductAssemblyID) → Product",
-     "Product → BillOfMaterials (ProductAssemblyID) → UnitMeasure",
-     "Product → BillOfMaterials (ComponentID) → Product",
-     "Product → BillOfMaterials (ComponentID) → UnitMeasure",
-     "Product → ProductInventory (ProductID) → Location",
-     "Product → ProductVendor (ProductID) → UnitMeasure",
-     "Product → ProductVendor (ProductID) → Vendor",
-     "Product → SpecialOfferProduct (ProductID) → SpecialOffer"
-    ],
-    "text": true
-   },
-   "seconds": 9.8,
-   "manual_score": 0.8,
-   "null_rate": 0.5099,
-   "table_role": "stamm",
-   "table_label": "Product",
-   "fk_to": null,
-   "special": false,
-   "value": {
-    "kind": "revenue",
-    "label": "Umsatz pro Jahr der Datensätze (aus PurchaseOrderDetail)",
-    "total_eur": 12661562.0,
-    "entries_per_year": 99,
-    "years": 4.64
-   },
-   "euro": {
-    "labor_year": 198.0,
-    "gap_once": 496.0,
     "entries_per_year": 99,
     "minutes": 2.0,
     "exposure_eur": 12661562.0,
@@ -3041,10 +2001,10 @@
      "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
      "klass": "Graph-ML light",
      "metrics": {
-      "balanced_accuracy": 0.9229,
-      "accuracy": 0.9716,
-      "auto_98": 0.9526,
-      "auto_99": 0.9147
+      "balanced_accuracy": 0.8815,
+      "accuracy": 0.9431,
+      "auto_98": 0.8436,
+      "auto_99": 0.7962
      }
     },
     {
@@ -3092,42 +2052,42 @@
     {
      "feature": "ProductModelID",
      "source": "eigen",
-     "importance": 776.6
+     "importance": 773.8
     },
     {
      "feature": "ProductVendor·Ø AverageLeadTime (ProductID)",
      "source": "Struktur ProductVendor",
-     "importance": 687.2
+     "importance": 654.0
     },
     {
      "feature": "Class",
      "source": "eigen",
-     "importance": 614.6
+     "importance": 612.0
     },
     {
      "feature": "Graph·BillOfMaterials.ProductAssemblyID→ComponentID·U",
      "source": "Nachbarschaft BillOfMaterials",
-     "importance": 292.6
+     "importance": 262.0
     },
     {
      "feature": "Graph·ProductVendor.ProductID→BusinessEntityID·U",
      "source": "Nachbarschaft ProductVendor",
-     "importance": 207.6
+     "importance": 238.0
     },
     {
      "feature": "Graph·BillOfMaterials.ProductAssemblyID→ComponentID·W",
      "source": "Nachbarschaft BillOfMaterials",
-     "importance": 171.6
+     "importance": 203.2
     },
     {
      "feature": "StandardCost",
      "source": "eigen",
-     "importance": 124.9
+     "importance": 185.3
     },
     {
      "feature": "ProductVendor·Ø StandardPrice (ProductID)",
      "source": "Struktur ProductVendor",
-     "importance": 107.9
+     "importance": 119.0
     }
    ],
    "examples": [
@@ -3175,18 +2135,18 @@
     "proposals": [
      {
       "value": "U",
-      "n": 239
+      "n": 240
      },
      {
       "value": "W",
-      "n": 54
+      "n": 53
      }
     ],
     "model": "LightGBM + Verknüpfungen"
    },
    "features": {
     "own": 16,
-    "linked": 32,
+    "linked": 28,
     "groups": [
      "Product → BillOfMaterials (ProductAssemblyID) → Product",
      "Product → BillOfMaterials (ProductAssemblyID) → UnitMeasure",
@@ -3199,7 +2159,7 @@
     ],
     "text": true
    },
-   "seconds": 8.3,
+   "seconds": 9.5,
    "manual_score": 0.8,
    "null_rate": 0.5813,
    "table_role": "stamm",
@@ -3346,7 +2306,7 @@
    "best": "lgbm_graph",
    "lift_vs_rule": 0.4056,
    "auto_98": 1.0,
-   "threshold_98": 0.4925,
+   "threshold_98": 0.4506,
    "rule_or_leak": [],
    "rule_cover": null,
    "leak_tables": [],
@@ -3354,42 +2314,42 @@
     {
      "feature": "Weight",
      "source": "eigen",
-     "importance": 2140.7
+     "importance": 2125.3
     },
     {
      "feature": "ProductModelID",
      "source": "eigen",
-     "importance": 1586.8
+     "importance": 1576.7
     },
     {
      "feature": "BillOfMaterials·Ø PerAssemblyQty (ProductAssemblyID)",
      "source": "Struktur BillOfMaterials",
-     "importance": 923.1
-    },
-    {
-     "feature": "ProductVendor·Ø AverageLeadTime (ProductID)",
-     "source": "Struktur ProductVendor",
-     "importance": 723.9
-    },
-    {
-     "feature": "ProductInventory·Anzahl (ProductID)",
-     "source": "Struktur ProductInventory",
-     "importance": 672.2
+     "importance": 945.5
     },
     {
      "feature": "ProductInventory·Ø Quantity (ProductID)",
      "source": "Struktur ProductInventory",
-     "importance": 670.0
+     "importance": 758.4
     },
     {
-     "feature": "ProductVendor·Ø StandardPrice (ProductID)",
+     "feature": "ProductVendor·Ø AverageLeadTime (ProductID)",
      "source": "Struktur ProductVendor",
-     "importance": 650.7
+     "importance": 686.6
     },
     {
      "feature": "ProductProductPhoto·Ø ProductPhotoID (ProductID)",
      "source": "Struktur ProductProductPhoto",
-     "importance": 644.2
+     "importance": 669.1
+    },
+    {
+     "feature": "ProductInventory·Anzahl (ProductID)",
+     "source": "Struktur ProductInventory",
+     "importance": 658.5
+    },
+    {
+     "feature": "ProductVendor·Ø StandardPrice (ProductID)",
+     "source": "Struktur ProductVendor",
+     "importance": 579.4
     }
    ],
    "examples": [
@@ -3397,58 +2357,62 @@
      "name": "LL Mountain Frame - Silver, 52",
      "actual": "12",
      "predicted": "16",
-     "confidence": 0.493
+     "confidence": 0.451
     },
     {
      "name": "LL Mountain Frame - Black, 52",
      "actual": "12",
      "predicted": "16",
-     "confidence": 0.514
+     "confidence": 0.465
     },
     {
      "name": "LL Road Frame - Red, 62",
      "actual": "14",
      "predicted": "14",
-     "confidence": 0.605
+     "confidence": 0.779
     },
     {
      "name": "ML Road Frame-W - Yellow, 38",
      "actual": "14",
      "predicted": "14",
-     "confidence": 0.974
+     "confidence": 0.962
     },
     {
      "name": "HL Touring Seat/Saddle",
      "actual": "15",
      "predicted": "15",
-     "confidence": 0.974
+     "confidence": 0.971
     },
     {
-     "name": "LL Mountain Front Wheel",
-     "actual": "17",
-     "predicted": "17",
-     "confidence": 0.989
+     "name": "LL Touring Handlebars",
+     "actual": "4",
+     "predicted": "4",
+     "confidence": 0.991
     }
    ],
    "missing_fill": {
     "missing": 209,
-    "sure": 209,
-    "share_sure": 1.0,
+    "sure": 208,
+    "share_sure": 0.9952,
     "proposals": [
      {
       "value": "20",
-      "n": 208
+      "n": 190
+     },
+     {
+      "value": "1",
+      "n": 16
      },
      {
       "value": "15",
-      "n": 1
+      "n": 2
      }
     ],
     "model": "LightGBM + Verknüpfungen"
    },
    "features": {
     "own": 16,
-    "linked": 31,
+    "linked": 27,
     "groups": [
      "Product → BillOfMaterials (ProductAssemblyID) → Product",
      "Product → BillOfMaterials (ProductAssemblyID) → UnitMeasure",
@@ -3461,7 +2425,7 @@
     ],
     "text": true
    },
-   "seconds": 24.7,
+   "seconds": 26.6,
    "manual_score": 0.9,
    "null_rate": 0.4147,
    "table_role": "stamm",
@@ -3477,11 +2441,741 @@
    },
    "euro": {
     "labor_year": 198.0,
-    "gap_once": 418.0,
+    "gap_once": 416.0,
     "entries_per_year": 99,
     "minutes": 2.0,
     "exposure_eur": 12661562.0,
     "net_year": 198.0
+   }
+  },
+  {
+   "id": "Product.ReorderPoint",
+   "table": "Product",
+   "column": "ReorderPoint",
+   "kind": "class",
+   "rows": 504,
+   "labeled": 504,
+   "missing": 0,
+   "excluded": [],
+   "status": "ok",
+   "verdict": "ML vorhersagbar",
+   "classes": [
+    {
+     "value": "375",
+     "n": 167
+    },
+    {
+     "value": "750",
+     "n": 156
+    },
+    {
+     "value": "75",
+     "n": 97
+    },
+    {
+     "value": "3",
+     "n": 54
+    },
+    {
+     "value": "600",
+     "n": 25
+    },
+    {
+     "value": "45",
+     "n": 5
+    }
+   ],
+   "positive": null,
+   "n_positive": null,
+   "alpha_95": null,
+   "engines": [
+    {
+     "id": "rule",
+     "name": "Regel: häufigster Wert je „ProductNumber·Präfix“",
+     "klass": "Regel",
+     "metrics": {
+      "balanced_accuracy": 0.8498,
+      "accuracy": 0.8968,
+      "auto_98": 0.0,
+      "auto_99": 0.0
+     }
+    },
+    {
+     "id": "lgbm",
+     "name": "LightGBM (eigene Felder)",
+     "klass": "Baum",
+     "metrics": {
+      "balanced_accuracy": 0.9099,
+      "accuracy": 0.9187,
+      "auto_98": 0.8611,
+      "auto_99": 0.8294
+     }
+    },
+    {
+     "id": "lgbm_graph",
+     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
+     "klass": "Graph-ML light",
+     "metrics": {
+      "balanced_accuracy": 0.9548,
+      "accuracy": 0.9782,
+      "auto_98": 0.994,
+      "auto_99": 0.9524
+     }
+    },
+    {
+     "id": "text",
+     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
+     "klass": "Text",
+     "metrics": {
+      "balanced_accuracy": 0.9483,
+      "accuracy": 0.9444,
+      "auto_98": 0.9107,
+      "auto_99": 0.8353
+     }
+    },
+    {
+     "id": "tabpfn",
+     "name": "TabPFN v2",
+     "klass": "TFM",
+     "metrics": {
+      "balanced_accuracy": 0.9594,
+      "accuracy": 0.9762,
+      "auto_98": 0.994,
+      "auto_99": 0.9802
+     }
+    },
+    {
+     "id": "ensemble",
+     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
+     "klass": "Ensemble",
+     "metrics": {
+      "balanced_accuracy": 0.9629,
+      "accuracy": 0.9722,
+      "auto_98": 0.9762,
+      "auto_99": 0.9544
+     }
+    }
+   ],
+   "best": "tabpfn",
+   "lift_vs_rule": 0.129,
+   "auto_98": 0.994,
+   "threshold_98": 0.5136,
+   "rule_or_leak": [
+    {
+     "feature": "SafetyStockLevel",
+     "ba": 1.0,
+     "source": "eigen"
+    }
+   ],
+   "rule_cover": {
+    "feature": "SafetyStockLevel",
+    "ba": 1.0,
+    "source": "eigen"
+   },
+   "leak_tables": [],
+   "importance": [
+    {
+     "feature": "Graph·BillOfMaterials.ComponentID→UnitMeasureCode·600",
+     "source": "Nachbarschaft BillOfMaterials",
+     "importance": 2343.8
+    },
+    {
+     "feature": "Graph·ProductInventory.ProductID→LocationID·375",
+     "source": "Nachbarschaft ProductInventory",
+     "importance": 1835.3
+    },
+    {
+     "feature": "Graph·ProductVendor.ProductID→BusinessEntityID·750",
+     "source": "Nachbarschaft ProductVendor",
+     "importance": 1601.6
+    },
+    {
+     "feature": "DaysToManufacture",
+     "source": "eigen",
+     "importance": 1228.2
+    },
+    {
+     "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·375",
+     "source": "Nachbarschaft BillOfMaterials",
+     "importance": 1066.5
+    },
+    {
+     "feature": "BillOfMaterials·Ø BOMLevel (ComponentID)",
+     "source": "Struktur BillOfMaterials",
+     "importance": 984.1
+    },
+    {
+     "feature": "ProductSubcategoryID",
+     "source": "eigen",
+     "importance": 888.4
+    },
+    {
+     "feature": "Graph·ProductInventory.ProductID→LocationID·3",
+     "source": "Nachbarschaft ProductInventory",
+     "importance": 801.4
+    }
+   ],
+   "examples": [
+    {
+     "name": "Seat Tube",
+     "actual": "375",
+     "predicted": "600",
+     "confidence": 0.514
+    },
+    {
+     "name": "Seat Lug",
+     "actual": "750",
+     "predicted": "600",
+     "confidence": 0.533
+    },
+    {
+     "name": "Seat Post",
+     "actual": "375",
+     "predicted": "375",
+     "confidence": 0.537
+    },
+    {
+     "name": "Front Derailleur Cage",
+     "actual": "600",
+     "predicted": "375",
+     "confidence": 0.537
+    },
+    {
+     "name": "Lower Head Race",
+     "actual": "750",
+     "predicted": "600",
+     "confidence": 0.488
+    },
+    {
+     "name": "Decal 2",
+     "actual": "750",
+     "predicted": "600",
+     "confidence": 0.542
+    }
+   ],
+   "missing_fill": null,
+   "features": {
+    "own": 15,
+    "linked": 28,
+    "groups": [
+     "Product → BillOfMaterials (ProductAssemblyID) → Product",
+     "Product → BillOfMaterials (ProductAssemblyID) → UnitMeasure",
+     "Product → BillOfMaterials (ComponentID) → Product",
+     "Product → BillOfMaterials (ComponentID) → UnitMeasure",
+     "Product → ProductInventory (ProductID) → Location",
+     "Product → ProductVendor (ProductID) → UnitMeasure",
+     "Product → ProductVendor (ProductID) → Vendor",
+     "Product → SpecialOfferProduct (ProductID) → SpecialOffer"
+    ],
+    "text": true
+   },
+   "seconds": 40.2,
+   "manual_score": 0.65,
+   "null_rate": 0.0,
+   "table_role": "stamm",
+   "table_label": "Product",
+   "fk_to": null,
+   "special": false,
+   "value": {
+    "kind": "revenue",
+    "label": "Umsatz pro Jahr der Datensätze (aus PurchaseOrderDetail)",
+    "total_eur": 12661562.0,
+    "entries_per_year": 99,
+    "years": 4.64
+   },
+   "euro": {
+    "labor_year": 197.0,
+    "gap_once": 0.0,
+    "entries_per_year": 99,
+    "minutes": 2.0,
+    "exposure_eur": 12661562.0,
+    "net_year": 197.0
+   }
+  },
+  {
+   "id": "Product.Class",
+   "table": "Product",
+   "column": "Class",
+   "kind": "class",
+   "rows": 504,
+   "labeled": 247,
+   "missing": 257,
+   "excluded": [],
+   "status": "ok",
+   "verdict": "ML vorhersagbar",
+   "classes": [
+    {
+     "value": "L",
+     "n": 97
+    },
+    {
+     "value": "H",
+     "n": 82
+    },
+    {
+     "value": "M",
+     "n": 68
+    }
+   ],
+   "positive": null,
+   "n_positive": null,
+   "alpha_95": null,
+   "engines": [
+    {
+     "id": "rule",
+     "name": "Regel: häufigster Wert je „StandardCost“",
+     "klass": "Regel",
+     "metrics": {
+      "balanced_accuracy": 0.5952,
+      "accuracy": 0.6356,
+      "auto_98": 0.004,
+      "auto_99": 0.004
+     }
+    },
+    {
+     "id": "lgbm",
+     "name": "LightGBM (eigene Felder)",
+     "klass": "Baum",
+     "metrics": {
+      "balanced_accuracy": 0.8245,
+      "accuracy": 0.83,
+      "auto_98": 0.7449,
+      "auto_99": 0.7206
+     }
+    },
+    {
+     "id": "lgbm_graph",
+     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
+     "klass": "Graph-ML light",
+     "metrics": {
+      "balanced_accuracy": 0.9605,
+      "accuracy": 0.9636,
+      "auto_98": 0.9595,
+      "auto_99": 0.8907
+     }
+    },
+    {
+     "id": "text",
+     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
+     "klass": "Text",
+     "metrics": {
+      "balanced_accuracy": 0.9324,
+      "accuracy": 0.9312,
+      "auto_98": 0.8947,
+      "auto_99": 0.8826
+     }
+    },
+    {
+     "id": "tabpfn",
+     "name": "TabPFN v2",
+     "klass": "TFM",
+     "metrics": {
+      "balanced_accuracy": 0.9793,
+      "accuracy": 0.9798,
+      "auto_98": 0.996,
+      "auto_99": 0.9271
+     }
+    },
+    {
+     "id": "ensemble",
+     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
+     "klass": "Ensemble",
+     "metrics": {
+      "balanced_accuracy": 0.9778,
+      "accuracy": 0.9798,
+      "auto_98": 0.9919,
+      "auto_99": 0.9555
+     }
+    }
+   ],
+   "best": "tabpfn",
+   "lift_vs_rule": 0.6453,
+   "auto_98": 0.996,
+   "threshold_98": 0.5191,
+   "rule_or_leak": [],
+   "rule_cover": null,
+   "leak_tables": [],
+   "importance": [
+    {
+     "feature": "StandardCost",
+     "source": "eigen",
+     "importance": 708.8
+    },
+    {
+     "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·L",
+     "source": "Nachbarschaft BillOfMaterials",
+     "importance": 525.1
+    },
+    {
+     "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·H",
+     "source": "Nachbarschaft BillOfMaterials",
+     "importance": 451.0
+    },
+    {
+     "feature": "Style",
+     "source": "eigen",
+     "importance": 423.0
+    },
+    {
+     "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·M",
+     "source": "Nachbarschaft BillOfMaterials",
+     "importance": 379.4
+    },
+    {
+     "feature": "Graph·BillOfMaterials.ProductAssemblyID→ComponentID·M",
+     "source": "Nachbarschaft BillOfMaterials",
+     "importance": 350.2
+    },
+    {
+     "feature": "Graph·BillOfMaterials.ProductAssemblyID→ComponentID·L",
+     "source": "Nachbarschaft BillOfMaterials",
+     "importance": 255.2
+    },
+    {
+     "feature": "ListPrice",
+     "source": "eigen",
+     "importance": 210.8
+    }
+   ],
+   "examples": [
+    {
+     "name": "LL Crankarm",
+     "actual": "L",
+     "predicted": "L",
+     "confidence": 0.519
+    },
+    {
+     "name": "HL Mountain Seat/Saddle",
+     "actual": "H",
+     "predicted": "H",
+     "confidence": 0.553
+    },
+    {
+     "name": "ML Crankarm",
+     "actual": "M",
+     "predicted": "M",
+     "confidence": 0.557
+    },
+    {
+     "name": "HL Road Seat/Saddle",
+     "actual": "H",
+     "predicted": "H",
+     "confidence": 0.585
+    },
+    {
+     "name": "LL Nipple",
+     "actual": "L",
+     "predicted": "M",
+     "confidence": 0.631
+    },
+    {
+     "name": "ML Fork",
+     "actual": "M",
+     "predicted": "L",
+     "confidence": 0.387
+    }
+   ],
+   "missing_fill": {
+    "missing": 257,
+    "sure": 247,
+    "share_sure": 0.9611,
+    "proposals": [
+     {
+      "value": "M",
+      "n": 134
+     },
+     {
+      "value": "L",
+      "n": 95
+     },
+     {
+      "value": "H",
+      "n": 18
+     }
+    ],
+    "model": "LightGBM + Verknüpfungen"
+   },
+   "features": {
+    "own": 16,
+    "linked": 28,
+    "groups": [
+     "Product → BillOfMaterials (ProductAssemblyID) → Product",
+     "Product → BillOfMaterials (ProductAssemblyID) → UnitMeasure",
+     "Product → BillOfMaterials (ComponentID) → Product",
+     "Product → BillOfMaterials (ComponentID) → UnitMeasure",
+     "Product → ProductInventory (ProductID) → Location",
+     "Product → ProductVendor (ProductID) → UnitMeasure",
+     "Product → ProductVendor (ProductID) → Vendor",
+     "Product → SpecialOfferProduct (ProductID) → SpecialOffer"
+    ],
+    "text": true
+   },
+   "seconds": 10.6,
+   "manual_score": 0.8,
+   "null_rate": 0.5099,
+   "table_role": "stamm",
+   "table_label": "Product",
+   "fk_to": null,
+   "special": false,
+   "value": {
+    "kind": "revenue",
+    "label": "Umsatz pro Jahr der Datensätze (aus PurchaseOrderDetail)",
+    "total_eur": 12661562.0,
+    "entries_per_year": 99,
+    "years": 4.64
+   },
+   "euro": {
+    "labor_year": 197.0,
+    "gap_once": 494.0,
+    "entries_per_year": 99,
+    "minutes": 2.0,
+    "exposure_eur": 12661562.0,
+    "net_year": 197.0
+   }
+  },
+  {
+   "id": "Product.ProductLine",
+   "table": "Product",
+   "column": "ProductLine",
+   "kind": "class",
+   "rows": 504,
+   "labeled": 278,
+   "missing": 226,
+   "excluded": [],
+   "status": "ok",
+   "verdict": "ML vorhersagbar",
+   "classes": [
+    {
+     "value": "R",
+     "n": 100
+    },
+    {
+     "value": "M",
+     "n": 91
+    },
+    {
+     "value": "T",
+     "n": 52
+    },
+    {
+     "value": "S",
+     "n": 35
+    }
+   ],
+   "positive": null,
+   "n_positive": null,
+   "alpha_95": null,
+   "engines": [
+    {
+     "id": "rule",
+     "name": "Regel: häufigster Wert je „ProductSubcategoryID“",
+     "klass": "Regel",
+     "metrics": {
+      "balanced_accuracy": 0.7726,
+      "accuracy": 0.7806,
+      "auto_98": 0.0144,
+      "auto_99": 0.0144
+     }
+    },
+    {
+     "id": "lgbm",
+     "name": "LightGBM (eigene Felder)",
+     "klass": "Baum",
+     "metrics": {
+      "balanced_accuracy": 0.8397,
+      "accuracy": 0.8453,
+      "auto_98": 0.7698,
+      "auto_99": 0.7302
+     }
+    },
+    {
+     "id": "lgbm_graph",
+     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
+     "klass": "Graph-ML light",
+     "metrics": {
+      "balanced_accuracy": 0.9476,
+      "accuracy": 0.946,
+      "auto_98": 0.8885,
+      "auto_99": 0.8453
+     }
+    },
+    {
+     "id": "text",
+     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
+     "klass": "Text",
+     "metrics": {
+      "balanced_accuracy": 0.9669,
+      "accuracy": 0.9604,
+      "auto_98": 0.9676,
+      "auto_99": 0.9496
+     }
+    },
+    {
+     "id": "tabpfn",
+     "name": "TabPFN v2",
+     "klass": "TFM",
+     "metrics": {
+      "balanced_accuracy": 0.9293,
+      "accuracy": 0.9245,
+      "auto_98": 0.9209,
+      "auto_99": 0.8957
+     }
+    },
+    {
+     "id": "ensemble",
+     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
+     "klass": "Ensemble",
+     "metrics": {
+      "balanced_accuracy": 0.9726,
+      "accuracy": 0.9712,
+      "auto_98": 0.9712,
+      "auto_99": 0.8885
+     }
+    }
+   ],
+   "best": "ensemble",
+   "lift_vs_rule": 0.2589,
+   "auto_98": 0.9712,
+   "threshold_98": 0.9817,
+   "rule_or_leak": [],
+   "rule_cover": null,
+   "leak_tables": [],
+   "importance": [
+    {
+     "feature": "Graph·ProductVendor.ProductID→BusinessEntityID·S",
+     "source": "Nachbarschaft ProductVendor",
+     "importance": 1314.7
+    },
+    {
+     "feature": "Graph·BillOfMaterials.ProductAssemblyID→ComponentID·T",
+     "source": "Nachbarschaft BillOfMaterials",
+     "importance": 785.2
+    },
+    {
+     "feature": "ProductSubcategoryID",
+     "source": "eigen",
+     "importance": 704.8
+    },
+    {
+     "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·M",
+     "source": "Nachbarschaft BillOfMaterials",
+     "importance": 556.8
+    },
+    {
+     "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·R",
+     "source": "Nachbarschaft BillOfMaterials",
+     "importance": 494.0
+    },
+    {
+     "feature": "Graph·BillOfMaterials.ProductAssemblyID→ComponentID·R",
+     "source": "Nachbarschaft BillOfMaterials",
+     "importance": 483.5
+    },
+    {
+     "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·T",
+     "source": "Nachbarschaft BillOfMaterials",
+     "importance": 393.5
+    },
+    {
+     "feature": "Weight",
+     "source": "eigen",
+     "importance": 186.5
+    }
+   ],
+   "examples": [
+    {
+     "name": "Patch Kit/8 Patches",
+     "actual": "S",
+     "predicted": "S",
+     "confidence": 0.982
+    },
+    {
+     "name": "Cable Lock",
+     "actual": "S",
+     "predicted": "S",
+     "confidence": 0.986
+    },
+    {
+     "name": "ML Mountain Seat/Saddle",
+     "actual": "M",
+     "predicted": "M",
+     "confidence": 0.992
+    },
+    {
+     "name": "Racing Socks, M",
+     "actual": "R",
+     "predicted": "R",
+     "confidence": 0.993
+    },
+    {
+     "name": "HL Road Seat/Saddle",
+     "actual": "R",
+     "predicted": "T",
+     "confidence": 0.993
+    },
+    {
+     "name": "HL Road Tire",
+     "actual": "R",
+     "predicted": "R",
+     "confidence": 0.995
+    }
+   ],
+   "missing_fill": {
+    "missing": 226,
+    "sure": 106,
+    "share_sure": 0.469,
+    "proposals": [
+     {
+      "value": "T",
+      "n": 57
+     },
+     {
+      "value": "M",
+      "n": 45
+     },
+     {
+      "value": "R",
+      "n": 4
+     }
+    ],
+    "model": "LightGBM + Verknüpfungen"
+   },
+   "features": {
+    "own": 16,
+    "linked": 28,
+    "groups": [
+     "Product → BillOfMaterials (ProductAssemblyID) → Product",
+     "Product → BillOfMaterials (ProductAssemblyID) → UnitMeasure",
+     "Product → BillOfMaterials (ComponentID) → Product",
+     "Product → BillOfMaterials (ComponentID) → UnitMeasure",
+     "Product → ProductInventory (ProductID) → Location",
+     "Product → ProductVendor (ProductID) → UnitMeasure",
+     "Product → ProductVendor (ProductID) → Vendor",
+     "Product → SpecialOfferProduct (ProductID) → SpecialOffer"
+    ],
+    "text": true
+   },
+   "seconds": 13.0,
+   "manual_score": 0.8,
+   "null_rate": 0.4484,
+   "table_role": "stamm",
+   "table_label": "Product",
+   "fk_to": null,
+   "special": false,
+   "value": {
+    "kind": "revenue",
+    "label": "Umsatz pro Jahr der Datensätze (aus PurchaseOrderDetail)",
+    "total_eur": 12661562.0,
+    "entries_per_year": 99,
+    "years": 4.64
+   },
+   "euro": {
+    "labor_year": 192.0,
+    "gap_once": 212.0,
+    "entries_per_year": 99,
+    "minutes": 2.0,
+    "exposure_eur": 12661562.0,
+    "net_year": 192.0
    }
   },
   {
@@ -3556,10 +3250,10 @@
      "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
      "klass": "Graph-ML light",
      "metrics": {
-      "balanced_accuracy": 0.781,
-      "accuracy": 0.7211,
-      "auto_98": 0.0717,
-      "auto_99": 0.0717
+      "balanced_accuracy": 0.7722,
+      "accuracy": 0.7092,
+      "auto_98": 0.0637,
+      "auto_99": 0.0637
      }
     },
     {
@@ -3578,10 +3272,10 @@
      "name": "TabPFN v2",
      "klass": "TFM",
      "metrics": {
-      "balanced_accuracy": 0.8935,
-      "accuracy": 0.8845,
-      "auto_98": 0.6972,
-      "auto_99": 0.5498
+      "balanced_accuracy": 0.8956,
+      "accuracy": 0.8765,
+      "auto_98": 0.4741,
+      "auto_99": 0.4701
      }
     },
     {
@@ -3591,15 +3285,15 @@
      "metrics": {
       "balanced_accuracy": 0.9773,
       "accuracy": 0.9721,
-      "auto_98": 0.9801,
-      "auto_99": 0.9283
+      "auto_98": 0.9442,
+      "auto_99": 0.9163
      }
     }
    ],
    "best": "ensemble",
    "lift_vs_rule": 0.4716,
-   "auto_98": 0.9801,
-   "threshold_98": 0.9679,
+   "auto_98": 0.9442,
+   "threshold_98": 0.9962,
    "rule_or_leak": [],
    "rule_cover": null,
    "leak_tables": [],
@@ -3607,105 +3301,101 @@
     {
      "feature": "Graph·SpecialOfferProduct.ProductID→SpecialOfferID·Silver/Black",
      "source": "Nachbarschaft SpecialOfferProduct",
-     "importance": 1001.0
+     "importance": 1102.9
     },
     {
      "feature": "ProductSubcategoryID",
      "source": "eigen",
-     "importance": 746.3
+     "importance": 686.0
     },
     {
      "feature": "Graph·BillOfMaterials.ProductAssemblyID→ComponentID·Red",
      "source": "Nachbarschaft BillOfMaterials",
-     "importance": 699.4
+     "importance": 646.8
     },
     {
      "feature": "ProductVendor·Ø AverageLeadTime (ProductID)",
      "source": "Struktur ProductVendor",
-     "importance": 646.5
-    },
-    {
-     "feature": "ProductProductPhoto·Ø ProductPhotoID (ProductID)",
-     "source": "Struktur ProductProductPhoto",
-     "importance": 522.5
+     "importance": 591.5
     },
     {
      "feature": "Graph·BillOfMaterials.ProductAssemblyID→ComponentID·Yellow",
      "source": "Nachbarschaft BillOfMaterials",
-     "importance": 480.6
-    },
-    {
-     "feature": "Graph·ProductVendor.ProductID→BusinessEntityID·Multi",
-     "source": "Nachbarschaft ProductVendor",
-     "importance": 461.0
+     "importance": 523.0
     },
     {
      "feature": "Graph·BillOfMaterials.ProductAssemblyID→ComponentID·Blue",
      "source": "Nachbarschaft BillOfMaterials",
-     "importance": 454.6
+     "importance": 500.0
+    },
+    {
+     "feature": "ProductProductPhoto·Ø ProductPhotoID (ProductID)",
+     "source": "Struktur ProductProductPhoto",
+     "importance": 485.6
+    },
+    {
+     "feature": "Graph·ProductVendor.ProductID→BusinessEntityID·Multi",
+     "source": "Nachbarschaft ProductVendor",
+     "importance": 477.2
     }
    ],
    "examples": [
     {
-     "name": "Chainring Bolts",
-     "actual": "Silver",
-     "predicted": "Silver",
-     "confidence": 0.968
-    },
-    {
-     "name": "Hydration Pack - 70 oz.",
-     "actual": "Silver",
+     "name": "Sport-100 Helmet, Blue",
+     "actual": "Blue",
      "predicted": "Black",
-     "confidence": 0.961
+     "confidence": 0.996
     },
     {
-     "name": "Lock Ring",
+     "name": "LL Mountain Frame - Silver, 48",
      "actual": "Silver",
      "predicted": "Silver",
-     "confidence": 0.975
+     "confidence": 0.997
     },
     {
-     "name": "Classic Vest, S",
+     "name": "HL Mountain Frame - Silver, 42",
+     "actual": "Silver",
+     "predicted": "Silver",
+     "confidence": 0.997
+    },
+    {
+     "name": "LL Mountain Frame - Silver, 52",
+     "actual": "Silver",
+     "predicted": "Silver",
+     "confidence": 0.997
+    },
+    {
+     "name": "Men's Sports Shorts, S",
+     "actual": "Black",
+     "predicted": "Black",
+     "confidence": 0.997
+    },
+    {
+     "name": "Classic Vest, M",
      "actual": "Blue",
      "predicted": "Blue",
-     "confidence": 0.96
-    },
-    {
-     "name": "AWC Logo Cap",
-     "actual": "Multi",
-     "predicted": "Multi",
-     "confidence": 0.98
-    },
-    {
-     "name": "Mountain-400-W Silver, 40",
-     "actual": "Silver",
-     "predicted": "Silver",
-     "confidence": 0.984
+     "confidence": 0.997
     }
    ],
    "missing_fill": {
     "missing": 248,
-    "sure": 183,
-    "share_sure": 0.7379,
+    "sure": 27,
+    "share_sure": 0.1089,
     "proposals": [
      {
       "value": "Silver",
-      "n": 161
-     },
-     {
-      "value": "Black",
       "n": 20
      },
      {
-      "value": "Silver/Black",
-      "n": 2
+      "value": "Black",
+      "n": 7
      }
     ],
     "model": "LightGBM + Verknüpfungen"
    },
    "features": {
     "own": 16,
-    "linked": 32,
+    "linked": 28,
     "groups": [
      "Product → BillOfMaterials (ProductAssemblyID) → Product",
      "Product → BillOfMaterials (ProductAssemblyID) → UnitMeasure",
@@ -3718,7 +3408,7 @@
     ],
     "text": true
    },
-   "seconds": 30.3,
+   "seconds": 34.8,
    "manual_score": 0.8,
    "null_rate": 0.4921,
    "table_role": "stamm",
@@ -3733,257 +3423,12 @@
     "years": 4.64
    },
    "euro": {
-    "labor_year": 194.0,
-    "gap_once": 366.0,
+    "labor_year": 187.0,
+    "gap_once": 54.0,
     "entries_per_year": 99,
     "minutes": 2.0,
     "exposure_eur": 12661562.0,
-    "net_year": 194.0
-   }
-  },
-  {
-   "id": "Product.ProductLine",
-   "table": "Product",
-   "column": "ProductLine",
-   "kind": "class",
-   "rows": 504,
-   "labeled": 278,
-   "missing": 226,
-   "excluded": [],
-   "status": "ok",
-   "verdict": "ML vorhersagbar",
-   "classes": [
-    {
-     "value": "R",
-     "n": 100
-    },
-    {
-     "value": "M",
-     "n": 91
-    },
-    {
-     "value": "T",
-     "n": 52
-    },
-    {
-     "value": "S",
-     "n": 35
-    }
-   ],
-   "positive": null,
-   "n_positive": null,
-   "alpha_95": null,
-   "engines": [
-    {
-     "id": "rule",
-     "name": "Regel: häufigster Wert je „ProductSubcategoryID“",
-     "klass": "Regel",
-     "metrics": {
-      "balanced_accuracy": 0.7726,
-      "accuracy": 0.7806,
-      "auto_98": 0.0144,
-      "auto_99": 0.0144
-     }
-    },
-    {
-     "id": "lgbm",
-     "name": "LightGBM (eigene Felder)",
-     "klass": "Baum",
-     "metrics": {
-      "balanced_accuracy": 0.8397,
-      "accuracy": 0.8453,
-      "auto_98": 0.7698,
-      "auto_99": 0.7302
-     }
-    },
-    {
-     "id": "lgbm_graph",
-     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
-     "klass": "Graph-ML light",
-     "metrics": {
-      "balanced_accuracy": 0.9472,
-      "accuracy": 0.9424,
-      "auto_98": 0.8705,
-      "auto_99": 0.8201
-     }
-    },
-    {
-     "id": "text",
-     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
-     "klass": "Text",
-     "metrics": {
-      "balanced_accuracy": 0.9669,
-      "accuracy": 0.9604,
-      "auto_98": 0.9676,
-      "auto_99": 0.9496
-     }
-    },
-    {
-     "id": "tabpfn",
-     "name": "TabPFN v2",
-     "klass": "TFM",
-     "metrics": {
-      "balanced_accuracy": 0.9419,
-      "accuracy": 0.9388,
-      "auto_98": 0.9281,
-      "auto_99": 0.8849
-     }
-    },
-    {
-     "id": "ensemble",
-     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
-     "klass": "Ensemble",
-     "metrics": {
-      "balanced_accuracy": 0.9726,
-      "accuracy": 0.9712,
-      "auto_98": 0.9712,
-      "auto_99": 0.9065
-     }
-    }
-   ],
-   "best": "ensemble",
-   "lift_vs_rule": 0.2589,
-   "auto_98": 0.9712,
-   "threshold_98": 0.9737,
-   "rule_or_leak": [],
-   "rule_cover": null,
-   "leak_tables": [],
-   "importance": [
-    {
-     "feature": "Graph·ProductVendor.ProductID→BusinessEntityID·S",
-     "source": "Nachbarschaft ProductVendor",
-     "importance": 1232.1
-    },
-    {
-     "feature": "Graph·BillOfMaterials.ProductAssemblyID→ComponentID·T",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 790.2
-    },
-    {
-     "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·R",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 576.4
-    },
-    {
-     "feature": "ProductSubcategoryID",
-     "source": "eigen",
-     "importance": 561.4
-    },
-    {
-     "feature": "Graph·BillOfMaterials.ProductAssemblyID→ComponentID·R",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 539.5
-    },
-    {
-     "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·M",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 461.5
-    },
-    {
-     "feature": "Graph·BillOfMaterials.ComponentID→ProductAssemblyID·T",
-     "source": "Nachbarschaft BillOfMaterials",
-     "importance": 433.9
-    },
-    {
-     "feature": "Weight",
-     "source": "eigen",
-     "importance": 196.4
-    }
-   ],
-   "examples": [
-    {
-     "name": "Patch Kit/8 Patches",
-     "actual": "S",
-     "predicted": "S",
-     "confidence": 0.974
-    },
-    {
-     "name": "ML Mountain Seat/Saddle",
-     "actual": "M",
-     "predicted": "M",
-     "confidence": 0.985
-    },
-    {
-     "name": "HL Road Seat/Saddle",
-     "actual": "R",
-     "predicted": "T",
-     "confidence": 0.988
-    },
-    {
-     "name": "Mountain Bottle Cage",
-     "actual": "M",
-     "predicted": "M",
-     "confidence": 0.991
-    },
-    {
-     "name": "Cable Lock",
-     "actual": "S",
-     "predicted": "S",
-     "confidence": 0.992
-    },
-    {
-     "name": "HL Road Tire",
-     "actual": "R",
-     "predicted": "R",
-     "confidence": 0.992
-    }
-   ],
-   "missing_fill": {
-    "missing": 226,
-    "sure": 110,
-    "share_sure": 0.4867,
-    "proposals": [
-     {
-      "value": "T",
-      "n": 61
-     },
-     {
-      "value": "M",
-      "n": 47
-     },
-     {
-      "value": "R",
-      "n": 2
-     }
-    ],
-    "model": "LightGBM + Verknüpfungen"
-   },
-   "features": {
-    "own": 16,
-    "linked": 32,
-    "groups": [
-     "Product → BillOfMaterials (ProductAssemblyID) → Product",
-     "Product → BillOfMaterials (ProductAssemblyID) → UnitMeasure",
-     "Product → BillOfMaterials (ComponentID) → Product",
-     "Product → BillOfMaterials (ComponentID) → UnitMeasure",
-     "Product → ProductInventory (ProductID) → Location",
-     "Product → ProductVendor (ProductID) → UnitMeasure",
-     "Product → ProductVendor (ProductID) → Vendor",
-     "Product → SpecialOfferProduct (ProductID) → SpecialOffer"
-    ],
-    "text": true
-   },
-   "seconds": 11.2,
-   "manual_score": 0.8,
-   "null_rate": 0.4484,
-   "table_role": "stamm",
-   "table_label": "Product",
-   "fk_to": null,
-   "special": false,
-   "value": {
-    "kind": "revenue",
-    "label": "Umsatz pro Jahr der Datensätze (aus PurchaseOrderDetail)",
-    "total_eur": 12661562.0,
-    "entries_per_year": 99,
-    "years": 4.64
-   },
-   "euro": {
-    "labor_year": 192.0,
-    "gap_once": 220.0,
-    "entries_per_year": 99,
-    "minutes": 2.0,
-    "exposure_eur": 12661562.0,
-    "net_year": 192.0
+    "net_year": 187.0
    }
   },
   {
@@ -4020,7 +3465,8 @@
       "accuracy": 0.9623,
       "auto_98": 0.8313,
       "auto_99": 0.8234,
-      "auto_positive": 0.3532,
+      "auto_positive": 0.3472,
+      "auto_positive_fp": 0,
       "auto_negative": 0.4881,
       "negatives_caught": 0.9283
      }
@@ -4037,6 +3483,7 @@
       "auroc": 0.9982,
       "auprc": 0.9978,
       "auto_positive": 0.4821,
+      "auto_positive_fp": 4,
       "auto_negative": 0.5179,
       "negatives_caught": 0.9849
      }
@@ -4046,13 +3493,14 @@
      "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
      "klass": "Graph-ML light",
      "metrics": {
-      "balanced_accuracy": 0.9881,
-      "accuracy": 0.9881,
+      "balanced_accuracy": 0.9904,
+      "accuracy": 0.9901,
       "auto_98": 1.0,
-      "auto_99": 0.998,
-      "auroc": 0.9981,
-      "auprc": 0.9976,
+      "auto_99": 1.0,
+      "auroc": 0.9983,
+      "auprc": 0.998,
       "auto_positive": 0.4802,
+      "auto_positive_fp": 4,
       "auto_negative": 0.5159,
       "negatives_caught": 0.9811
      }
@@ -4069,6 +3517,7 @@
       "auroc": 0.9982,
       "auprc": 0.9981,
       "auto_positive": 0.4702,
+      "auto_positive_fp": 4,
       "auto_negative": 0.4464,
       "negatives_caught": 0.8491
      }
@@ -4078,13 +3527,14 @@
      "name": "TabPFN v2",
      "klass": "TFM",
      "metrics": {
-      "balanced_accuracy": 0.9902,
-      "accuracy": 0.9901,
+      "balanced_accuracy": 0.9943,
+      "accuracy": 0.994,
       "auto_98": 1.0,
       "auto_99": 1.0,
       "auroc": 0.9996,
       "auprc": 0.9996,
-      "auto_positive": 0.4821,
+      "auto_positive": 0.4802,
+      "auto_positive_fp": 3,
       "auto_negative": 0.5198,
       "negatives_caught": 0.9887
      }
@@ -4098,18 +3548,19 @@
       "accuracy": 0.9901,
       "auto_98": 1.0,
       "auto_99": 1.0,
-      "auroc": 0.9997,
-      "auprc": 0.9996,
-      "auto_positive": 0.4802,
+      "auroc": 0.9994,
+      "auprc": 0.9993,
+      "auto_positive": 0.4762,
+      "auto_positive_fp": 3,
       "auto_negative": 0.5159,
       "negatives_caught": 0.9811
      }
     }
    ],
    "best": "tabpfn",
-   "lift_vs_rule": 0.027,
+   "lift_vs_rule": 0.0312,
    "auto_98": 1.0,
-   "threshold_98": 0.5994,
+   "threshold_98": 0.503,
    "rule_or_leak": [
     {
      "feature": "ProductVendor·Anzahl (ProductID)",
@@ -4155,86 +3606,86 @@
     {
      "feature": "DaysToManufacture",
      "source": "eigen",
-     "importance": 4726.4
-    },
-    {
-     "feature": "ProductCostHistory·Ø StandardCost (ProductID)",
-     "source": "Struktur ProductCostHistory",
-     "importance": 256.1
-    },
-    {
-     "feature": "ProductModelID",
-     "source": "eigen",
-     "importance": 193.3
+     "importance": 4351.5
     },
     {
      "feature": "StandardCost",
      "source": "eigen",
-     "importance": 149.4
-    },
-    {
-     "feature": "ProductListPriceHistory·Ø ListPrice (ProductID)",
-     "source": "Struktur ProductListPriceHistory",
-     "importance": 132.4
-    },
-    {
-     "feature": "ProductSubcategoryID",
-     "source": "eigen",
-     "importance": 96.6
-    },
-    {
-     "feature": "ProductInventory·Ø Bin (ProductID)",
-     "source": "Struktur ProductInventory",
-     "importance": 48.5
+     "importance": 419.5
     },
     {
      "feature": "ListPrice",
      "source": "eigen",
-     "importance": 48.3
+     "importance": 343.2
+    },
+    {
+     "feature": "ProductModelID",
+     "source": "eigen",
+     "importance": 284.4
+    },
+    {
+     "feature": "ProductSubcategoryID",
+     "source": "eigen",
+     "importance": 163.9
+    },
+    {
+     "feature": "ProductInventory·Ø Quantity (ProductID)",
+     "source": "Struktur ProductInventory",
+     "importance": 61.7
+    },
+    {
+     "feature": "ProductInventory·Ø Bin (ProductID)",
+     "source": "Struktur ProductInventory",
+     "importance": 35.7
+    },
+    {
+     "feature": "Class",
+     "source": "eigen",
+     "importance": 18.8
     }
    ],
    "examples": [
     {
-     "name": "Front Derailleur",
-     "actual": "1",
-     "predicted": "0",
-     "confidence": 0.599
-    },
-    {
      "name": "Rear Derailleur",
      "actual": "1",
-     "predicted": "0",
-     "confidence": 0.625
+     "predicted": "1",
+     "confidence": 0.503
     },
     {
-     "name": "Touring Pedal",
-     "actual": "0",
-     "predicted": "0",
-     "confidence": 0.89
+     "name": "Front Derailleur",
+     "actual": "1",
+     "predicted": "1",
+     "confidence": 0.603
     },
     {
      "name": "Chain",
      "actual": "0",
      "predicted": "1",
-     "confidence": 0.893
+     "confidence": 0.784
     },
     {
-     "name": "LL Headset",
-     "actual": "1",
-     "predicted": "1",
-     "confidence": 0.958
+     "name": "Touring Pedal",
+     "actual": "0",
+     "predicted": "0",
+     "confidence": 0.863
     },
     {
-     "name": "Seat Tube",
+     "name": "LL Mountain Rear Wheel",
      "actual": "1",
      "predicted": "1",
-     "confidence": 0.96
+     "confidence": 0.933
+    },
+    {
+     "name": "LL Mountain Seat/Saddle",
+     "actual": "0",
+     "predicted": "0",
+     "confidence": 0.942
     }
    ],
    "missing_fill": null,
    "features": {
     "own": 16,
-    "linked": 17,
+    "linked": 13,
     "groups": [
      "Product → BillOfMaterials (ProductAssemblyID) → Product",
      "Product → BillOfMaterials (ProductAssemblyID) → UnitMeasure",
@@ -4247,7 +3698,7 @@
     ],
     "text": true
    },
-   "seconds": 10.0,
+   "seconds": 9.8,
    "manual_score": 0.65,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -4305,6 +3756,7 @@
       "auto_98": 1.0,
       "auto_99": 1.0,
       "auto_positive": 0.1317,
+      "auto_positive_fp": 0,
       "auto_negative": 0.0,
       "negatives_caught": 0.0
      }
@@ -4321,6 +3773,7 @@
       "auroc": 1.0,
       "auprc": 1.0,
       "auto_positive": 0.1415,
+      "auto_positive_fp": 0,
       "auto_negative": 0.8585,
       "negatives_caught": 1.0
      }
@@ -4337,6 +3790,7 @@
       "auroc": 1.0,
       "auprc": 1.0,
       "auto_positive": 0.1415,
+      "auto_positive_fp": 0,
       "auto_negative": 0.8585,
       "negatives_caught": 1.0
      }
@@ -4353,6 +3807,7 @@
       "auroc": 1.0,
       "auprc": 1.0,
       "auto_positive": 0.1415,
+      "auto_positive_fp": 0,
       "auto_negative": 0.8585,
       "negatives_caught": 1.0
      }
@@ -4369,6 +3824,7 @@
       "auroc": 1.0,
       "auprc": 1.0,
       "auto_positive": 0.1415,
+      "auto_positive_fp": 0,
       "auto_negative": 0.8585,
       "negatives_caught": 1.0
      }
@@ -4385,6 +3841,7 @@
       "auroc": 1.0,
       "auprc": 1.0,
       "auto_positive": 0.1415,
+      "auto_positive_fp": 0,
       "auto_negative": 0.8585,
       "negatives_caught": 1.0
      }
@@ -4433,32 +3890,27 @@
     {
      "feature": "ProductModelID",
      "source": "eigen",
-     "importance": 1263.9
+     "importance": 1404.2
     },
     {
      "feature": "Weight",
      "source": "eigen",
-     "importance": 779.5
+     "importance": 725.0
     },
     {
      "feature": "ProductInventory·Ø Bin (ProductID)",
      "source": "Struktur ProductInventory",
-     "importance": 202.6
+     "importance": 172.7
     },
     {
      "feature": "Graph·ProductInventory.ProductID→LocationID·LB",
      "source": "Nachbarschaft ProductInventory",
-     "importance": 42.8
-    },
-    {
-     "feature": "ProductInventory·Ø Quantity (ProductID)",
-     "source": "Struktur ProductInventory",
-     "importance": 39.9
+     "importance": 29.2
     },
     {
      "feature": "Graph·ProductInventory.ProductID→LocationID·G",
      "source": "Nachbarschaft ProductInventory",
-     "importance": 2.4
+     "importance": 0.2
     },
     {
      "feature": "MakeFlag",
@@ -4467,6 +3919,11 @@
     },
     {
      "feature": "FinishedGoodsFlag",
+     "source": "eigen",
+     "importance": 0.0
+    },
+    {
+     "feature": "Color",
      "source": "eigen",
      "importance": 0.0
     }
@@ -4523,7 +3980,7 @@
    },
    "features": {
     "own": 13,
-    "linked": 24,
+    "linked": 20,
     "groups": [
      "Product → BillOfMaterials (ProductAssemblyID) → Product",
      "Product → BillOfMaterials (ProductAssemblyID) → UnitMeasure",
@@ -4536,7 +3993,7 @@
     ],
     "text": true
    },
-   "seconds": 6.1,
+   "seconds": 6.2,
    "manual_score": 0.9,
    "null_rate": 0.5933,
    "table_role": "stamm",
@@ -4773,7 +4230,7 @@
     "groups": [],
     "text": true
    },
-   "seconds": 32.0,
+   "seconds": 34.2,
    "manual_score": 0.5,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -4831,6 +4288,7 @@
       "auto_98": 0.2981,
       "auto_99": 0.2981,
       "auto_positive": 0.2788,
+      "auto_positive_fp": 0,
       "auto_negative": 0.0385,
       "negatives_caught": 0.3636
      }
@@ -4847,6 +4305,7 @@
       "auroc": 0.5997,
       "auprc": 0.9093,
       "auto_positive": 0.0865,
+      "auto_positive_fp": 0,
       "auto_negative": 0.0192,
       "negatives_caught": 0.1818
      }
@@ -4863,6 +4322,7 @@
       "auroc": 0.8143,
       "auprc": 0.9707,
       "auto_positive": 0.6154,
+      "auto_positive_fp": 1,
       "auto_negative": 0.0,
       "negatives_caught": 0.0
      }
@@ -4879,6 +4339,7 @@
       "auroc": 0.7038,
       "auprc": 0.9488,
       "auto_positive": 0.1731,
+      "auto_positive_fp": 0,
       "auto_negative": 0.0,
       "negatives_caught": 0.0
      }
@@ -4895,6 +4356,7 @@
       "auroc": 0.9326,
       "auprc": 0.9895,
       "auto_positive": 0.8269,
+      "auto_positive_fp": 1,
       "auto_negative": 0.0481,
       "negatives_caught": 0.4545
      }
@@ -4911,6 +4373,7 @@
       "auroc": 0.8201,
       "auprc": 0.9747,
       "auto_positive": 0.6442,
+      "auto_positive_fp": 1,
       "auto_negative": 0.0,
       "negatives_caught": 0.0
      }
@@ -5015,7 +4478,7 @@
     ],
     "text": true
    },
-   "seconds": 4.2,
+   "seconds": 4.4,
    "manual_score": 0.65,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -5036,6 +4499,496 @@
     "minutes": 1.5,
     "exposure_eur": 12661562.0,
     "net_year": 20.0
+   }
+  },
+  {
+   "id": "SalesOrderHeader.TerritoryID",
+   "table": "SalesOrderHeader",
+   "column": "TerritoryID",
+   "kind": "class",
+   "rows": 8000,
+   "labeled": 8000,
+   "missing": 0,
+   "excluded": [],
+   "status": "ok",
+   "verdict": "Regel genügt – aus Stammdaten übernommen",
+   "classes": [
+    {
+     "value": "9",
+     "n": 1672
+    },
+    {
+     "value": "4",
+     "n": 1574
+    },
+    {
+     "value": "1",
+     "n": 1211
+    },
+    {
+     "value": "6",
+     "n": 1021
+    },
+    {
+     "value": "10",
+     "n": 844
+    },
+    {
+     "value": "8",
+     "n": 693
+    },
+    {
+     "value": "7",
+     "n": 685
+    },
+    {
+     "value": "5",
+     "n": 122
+    },
+    {
+     "value": "3",
+     "n": 104
+    },
+    {
+     "value": "2",
+     "n": 74
+    }
+   ],
+   "positive": null,
+   "n_positive": null,
+   "alpha_95": null,
+   "engines": [
+    {
+     "id": "rule",
+     "name": "Regel: häufigster Wert je „Address.City“",
+     "klass": "Regel",
+     "metrics": {
+      "balanced_accuracy": 0.9199,
+      "accuracy": 0.9835,
+      "auto_98": 1.0,
+      "auto_99": 0.0158
+     }
+    },
+    {
+     "id": "lgbm",
+     "name": "LightGBM (eigene Felder)",
+     "klass": "Baum",
+     "metrics": {
+      "balanced_accuracy": 0.5568,
+      "accuracy": 0.5278,
+      "auto_98": 0.0146,
+      "auto_99": 0.014
+     }
+    },
+    {
+     "id": "lgbm_graph",
+     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
+     "klass": "Graph-ML light",
+     "metrics": {
+      "balanced_accuracy": 0.9908,
+      "accuracy": 0.9986,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    },
+    {
+     "id": "text",
+     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
+     "klass": "Text",
+     "metrics": {
+      "balanced_accuracy": 0.5952,
+      "accuracy": 0.4715,
+      "auto_98": 0.2045,
+      "auto_99": 0.0932
+     }
+    },
+    {
+     "id": "ensemble",
+     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
+     "klass": "Ensemble",
+     "metrics": {
+      "balanced_accuracy": 0.9814,
+      "accuracy": 0.9968,
+      "auto_98": 1.0,
+      "auto_99": 1.0
+     }
+    }
+   ],
+   "best": "lgbm_graph",
+   "lift_vs_rule": 0.0771,
+   "auto_98": 1.0,
+   "threshold_98": 0.2784,
+   "rule_or_leak": [
+    {
+     "feature": "Customer.TerritoryID",
+     "ba": 1.0,
+     "source": "über CustomerID → Customer"
+    }
+   ],
+   "rule_cover": {
+    "feature": "Customer.TerritoryID",
+    "ba": 1.0,
+    "source": "über CustomerID → Customer"
+   },
+   "leak_tables": [],
+   "importance": [
+    {
+     "feature": "Address.StateProvinceID",
+     "source": "über ShipToAddressID → Address",
+     "importance": 85867.1
+    },
+    {
+     "feature": "Address.City",
+     "source": "über ShipToAddressID → Address",
+     "importance": 70115.5
+    },
+    {
+     "feature": "SalesPersonID",
+     "source": "eigen",
+     "importance": 51711.3
+    },
+    {
+     "feature": "CurrencyRate.AverageRate",
+     "source": "über CurrencyRateID → CurrencyRate",
+     "importance": 29355.1
+    },
+    {
+     "feature": "CurrencyRate.ToCurrencyCode",
+     "source": "über CurrencyRateID → CurrencyRate",
+     "importance": 27376.6
+    },
+    {
+     "feature": "CurrencyRate.EndOfDayRate",
+     "source": "über CurrencyRateID → CurrencyRate",
+     "importance": 17934.7
+    },
+    {
+     "feature": "Customer.StoreID",
+     "source": "über CustomerID → Customer",
+     "importance": 5518.1
+    },
+    {
+     "feature": "CustomerID",
+     "source": "eigen",
+     "importance": 2301.7
+    }
+   ],
+   "examples": [
+    {
+     "name": "SO70273",
+     "actual": "5",
+     "predicted": "8",
+     "confidence": 0.278
+    },
+    {
+     "name": "SO52591",
+     "actual": "5",
+     "predicted": "8",
+     "confidence": 0.401
+    },
+    {
+     "name": "SO57382",
+     "actual": "5",
+     "predicted": "8",
+     "confidence": 0.402
+    },
+    {
+     "name": "SO63339",
+     "actual": "5",
+     "predicted": "5",
+     "confidence": 0.411
+    },
+    {
+     "name": "SO67322",
+     "actual": "1",
+     "predicted": "1",
+     "confidence": 0.449
+    },
+    {
+     "name": "SO45271",
+     "actual": "2",
+     "predicted": "3",
+     "confidence": 0.462
+    }
+   ],
+   "missing_fill": null,
+   "features": {
+    "own": 10,
+    "linked": 9,
+    "groups": [],
+    "text": true
+   },
+   "seconds": 319.6,
+   "manual_score": 0.5,
+   "null_rate": 0.0,
+   "table_role": "bewegung",
+   "table_label": "SalesOrderHeader",
+   "fk_to": "SalesTerritory",
+   "special": false,
+   "inherited": true,
+   "inherited_from": "Customer.TerritoryID (über CustomerID → Customer)",
+   "value": {
+    "kind": "revenue",
+    "label": "Umsatz pro Jahr der Datensätze (aus SalesOrderDetail)",
+    "total_eur": 21802528.0,
+    "entries_per_year": 6788,
+    "years": 4.64
+   },
+   "euro": {
+    "labor_year": 0.0,
+    "gap_once": 0.0,
+    "entries_per_year": 6788,
+    "minutes": 2.0,
+    "exposure_eur": 21802528.0,
+    "net_year": 0.0
+   }
+  },
+  {
+   "id": "SalesOrderHeader.ShipMethodID",
+   "table": "SalesOrderHeader",
+   "column": "ShipMethodID",
+   "kind": "flag",
+   "rows": 8000,
+   "labeled": 8000,
+   "missing": 0,
+   "excluded": [],
+   "status": "ok",
+   "verdict": "Regel genügt – aus Stammdaten übernommen",
+   "classes": [
+    {
+     "value": "1",
+     "n": 7011
+    },
+    {
+     "value": "5",
+     "n": 989
+    }
+   ],
+   "positive": "1",
+   "n_positive": 7011,
+   "alpha_95": 0.00043,
+   "engines": [
+    {
+     "id": "rule",
+     "name": "Regel: häufigster Wert je „Customer.PersonID“",
+     "klass": "Regel",
+     "metrics": {
+      "balanced_accuracy": 0.9055,
+      "accuracy": 0.9766,
+      "auto_98": 0.0813,
+      "auto_99": 0.0003,
+      "auto_positive": 0.0199,
+      "auto_positive_fp": 3,
+      "auto_negative": 0.1003,
+      "negatives_caught": 0.8109
+     }
+    },
+    {
+     "id": "lgbm",
+     "name": "LightGBM (eigene Felder)",
+     "klass": "Baum",
+     "metrics": {
+      "balanced_accuracy": 0.9995,
+      "accuracy": 0.9999,
+      "auto_98": 1.0,
+      "auto_99": 1.0,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "auto_positive": 0.8764,
+      "auto_positive_fp": 0,
+      "auto_negative": 0.1236,
+      "negatives_caught": 1.0
+     }
+    },
+    {
+     "id": "lgbm_graph",
+     "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
+     "klass": "Graph-ML light",
+     "metrics": {
+      "balanced_accuracy": 0.9995,
+      "accuracy": 0.9999,
+      "auto_98": 1.0,
+      "auto_99": 1.0,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "auto_positive": 0.8764,
+      "auto_positive_fp": 0,
+      "auto_negative": 0.1236,
+      "negatives_caught": 1.0
+     }
+    },
+    {
+     "id": "text",
+     "name": "Text-Modell (Zeichen-n-Gramme der Benennung)",
+     "klass": "Text",
+     "metrics": {
+      "balanced_accuracy": 0.9328,
+      "accuracy": 0.9584,
+      "auto_98": 0.9364,
+      "auto_99": 0.8351,
+      "auroc": 0.9742,
+      "auprc": 0.9947,
+      "auto_positive": 0.882,
+      "auto_positive_fp": 141,
+      "auto_negative": 0.0037,
+      "negatives_caught": 0.0303
+     }
+    },
+    {
+     "id": "ensemble",
+     "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
+     "klass": "Ensemble",
+     "metrics": {
+      "balanced_accuracy": 0.9995,
+      "accuracy": 0.9999,
+      "auto_98": 1.0,
+      "auto_99": 1.0,
+      "auroc": 1.0,
+      "auprc": 1.0,
+      "auto_positive": 0.8764,
+      "auto_positive_fp": 0,
+      "auto_negative": 0.1236,
+      "negatives_caught": 1.0
+     }
+    }
+   ],
+   "best": "lgbm",
+   "lift_vs_rule": 0.1038,
+   "auto_98": 1.0,
+   "threshold_98": 0.9977,
+   "rule_or_leak": [
+    {
+     "feature": "OnlineOrderFlag",
+     "ba": 1.0,
+     "source": "eigen"
+    },
+    {
+     "feature": "SalesPersonID",
+     "ba": 1.0,
+     "source": "eigen"
+    },
+    {
+     "feature": "Customer.StoreID",
+     "ba": 1.0,
+     "source": "über CustomerID → Customer"
+    }
+   ],
+   "rule_cover": {
+    "feature": "OnlineOrderFlag",
+    "ba": 1.0,
+    "source": "eigen"
+   },
+   "leak_tables": [],
+   "importance": [
+    {
+     "feature": "CustomerID",
+     "source": "eigen",
+     "importance": 72401.5
+    },
+    {
+     "feature": "Customer.PersonID",
+     "source": "über CustomerID → Customer",
+     "importance": 17398.1
+    },
+    {
+     "feature": "TaxAmt",
+     "source": "eigen",
+     "importance": 673.0
+    },
+    {
+     "feature": "Address.City",
+     "source": "über ShipToAddressID → Address",
+     "importance": 219.7
+    },
+    {
+     "feature": "SalesTerritory.SalesYTD",
+     "source": "über TerritoryID → SalesTerritory",
+     "importance": 135.0
+    },
+    {
+     "feature": "SubTotal",
+     "source": "eigen",
+     "importance": 78.4
+    },
+    {
+     "feature": "TerritoryID",
+     "source": "eigen",
+     "importance": 11.1
+    },
+    {
+     "feature": "CurrencyRate.EndOfDayRate",
+     "source": "über CurrencyRateID → CurrencyRate",
+     "importance": 9.5
+    }
+   ],
+   "examples": [
+    {
+     "name": "SO45579",
+     "actual": "5",
+     "predicted": "1",
+     "confidence": 0.998
+    },
+    {
+     "name": "SO49746",
+     "actual": "1",
+     "predicted": "1",
+     "confidence": 0.999
+    },
+    {
+     "name": "SO44723",
+     "actual": "1",
+     "predicted": "1",
+     "confidence": 1.0
+    },
+    {
+     "name": "SO44479",
+     "actual": "1",
+     "predicted": "1",
+     "confidence": 1.0
+    },
+    {
+     "name": "SO68808",
+     "actual": "1",
+     "predicted": "1",
+     "confidence": 1.0
+    },
+    {
+     "name": "SO68467",
+     "actual": "1",
+     "predicted": "1",
+     "confidence": 1.0
+    }
+   ],
+   "missing_fill": null,
+   "features": {
+    "own": 8,
+    "linked": 10,
+    "groups": [],
+    "text": true
+   },
+   "seconds": 45.2,
+   "manual_score": 0.65,
+   "null_rate": 0.0,
+   "table_role": "bewegung",
+   "table_label": "SalesOrderHeader",
+   "fk_to": "ShipMethod",
+   "special": false,
+   "inherited": true,
+   "inherited_from": "Customer.StoreID (über CustomerID → Customer)",
+   "value": {
+    "kind": "revenue",
+    "label": "Umsatz pro Jahr der Datensätze (aus SalesOrderDetail)",
+    "total_eur": 21802528.0,
+    "entries_per_year": 6788,
+    "years": 4.64
+   },
+   "euro": {
+    "labor_year": 0.0,
+    "gap_once": 0.0,
+    "entries_per_year": 6788,
+    "minutes": 1.5,
+    "exposure_eur": 21802528.0,
+    "net_year": 0.0
    }
   },
   {
@@ -5200,7 +5153,7 @@
     "groups": [],
     "text": false
    },
-   "seconds": 8.0,
+   "seconds": 5.7,
    "manual_score": 0.4,
    "null_rate": 0.0,
    "table_role": "bewegung",
@@ -5248,16 +5201,16 @@
      "name": "LightGBM + Verknüpfungen",
      "klass": "Graph-ML light",
      "metrics": {
-      "within_10": 0.4537
+      "within_10": 0.4488
      }
     }
    ],
    "best": "lgbm_graph",
-   "auto_98": 0.4537,
-   "lift_vs_rule": -0.3451,
+   "auto_98": 0.4488,
+   "lift_vs_rule": -0.3521,
    "rule_or_leak": [],
    "metric_note": "Anteil der Vorschläge innerhalb ±10 % des gepflegten Werts",
-   "seconds": 1.1,
+   "seconds": 1.0,
    "manual_score": 0.75,
    "null_rate": 0.5933,
    "table_role": "stamm",
@@ -5272,12 +5225,12 @@
     "years": 4.64
    },
    "euro": {
-    "labor_year": 135.0,
+    "labor_year": 133.0,
     "gap_once": 0.0,
     "entries_per_year": 99,
     "minutes": 3.0,
     "exposure_eur": 12661562.0,
-    "net_year": 135.0
+    "net_year": 133.0
    }
   },
   {
@@ -5372,7 +5325,7 @@
      "name": "LightGBM + Verknüpfungen (Graph-Kontext)",
      "klass": "Graph-ML light",
      "metrics": {
-      "balanced_accuracy": 0.1931,
+      "balanced_accuracy": 0.1895,
       "accuracy": 0.1951,
       "auto_98": 0.0,
       "auto_99": 0.0
@@ -5394,17 +5347,17 @@
      "name": "Ensemble: LightGBM + Text + ähnliche Datensätze (Stacking)",
      "klass": "Ensemble",
      "metrics": {
-      "balanced_accuracy": 0.732,
-      "accuracy": 0.7756,
-      "auto_98": 0.2878,
-      "auto_99": 0.1366
+      "balanced_accuracy": 0.7143,
+      "accuracy": 0.761,
+      "auto_98": 0.3463,
+      "auto_99": 0.239
      }
     }
    ],
    "best": "ensemble",
-   "lift_vs_rule": 3.4908,
-   "auto_98": 0.2878,
-   "threshold_98": 0.9997,
+   "lift_vs_rule": 3.3822,
+   "auto_98": 0.3463,
+   "threshold_98": 0.9996,
    "rule_or_leak": [],
    "rule_cover": null,
    "leak_tables": [],
@@ -5412,49 +5365,61 @@
     {
      "feature": "Weight",
      "source": "eigen",
-     "importance": 1382.8
+     "importance": 1409.7
     },
     {
      "feature": "BillOfMaterials·Ø BillOfMaterialsID (ComponentID)",
      "source": "Struktur BillOfMaterials",
-     "importance": 1377.1
+     "importance": 1408.2
     },
     {
      "feature": "BillOfMaterials·Ø BillOfMaterialsID (ProductAssemblyID)",
      "source": "Struktur BillOfMaterials",
-     "importance": 1119.3
+     "importance": 1163.4
     },
     {
      "feature": "ProductInventory·Ø Quantity (ProductID)",
      "source": "Struktur ProductInventory",
-     "importance": 778.7
+     "importance": 775.3
     },
     {
      "feature": "ProductSubcategoryID",
      "source": "eigen",
-     "importance": 500.7
+     "importance": 465.8
     },
     {
      "feature": "ProductModelID",
      "source": "eigen",
-     "importance": 414.8
+     "importance": 452.4
+    },
+    {
+     "feature": "StandardCost",
+     "source": "eigen",
+     "importance": 370.7
     },
     {
      "feature": "BillOfMaterials·Ø PerAssemblyQty (ProductAssemblyID)",
      "source": "Struktur BillOfMaterials",
-     "importance": 359.7
-    },
-    {
-     "feature": "SpecialOfferProduct·Anzahl (ProductID)",
-     "source": "Struktur SpecialOfferProduct",
-     "importance": 357.3
+     "importance": 365.1
     }
    ],
    "examples": [
     {
-     "name": "HL Road Frame - Black, 48",
-     "actual": "48",
-     "predicted": "48",
+     "name": "Mountain-100 Silver, 44",
+     "actual": "44",
+     "predicted": "44",
+     "confidence": 1.0
+    },
+    {
+     "name": "Mountain-400-W Silver, 42",
+     "actual": "42",
+     "predicted": "40",
+     "confidence": 1.0
+    },
+    {
+     "name": "ML Mountain Frame - Black, 44",
+     "actual": "44",
+     "predicted": "44",
      "confidence": 1.0
     },
     {
@@ -5464,45 +5429,37 @@
      "confidence": 1.0
     },
     {
+     "name": "Road-650 Black, 60",
+     "actual": "60",
+     "predicted": "60",
+     "confidence": 1.0
+    },
+    {
      "name": "HL Mountain Frame - Black, 42",
      "actual": "42",
      "predicted": "42",
-     "confidence": 1.0
-    },
-    {
-     "name": "LL Touring Frame - Yellow, 50",
-     "actual": "50",
-     "predicted": "50",
-     "confidence": 1.0
-    },
-    {
-     "name": "Road-450 Red, 52",
-     "actual": "52",
-     "predicted": "52",
-     "confidence": 1.0
-    },
-    {
-     "name": "LL Mountain Frame - Black, 48",
-     "actual": "48",
-     "predicted": "48",
      "confidence": 1.0
     }
    ],
    "missing_fill": {
     "missing": 293,
-    "sure": 1,
-    "share_sure": 0.0034,
+    "sure": 5,
+    "share_sure": 0.0171,
     "proposals": [
      {
+      "value": "S",
+      "n": 3
+     },
+     {
       "value": "L",
-      "n": 1
+      "n": 2
      }
     ],
     "model": "LightGBM + Verknüpfungen"
    },
    "features": {
     "own": 16,
-    "linked": 32,
+    "linked": 28,
     "groups": [
      "Product → BillOfMaterials (ProductAssemblyID) → Product",
      "Product → BillOfMaterials (ProductAssemblyID) → UnitMeasure",
@@ -5515,7 +5472,7 @@
     ],
     "text": true
    },
-   "seconds": 30.6,
+   "seconds": 31.1,
    "manual_score": 0.8,
    "null_rate": 0.5813,
    "table_role": "stamm",
@@ -5530,12 +5487,12 @@
     "years": 4.64
    },
    "euro": {
-    "labor_year": 57.0,
-    "gap_once": 2.0,
+    "labor_year": 69.0,
+    "gap_once": 10.0,
     "entries_per_year": 99,
     "minutes": 2.0,
     "exposure_eur": 12661562.0,
-    "net_year": 57.0
+    "net_year": 69.0
    }
   },
   {
@@ -5733,7 +5690,7 @@
     ],
     "text": true
    },
-   "seconds": 5.3,
+   "seconds": 5.7,
    "manual_score": 0.65,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -5938,7 +5895,7 @@
     "groups": [],
     "text": true
    },
-   "seconds": 408.3,
+   "seconds": 389.6,
    "manual_score": 0.6,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -5995,7 +5952,7 @@
    "lift_vs_rule": -0.3158,
    "rule_or_leak": [],
    "metric_note": "Anteil der Vorschläge innerhalb ±10 % des gepflegten Werts",
-   "seconds": 0.6,
+   "seconds": 1.0,
    "manual_score": 0.45,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -6212,7 +6169,7 @@
     "groups": [],
     "text": true
    },
-   "seconds": 26.3,
+   "seconds": 27.9,
    "manual_score": 0.5,
    "null_rate": 0.0,
    "table_role": "stamm",
@@ -6452,7 +6409,7 @@
     "groups": [],
     "text": true
    },
-   "seconds": 6.2,
+   "seconds": 7.7,
    "manual_score": 0.4,
    "null_rate": 0.99,
    "table_role": "bewegung",
@@ -6640,7 +6597,7 @@
   }
  ],
  "counts": {
-  "ok": 20,
+  "ok": 19,
   "warn": 4,
   "bad": 4,
   "na": 8

@@ -3235,7 +3235,7 @@ function graphReady() {
       // identisch zu classifier_scan.euro (mit Minuten-Faktor)
       const v = r.value || {}, p = this.dcPrm, def = this.dc?.euro_defaults?.minutes || {};
       const minutes = (r.minutes ?? def[r.kind] ?? 2) * (p.minFactor || 1), rate = p.rate || 60, entries = v.entries_per_year || 0;
-      let labor = entries * minutes / 60 * rate * (r.auto_98 || 0);
+      let labor = entries * minutes / 60 * rate * (r.inherited ? 0 : (r.auto_98 || 0));
       const gap = (r.missing_fill?.sure || 0) * minutes / 60 * rate;
       const out = { labor_year: labor, gap_once: gap, entries, minutes, exposure: v.total_eur, net_year: labor };
       if (v.kind === 'stock' && r.n_positive) {
@@ -3251,6 +3251,7 @@ function graphReady() {
     dcTotal() { return (this.dc?.results || []).filter(r => r.euro).reduce((a, r) => a + Math.max(0, this.dcEuro(r).net_year || 0), 0); },
     dcEuroText(r) {
       const e = this.dcEuro(r);
+      if (r.inherited) return 'Kein Pflegeaufwand: Der Wert ergibt sich aus ' + r.inherited_from + ' – das System kann ihn übernehmen (Stufe 0). Prüfen, ob Mitarbeiter ihn heute trotzdem von Hand erfassen.';
       let t = this.fmtInt(e.entries) + ' Eingaben/Jahr × ' + String(e.minutes).replace('.', ',') + ' min × ' + this.dcPrm.rate + ' €/h × automatisch entschiedener Anteil = ' + this.fmtEur(e.labor_year) + ' Pflegeaufwand pro Jahr';
       if (e.fp_stock != null) t += ' − Bevorratung gemessener Fehlalarme ' + this.fmtEur(e.fp_stock) + ' (je ET ' + this.fmtEur(e.stock_et) + '/Jahr Lagerkosten) = ' + this.fmtEur(e.net_year) + ' netto. Prüfgrenze: Mit ' + this.fmtInt(r.n_positive) + ' geprüften ET sind übersehene ET nur bis ' + this.fmtPct(r.alpha_95) + ' ausschließbar – das entspricht bis zu ' + this.fmtEur(e.fn_bound) + '/Jahr Risiko; erst ≈ 3.000 geprüfte ET drücken das auf ein Zehntel';
       if (e.gap > 0) t += ' · einmalig Lücken schließen: ' + this.fmtEur(e.gap);
