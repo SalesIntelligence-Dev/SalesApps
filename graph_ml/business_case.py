@@ -85,6 +85,12 @@ PARAMS: dict[str, list[dict]] = {
         {"id": "cost", "label": "Kosten je Serviceangebot (Kontakt, Terminierung)", "unit": "€", "default": 25, "min": 0, "max": 200, "step": 5, "role": "cost"},
         {"id": "margin", "label": "Ergebnisanteil des Werkstattauftrags", "unit": "%", "default": 35, "min": 10, "max": 100, "step": 5, "role": "fixed"},
         {"id": "periods", "label": "Angebotsrunden pro Jahr", "unit": "×", "default": 4, "min": 1, "max": 6, "step": 1, "role": "fixed"}],
+    "win_probability": [
+        {"id": "list_share", "label": "Gefährdete Aufträge mit Maßnahme (oberste % nach Risiko)", "unit": "%", "default": 10, "min": 5, "max": 30, "step": 1, "role": "fixed"},
+        {"id": "rate", "label": "Anteil, der durch Nachschub oder Ersatzartikel doch zu Umsatz wird", "unit": "%", "default": 25, "min": 5, "max": 60, "step": 1, "role": "rate"},
+        {"id": "cost", "label": "Kosten je Maßnahme (Eilbestellung, Rücksprache)", "unit": "€", "default": 10, "min": 0, "max": 100, "step": 5, "role": "cost"},
+        {"id": "margin", "label": "Ergebnisanteil (Marge)", "unit": "%", "default": 30, "min": 10, "max": 100, "step": 5, "role": "fixed"},
+        {"id": "periods", "label": "Testzeiträume pro Jahr (Test ≈ 5 Monate)", "unit": "×", "default": 2, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
     "predictive_maintenance": [
         {"id": "list_share", "label": "Inspizierte Einheiten je Runde (oberste % nach Risiko)", "unit": "%", "default": 10, "min": 5, "max": 30, "step": 1, "role": "fixed"},
         {"id": "rate", "label": "Anteil erkannter Ausfälle, die als geplanter Tausch abgefangen werden", "unit": "%", "default": 50, "min": 10, "max": 90, "step": 5, "role": "rate"},
@@ -132,6 +138,7 @@ STEP_LABELS = {"churn": ("Umsatz der Abwanderer", "davon in der Liste", "gerette
                "price_recommendation": ("Preislücke zum erwartbaren Preis", "geprüfte Aufträge", "geschlossen (Annahme)"),
                "price_leakage": ("Leakage im Testzeitraum", "geprüfte Aufträge", "vermieden (Annahme)"),
                "quote_check": ("Margenlücke unter 10 %", "geprüfte Angebote", "zurückgeholt (Annahme)"),
+               "win_probability": ("gefährdeter Auftragswert im Test", "davon in der Liste", "gerettet (Annahme)"),
                "predictive_maintenance": ("Mehrkosten aller Ausfälle im Test", "davon in der Liste", "abgefangen (Annahme)"),
                "spare_parts_demand": ("Sicherheitsbestand", "Fehlerreduktion", "Kostensenkung"),
                "quality_root_cause": ("Ausschusskosten im Test", "davon in der Prüfliste", "vermieden (Annahme)"),
@@ -323,7 +330,8 @@ def next_step(cases: dict, vk: dict | None = None) -> dict:
              "price_recommendation": "Preis- & Rabattempfehlung", "price_leakage": "Preis-Leakage", "quote_check": "Angebotsprüfung",
              "installed_base": "Installierte Basis", "service_contracts": "Serviceverträge", "spare_parts_pricing": "Ersatzteilpreise",
              "quality_root_cause": "Qualitäts-Frühwarnung", "supplier_recourse": "Lieferantenregress",
-             "predictive_maintenance": "Predictive Maintenance", "spare_parts_demand": "Ersatzteilbedarf"}
+             "predictive_maintenance": "Predictive Maintenance", "spare_parts_demand": "Ersatzteilbedarf",
+             "win_probability": "Gewinnwahrscheinlichkeit"}
     step = "Pilot" if stage == "pilot" else "Readiness-Sprint"
     roi_txt = str(round(roi, 1)).replace(".", ",")
     return {"stage": stage, "use_case": top, "annual": round(top_val), "year1_cost": year1, "roi": round(roi, 1),

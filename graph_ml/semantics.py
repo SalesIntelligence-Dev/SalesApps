@@ -19,7 +19,7 @@ FIELD_ORDER = ["order_key", "event_time", "customer_key", "product_key", "quanti
                "product_group", "product_text", "country", "account_group", "sales_rep", "doc_type", "return_link", "campaign", "response",
                "serial_number", "batch", "warranty_claim", "defect_code", "supplier", "bom", "usage_data",
                "service_event", "contract", "config",
-               "rejected_qty", "technician", "failure_event"]
+               "rejected_qty", "technician", "failure_event", "service_text"]
 
 PREFER_WITH = {"quantity": "product_key", "price": "product_key", "event_time": "order_key",
                "doc_type": "order_key", "country": "customer_key", "product_text": "product_key_master",

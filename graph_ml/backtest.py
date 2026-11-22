@@ -40,7 +40,7 @@ DATASET_DATES = {"v0": ("2011-09-01", "2010-03-01", "2010-03-01"),
 DATASET_OF = {"account_scoring": "wwi", "territory_coverage": "aw", "price_recommendation": "aw", "price_leakage": "aw",
               "quote_check": "aw", "spare_parts_pricing": "aw", "installed_base": "scania", "service_contracts": "scania",
               "quality_root_cause": "aw", "supplier_recourse": "aw", "predictive_maintenance": "cmapss",
-              "spare_parts_demand": "wwi"}
+              "spare_parts_demand": "wwi", "win_probability": "wwi"}
 DATASET_NAMES = {"v0": "online_retail_ii", "wwi": "wwi", "aw": "adventureworks_data", "scania": "scania", "cmapss": "cmapss"}          # Use Cases, die auf einem anderen Datensatz gerechnet werden
 _TIME_LOCK = threading.RLock()
 

@@ -203,6 +203,12 @@ FIELDS: dict[str, dict] = {
         "table_level": ["usage", "telemetry", "sensordata", "betriebsdaten", "einsatzdaten", "readout", "readouts", "auslesung"],
         "kinds": "any",
     },
+    "service_text": {
+        "label": "Fehlerbeschreibung (Freitext)",
+        "syn": ["problemdescription", "fehlerbeschreibung", "symptom", "complainttext", "ticketdescription", "servicetext", "meldungstext"],
+        "contains": ["problemdescription", "fehlerbeschreibung", "symptom", "tickettext", "meldungstext"],
+        "kinds": "any",
+    },
     "service_event": {
         "label": "Reparatur-/Serviceereignis",
         "syn": ["repairid", "repairtimestep", "serviceorderid", "serviceorder", "wartung", "reparatur", "maintenanceid"],
@@ -502,6 +508,29 @@ USE_CASES: list[dict] = [
      "requires": [("service_event", "pflicht", None, "PB-10"), ("defect_code", "pflicht", None, "PB-05"),
                   ("technician", "pflicht", None, "PB-10"), ("product_key", "optional", None, None), ("serial_number", "optional", None, None)],
      "links": [("service_event", "defect_code")], "learnable": True, "max_stage": 1, "note": "keine offenen Daten – nur Struktur"},
+    {"id": "win_probability", "name": "Gewinnwahrscheinlichkeit & Umsatzprognose", "area": "Sales", "lighthouse": False,
+     "app_route": None, "app_name": "neu",
+     "label": "Auftrag wird nicht binnen 30 Tagen zu Umsatz (Lieferung + Rechnung) – plus Pipeline-Umsatz je Woche",
+     "label_detail": "Ohne Angebotsdaten gemessen an Rückstandsaufträgen (WWI): positiv, wenn binnen 30 Tagen keine Rechnung folgt. "
+                     "Umsatzprognose = Σ Auftragswert × Lieferwahrscheinlichkeit je Woche, verglichen mit dem tatsächlich fakturierten Wert.",
+     "window_days": 30, "min_positives": 100, "entity": "order",
+     "baseline": "größte Rückstandsmenge zuerst", "lever": "Umsatz, Planbarkeit",
+     "blockers": ["Angebote/Opportunities nicht im Export", "Auftrag ohne Bezug zur Rechnung"],
+     "requires": [("order_key", "pflicht", None, None), ("customer_key", "pflicht", None, "PB-01"), ("event_time", "pflicht", None, None),
+                  ("product_key", "pflicht", None, None), ("quantity", "pflicht", None, None), ("account_group", "optional", None, None),
+                  ("supplier", "optional", None, None)],
+     "links": [("order_key", "customer_key")], "learnable": True, "max_stage": 3, "note": "gerechnet auf WideWorldImporters (Rückstände)"},
+    {"id": "service_triage", "name": "Service-Triage & Diagnose", "area": "After Sales", "lighthouse": False,
+     "app_route": None, "app_name": "neu",
+     "label": "Kategorie und Lösung je Servicemeldung aus dem Fehlertext",
+     "label_detail": "Braucht Servicemeldungen mit Freitext und gelöster Kategorie. Eher ein Sprachmodell-Thema als Graph ML; "
+                     "kein offener Datensatz mit Texten vorhanden (WWI- und AdventureWorks-Kommentare sind leer).",
+     "window_days": 0, "min_positives": 100, "entity": "ticket",
+     "baseline": "Schlagwortregeln", "lever": "Produktivität im Service",
+     "blockers": ["Fehlertexte nicht exportiert", "Lösungskategorie nicht gepflegt"],
+     "requires": [("service_event", "pflicht", None, "PB-10"), ("service_text", "pflicht", None, "PB-05"),
+                  ("defect_code", "optional", None, "PB-05"), ("serial_number", "optional", None, None)],
+     "links": [("service_event", "service_text")], "learnable": True, "max_stage": 1, "note": "Sprachmodell-Thema · keine offenen Texte"},
     {"id": "warranty_fraud", "name": "Garantiebetrug & Fehlbuchungen", "area": "After Sales", "lighthouse": False,
      "app_route": None, "app_name": "neu",
      "label": "Auffälliger Garantiefall (Händler–Techniker–Teil-Muster)",
@@ -679,7 +708,8 @@ STORY: dict[str, dict] = {
         "v2": "Preis- und Rabattempfehlung · Preis-Leakage", "effect": "+2–7 Pp. Umsatzrendite; > 6 % des Umsatzes versickern",
         "fit": "mittel",
         "graph": "Rabatte ähnlicher Kunden für ähnliche Artikel (Kunde → Artikel → Peer-Kunden) zeigen, wo Preise unter "
-                 "Peer-Niveau liegen. Ohne Einstandspreis keine Marge – deshalb hier nur Profil.",
+                 "Peer-Niveau liegen. Ohne Einstandspreis keine Marge – deshalb auf Online Retail II nur Profil. Abgleich v2: "
+                 "gemessen in Preis- & Rabattempfehlung, Preis-Leakage und Angebotsprüfung (AdventureWorks mit Kosten zum Datum).",
         "path": ["Kunde", "Position", "Artikel", "Peer-Kunden"],
         "tabular": "Preisstreuung je Artikel und Kunde",
         "unit": "je Position: Preis unter Peer-Niveau (Leakage)",
@@ -688,7 +718,8 @@ STORY: dict[str, dict] = {
         "v2": "Garantie: Frühwarnung und Root Cause (Retouren)", "effect": "Garantie-/Retourenkosten −4 bis −20 %",
         "fit": "hoch",
         "graph": "Stornos häufen sich bei Artikeln, die dieselben Kunden kaufen (Position → Artikel → Kunden → "
-                 "Nachbarartikel) – die Retourenquote der Nachbarn ist ein Graph-Merkmal.",
+                 "Nachbarartikel) – die Retourenquote der Nachbarn ist ein Graph-Merkmal. Abgleich v2: bleibt auf Online Retail II "
+                 "(WWI hat keine Gutschriften, AdventureWorks keine Retouren); Garantie-Pendant ist die Qualitäts-Frühwarnung.",
         "path": ["Position", "Artikel", "Kunden", "Nachbarartikel"],
         "tabular": "Menge, Preis vs. üblich, Positionen im Beleg, Kundenhistorie",
         "unit": "je Verkaufsposition: Storno binnen 30 Tagen",
@@ -746,6 +777,24 @@ STORY: dict[str, dict] = {
         "tabular": "Fehlercode, Anlagentyp, Alter, Techniker",
         "unit": "je Serviceauftrag: benötigte Teile",
         "euro": "vermiedene Folgebesuche × Kosten je Besuch − Mehrbestand im Fahrzeug (sobald Serviceaufträge mit Teilen vorliegen)"},
+    "win_probability": {
+        "v2": "Gewinnwahrscheinlichkeit und Umsatzprognose", "effect": "nur 45 % der Vertriebsleiter vertrauen ihrer Prognose", "fit": "mittel",
+        "graph": "Ob ein Auftrag zu Umsatz wird, hängt am Artikel und seinem Nachschub: Auftrag → Artikel → andere wartende Aufträge, "
+                 "Artikel → Lieferant → dessen Lieferquote, Artikel → offene Einkaufsbestellungen. Gemessen auf WWI: Der Generator "
+                 "folgt fast einer Mengenregel (ab ~50 Stück bleibt der Rückstand liegen) – Modelle sind nur +12 % besser, die "
+                 "Graph-Merkmale verbessern aber die Wochenprognose (WAPE 0,15 → 0,11).",
+        "path": ["Auftrag", "Artikel", "Lieferant", "Nachschub"],
+        "tabular": "Auftragswert, Menge, Kunde, Kreditlimit, bisherige Quote des Kunden",
+        "unit": "je Rückstandsauftrag: Umsatz binnen 30 Tagen gefährdet; je Woche: Pipeline-Umsatz",
+        "euro": "gefährdeter Auftragswert in der Top-Liste × geretteter Anteil (Nachschub, Ersatzartikel) × Marge − Aktionen × Kosten, × 2"},
+    "service_triage": {
+        "v2": "Service-Triage und Diagnose", "effect": "Produktivität +30–45 % (GenAI)", "fit": "gering",
+        "graph": "Der Fehlertext trägt das Signal – das ist ein Sprachmodell-Thema. Graph hilft wenig (ähnliche Anlagen → frühere "
+                 "Lösungen als Zusatzmerkmal). Ehrlich Rot/Gelb; ohne offene Servicetexte nur Struktur.",
+        "path": ["Meldung", "Fehlertext", "ähnliche Meldungen", "Lösung"],
+        "tabular": "Fehlercode, Produkt, Alter",
+        "unit": "je Servicemeldung: Kategorie/Lösung",
+        "euro": "eingesparte Bearbeitungszeit je Meldung × Meldungen × Stundensatz (sobald Texte und Lösungen vorliegen)"},
     "warranty_fraud": {
         "v2": "Garantiebetrug und Fehlbuchungen", "effect": "3–15 % der Garantiekosten", "fit": "hoch",
         "graph": "Betrug tritt in Ringen auf: dieselben Händler, Techniker und Teile wiederholen sich (Fall → Händler → Techniker → Teil). "

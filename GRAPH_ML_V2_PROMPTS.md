@@ -324,3 +324,21 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
   Reichweite (künstliche Endbestände – Kapital-Kennzahl bewusst weggelassen).
 - **First-Time-Fix:** keine offenen Serviceaufträge mit Fehlercode, Techniker und Teilen → nur Struktur (`NOT_MEASURABLE`).
 - **Tests:** 68 grün. Web-Modus 213 MB, kein torch.
+
+## Umsetzungsnotizen nach Prompt 9
+
+- **Deployment:** Prompt 8 gepusht (`a2ade6f`).
+- **Neu: `graph_ml/sales_pipeline.py`** – Gewinnwahrscheinlichkeit & Umsatzprognose auf WWI. Es gibt keine Angebote; fast alle
+  nicht fakturierten Aufträge sind Rückstandsaufträge. Label: Rückstand wird nicht binnen 30 Tagen fakturiert (7.330 Aufträge,
+  60 %; Test ab 01.01.2016, 796). Graph: Artikel → andere offene Rückstände, Artikel → Lieferant, Kunde → Einkaufsgemeinschaft,
+  Artikel → offene Einkaufsbestellungen (alles zum Auftragsdatum bekannt; Test: Zukunft verändern → Quoten davor gleich).
+- **Ehrlich:** Der WWI-Generator folgt fast einer Mengenregel (ab ~50 Stück bleibt der Rückstand liegen; Einzelmerkmal Menge
+  AUC 0,89, Wert 0,94). Erst mit einer Kundenquote als Regel sah es nach +52 % aus – Baseline deshalb „größte Menge zuerst“:
+  AUPRC Regel 0,896 · LightGBM 0,990 · + Graph 0,998 · TabPFN 1,000 · GNN 0,937 → +11,6 % (signifikant, Gelb).
+  Umsatzprognose je Woche (WAPE): Regel (Lieferquote je Mengenklasse) 0,38 · LightGBM 0,15 · + Graph 0,11 · **TabPFN 0,06**
+  · GNN 0,19. Euro 18.899 €/Jahr (Rettungsquote 25 %, Marge 30 % = Annahmen) → Rot.
+- **Service-Triage:** keine offenen Servicetexte (WWI-Kommentare/Gutschriftgründe leer) → nur Struktur, Feld `service_text`;
+  ehrlich als Sprachmodell-Thema markiert.
+- **Abgleich der Altfälle:** Marge → Verweis auf Preisempfehlung, Leakage und Angebotsprüfung (AdventureWorks); Retouren-Root-Cause
+  bleibt auf Online Retail II (WWI ohne Gutschriften, AW ohne Retouren), Garantie-Pendant = Qualitäts-Frühwarnung.
+- **Tests:** 70 grün. Web-Modus 213 MB, alle Routen 200, kein torch. 25 Use Cases.

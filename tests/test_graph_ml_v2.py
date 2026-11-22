@@ -357,3 +357,34 @@ class MaintenanceTest(unittest.TestCase):
         self.assertEqual(by["predictive_maintenance"]["ampel"]["vorhersagekraft"]["status"], "ok")
         fe = next(f for f in by["predictive_maintenance"]["fields"] if f["field"] == "failure_event")
         self.assertIsNotNone(fe["binding"])
+
+class PipelineTest(unittest.TestCase):
+    """Prompt 9: Gewinnwahrscheinlichkeit & Umsatzprognose (WWI), Service-Triage (Struktur), Abgleich der Altfälle."""
+
+    def test_labels_only_after_window_and_past_features(self):
+        from graph_ml import sales_pipeline as sp
+        b, t = sp.backorders(log=lambda m: None)
+        end = max(b["OrderDate"].max(), b["InvoiceDate"].max())
+        self.assertTrue((b["avail"] <= end).all())                    # nur Aufträge mit feststehendem Label
+        f1 = sp.features(b, t)
+        b2 = b.copy()
+        late = b2["avail"] >= sp.TEST_FROM
+        b2.loc[late, "y"] = 1 - b2.loc[late, "y"]                     # Zukunft verändern …
+        f2 = sp.features(b2, t)
+        early = (b["OrderDate"] < sp.TEST_FROM).to_numpy()
+        cols = ["c_rate", "g_item_rate", "g_supplier_rate", "g_group_rate"]
+        self.assertTrue(f1.loc[early, cols].equals(f2.loc[early, cols]))   # … Quoten davor bleiben gleich
+
+    def test_artifact_and_legacy_reconciliation(self):
+        from graph_ml import business_case as bc
+        from graph_ml import evaluation as ev
+        r = ev.load("win_probability")
+        self.assertEqual((r["kind"], r["dataset"]), ("binary", "wwi"))
+        fc = r["pipeline"]["forecast"]
+        self.assertLess(fc["wape"][r["best"]], fc["wape"]["rule"])
+        self.assertEqual(len(fc["weeks"]), len(fc["actual"]))
+        self.assertIn("service_triage", ev.NOT_MEASURABLE)
+        self.assertIn("AdventureWorks", ev.NOT_MEASURABLE["margin"])
+        ov = bc.overview()["cases"]
+        self.assertEqual(ov["win_probability"]["dataset"], "wwi")
+        self.assertEqual(ov["service_triage"]["euro"]["status"], "na")
