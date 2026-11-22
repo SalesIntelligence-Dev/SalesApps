@@ -74,6 +74,8 @@ def main(argv: list[str] | None = None) -> int:
         maintenance.main()
         from . import sales_pipeline
         sales_pipeline.main()
+        from . import matrix
+        matrix.main()                                    # zuletzt: liest alle Rückblicke
         from . import aftersales
         from .connectors import LOCAL_DIR
         if (LOCAL_DIR / "scania_readouts.npz").exists():   # volle SCANIA-Auslesungen liegen nur lokal (337 MB)

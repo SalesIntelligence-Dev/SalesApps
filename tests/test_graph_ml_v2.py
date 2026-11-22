@@ -388,3 +388,29 @@ class PipelineTest(unittest.TestCase):
         ov = bc.overview()["cases"]
         self.assertEqual(ov["win_probability"]["dataset"], "wwi")
         self.assertEqual(ov["service_triage"]["euro"]["status"], "na")
+
+class MatrixTest(unittest.TestCase):
+    """Prompt 10: Gesamtabgleich Use Cases × Datensätze, Report."""
+
+    def test_matrix_artifact_consistent(self):
+        from graph_ml import evaluation as ev
+        from graph_ml import matrix as mx
+        from graph_ml import usecases
+        m = mx.load()
+        self.assertEqual(len(m["use_cases"]), len(usecases.USE_CASES))
+        ids = {d["id"] for d in m["datasets"]}
+        self.assertTrue({"online_retail_ii", "adventureworks_data", "wwi", "scania", "cmapss"} <= ids)
+        for u in m["use_cases"]:
+            homes = [d for d in ids if (m["cells"].get(f"{u['id']}|{d}") or {}).get("home")]
+            self.assertEqual(len(homes), 0 if u["home"] is None else 1, u["id"])    # genau ein Heimat-Datensatz
+            if u["home"] and ev.load(u["id"]):
+                self.assertTrue(u["measured"], u["id"])
+        self.assertEqual(sum(m["counts"].values()), len(m["use_cases"]))
+
+    def test_report_contains_matrix(self):
+        from app import app
+        c = app.test_client()
+        r = c.get("/graph_ml/report")
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("Gesamtabgleich".encode(), r.data)
+        self.assertEqual(c.get("/graph_ml/api/matrix").status_code, 200)

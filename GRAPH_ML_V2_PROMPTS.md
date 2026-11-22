@@ -342,3 +342,22 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
 - **Abgleich der Altfälle:** Marge → Verweis auf Preisempfehlung, Leakage und Angebotsprüfung (AdventureWorks); Retouren-Root-Cause
   bleibt auf Online Retail II (WWI ohne Gutschriften, AW ohne Retouren), Garantie-Pendant = Qualitäts-Frühwarnung.
 - **Tests:** 70 grün. Web-Modus 213 MB, alle Routen 200, kein torch. 25 Use Cases.
+
+## Umsetzungsnotizen nach Prompt 10 (Abschluss v2)
+
+- **Deployment:** Prompt 9 gepusht (`806e57e`).
+- **Neu: `graph_ml/matrix.py`** – Ampel-Matrix 25 Use Cases × 6 eingebaute Datensätze (Stufe 3 bzw. höchste mögliche Stufe).
+  Je Use Case genau ein Heimat-Datensatz (Rückblick + Euro, ★), sonst Datenreife; vier Use Cases ohne offene Daten
+  (Garantie, Garantiebetrug, First-Time-Fix, Service-Triage) als „nur Struktur“. Artefakt `artifacts/matrix.json` (36 KB,
+  Precompute schreibt es zuletzt), Route `/graph_ml/api/matrix`, aufklappbares Panel „Gesamtabgleich“ in Schritt 4 – Zelle
+  öffnet die Detailseite im passenden Datensatz (Stufe 3 automatisch).
+- **Stand:** 20 von 25 Use Cases mit Rückblick gemessen · Gesamt Grün 0 · Gelb 14 · Rot 7 · nur Struktur 4. Kein Use Case ist
+  insgesamt Grün, weil Datenreife oder Euro die schwächste Dimension bleiben.
+- **Report (HTML + Excel):** neuer Abschnitt 8 „Gesamtabgleich“ (Matrix + Rückblicke auf weiteren Datensätzen mit Hinweis
+  „künstlich, nicht addierbar“), Excel-Blätter „Matrix“ und „Weitere Datensätze“.
+- **Ergebnisse v2 je Modellklasse (Sieger, 18 Rückblicke mit Modellvergleich):** TabPFN 7× · LightGBM + Graph-Merkmale 5× ·
+  LightGBM 4× · gelerntes GNN 2× (Churn, Neukunden-Scoring). Vorhersagekraft Grün bei 11 Use Cases. Ehrliches Fazit:
+  relationale Signale helfen am häufigsten als Merkmale in Baum-/Tabellenmodellen; ein gelerntes GNN gewinnt selten.
+- **Tests:** 72 grün. Web-Modus: 34 Routen + 6 Datensätze × 3 Stufen = 200, Spitze 240 MB, kein torch.
+- **Offen (außerhalb v2):** Olist und SAP SALT (Zugang durch den Nutzer), Odoo-Schema, RunPod-Worker für Live-GPU
+  (`GRAPH_ML_GPU_TODO.md`).

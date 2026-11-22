@@ -828,6 +828,35 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
       </template>
     </div>
 
+    <!-- Gesamtabgleich: Use Cases × Datensätze -->
+    <div class="panel p-4 sm:p-5">
+      <button class="w-full flex items-center justify-between gap-3 text-left" @click="gmOpen = !gmOpen; if (gmOpen && !gm) loadGm()" :aria-expanded="gmOpen">
+        <div>
+          <div class="font-semibold">Gesamtabgleich · alle Use Cases × Datensätze</div>
+          <div class="text-[12px] sub" x-text="gm ? (gm.measured+' von '+gm.use_cases.length+' Use Cases mit Rückblick gemessen · Gesamt Grün '+gm.counts.ok+' · Gelb '+gm.counts.warn+' · Rot '+gm.counts.bad+' · nur Struktur '+gm.counts.na) : 'Wo trägt welcher Use Case? ★ = dort gemessen (Rückblick + Euro), sonst Datenreife'"></div>
+        </div>
+        <span class="chip" x-text="gmOpen ? 'einklappen' : 'aufklappen'"></span>
+      </button>
+      <template x-if="gmOpen && gm">
+        <div class="mt-3">
+          <div class="scroll-x scroll-thin"><table class="tbl min-w-[760px] text-[12px]">
+            <thead><tr><th>Use Case</th>
+              <template x-for="c in gm.datasets" :key="'gh'+c.id"><th class="text-center"><span x-text="c.name.split(' (')[0].replace('Microsoft ', '')"></span>
+                <span class="block text-[10px] muted font-normal" x-text="'Stufe '+c.stage+(c.synthetic ? ' · künstlich' : '')"></span></th></template></tr></thead>
+            <tbody><template x-for="u in gm.use_cases" :key="'gr'+u.id"><tr>
+              <td><b x-text="u.name"></b><span class="block text-[10.5px] muted" x-text="u.home ? u.area : u.area+' · nur Struktur – keine offenen Daten'"></span></td>
+              <template x-for="c in gm.datasets" :key="'gc'+u.id+c.id"><td class="text-center">
+                <button class="amp" :class="'amp-'+(gmCell(u.id, c.id).gesamt || 'na')" @click="gmOpenCell(u.id, c.id)"
+                        :title="gmCell(u.id, c.id).measured ? ('gemessen: '+(gmCell(u.id, c.id).best || '–')+(gmCell(u.id, c.id).annual != null ? ' · '+fmtEur(gmCell(u.id, c.id).annual)+'/Jahr' : '')) : ('Datenreife '+(gmCell(u.id, c.id).score ?? '–'))">
+                  <span x-text="gmCell(u.id, c.id).measured ? '★ '+(gmCell(u.id, c.id).lift != null ? fmtLift(gmCell(u.id, c.id).lift) : ampText(gmCell(u.id, c.id).gesamt)) : (gmCell(u.id, c.id).score ?? '–')"></span></button>
+              </td></template>
+            </tr></template></tbody>
+          </table></div>
+          <div class="text-[11.5px] sub mt-2" x-text="gm.note+' Zahl ohne ★ = Datenreife (0–100). Zelle antippen öffnet die Detailseite im Datensatz.'"></div>
+        </div>
+      </template>
+    </div>
+
     <!-- Matrix -->
     <div class="panel p-4 sm:p-5">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
@@ -2347,7 +2376,7 @@ function graphReady() {
     timeline: TIMELINE, tourSteps: TOUR, TIMELINE_SOURCES,
     bc: null, bcVariant: 'v0', bcUc: 'churn', bcParams: {}, bcScenario: 'realistisch', bcThr: { green: 100000, yellow: 25000 },
     bt: null, btUc: 'churn', btRes: null, btLoading: false, btErr: '', btJob: null, btSeries: 0,
-    ucBt: null, recoPaths: null, recoPathCust: null, terrTable: null, stageAuto: false, checks: null, checksLoading: false, checksSeq: 0, ucOpen: null, ucFocusDim: null, colTable3: null,
+    ucBt: null, gm: null, gmOpen: false, recoPaths: null, recoPathCust: null, terrTable: null, stageAuto: false, checks: null, checksLoading: false, checksSeq: 0, ucOpen: null, ucFocusDim: null, colTable3: null,
     playbooks: { 'PB-01': 'Fehlende Kundennummern', 'PB-02': 'Stornos ohne Originalbezug', 'PB-03': 'Nicht-Artikel-Codes',
                  'PB-04': 'Artikelstamm konsolidieren', 'PB-05': 'Freitext → Kategorien', 'PB-06': 'Dubletten entfernen',
                  'PB-07': 'Preis 0 / negative Mengen', 'PB-08': 'Währung umrechnen', 'PB-09': 'Governance-Checkliste',
@@ -3064,6 +3093,13 @@ function graphReady() {
     ucCheck(id) { return this.checks?.use_cases.find(u => u.id === id) || null; },
     ucDetail() { return this.ucOpen ? this.ucCheck(this.ucOpen) : null; },
     ucMeta() { return this.usecases.find(u => u.id === this.ucOpen) || null; },
+    async loadGm() { try { this.gm = await this.api('/matrix'); } catch (_) { this.gm = null; } },
+    gmCell(uc, ds) { return this.gm?.cells?.[uc + '|' + ds] || {}; },
+    async gmOpenCell(uc, ds) {
+      if (this.dsId !== ds) await this.selectDataset(ds);
+      if (this.gmCell(uc, ds).home && this.stage < 3) this.stage = 3;
+      afterRender(() => this.openUc(uc));
+    },
     async loadUcBt(id) {
       this.ucBt = null;
       if (!(this.bt?.use_cases || []).includes(id)) return;

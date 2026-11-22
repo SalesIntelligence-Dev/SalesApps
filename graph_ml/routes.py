@@ -515,6 +515,12 @@ def api_reco_paths():
     return jsonify(r or {"customers": [], "note": _ACT_HINT})
 
 
+@graph_bp.route("/graph_ml/api/matrix")
+def api_matrix():
+    from . import matrix
+    return jsonify(matrix.load())
+
+
 @graph_bp.route("/graph_ml/api/usecases/territory_coverage/table")
 def api_territory_table():
     from . import activation as act

@@ -150,6 +150,20 @@ def collect(variant: str = "v0") -> dict:
                                       for p in bc.PARAMS.get(uc, [])]})
     cases.sort(key=lambda x: -(x["euro"].get("annual") or 0))
 
+    # Gesamtabgleich: alle Use Cases × Datensätze, Rückblicke außerhalb von Online Retail II
+    from . import matrix as mx
+    gm = mx.load()
+    dsn = {c["id"]: c["name"] for c in gm["datasets"]}
+    other = []
+    for uc, c in bc0["cases"].items():
+        if not c or c.get("dataset", "online_retail_ii") == "online_retail_ii" or "use_case" not in c:
+            continue
+        r = ev.load(uc)
+        e = c.get("euro") or {}
+        other.append({"uc": uc, "name": next((u["name"] for u in gm["use_cases"] if u["id"] == uc), uc),
+                      "dataset": dsn.get(c.get("dataset"), c.get("dataset")), "model": c.get("model_name") or (r or {}).get("recommendation", {}).get("name"),
+                      "vk": (r or {}).get("vorhersagekraft", {}), "euro": e, "note": c.get("note")})
+    other.sort(key=lambda x: (x["dataset"], x["name"]))
     from . import activation as act
     a = act.summary()
     m = act.load_monitoring()
@@ -168,6 +182,7 @@ def collect(variant: str = "v0") -> dict:
         "cases": cases, "best_case": best, "next_step": bc0["next_step"], "funnel": bc0["funnel"],
         "disclaimer": bc.DISCLAIMER, "fx": bc0["fx"], "thresholds": bc0["thresholds"],
         "activation": a, "monitoring": m, "sources": SOURCES, "status_text": STATUS_TEXT,
+        "matrix": gm, "other_cases": other,
     }
 
 
@@ -258,6 +273,19 @@ def to_xlsx(data: dict) -> bytes:
                                               "Nicht-Artikel", "Dubletten", "Stornos mit Original"],
               [[r["month"], r["rows"], r["cust_fill"], r["desc_fill"], r["price0"], r["non_article"], r["dup"],
                 r["storno_linked"]] for r in m["months"]])
+    gm = data.get("matrix")
+    if gm:
+        rows = []
+        for u in gm["use_cases"]:
+            row = [u["name"], u["area"], next((c["name"] for c in gm["datasets"] if c["id"] == u["home"]), "nur Struktur")]
+            for c in gm["datasets"]:
+                x = gm["cells"].get(f"{u['id']}|{c['id']}") or {}
+                row.append(("★ " if x.get("home") else "") + (st.get(x.get("gesamt")) or "–") + (f" · {x['score']}" if x.get("score") is not None else ""))
+            rows.append(row)
+        table(wb.create_sheet("Matrix"), ["Use Case", "Bereich", "gemessen auf"] + [c["name"] for c in gm["datasets"]], rows)
+        table(wb.create_sheet("Weitere Datensätze"), ["Use Case", "Datensatz", "Engine", "Vorhersagekraft", "Begründung", "Euro/Jahr", "Euro-Ampel", "Hinweis"],
+              [[o["name"], o["dataset"], o["model"], st.get(o["vk"].get("status")), o["vk"].get("reason"), o["euro"].get("annual"),
+                st.get(o["euro"].get("status")), o.get("note") or ""] for o in data.get("other_cases", [])], status_cols=(3, 6))
     table(wb.create_sheet("Quellen"), ["Quelle", "Link"], [list(s) for s in data["sources"]])
     buf = io.BytesIO()
     wb.save(buf)

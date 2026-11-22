@@ -97,7 +97,7 @@ footer{margin-top:18px;padding-top:8px;border-top:1px solid var(--line);font-siz
   <div class="note"><b>Wichtig:</b> {{ d.disclaimer }} Der Rückblick ist streng nach Datum getrennt (kein Leakage).</div>
   <ol class="toc">
     <li>Zusammenfassung</li><li>Ampel je Use Case</li><li>Prüfergebnisse</li><li>Modellvergleich</li>
-    <li>Reparaturplan</li><li>Business Case</li><li>Aktivierung &amp; Monitoring</li><li>Quellen &amp; Annahmen</li>
+    <li>Reparaturplan</li><li>Business Case</li><li>Aktivierung &amp; Monitoring</li><li>Gesamtabgleich</li><li>Quellen &amp; Annahmen</li>
   </ol>
 
   <h2>2 Ampel je Use Case</h2>
@@ -215,7 +215,31 @@ footer{margin-top:18px;padding-top:8px;border-top:1px solid var(--line);font-siz
       <td><span class="amp amp-{{ x.status }}">{{ st.get(x.status) }}</span></td></tr>{% endfor %}</tbody></table>
   {% endif %}
 
-  <h2>8 Quellen &amp; Annahmen</h2>
+  {% if d.matrix %}
+  <h2 class="brk">8 Gesamtabgleich · Use Cases × Datensätze</h2>
+  <p class="sub small">{{ d.matrix.note }} ★ = Rückblick auf diesem Datensatz (Gesamtampel), Zahl = Datenreife. Gemessen:
+    {{ d.matrix.measured }} von {{ d.matrix.use_cases|length }} Use Cases · Gesamt Grün {{ d.matrix.counts.ok }} · Gelb {{ d.matrix.counts.warn }}
+    · Rot {{ d.matrix.counts.bad }} · nur Struktur {{ d.matrix.counts.na }}.</p>
+  <div class="wide"><table>
+    <thead><tr><th>Use Case</th>{% for c in d.matrix.datasets %}<th>{{ c.name.split(' (')[0] }}<div class="small muted">Stufe {{ c.stage }}{% if c.synthetic %} · künstlich{% endif %}</div></th>{% endfor %}</tr></thead>
+    <tbody>{% for u in d.matrix.use_cases %}<tr><td><b>{{ u.name }}</b><div class="small muted">{{ u.area }}{% if not u.home %} · nur Struktur{% endif %}</div></td>
+      {% for c in d.matrix.datasets %}{% set x = d.matrix.cells.get(u.id ~ '|' ~ c.id, {}) %}
+      <td><span class="amp amp-{{ x.gesamt or 'na' }}">{% if x.measured %}★ {{ st.get(x.gesamt) }}{% else %}{{ x.score if x.score is not none else '–' }}{% endif %}</span></td>{% endfor %}</tr>{% endfor %}
+    </tbody>
+  </table></div>
+  <h3>Rückblicke auf weiteren Datensätzen</h3>
+  <div class="wide"><table>
+    <thead><tr><th>Use Case</th><th>Datensatz</th><th>Bestes Modell</th><th>Vorhersagekraft</th><th class="num">Euro/Jahr</th></tr></thead>
+    <tbody>{% for o in d.other_cases %}<tr><td><b>{{ o.name }}</b></td><td class="small">{{ o.dataset }}</td><td class="small">{{ o.model or '–' }}</td>
+      <td><span class="amp amp-{{ o.vk.status or 'na' }}">{{ st.get(o.vk.status) }}</span><div class="small muted">{{ o.vk.reason or '' }}</div></td>
+      <td class="num"><span class="amp amp-{{ o.euro.status or 'na' }}">{% if o.euro.annual is not none %}{{ de_eur(o.euro.annual) }}{% else %}nicht messbar{% endif %}</span></td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+  <p class="small muted">Euro-Werte auf künstlichen Datensätzen (AdventureWorks, WideWorldImporters) zeigen die Methode, nicht die Größenordnung;
+    sie sind nicht mit Online Retail II addierbar.</p>
+  {% endif %}
+
+  <h2>9 Quellen &amp; Annahmen</h2>
   <ul class="small">{% for s in d.sources %}<li><a href="{{ s[1] }}">{{ s[0] }}</a></li>{% endfor %}</ul>
   <p class="small muted">Preise im Trichter sind Annahmen aus dem Konzept „Graph-ML-Readiness-Plattform“. Die Online-Retail-II-Daten
     stammen von einem britischen Online-Händler (12/2009–12/2011) und werden unter CC BY 4.0 genutzt.</p>
