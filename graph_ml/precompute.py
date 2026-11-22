@@ -70,6 +70,8 @@ def main(argv: list[str] | None = None) -> int:
             ev.save(res)
         from . import quality
         quality.main()
+        from . import maintenance
+        maintenance.main()
         from . import aftersales
         from .connectors import LOCAL_DIR
         if (LOCAL_DIR / "scania_readouts.npz").exists():   # volle SCANIA-Auslesungen liegen nur lokal (337 MB)

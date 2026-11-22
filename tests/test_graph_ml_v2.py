@@ -320,3 +320,40 @@ class QualityTest(unittest.TestCase):
         rq = next(f for f in by["supplier_recourse"]["fields"] if f["field"] == "rejected_qty")
         self.assertEqual(rq["binding"]["column"], "RejectedQty")
         self.assertEqual(by["supplier_recourse"]["ampel"]["vorhersagekraft"]["status"], "ok")
+
+class MaintenanceTest(unittest.TestCase):
+    """Prompt 8: Predictive Maintenance (C-MAPSS), Ersatzteilbedarf & Bestände (WWI), First-Time-Fix (nur Struktur)."""
+
+    def test_peer_normal_values_only_from_training_engines(self):
+        import numpy as np
+
+        from graph_ml import maintenance as mt
+        c, rows = mt.pdm_rows(log=lambda m: None)
+        f1 = mt.pdm_features(c, rows)
+        c2 = c.copy()
+        test_e = set(rows.loc[rows["test"], "engine_id"])
+        c2.loc[c2["engine_id"].isin(test_e), mt.SENSORS] += 1000.0       # Test-Triebwerke verändern …
+        f2 = mt.pdm_features(c2, rows)
+        tr = (~rows["test"]).to_numpy()
+        g = [x for x in f1.columns if x.startswith("g_")]
+        self.assertTrue(np.allclose(f1.loc[tr, g].to_numpy(), f2.loc[tr, g].to_numpy()))   # … Peer-Werte der anderen bleiben gleich
+        self.assertEqual(set(rows.loc[rows["test"], "engine_id"]) & set(rows.loc[~rows["test"], "engine_id"]), set())
+
+    def test_artifacts_and_ampel(self):
+        from graph_ml import business_case as bc
+        from graph_ml import evaluation as ev
+        from graph_ml.data_loader import get_registry
+        pdm = ev.load("predictive_maintenance")
+        self.assertEqual((pdm["kind"], pdm["dataset"]), ("binary", "cmapss"))
+        au = {e["id"]: e["metrics"]["auprc"] for e in pdm["engines"]}
+        self.assertGreater(au[pdm["best"]], au["rule"])
+        dem = ev.load("spare_parts_demand")
+        self.assertEqual((dem["whatif"]["kind"], dem["dataset"]), ("forecast", "wwi"))
+        self.assertIn("first_time_fix", ev.NOT_MEASURABLE)
+        ov = bc.overview()["cases"]
+        self.assertEqual(ov["first_time_fix"]["euro"]["status"], "na")
+        self.assertIsNotNone(ov["spare_parts_demand"]["euro"].get("annual"))
+        by = {u["id"]: u for u in get_registry().checks("cmapss", 3)["use_cases"]}
+        self.assertEqual(by["predictive_maintenance"]["ampel"]["vorhersagekraft"]["status"], "ok")
+        fe = next(f for f in by["predictive_maintenance"]["fields"] if f["field"] == "failure_event")
+        self.assertIsNotNone(fe["binding"])

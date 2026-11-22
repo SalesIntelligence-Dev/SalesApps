@@ -85,6 +85,16 @@ PARAMS: dict[str, list[dict]] = {
         {"id": "cost", "label": "Kosten je Serviceangebot (Kontakt, Terminierung)", "unit": "€", "default": 25, "min": 0, "max": 200, "step": 5, "role": "cost"},
         {"id": "margin", "label": "Ergebnisanteil des Werkstattauftrags", "unit": "%", "default": 35, "min": 10, "max": 100, "step": 5, "role": "fixed"},
         {"id": "periods", "label": "Angebotsrunden pro Jahr", "unit": "×", "default": 4, "min": 1, "max": 6, "step": 1, "role": "fixed"}],
+    "predictive_maintenance": [
+        {"id": "list_share", "label": "Inspizierte Einheiten je Runde (oberste % nach Risiko)", "unit": "%", "default": 10, "min": 5, "max": 30, "step": 1, "role": "fixed"},
+        {"id": "rate", "label": "Anteil erkannter Ausfälle, die als geplanter Tausch abgefangen werden", "unit": "%", "default": 50, "min": 10, "max": 90, "step": 5, "role": "rate"},
+        {"id": "cost", "label": "Kosten je Inspektion", "unit": "€", "default": 500, "min": 0, "max": 5000, "step": 50, "role": "cost"},
+        {"id": "margin", "label": "Ergebnisanteil", "unit": "%", "default": 100, "min": 10, "max": 100, "step": 5, "role": "fixed"},
+        {"id": "periods", "label": "Hochrechnung (1 = Testflotte über ihre ganze Lebensdauer)", "unit": "×", "default": 1, "min": 1, "max": 4, "step": 1, "role": "fixed"}],
+    "spare_parts_demand": [
+        {"id": "coverage_weeks", "label": "Reichweite des Bestands", "unit": "Wochen", "default": 8, "min": 2, "max": 26, "step": 1, "role": "fixed"},
+        {"id": "safety_share", "label": "Anteil Sicherheitsbestand am Bestand", "unit": "%", "default": 30, "min": 5, "max": 60, "step": 1, "role": "rate"},
+        {"id": "holding_rate", "label": "Lagerhaltungskostensatz p. a. (Kapital, Lager, Abschriften)", "unit": "%", "default": 25, "min": 5, "max": 40, "step": 1, "role": "rate"}],
     "quality_root_cause": [
         {"id": "list_share", "label": "Geprüfte Aufträge vor dem Start (oberste % nach Risiko)", "unit": "%", "default": 10, "min": 5, "max": 30, "step": 1, "role": "fixed"},
         {"id": "rate", "label": "Anteil des Ausschusses, der durch Prüfung vor dem Start vermieden wird", "unit": "%", "default": 25, "min": 5, "max": 60, "step": 1, "role": "rate"},
@@ -122,6 +132,8 @@ STEP_LABELS = {"churn": ("Umsatz der Abwanderer", "davon in der Liste", "gerette
                "price_recommendation": ("Preislücke zum erwartbaren Preis", "geprüfte Aufträge", "geschlossen (Annahme)"),
                "price_leakage": ("Leakage im Testzeitraum", "geprüfte Aufträge", "vermieden (Annahme)"),
                "quote_check": ("Margenlücke unter 10 %", "geprüfte Angebote", "zurückgeholt (Annahme)"),
+               "predictive_maintenance": ("Mehrkosten aller Ausfälle im Test", "davon in der Liste", "abgefangen (Annahme)"),
+               "spare_parts_demand": ("Sicherheitsbestand", "Fehlerreduktion", "Kostensenkung"),
                "quality_root_cause": ("Ausschusskosten im Test", "davon in der Prüfliste", "vermieden (Annahme)"),
                "supplier_recourse": ("beanstandeter Warenwert im Test", "davon in der Prüfliste", "zurückgeholt (Annahme)"),
                "installed_base": ("Wert aller Reparaturen im Test", "davon in der Liste", "gewonnen (Annahme)"),
@@ -255,6 +267,9 @@ def use_case_case(uc: str, variant: str = "v0", fx: float = FX_DEFAULT) -> dict 
         name = {"wwi": "WideWorldImporters", "adventureworks_data": "AdventureWorks"}[out["dataset"]]
         out["note"] = (f"Gerechnet auf {name} (künstliche Beispieldaten) – die Methode ist übertragbar, "
                        "die Euro-Größenordnung nicht.")
+    elif out["dataset"] == "cmapss":
+        out["note"] = ("Gerechnet auf NASA C-MAPSS (Simulation, Public Domain) – die Mehrkosten je ungeplantem Ausfall "
+                       f"({_eur(res.get('maintenance', {}).get('fail_eur', 50000))}) sind eine Annahme.")
     elif out["dataset"] == "scania":
         out["note"] = ("Gerechnet auf SCANIA Component X (echte, anonymisierte Lkw-Flotte) – der Auftragswert je Reparatur "
                        f"({_eur(res.get('aftersales', {}).get('repair_eur', 2500))}) ist eine Annahme, SCANIA veröffentlicht keine Preise.")
@@ -307,7 +322,8 @@ def next_step(cases: dict, vk: dict | None = None) -> dict:
              "territory_coverage": "Vertriebsabdeckung", "next_best_action": "Next Best Action",
              "price_recommendation": "Preis- & Rabattempfehlung", "price_leakage": "Preis-Leakage", "quote_check": "Angebotsprüfung",
              "installed_base": "Installierte Basis", "service_contracts": "Serviceverträge", "spare_parts_pricing": "Ersatzteilpreise",
-             "quality_root_cause": "Qualitäts-Frühwarnung", "supplier_recourse": "Lieferantenregress"}
+             "quality_root_cause": "Qualitäts-Frühwarnung", "supplier_recourse": "Lieferantenregress",
+             "predictive_maintenance": "Predictive Maintenance", "spare_parts_demand": "Ersatzteilbedarf"}
     step = "Pilot" if stage == "pilot" else "Readiness-Sprint"
     roi_txt = str(round(roi, 1)).replace(".", ",")
     return {"stage": stage, "use_case": top, "annual": round(top_val), "year1_cost": year1, "roi": round(roi, 1),

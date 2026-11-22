@@ -1872,6 +1872,35 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
                 <div class="text-[11.5px] sub mt-1.5" x-text="'Prämie = erwartete Reparaturquote im 48er-Fenster × Auftragswert '+fmtEur(ucBt.aftersales.repair_eur)+' (Annahme) × 1,2 Sicherheitsaufschlag. Abschluss und Verlängerung von Verträgen sind ohne Vertragsdaten nicht messbar.'"></div>
               </div>
             </template>
+            <template x-if="ucOpen==='predictive_maintenance' && ucBt?.maintenance?.fleets">
+              <div class="mt-3">
+                <div class="kpi-label" x-text="'Testtriebwerke je Flotte · Liste laut '+(ucBt.recommendation?.name||'')"></div>
+                <div class="scroll-x scroll-thin mt-1"><table class="tbl min-w-[420px] text-[12px]">
+                  <thead><tr><th>Flotte</th><th class="text-right">Schnitte</th><th class="text-right">Ausfallquote erwartet</th><th class="text-right">tatsächlich</th></tr></thead>
+                  <tbody><template x-for="f in ucBt.maintenance.fleets" :key="'mf'+f.fleet"><tr>
+                    <td x-text="f.fleet"></td><td class="text-right tabular-nums" x-text="fmtInt(f.cuts)"></td>
+                    <td class="text-right tabular-nums" x-text="fmtPct(f.predicted)"></td><td class="text-right tabular-nums" x-text="fmtPct(f.observed)"></td></tr></template></tbody>
+                </table></div>
+                <div class="text-[12px] mt-2"><b>Top-10-%-Liste nach wahrer Restlebensdauer:</b> <span class="sub" x-text="Object.entries(ucBt.maintenance.rul_top).map(([k,v]) => k+' Zyklen: '+fmtInt(v)).join(' · ')"></span></div>
+                <div class="text-[11.5px] sub mt-1">FD001/FD003: eine Betriebsbedingung; FD002/FD004: sechs – dort trägt die Normierung gegen Peers unter derselben Bedingung.</div>
+              </div>
+            </template>
+            <template x-if="ucOpen==='spare_parts_demand' && ucBt?.maintenance?.stock">
+              <div class="mt-3">
+                <div class="kpi-label" x-text="'Bestandsampel zum '+fmtDate(ucBt.maintenance.stock.as_of)+' (Endbestand gegen Bedarf Folgemonat)'"></div>
+                <div class="grid grid-cols-2 gap-2 mt-1">
+                  <div class="panel-flat p-2.5"><div class="text-[10.5px] muted uppercase font-bold">Artikel knapp</div><div class="font-bold tabular-nums text-amber-300" x-text="fmtInt(ucBt.maintenance.stock.n_short)"></div></div>
+                  <div class="panel-flat p-2.5"><div class="text-[10.5px] muted uppercase font-bold">Reichweite &gt; 1 Jahr</div><div class="font-bold tabular-nums" x-text="fmtInt(ucBt.maintenance.stock.n_over)+' von '+fmtInt(ucBt.maintenance.items)"></div></div>
+                </div>
+                <div class="scroll-x scroll-thin mt-2"><table class="tbl min-w-[520px] text-[12px]">
+                  <thead><tr><th>Knapp (Reichweite &lt; Lieferzeit + 7 Tage)</th><th class="text-right">Bestand</th><th class="text-right">Bedarf/Monat (Ø 3 M.)</th><th class="text-right">Reichweite</th><th class="text-right">Lieferzeit</th></tr></thead>
+                  <tbody><template x-for="r in ucBt.maintenance.stock.short" :key="'ms'+r.item"><tr>
+                    <td x-text="r.item"></td><td class="text-right tabular-nums" x-text="fmtInt(r.on_hand)"></td><td class="text-right tabular-nums" x-text="fmtInt(r.forecast)"></td>
+                    <td class="text-right tabular-nums text-amber-300" x-text="fmtInt(r.cover_days)+' T.'"></td><td class="text-right tabular-nums" x-text="fmtInt(r.lead_days)+' T.'"></td></tr></template></tbody>
+                </table></div>
+                <div class="text-[11.5px] sub mt-1.5">WideWorldImporters ist künstlich: Der Endbestand ist bei fast allen Artikeln sehr hoch – die Ampel zeigt die Methode, nicht eine echte Lagerlage.</div>
+              </div>
+            </template>
             <template x-if="ucOpen==='supplier_recourse' && ucBt?.quality?.vendors">
               <div class="mt-3">
                 <div class="kpi-label" x-text="'Wareneingang ab '+fmtDate(ucBt.timeline.test)+' · Prüfliste laut '+(ucBt.recommendation?.name||'')"></div>

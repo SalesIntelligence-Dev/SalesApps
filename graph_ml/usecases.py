@@ -46,8 +46,8 @@ FIELDS: dict[str, dict] = {
     "product_key": {
         "label": "Artikelnummer",
         "syn": ["stockcode", "productid", "product", "artikel", "artikelnr", "artikelnummer", "matnr", "material",
-                "sku", "itemid", "item", "materialnummer"],
-        "contains": ["stockcode", "productid", "artikel", "material"],
+                "sku", "itemid", "item", "materialnummer", "stockitemid"],
+        "contains": ["stockcode", "productid", "artikel", "material", "stockitemid"],
         "exclude": ["category", "subcategory", "model", "photo", "description", "name", "group", "gruppe",
                     "vendor", "review", "document", "type"],
         "kinds": "any",
@@ -215,6 +215,13 @@ FIELDS: dict[str, dict] = {
         "label": "Beanstandete Menge (Wareneingangsprüfung)",
         "syn": ["rejectedqty", "rejected", "beanstandet", "beanstandetemenge", "reklamiertemenge", "rejectqty", "insmk"],
         "contains": ["rejected", "beanstand", "reject"],
+        "kinds": "any",
+    },
+    "failure_event": {
+        "label": "Ausfall / Fehlerereignis",
+        "syn": ["failed", "failure", "failureid", "ausfall", "breakdown", "rulatend", "faultid", "errorid", "stoerung"],
+        "contains": ["failure", "ausfall", "breakdown", "rulatend", "stoerung"],
+        "table_level": ["failure", "failures", "ausfall", "breakdown", "errors", "faults"],
         "kinds": "any",
     },
     "technician": {
@@ -462,6 +469,39 @@ USE_CASES: list[dict] = [
                   ("rejected_qty", "pflicht", None, "PB-10"), ("event_time", "pflicht", None, None), ("price", "optional", None, None),
                   ("bom", "optional", None, None)],
      "links": [("supplier", "product_key")], "learnable": True, "max_stage": 3, "note": "gerechnet auf AdventureWorks (Wareneingang)"},
+    {"id": "predictive_maintenance", "name": "Predictive Maintenance", "area": "After Sales", "lighthouse": False,
+     "app_route": None, "app_name": "neu",
+     "label": "Einheit fällt in den nächsten 30 Zyklen aus – Wartung einplanen, bevor es ungeplant wird",
+     "label_detail": "Schnitt an einem Betriebszyklus je Triebwerk; positiv, wenn die Restlebensdauer ≤ 30 Zyklen ist. "
+                     "Test auf anderen Triebwerken (keine Kalenderzeit). Peer-Normalwerte nur aus Trainings-Triebwerken.",
+     "window_days": 0, "min_positives": 100, "entity": "serial",
+     "baseline": "meiste Zyklen zuerst", "lever": "Stillstand, Servicekosten",
+     "blockers": ["Telemetrie nicht je Seriennummer", "Ausfälle nicht dokumentiert (nur Reparaturen)"],
+     "requires": [("serial_number", "pflicht", None, "PB-10"), ("usage_data", "pflicht", None, "PB-10"),
+                  ("failure_event", "pflicht", None, "PB-10"), ("config", "optional", None, None)],
+     "links": [("serial_number", "usage_data")], "learnable": True, "max_stage": 3, "note": "gerechnet auf NASA C-MAPSS"},
+    {"id": "spare_parts_demand", "name": "Ersatzteilbedarf & Bestände", "area": "After Sales", "lighthouse": False,
+     "app_route": None, "app_name": "neu",
+     "label": "Bedarf je Lagerartikel im Folgemonat – Grundlage für Sicherheitsbestand und Nachbestellung",
+     "label_detail": "Bestellmengen je Artikel und Monat; Test auf den letzten 4 Monaten, WAPE wertgewichtet. Dazu Bestandsampel: "
+                     "Reichweite des Endbestands gegen Lieferzeit.",
+     "window_days": 30, "min_positives": 0, "entity": "series",
+     "baseline": "Ø der letzten 3 Monate", "lever": "Bestand, Kapitalbindung",
+     "blockers": ["Bestände nicht historisiert", "Lieferzeiten nicht gepflegt"],
+     "requires": [("product_key", "pflicht", None, None), ("quantity", "pflicht", None, None), ("event_time", "pflicht", None, None),
+                  ("product_group", "optional", None, None), ("customer_key", "optional", None, None), ("supplier", "optional", None, None)],
+     "links": [("product_key", "quantity")], "learnable": True, "max_stage": 3, "note": "gerechnet auf WideWorldImporters"},
+    {"id": "first_time_fix", "name": "First-Time-Fix im Außendienst", "area": "After Sales", "lighthouse": False,
+     "app_route": None, "app_name": "neu",
+     "label": "Benötigte Teile vor dem Einsatz – Einsatz ohne Folgebesuch",
+     "label_detail": "Braucht Serviceaufträge mit Fehlercode, Techniker, verbauten Teilen und Folgebesuch ja/nein. "
+                     "Kein offener Datensatz vorhanden – bewertet wird nur die Struktur.",
+     "window_days": 0, "min_positives": 100, "entity": "order",
+     "baseline": "Standard-Teilekoffer je Fehlercode", "lever": "Servicekosten, Kundenzufriedenheit",
+     "blockers": ["Teileverbrauch nicht je Serviceauftrag", "Folgebesuche nicht verknüpft"],
+     "requires": [("service_event", "pflicht", None, "PB-10"), ("defect_code", "pflicht", None, "PB-05"),
+                  ("technician", "pflicht", None, "PB-10"), ("product_key", "optional", None, None), ("serial_number", "optional", None, None)],
+     "links": [("service_event", "defect_code")], "learnable": True, "max_stage": 1, "note": "keine offenen Daten – nur Struktur"},
     {"id": "warranty_fraud", "name": "Garantiebetrug & Fehlbuchungen", "area": "After Sales", "lighthouse": False,
      "app_route": None, "app_name": "neu",
      "label": "Auffälliger Garantiefall (Händler–Techniker–Teil-Muster)",
@@ -680,6 +720,32 @@ STORY: dict[str, dict] = {
         "tabular": "Bestellmenge, Preis, Lieferzeit, Bonität, bisherige Beanstandungsquote des Lieferanten",
         "unit": "je Bestellposition: Beanstandung beim Wareneingang",
         "euro": "beanstandeter Warenwert in der Prüfliste × zurückgeholter Anteil (Regress inkl. Folgekosten) − Prüfungen × Kosten, × 2"},
+    "predictive_maintenance": {
+        "v2": "Predictive Maintenance als Service", "effect": "ungeplanter Stillstand −30 bis −50 %", "fit": "mittel",
+        "graph": "Was „normal“ ist, hängt von der Betriebsbedingung ab: Schnitt → Bedingung → Peer-Triebwerke liefert den Normalwert, "
+                 "Schnitt → Flotte → Lebensdauer der Peers das Ausfallrisiko in diesem Alter. Gemessen: Die Peer-Normierung hilft "
+                 "LightGBM leicht, am besten ist TabPFN; ein gelerntes GNN bleibt deutlich zurück – oft genügt Zeitreihe + Baum.",
+        "path": ["Triebwerk", "Betriebsbedingung", "Peer-Triebwerke", "Normalwert"],
+        "tabular": "21 Sensoren, Ø und Änderung über 10 Zyklen, Zyklenzahl, Einstellungen",
+        "unit": "je Triebwerk und Zyklus: Ausfall in den nächsten 30 Zyklen",
+        "euro": "erkannte Ausfälle in der Top-Liste × Mehrkosten ungeplanter Ausfall (Annahme 50.000 €) × vermiedener Anteil − "
+                "Inspektionen × Kosten (Testflotte über ihre ganze Lebensdauer)"},
+    "spare_parts_demand": {
+        "v2": "Ersatzteilbedarf und Bestände", "effect": "Bestand −20 bis −27 %", "fit": "mittel",
+        "graph": "Artikel derselben Warengruppe und Artikel, die dieselben Kunden kaufen, bewegen sich gemeinsam (Artikel → "
+                 "Warengruppe/Kunden → andere Artikel). Gemessen: LightGBM mit dem eigenen Verlauf gewinnt, die Graph-Signale bringen nichts.",
+        "path": ["Artikel", "Warengruppe", "Geschwister-Artikel", "Trend"],
+        "tabular": "Vormonat, Ø 3 und 12 Monate, Vorjahresmonat, Trend, Preis",
+        "unit": "je Lagerartikel: Menge im Folgemonat",
+        "euro": "Sicherheitsbestand × relative Fehlerreduktion ggü. Regel × Lagerhaltungskostensatz"},
+    "first_time_fix": {
+        "v2": "First-Time-Fix im Außendienst", "effect": "Fehlbesuch: 1,6 Zusatzfahrten à 200–300 $", "fit": "mittel",
+        "graph": "Welche Teile ein Einsatz braucht, zeigt das Muster ähnlicher Anlagen: Fehlercode → frühere Aufträge → verbaute Teile, "
+                 "Anlage → Konfiguration → Peer-Anlagen. Ohne offene Serviceaufträge bleibt es bei der Struktur.",
+        "path": ["Serviceauftrag", "Fehlercode", "frühere Aufträge", "Teile"],
+        "tabular": "Fehlercode, Anlagentyp, Alter, Techniker",
+        "unit": "je Serviceauftrag: benötigte Teile",
+        "euro": "vermiedene Folgebesuche × Kosten je Besuch − Mehrbestand im Fahrzeug (sobald Serviceaufträge mit Teilen vorliegen)"},
     "warranty_fraud": {
         "v2": "Garantiebetrug und Fehlbuchungen", "effect": "3–15 % der Garantiekosten", "fit": "hoch",
         "graph": "Betrug tritt in Ringen auf: dieselben Händler, Techniker und Teile wiederholen sich (Fall → Händler → Techniker → Teil). "

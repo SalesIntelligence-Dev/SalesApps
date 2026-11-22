@@ -313,15 +313,22 @@ def _index(s: pd.Series) -> tuple[np.ndarray, int]:
 
 def evaluate_binary(f: pd.DataFrame, y: np.ndarray, value: np.ndarray, t_query: pd.Series, test_from: pd.Timestamp,
                     avail: pd.Series, base: list[str], graph: list[str], rule: np.ndarray, links: dict, names: dict,
-                    labels: dict, log=print) -> dict:
+                    labels: dict, log=print, masks: tuple | None = None) -> dict:
+    """masks = (test, val) für Daten ohne Kalenderzeit (Split nach Einheiten); sonst zeitlicher Split ab test_from."""
     t0 = time.time()
-    test = (t_query >= test_from).to_numpy()
-    known = (avail < test_from).to_numpy()                       # Training nur mit Labels, die am Stichtag feststanden
-    trall = (~test) & known
-    tq = t_query[trall]
-    cut = tq.quantile(0.82)
-    va = trall & (t_query >= cut).to_numpy()
-    tr = trall & ~va
+    if masks is not None:
+        test, va = masks
+        trall = ~test
+        tr = trall & ~va
+        cut = None
+    else:
+        test = (t_query >= test_from).to_numpy()
+        known = (avail < test_from).to_numpy()                   # Training nur mit Labels, die am Stichtag feststanden
+        trall = (~test) & known
+        tq = t_query[trall]
+        cut = tq.quantile(0.82)
+        va = trall & (t_query >= cut).to_numpy()
+        tr = trall & ~va
     yt = y[test]
     scores, notes = {"rule": rule[test]}, {}
     imp = None
@@ -367,8 +374,8 @@ def evaluate_binary(f: pd.DataFrame, y: np.ndarray, value: np.ndarray, t_query: 
              "test_positive_rate": round(float(yt.mean()), 4), "features": len(base) + len(graph), "graph_features": len(graph)}
     return {"engines": engines, "best": best["id"], "lift": lift, "lift_ci": best["ci"]["lift_ci"], "whatif": whatif, "sizes": sizes,
             "scores": scores, "test": test, "seconds": round(time.time() - t0, 1),
-            "train_dates": [str(d.date()) for d in pd.date_range(t_query[trall].min(), cut, freq="QS")][:12],
-            "val": str(cut.date())}
+            "train_dates": [] if cut is None else [str(d.date()) for d in pd.date_range(t_query[trall].min(), cut, freq="QS")][:12],
+            "val": None if cut is None else str(cut.date())}
 
 
 SUP_LABELS = {"v_rate": "Beanstandungsquote des Lieferanten (bisher)", "v_n": "bisherige Positionen des Lieferanten",

@@ -31,10 +31,12 @@ UC_ORDER = ["churn", "lead_scoring", "cross_selling", "recommendation", "returns
             "account_scoring", "territory_coverage"]
 # Eigene Rückblicke außerhalb von run_use_case: NBA-Policy (nba_eval.py) und Pricing (pricing.py)
 POLICY_UCS = ["next_best_action", "price_recommendation", "price_leakage", "quote_check", "installed_base", "service_contracts",
-              "spare_parts_pricing", "quality_root_cause", "supplier_recourse"]          # eigene Rückblicke außerhalb von run_use_case (nba_eval, pricing, aftersales)
+              "spare_parts_pricing", "quality_root_cause", "supplier_recourse",
+              "predictive_maintenance", "spare_parts_demand"]          # eigene Rückblicke außerhalb von run_use_case (nba_eval, pricing, aftersales)
 NOT_MEASURABLE = {
     "margin": "Einstandspreis fehlt – kein Label, Vorhersagekraft nicht messbar.",
     "warranty_root_cause": "Seriennummer, Charge und Garantiefälle fehlen – gemessen ersatzweise als Qualitäts-Frühwarnung (Ausschuss).",
+    "first_time_fix": "Keine offenen Serviceaufträge mit Fehlercode, Techniker und verbauten Teilen – nur Struktur bewertbar.",
     "warranty_fraud": "Keine offenen Garantiefälle mit Händler, Techniker und Prüfergebnis – nur Struktur bewertbar.",
 }
 MAIN_LABEL = {"recall_at_10": "Recall@Top-10 %", "map_at_12": "MAP@12", "wape": "WAPE", "auprc": "AUPRC",

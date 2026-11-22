@@ -305,3 +305,22 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
 - **Garantiebetrug:** keine offenen Daten (Garantiefälle mit Händler, Techniker, Prüfergebnis) → nur Struktur (`NOT_MEASURABLE`).
   `warranty_root_cause` bleibt Stufe 1 und verweist auf die Qualitäts-Frühwarnung.
 - **Tests:** 66 grün (System-Python). Web-Modus 211 MB, kein torch.
+
+## Umsetzungsnotizen nach Prompt 8
+
+- **Deployment:** Prompt 7 gepusht (`92337a3`).
+- **Neu: `graph_ml/maintenance.py`**; `quality.evaluate_binary` kann jetzt auch nach Einheiten splitten (`masks`). Neues Feld
+  `failure_event`; `stockitemid` als Artikelschlüssel (WWI-Artikel wurden bisher nicht erkannt – betraf auch Preisempfehlung
+  und Cross-Selling auf WWI). Profile neu erzeugt.
+- **Predictive Maintenance (NASA C-MAPSS, Public Domain):** 14.160 Schnitte (10 je Triebwerk, 1.416 Triebwerke, 4 Flotten),
+  Label Ausfall in 30 Zyklen (8,7 %), Test 20 % der Triebwerke je Flotte. Graph: Sensoren normiert gegen Peer-Triebwerke unter
+  derselben Betriebsbedingung (nur Trainings-Triebwerke, erste 30 Zyklen; Test: Test-Triebwerke verändern → Peer-Werte der
+  anderen gleich) und Ausfallquote der Flotten-Peers im gleichen Alter. AUPRC: Regel (meiste Zyklen) 0,344 · LightGBM 0,905 ·
+  + Graph 0,923 · **TabPFN 0,936** · GNN 0,496 → +172 % (signifikant). Euro 5,6 Mio. € (Testflotte über die Lebensdauer,
+  50.000 € Mehrkosten je ungeplantem Ausfall = Annahme; Hochrechnung bewusst 1×, die Testschnitte decken die ganze Lebensdauer ab).
+- **Ersatzteilbedarf & Bestände (WWI):** 227 Lagerartikel, Bedarf Folgemonat, Test 4 Monate, WAPE wertgewichtet: Regel
+  (Ø 3 Monate) 0,226 · **LightGBM 0,206** · + Warengruppe/Co-Kauf 0,213 → +8,8 % (signifikant, < 20 % → Gelb). Euro 52.877 €
+  (Sicherheitsbestand-Formel wie Absatzprognose). Bestandsampel zum 31.05.2016: 9 Artikel knapp; 213 von 227 mit > 1 Jahr
+  Reichweite (künstliche Endbestände – Kapital-Kennzahl bewusst weggelassen).
+- **First-Time-Fix:** keine offenen Serviceaufträge mit Fehlercode, Techniker und Teilen → nur Struktur (`NOT_MEASURABLE`).
+- **Tests:** 68 grün. Web-Modus 213 MB, kein torch.
