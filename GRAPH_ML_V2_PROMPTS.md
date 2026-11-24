@@ -398,3 +398,25 @@ Euro-Formel mit Annahmen, Aktivierungsliste falls sinnvoll, Detailseite, Tests, 
 - **Schritt-Leiste in drei Gruppen:** Datenanbindung (1–2, Cyan) · Analyse (3–4, Blau) · Implementierung (5–6, Amber, „ab hier
   Bezahlmodell“).
 - **Tests:** 77 grün. 26 Use Cases.
+
+## Nachtrag: Lernintuition und Graph-Verbindung je Use Case (24.11.2026)
+
+- **Backup:** Live-Stand `72e9fd6` als `../backup_24_11_26` (git archive, 37 MB), Tag `graph_ml-v2-24_11_26`.
+- **Neu: `graph_ml/intuition.py`** + Route `/graph_ml/api/intuition`. Je Use Case (alle 26): was eine Zeile ist, Input/Output,
+  was jede Stufe sieht (Regel-Text aus dem Artefakt), Beispiel-Graph der Graph-Verbindung (erfundene Werte), Erklärung
+  „Warum der Graph hilft – oder nicht“ als Hypothese. Stufenwerte, Sieger und Urteile werden aus den Rückblick-Artefakten
+  berechnet: „Graph hilft?“ = bestes Graph-Modell (Graph-Merkmale oder GNN) ggü. LightGBM ohne Graph (bei Empfehlung ggü.
+  Regel); Grün ≥ +10 %, Gelb +3–10 % (nicht abgesichert), Rot gleichauf/schlechter, grau ohne Modellvergleich bzw. nahe der
+  Obergrenze (Gewinnwahrscheinlichkeit). „TabPFN hilft?“ analog.
+- **Ergebnis:** Graph deutlich bei Produkt-Empfehlung (+15,5 % ggü. Regel), Churn (+15,1 %, GNN), Retouren (+13,9 %);
+  leicht bei Ersatzteilbedarf, Absatzprognose, Account-Scoring; sonst nicht. TabPFN deutlich bei Lieferantenregress (+22,4 %),
+  Preis (+13,5 %), Retouren (+11,9 %), Qualität (+10,9 %, aber keine Stufe schlägt dort die Regel belastbar).
+- **UI:** Detailseite Abschnitt 2b „Daten & Graph-Verbindung“ (Zeile/Input/Output + Cytoscape-Beispielgraph), Abschnitt 3
+  mit Lernintuition-Tabelle, Zielmetrik einfach erklärt, Urteilen und Erklärung; Schritt 5 Übersicht „Graph ML oder Tabular
+  FM – wo hilft was?“ (21 Use Cases, Zeile öffnet die Detailseite).
+- **Prüfung der externen Code-Kritik:** Die Empfehlungs-Regel im Produktivcode sortiert korrekt nach Kaufmenge (+15,5 % bleibt);
+  der Fehler stand nur im lokalen Notebook (korrigiert: MAP@12 0,100 → 0,185). TabPFN lief nachweislich als v2
+  (`tabpfn-v2-classifier`). Veraltete Texte korrigiert (Empfehlung „GNN folgt in Prompt 3“, Absatzprognose „LightGBM gewinnt“),
+  Data-Prediction-Kaskade als „Kaskade“ statt „Baum“. Offen: Signifikanztest gegen LightGBM, Ampel-Gelb ohne Signifikanz,
+  Validierungs-Stichtage mit Label-Fenster über den Validierungs-Stichtag hinaus (nur Early Stopping betroffen).
+- **Tests:** 80 grün.

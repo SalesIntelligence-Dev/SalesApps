@@ -527,6 +527,12 @@ def api_classifier(ds_id):
     return jsonify({"available": True, **res})
 
 
+@graph_bp.route("/graph_ml/api/intuition")
+def api_intuition():
+    from . import intuition
+    return jsonify(intuition.overview())
+
+
 @graph_bp.route("/graph_ml/api/matrix")
 def api_matrix():
     from . import matrix

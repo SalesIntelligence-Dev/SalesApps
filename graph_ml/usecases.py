@@ -614,8 +614,8 @@ STORY: dict[str, dict] = {
     "recommendation": {
         "v2": "Cross-Selling und Produktempfehlung", "effect": "meist 10–15 % mehr Umsatz", "fit": "hoch",
         "graph": "Heute: Kandidaten aus dem Co-Kauf-Graphen aller Kunden („wer A kaufte, kaufte auch B“) – andere Kunden "
-                 "fließen als Artikel-Ähnlichkeit ein (Graph-ML light). Ein gelerntes Kunden-Graph-Modell (LightGCN) "
-                 "verlor im Rückblick; ein heterogenes GNN folgt in Prompt 3.",
+                 "fließen als Artikel-Ähnlichkeit ein (Graph-ML light). Gelernte Graph-Modelle liefen mit: der GNN-Ranker "
+                 "(Hetero-GraphSAGE) knapp dahinter, LightGCN deutlich dahinter.",
         "path": ["Kunde", "gekaufter Artikel", "Kunden mit demselben Artikel", "empfohlener Artikel"],
         "tabular": "eigene Wiederkäufe, Beliebtheit 30/90 Tage",
         "unit": "je aktivem Kunde: Top-12-Artikel für die nächsten 90 Tage",
@@ -709,7 +709,7 @@ STORY: dict[str, dict] = {
     "demand_forecast": {
         "v2": "Absatzprognose", "effect": "Prognosefehler −20 bis −50 %", "fit": "mittel",
         "graph": "Artikel derselben Gruppe teilen Saison und Trends (Artikel → Gruppe → Artikel). Gemessen: LightGBM mit "
-                 "Verzögerungs-Merkmalen gewinnt – der Graph bringt hier wenig.",
+                 "Gruppen- und Co-Kauf-Merkmalen liegt knapp vor LightGBM ohne Graph (+3,6 %, nicht abgesichert).",
         "path": ["Artikel", "Artikelgruppe", "Geschwister-Artikel"],
         "tabular": "Vorwochen, Vorjahreswoche, gleitende Mittel, Kalender",
         "unit": "je Top-100-Artikel und Woche, 13 Wochen voraus",

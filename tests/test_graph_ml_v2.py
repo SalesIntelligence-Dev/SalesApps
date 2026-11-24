@@ -495,3 +495,40 @@ class DataPredictionTest(unittest.TestCase):
             u = next(x for x in get_registry().checks(ds, 3)["use_cases"] if x["id"] == "data_prediction")
             self.assertEqual(u["dp"]["count"], n)
         self.assertEqual(dpm.readiness(None)["status"], "bad")
+
+class IntuitionTest(unittest.TestCase):
+    """Lernintuition je Use Case: Stufen, Graph-Verbindung, Urteil „Graph hilft?“ aus den Messwerten."""
+
+    def test_every_use_case_has_intuition_and_valid_graph(self):
+        from graph_ml import intuition as it
+        from graph_ml import usecases
+        for u in usecases.USE_CASES:
+            d = it.INTUITION.get(u["id"])
+            self.assertIsNotNone(d, u["id"])
+            self.assertTrue(d.get("why") and d.get("row") and d.get("output"), u["id"])
+            ids = {n["id"] for n in d["graph"]["nodes"]}
+            self.assertTrue(any(n["role"] == "focus" for n in d["graph"]["nodes"]), u["id"])
+            for e in d["graph"]["edges"]:
+                self.assertIn(e["source"], ids, u["id"])
+                self.assertIn(e["target"], ids, u["id"])
+
+    def test_verdicts_follow_measurements(self):
+        from graph_ml import intuition as it
+        churn = it.for_use_case("churn")
+        self.assertEqual(churn["winner"]["family"], "gnn")
+        self.assertEqual(churn["graph_verdict"]["status"], "ok")             # GNN +15 % ggü. LightGBM
+        sup = it.for_use_case("supplier_recourse")
+        self.assertEqual(sup["tfm_verdict"]["status"], "ok")                 # TabPFN +22 %
+        self.assertNotEqual(sup["graph_verdict"]["status"], "ok")
+        self.assertEqual(it.for_use_case("win_probability")["graph_verdict"]["status"], "na")   # nahe der Obergrenze
+        self.assertEqual(it.for_use_case("quote_check")["graph_verdict"]["status"], "na")
+        tree = next(s for s in churn["stages"] if s["family"] == "tree")["value"]
+        gnn = next(s for s in churn["stages"] if s["family"] == "gnn")
+        self.assertAlmostEqual(gnn["vs_tree"], (gnn["value"] - tree) / tree, places=6)
+        self.assertFalse(it.for_use_case("warranty_fraud")["measured"])
+
+    def test_route(self):
+        from app import app
+        r = app.test_client().get("/graph_ml/api/intuition")
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("churn", r.get_json()["use_cases"])

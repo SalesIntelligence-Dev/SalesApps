@@ -1134,6 +1134,38 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
       </div>
     </div>
 
+    <!-- Übersicht: wo hilft Graph ML, wo Tabular FM? -->
+    <div class="panel p-4 sm:p-5" x-show="intu">
+      <button class="w-full flex items-center justify-between gap-3 text-left" @click="intuOpen = !intuOpen" :aria-expanded="intuOpen">
+        <div><div class="font-semibold">Graph ML oder Tabular FM – wo hilft was?</div>
+          <div class="text-[12px] sub">Je Use Case der beste Wert jeder Stufe in der Zielmetrik, das Urteil „Graph hilft?“ (bestes Graph-Modell ggü. LightGBM ohne Graph)
+            und „TabPFN hilft?“. Zeile antippen öffnet die Detailseite mit Lernintuition und Graph-Verbindung.</div></div>
+        <span class="chip" x-text="intuOpen ? 'einklappen' : 'aufklappen'"></span>
+      </button>
+      <template x-if="intuOpen && intu">
+        <div class="mt-3">
+          <div class="scroll-x scroll-thin"><table class="tbl min-w-[1080px] text-[12px]">
+            <thead><tr><th>Use Case</th><th>Zielmetrik</th><th class="text-right">Regel</th><th class="text-right">LightGBM</th><th class="text-right">TabPFN</th>
+              <th class="text-right">+ Graph-Merkmale</th><th class="text-right">GNN</th><th>bestes</th><th>Graph hilft?</th><th>TabPFN hilft?</th></tr></thead>
+            <tbody><template x-for="r in intuRows()" :key="'ir'+r.uc"><tr class="cursor-pointer" @click="openUc(r.uc)">
+              <td><b x-text="ucName(r.uc)"></b><span class="block text-[10.5px] muted" x-text="({online_retail_ii:'Online Retail II',adventureworks_data:'AdventureWorks',wwi:'WideWorldImporters',scania:'SCANIA',cmapss:'C-MAPSS'})[r.dataset] || r.dataset"></span></td>
+              <td class="text-[11.5px]" :title="r.metric?.explain" x-text="(r.metric?.name||'')+(r.metric?.direction==='kleiner ist besser' ? ' ↓' : '')"></td>
+              <template x-for="f in ['rule','tree','tfm','light','gnn']" :key="r.uc+f">
+                <td class="text-right tabular-nums" :class="intuStage(r, f)?.best ? 'text-[#a5f3fc] font-semibold' : ''" x-text="intuCell(r, f)"></td>
+              </template>
+              <td class="text-[11.5px]" x-text="r.winner?.family_name || '–'"></td>
+              <template x-for="(v, vi) in [r.graph_verdict, r.tfm_verdict]" :key="r.uc+'-v'+vi">
+                <td><span class="amp" :class="'amp-'+(v.status||'na')" :title="(v.basis||'')+(v.note ? ' · '+v.note : '')"><span class="amp-ic" x-text="ampIcon(v.status)"></span>
+                  <span x-text="v.delta != null && !String(v.label).startsWith('je Feld') ? fmtLift(v.delta) : (String(v.label).startsWith('je Feld') ? 'je Feld' : v.label)"></span></span></td>
+              </template>
+            </tr></template></tbody>
+          </table></div>
+          <div class="text-[11.5px] sub mt-2">Grün = ≥ +10 % ggü. LightGBM · Gelb = +3 bis +10 % (nicht abgesichert) · Rot = gleichauf oder schlechter · grau = kein Modellvergleich bzw. nahe der Obergrenze.
+            <span x-text="intu.disclaimer"></span></div>
+        </div>
+      </template>
+    </div>
+
     <!-- Use-Case-Auswahl -->
     <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5">
       <template x-for="uc in (bt?.use_cases||[])" :key="'btc'+uc">
@@ -2001,19 +2033,84 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
           </div>
         </div>
 
+        <template x-if="ucIntu()?.graph">
+        <div class="uc-sec">
+          <div class="uc-num">2b</div>
+          <div class="flex-1 min-w-0 space-y-2">
+            <div class="eyebrow">Daten &amp; Graph-Verbindung</div>
+            <div class="grid sm:grid-cols-3 gap-2 text-[12px]">
+              <div class="panel-flat p-2.5"><div class="kpi-label">Eine Zeile ist</div><div class="mt-0.5" x-text="ucIntu().row"></div></div>
+              <div class="panel-flat p-2.5"><div class="kpi-label">Input ins Modell</div><div class="mt-0.5" x-text="ucIntu().input"></div></div>
+              <div class="panel-flat p-2.5"><div class="kpi-label">Output</div><div class="mt-0.5" x-text="ucIntu().output"></div></div>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2 mt-1">
+              <div class="kpi-label">Graph-ML-Verbindung · so läuft das Signal über andere Datensätze (Beispiel, erfundene Werte)</div>
+              <div class="flex flex-wrap gap-1 text-[10.5px]">
+                <span class="chip !py-0" style="border-color:#22d3ee;color:#a5f3fc">Ziel</span>
+                <span class="chip !py-0" style="border-color:#8b7cf6;color:#c4b5fd">verbunden</span>
+                <span class="chip !py-0" style="border-color:#f59e0b;color:#fcd34d">Nachbar mit Risiko</span>
+                <span class="chip !py-0" style="border-color:#34d399;color:#6ee7b7">Nachbar unauffällig</span>
+              </div>
+            </div>
+            <div id="cyIntu" class="cy h-[230px]"></div>
+            <div class="text-[12px] sub" x-text="ucIntu().graph.caption"></div>
+          </div>
+        </div>
+        </template>
+
         <!-- 3 · Warum relational / Graph -->
         <div class="uc-sec">
           <div class="uc-num">3</div>
           <div class="flex-1 min-w-0">
             <div class="eyebrow">Warum relationales Lernen – oder reicht LightGBM?</div>
-            <div class="text-[13px] mt-1.5" x-text="ucMeta()?.story?.graph"></div>
+            <template x-if="ucIntu()?.stages?.length">
+              <div class="mt-2 space-y-3">
+                <div>
+                  <div class="kpi-label mb-1" x-text="'Lernintuition · was jede Stufe sieht und wie gut sie im Rückblick war ('+(ucIntu().metric?.name||'')+')'"></div>
+                  <div class="scroll-x scroll-thin"><table class="tbl min-w-[560px] text-[12px]">
+                    <thead><tr><th>Stufe</th><th>Was das Modell sieht</th><th class="text-right">Rückblick</th><th class="text-right">ggü. LightGBM</th></tr></thead>
+                    <tbody><template x-for="s in ucIntu().stages" :key="'st'+s.family">
+                      <tr :class="s.best ? 'bg-[rgba(34,211,238,.08)]' : ''">
+                        <td class="whitespace-nowrap"><b x-text="s.family_name"></b><span x-show="s.best" class="chip !py-0 !text-[10px] ml-1" style="border-color:#22d3ee;color:#a5f3fc">bestes</span>
+                          <span class="block text-[10.5px] muted" x-text="s.name"></span></td>
+                        <td class="text-[11.5px]" x-text="s.sees"></td>
+                        <td class="text-right tabular-nums" x-text="intuVal(s.value)"></td>
+                        <td class="text-right tabular-nums" :class="s.vs_tree > 0.03 ? 'delta-up' : s.vs_tree < -0.03 ? 'delta-down' : 'muted'"
+                            x-text="s.family==='tree' ? 'Basis' : s.vs_tree != null ? fmtLift(s.vs_tree) : '–'"></td>
+                      </tr></template></tbody>
+                  </table></div>
+                </div>
+                <div class="panel-flat p-2.5 text-[12px]" x-show="ucIntu().metric">
+                  <b x-text="'Zielmetrik einfach erklärt: '+(ucIntu().metric?.name||'')"></b>
+                  <span class="sub" x-text="' – '+(ucIntu().metric?.explain||'')"></span>
+                  <span class="muted" x-show="ucIntu().metric?.direction" x-text="' ('+ucIntu().metric?.direction+')'"></span>
+                  <span class="block mt-1" x-show="ucIntu().winner" x-text="'Am besten: '+(ucIntu().winner?.family_name||'')+' · '+(ucIntu().winner?.name||'')+' mit '+intuVal(ucIntu().winner?.value)"></span>
+                </div>
+                <div class="grid sm:grid-cols-2 gap-2 text-[12px]">
+                  <template x-for="[lab, v] in [['Graph ML hilft?', ucIntu().graph_verdict], ['Tabular FM (TabPFN) hilft?', ucIntu().tfm_verdict]]" :key="'v'+lab">
+                    <div class="panel-flat p-2.5">
+                      <div class="flex items-center justify-between gap-2"><b x-text="lab"></b>
+                        <span class="amp" :class="'amp-'+(v.status||'na')"><span class="amp-ic" x-text="ampIcon(v.status)"></span><span x-text="v.label"></span></span></div>
+                      <div class="text-[11px] muted mt-1" x-text="(v.delta != null && !String(v.label).startsWith('je Feld') ? fmtLift(v.delta)+' · ' : '')+(v.basis||'')+(v.model ? ' · '+v.model : '')"></div>
+                      <div class="text-[11px] text-amber-200/90" x-show="v.note" x-text="v.note"></div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+            <template x-if="ucIntu()?.why">
+              <div class="mt-3 panel-flat p-2.5 text-[12.5px]">
+                <b x-text="intuWhyTitle()"></b> <span x-text="ucIntu().why"></span>
+                <div class="text-[11px] muted mt-1" x-text="ucIntu().disclaimer"></div>
+              </div>
+            </template>
             <div class="flex flex-wrap items-center gap-1.5 mt-2.5" x-show="ucMeta()?.story?.path">
               <template x-for="(n, i) in (ucMeta()?.story?.path || [])" :key="'p'+i">
                 <span class="flex items-center gap-1.5"><span class="chip !py-0.5 !text-[11.5px]" style="border-color:rgba(34,211,238,.45);color:#a5f3fc" x-text="n"></span>
                   <span x-show="i < ucMeta().story.path.length-1" class="text-[#22d3ee]">→</span></span>
               </template>
             </div>
-            <div class="text-[12px] sub mt-2"><b class="text-[#e7e9f3]">Was ein flaches Modell schon sieht:</b> <span x-text="ucMeta()?.story?.tabular"></span></div>
+
             <template x-if="ucOpen==='territory_coverage' && terrTable?.territories?.length">
               <div class="mt-3">
                 <div class="kpi-label" x-text="'Gebiete am Rückblick-Stichtag '+fmtDate(terrTable.T)+' · '+terrTable.engine"></div>
@@ -2208,7 +2305,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
                 <div class="text-[11px] muted mt-0.5" x-text="recoPaths.note"></div>
               </div>
             </template>
-            <template x-if="ucClassRows().length">
+            <template x-if="ucClassRows().length && !ucIntu()?.stages?.length">
               <div class="mt-3">
                 <div class="kpi-label mb-1" x-text="'Gemessen im Rückblick · '+(ucBt?.main_metric_label||'')"></div>
                 <template x-for="r in ucClassRows()" :key="r.fam">
@@ -2222,7 +2319,7 @@ input[type=range].rng{width:100%;accent-color:#8b7cf6}
                 <div class="text-[12px] mt-2 panel-flat p-2.5" x-text="ucVerdict()"></div>
               </div>
             </template>
-            <div class="text-[12px] muted mt-2" x-show="!ucClassRows().length">Kein Rückblick möglich – der Datensatz enthält die nötigen Tabellen nicht.</div>
+            <div class="text-[12px] muted mt-2" x-show="!ucClassRows().length && !ucIntu()?.stages?.length">Kein Rückblick möglich – für diesen Use Case gibt es keine offenen Daten mit den nötigen Tabellen.</div>
           </div>
         </div>
 
@@ -2563,7 +2660,7 @@ function graphReady() {
     timeline: TIMELINE, tourSteps: TOUR, TIMELINE_SOURCES,
     bc: null, bcVariant: 'v0', bcUc: 'churn', bcParams: {}, bcScenario: 'realistisch', bcThr: { green: 100000, yellow: 25000 },
     bt: null, btUc: 'churn', btRes: null, btLoading: false, btErr: '', btJob: null, btSeries: 0,
-    ucBt: null, gm: null, gmOpen: false, dc: null, dcSel: null, dcPrm: { rate: 60, minFactor: 1, holding: 25, fn: 5000 },
+    ucBt: null, gm: null, gmOpen: false, intu: null, intuOpen: true, dc: null, dcSel: null, dcPrm: { rate: 60, minFactor: 1, holding: 25, fn: 5000 },
     dcStages: [{ short: 'Stufe 0 · Regeln', text: 'Einzelfeld-Regeln und Lookups; Folgefelder werden ausgewiesen', measured: true },
                { short: 'Stufe 1 · ML', text: 'LightGBM, Graph-Kontext, Text-Modell, TabPFN, Ensemble – gemessen', measured: true },
                { short: 'Stufe 2 · LLM-Prüfer', text: 'Graubereich und neue Datensätze, unabhängig von Stufe 1 – Konzept', measured: false },
@@ -2601,7 +2698,7 @@ function graphReady() {
       this.$watch('overview', o => { if (o && this.step === 1) afterRender(() => this.drawMonthly()); });
       this.$watch('subgraph', g => { if (g) afterRender(() => this.drawSubgraph()); });
       this.$watch('stage', () => this.loadChecks());
-      this.$watch('ucOpen', v => { if (v) afterRender(() => this.drawUcGraph()); });
+      this.$watch('ucOpen', v => { if (v) afterRender(() => { this.drawUcGraph(); this.drawIntuGraph(); }); });
       this.$watch('btRes', r => { if (r) afterRender(() => this.drawBtCharts()); });
       this.loadBacktest();
       this.loadPlaybooks();
@@ -2619,6 +2716,7 @@ function graphReady() {
       try {
         const [uc, ds] = await Promise.all([this.api('/usecases'), this.api('/datasets')]);
         this.usecases = uc; this.datasets = ds;
+        this.api('/intuition').then(r => { this.intu = r; if (this.ucOpen) afterRender(() => this.drawIntuGraph()); }).catch(() => {});
         if (!ds.some(d => d.id === this.dsId) && ds.length) this.dsId = ds[0].id;
         await this.selectDataset(this.dsId);
       } catch (e) { this.notify('Laden fehlgeschlagen: ' + e.message, 'bad'); this.loading.ds = false; }
@@ -3294,6 +3392,16 @@ function graphReady() {
       try { const r = await this.api('/classifier/' + id); if (this.dsId === id) { this.dc = r; this.dcSel = r.results?.find(x => x.special)?.id || null; } }
       catch (_) { this.dc = { available: false, hint: 'Data-Classifier-Analyse nicht erreichbar.' }; }
     },
+    intuRows() {
+      const rank = { ok: 0, warn: 1, bad: 2, na: 3 };
+      return Object.values(this.intu?.use_cases || {}).filter(r => r.measured)
+        .sort((a, b) => (rank[a.graph_verdict.status] - rank[b.graph_verdict.status]) || ((b.graph_verdict.delta ?? -9) - (a.graph_verdict.delta ?? -9)));
+    },
+    intuStage(r, f) { return (r.stages || []).find(s => s.family === f) || null; },
+    intuCell(r, f) {
+      const s = this.intuStage(r, f); if (!s || s.value == null) return '–';
+      return r.metric?.key === 'net_value' ? this.fmtEur(s.value) : this.fmtNum(s.value, Math.abs(s.value) < 0.1 ? 4 : 3);
+    },
     dpCountText(dp) {
       const n = dp?.count || 0;
       return n === 0 ? 'keine Feld-Use-Cases' : n === 1 ? '1 Data-Prediction-Use-Case' : n + ' Data-Prediction-Use-Cases';
@@ -3506,6 +3614,50 @@ function graphReady() {
     },
     fmtDateTime(iso) { if (!iso) return '–'; const d = new Date(iso); return d.toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' }); },
 
+    ucIntu() { return this.ucOpen ? this.intu?.use_cases?.[this.ucOpen] || null : null; },
+    intuVal(v) {
+      if (v == null) return '–';
+      const m = this.ucIntu()?.metric?.key;
+      return m === 'net_value' ? this.fmtEur(v) : this.fmtNum(v, Math.abs(v) < 0.1 ? 4 : 3);
+    },
+    intuWhyTitle() {
+      const s = this.ucIntu()?.graph_verdict?.status;
+      return s === 'ok' ? 'Warum der Graph hier hilft:' : s === 'warn' ? 'Warum der Graph hier nur wenig hilft:' : s === 'bad' ? 'Warum der Graph hier nicht hilft:' : 'Graph-Intuition:';
+    },
+    drawIntuGraph(attempt = 0) {
+      const g = this.ucIntu()?.graph, el = document.getElementById('cyIntu');
+      if (!g || !el || el.offsetParent === null || el.offsetWidth < 50) {
+        if (this.ucOpen && attempt < 40) setTimeout(() => this.drawIntuGraph(attempt + 1), 75);
+        return;
+      }
+      if (CY.intu) CY.intu.destroy();
+      const col = {}; g.nodes.forEach(n => (col[n.col] ||= []).push(n.id));
+      const color = { focus: '#22d3ee', entity: '#8b7cf6', risk: '#f59e0b', ok: '#34d399', peer: '#64748b', target: '#22d3ee' };
+      const nodes = g.nodes.map(n => {
+        const longest = Math.max(...n.label.split('\n').map(l => l.length));
+        return { data: { id: n.id, label: n.label, role: n.role, c: color[n.role] || '#64748b', w: Math.round(longest * 6.3 + 24), h: n.label.includes('\n') ? 40 : 28 } };
+      });
+      const edges = g.edges.map((e, i) => ({ data: { id: 'ie' + i, source: e.source, target: e.target, label: e.label || '' } }));
+      CY.intu = cytoscape({
+        container: el, elements: [...nodes, ...edges], minZoom: 0.3, maxZoom: 2,
+        style: [
+          { selector: 'node', style: { 'shape': 'round-rectangle', 'label': 'data(label)', 'text-wrap': 'wrap', 'font-size': 10, 'font-family': 'Inter',
+            'color': '#e7e9f3', 'text-valign': 'center', 'text-halign': 'center', 'width': 'data(w)', 'height': 'data(h)',
+            'background-color': '#12122a', 'border-width': 1.6, 'border-color': 'data(c)' } },
+          { selector: 'node[role = "focus"]', style: { 'border-width': 3, 'background-color': 'rgba(34,211,238,.12)' } },
+          { selector: 'node[role = "target"]', style: { 'border-style': 'dashed', 'border-width': 2.4, 'background-color': 'rgba(34,211,238,.06)' } },
+          { selector: 'edge', style: { 'width': 1.6, 'line-color': '#4b5a8a', 'curve-style': 'bezier', 'target-arrow-shape': 'triangle',
+            'target-arrow-color': '#4b5a8a', 'arrow-scale': .7, 'label': 'data(label)', 'font-size': 9, 'color': '#94a3b8',
+            'text-background-color': '#0b0b1e', 'text-background-opacity': 1, 'text-background-padding': 2 } },
+        ],
+        layout: { name: 'preset', padding: 16, fit: true, positions: n => {
+          const c = g.nodes.find(x => x.id === n.id()).col, list = col[c], i = list.indexOf(n.id());
+          return { x: c * 185, y: (i - (list.length - 1) / 2) * 62 };
+        } },
+      });
+      if (CY.intu.zoom() > 1.2) { CY.intu.zoom(1.2); CY.intu.center(); }
+      guardWheel(el);
+    },
     drawUcGraph(attempt = 0) {
       if (!this.ucOpen) return;
       const u = this.ucDetail(), el = document.getElementById('cyUc');

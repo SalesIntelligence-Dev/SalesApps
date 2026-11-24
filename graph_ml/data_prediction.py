@@ -98,7 +98,7 @@ def to_result() -> dict | None:
             "engines": [{"id": "rule", "status": "ok", "meta": {"name": "Regel (Stufe 0) je Feld", "klass": "Regel", "device": "CPU"},
                          "metrics": {"auto_98": home["mean_rule"]}},
                         {"id": "cascade", "status": "ok", "meta": {"name": "Kaskade: bestes Modell je Feld (Regel, LightGBM, Graph-Kontext, Text, TabPFN)",
-                                                                   "klass": "Baum", "device": "GPU"},
+                                                                   "klass": "Kaskade", "device": "GPU"},
                          "metrics": {"auto_98": home["mean_auto"]}}],
             "best": "cascade", "vorhersagekraft": vk,
             "whatif": {"kind": "classifier", "currency": "EUR",
